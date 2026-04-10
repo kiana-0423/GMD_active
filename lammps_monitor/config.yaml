@@ -1,0 +1,73 @@
+# LAMMPS 在线监控系统配置文件
+# ==================================================
+
+# LAMMPS 执行环境配置
+lammps:
+  executable: "lmp"  # LAMMPS 可执行文件路径或命令名
+  input_file: "inputs/in.monitor.lmp"  # LAMMPS 输入脚本
+  log_file: "outputs/log.lammps"  # LAMMPS 日志输出路径
+  dump_file: "outputs/dump.monitor.atom"  # 原子轨迹转储
+  data_file: null  # TODO: 用户自行替换为实际数据文件路径，e.g. "data/system.data"
+
+# 单步位移保险丝配置（fix dt/reset）
+dtreset:
+  every: 1  # 每 N 步调整一次 dt
+  dtmax: 0.002  # 最大时间步长 (ps)
+  dtmin: 0.0001  # 最小时间步长 (ps)
+  xmax: 0.1  # 每步最大位移限制 (Angstrom)
+  emax: 0.1  # 每步最大单原子动能变化率限制（可选，需体系支持，留空或false禁用）
+
+# 触发条件的阈值
+thresholds:
+  # 位移异常阈值
+  displacement:
+    soft: 2.0  # 软警告：最大位移超过此值时记为"warning"
+    hard: 5.0  # 硬停止：最大位移超过此值时立即停机
+  
+  # 单原子势能异常阈值
+  per_atom_pe:
+    soft: 50.0  # 软警告 (kcal/mol 或对应单位)
+    hard: 200.0  # 硬停止
+  
+  # 单原子动能异常阈值
+  per_atom_ke:
+    soft: 10.0  # 软警告 (kcal/mol 或对应单位)
+    hard: 50.0  # 硬停止
+  
+  # 配位数异常阈值（可选，若不监控配位数则设为 null）
+  coordination:
+    soft: 1.0  # 配位数变化量（从初始配位数偏离此量）
+    hard: 2.5  # 硬停止
+  
+  # 最大键长异常阈值（若存在显式键，根据体系调整）
+  bondmax:
+    soft: null  # 软警告，设为 null 则禁用
+    hard: 2.0  # 硬停止 (Angstrom)，若无键设为 null
+
+# 输出和日志
+output:
+  output_dir: "outputs"  # 所有输出文件所在目录
+  events_csv: "outputs/monitor_events.csv"  # 每次运行的监控指标 CSV
+  events_jsonl: "outputs/monitor_events.jsonl"  # 每次运行的监控指标 JSONL（可选）
+  metadata_json: "outputs/event_metadata.json"  # 最近一次停机事件的元数据
+  trend_csv: "outputs/monitor_trend.csv"  # 完整监控趋势表
+
+# 运行控制
+run:
+  chunk_size: 100000  # 一次 run 的步数（可选，若只做一次长运行设为大值）
+  max_chunks: 10  # 最多运行多少个 chunk（0 或 null 表示不限）
+  restart_mode: false  # 是否从上次中断处续跑（需要 LAMMPS 的 restart 文件支持）
+  dry_run: false  # dry-run 模式：仅验证配置和 LAMMPS 输入，不实际运行
+
+# 监控选项
+monitor:
+  enable_coordination_monitoring: true  # 是否监控配位数变化
+  enable_bondmax_monitoring: false  # 是否监控最大键长（若体系无显式键设为 false）
+  thermo_frequency: 1  # 热力学输出频率（步数）
+  dump_frequency: 100  # 原子转储频率（步数），设为 0 禁用转储
+  verbose: true  # 是否输出详细日志到终端
+
+# 报警配置（可扩展）
+alert:
+  webhook_url: null  # TODO: 可选企业微信/Slack webhook URL
+  enable_console_alert: true  # 是否在终端显示报警
