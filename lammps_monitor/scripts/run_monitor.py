@@ -22,9 +22,13 @@ try:
         MonitorMetrics,
         parse_config,
         make_decision,
+        parse_thermo_header_line,
+        parse_thermo_metrics_line,
+        detect_abort_reason_in_line,
         write_event_csv,
         write_event_jsonl,
         write_metadata_json,
+        write_trend_csv,
         alert_user,
         RunConfig,
     )
@@ -50,6 +54,12 @@ class LAMMPSMonitor:
         self.config = None
         self.run_id = 0
         self.process = None
+        self.current_thermo_columns = None
+        self.latest_metrics = None
+        self.live_status = "normal"
+        self.live_reason = ""
+        self.abort_requested = False
+        self._trend_initialized = False
     
     def load_config(self) -> bool:
         """加载 YAML 配置文件"""
@@ -174,6 +184,96 @@ class LAMMPSMonitor:
             return True
         
         return False
+
+    def _record_trend_point(self, metrics: MonitorMetrics):
+        """实时记录趋势数据"""
+
+        trend_csv = self.config_dict["output"].get("trend_csv")
+        if not trend_csv:
+            return
+
+        write_trend_csv(
+            metrics,
+            Path(trend_csv),
+            append=self._trend_initialized,
+        )
+        self._trend_initialized = True
+
+    def _evaluate_live_metrics(self, metrics: MonitorMetrics):
+        """对实时监控指标做在线判定"""
+
+        self.latest_metrics = metrics
+        self._record_trend_point(metrics)
+
+        status, reason = make_decision(
+            maxdisp=metrics.maxdisp,
+            vmaxpe=metrics.vmaxpe,
+            vmaxke=metrics.vmaxke,
+            vmaxcn=metrics.vmaxcn if self.config.enable_coordination else None,
+            thresholds=self.config.thresholds,
+        )
+
+        if status == "warning":
+            if self.live_status == "normal" or reason != self.live_reason:
+                self.live_status = "warning"
+                self.live_reason = reason
+                alert_user(
+                    f"实时监控警告: step={metrics.step}, reason={reason}",
+                    level="WARNING",
+                )
+            return
+
+        if status == "abort" and not self.abort_requested:
+            self.live_status = "abort"
+            self.live_reason = reason
+            self.abort_requested = True
+            alert_user(
+                f"实时监控触发停机: step={metrics.step}, reason={reason}",
+                level="ERROR",
+            )
+            self.terminate_lammps()
+
+    def _handle_output_line(self, line: str):
+        """处理 LAMMPS 的单行标准输出"""
+
+        stripped = line.rstrip()
+
+        if self.config.verbose and stripped:
+            print(f"[LAMMPS] {stripped}")
+
+        reason = detect_abort_reason_in_line(stripped)
+        if reason and not self.abort_requested:
+            self.live_status = "abort"
+            self.live_reason = reason
+            self.abort_requested = True
+            alert_user(f"检测到 LAMMPS 异常输出: {reason}", level="ERROR")
+            self.terminate_lammps()
+            return
+
+        thermo_columns = parse_thermo_header_line(stripped)
+        if thermo_columns:
+            self.current_thermo_columns = thermo_columns
+            return
+
+        metrics = parse_thermo_metrics_line(stripped, self.current_thermo_columns)
+        if metrics is not None:
+            self._evaluate_live_metrics(metrics)
+
+    def stream_monitor_loop(self) -> int:
+        """流式读取 LAMMPS 输出并实时决策"""
+
+        if not self.process:
+            return 1
+
+        if self.process.stdout is None:
+            return self.wait_lammps()
+
+        for raw_line in self.process.stdout:
+            self._handle_output_line(raw_line)
+            if self.process.poll() is not None and self.abort_requested:
+                break
+
+        return self.process.wait()
     
     def analyze_results(self) -> Tuple[str, str, MonitorMetrics]:
         """
@@ -295,9 +395,9 @@ class LAMMPSMonitor:
         if not self.run_lammps():
             return False
         
-        # 第 3 步：等待完成
-        alert_user("等待 LAMMPS 运行...", level="INFO")
-        rc = self.wait_lammps()
+        # 第 3 步：流式监控并等待完成
+        alert_user("开始实时监控 LAMMPS 输出...", level="INFO")
+        rc = self.stream_monitor_loop()
         
         if rc == 0:
             alert_user("LAMMPS 进程正常退出", level="INFO")
@@ -307,6 +407,19 @@ class LAMMPSMonitor:
         # 第 4 步：分析结果
         alert_user("分析运行结果...", level="INFO")
         status, reason, metrics = self.analyze_results()
+
+        if metrics is None and self.latest_metrics is not None:
+            metrics = self.latest_metrics
+
+        if self.abort_requested:
+            status = "abort"
+            reason = self.live_reason or reason
+        elif self.live_status == "warning" and status == "normal":
+            status = "warning"
+            reason = self.live_reason
+        elif rc != 0 and status == "normal":
+            status = "abort"
+            reason = self.live_reason or f"process_exit_{rc}"
         
         # 第 5 步：保存结果
         alert_user("保存运行结果...", level="INFO")

@@ -141,6 +141,48 @@ def make_decision(
     return "normal", ""
 
 
+def parse_thermo_header_line(line: str) -> Optional[List[str]]:
+    """解析 thermo 表头行，若不是表头则返回 None"""
+
+    if re.match(r"^\s*step\s+", line, flags=re.IGNORECASE):
+        return line.split()
+
+    return None
+
+
+def parse_thermo_data_line(
+    line: str,
+    columns: Optional[List[str]]
+) -> Optional[Dict[str, str]]:
+    """根据已有列名解析单行 thermo 数据"""
+
+    if not columns:
+        return None
+
+    stripped = line.strip()
+    if not stripped or not re.match(r"^\d+\s+", stripped):
+        return None
+
+    values = stripped.split()
+    if len(values) != len(columns):
+        return None
+
+    return dict(zip(columns, values))
+
+
+def parse_thermo_metrics_line(
+    line: str,
+    columns: Optional[List[str]]
+) -> Optional[MonitorMetrics]:
+    """将单行 thermo 数据解析为结构化指标"""
+
+    row = parse_thermo_data_line(line, columns)
+    if row is None:
+        return None
+
+    return parse_final_metrics([row], columns)
+
+
 def extract_thermo_data(log_content: str) -> List[Dict[str, str]]:
     """
     从 LAMMPS 日志中提取 thermo 数据行
@@ -230,32 +272,40 @@ def detect_abort_reason(log_content: str) -> Optional[str]:
     返回：停止原因字符串，或 None 表示正常完成
     """
     
-    lower_log = log_content.lower()
-    
-    # 查找 ERROR 和 halting 的组合
-    if "error:" in lower_log and "halting" in lower_log:
-        # 尝试提取 ERROR 行
-        for line in log_content.split("\n"):
-            if "ERROR" in line or "error" in line.lower():
-                return line.strip()
-    
-    # 查找其他致命错误关键词
+    for line in log_content.split("\n"):
+        reason = detect_abort_reason_in_line(line)
+        if reason:
+            return reason
+
+    return None
+
+
+def detect_abort_reason_in_line(line: str) -> Optional[str]:
+    """从单行输出中识别是否出现致命错误"""
+
+    stripped = line.strip()
+    if not stripped:
+        return None
+
+    lower_line = stripped.lower()
+
+    if "error:" in lower_line:
+        return stripped
+
     fatal_keywords = [
         "segmentation fault",
         "nan",
         "inf",
         "diverged",
         "lost atoms",
-        "out of bounds"
+        "out of bounds",
+        "halting",
     ]
-    
+
     for keyword in fatal_keywords:
-        if keyword in lower_log:
-            # 查找包含该关键词的行
-            for line in log_content.split("\n"):
-                if keyword in line.lower():
-                    return line.strip()
-    
+        if keyword in lower_line:
+            return stripped
+
     return None
 
 
@@ -355,6 +405,43 @@ def write_metadata_json(
     
     with open(metadata_file, "w") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
+
+
+def write_trend_csv(
+    metrics: MonitorMetrics,
+    csv_file: Path,
+    append: bool = True,
+):
+    """追加写入单条实时监控指标"""
+
+    fieldnames = [
+        "step", "temp", "press", "pe", "ke", "etotal", "vol", "dt",
+        "maxdisp", "vmaxpe", "vmaxke", "vmaxcn",
+    ]
+
+    csv_file.parent.mkdir(parents=True, exist_ok=True)
+    file_exists = csv_file.exists()
+
+    with open(csv_file, "a" if (append and file_exists) else "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+
+        if not file_exists or not append:
+            writer.writeheader()
+
+        writer.writerow({
+            "step": metrics.step,
+            "temp": metrics.temp,
+            "press": metrics.press,
+            "pe": metrics.pe,
+            "ke": metrics.ke,
+            "etotal": metrics.etotal,
+            "vol": metrics.vol,
+            "dt": metrics.dt,
+            "maxdisp": metrics.maxdisp,
+            "vmaxpe": metrics.vmaxpe,
+            "vmaxke": metrics.vmaxke,
+            "vmaxcn": metrics.vmaxcn,
+        })
 
 
 def get_last_safe_timestep(
