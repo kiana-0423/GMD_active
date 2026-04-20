@@ -8,3 +8,5 @@ dry_run: true
 md:
   n_steps: 50
   model_version: model_v000
+  command_template: ""
+  config: ""

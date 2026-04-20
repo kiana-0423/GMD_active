@@ -82,11 +82,73 @@ pytest
 - 如果没有 API，可通过 subprocess 调用外部命令
 - 在线监控通过 `monitor_callback` 注入，不修改 `GMD` 核心代码
 
+示例配置：
+
+```yaml
+# configs/active_learning.yaml
+max_iterations: 10
+max_candidates_per_iteration: 50
+candidate_dir: active_learning_candidates
+labeled_data_dir: labeled_data
+model_registry_dir: models
+workflow_state_path: workflow_state.json
+dry_run: false
+md:
+  n_steps: 5000
+  model_version: model_v000
+  config: configs/gmd.yaml
+  command_template: "python /path/to/GMD/run_md.py --model {model} --config {config}"
+```
+
+其中 `command_template` 由 `GMDAdapter` 消费，至少应支持：
+
+- `{model}`: 当前已导出模型路径或模型版本路径
+- `{config}`: `GMD` 运行配置文件路径
+
+`GMD` 侧应返回或回调给控制层的单帧信息至少包括：
+
+- `step`
+- `positions`
+- `symbols`
+- `forces`
+
+建议同时提供：
+
+- `cell`
+- `pbc`
+- `energy`
+- `ensemble_forces`
+
 ## 接入 GMD_se3gnn
 
 - 使用 `adapters/gmd_se3gnn_adapter.py`
 - 支持 Python API 调用和 subprocess 调用
 - 训练、导出、推理接口都通过 adapter 暴露
+
+示例配置：
+
+```yaml
+# configs/retraining.yaml
+trainer_type: gmd_se3gnn
+call_mode: subprocess
+train_command: "python /path/to/GMD_se3gnn/train.py --config {config} --data {data} --output {output}"
+export_command: "python /path/to/GMD_se3gnn/export.py --model {model} --output {output}"
+```
+
+占位符含义：
+
+- `{config}`: 训练配置路径
+- `{data}`: 当前轮合并后的训练数据路径
+- `{output}`: 训练或导出输出目录
+- `{model}`: 训练好的模型路径
+
+联用时的最小步骤：
+
+1. 在 `configs/active_learning.yaml` 中设置 `dry_run: false`，并填写 `md.command_template` 与 `md.config`。
+2. 在 `configs/retraining.yaml` 中填写 `train_command` 和 `export_command`。
+3. 确保 `GMD` 运行结束后，adapter 能返回包含 `forces` 的 `MDFrame`。
+4. 如果要启用 ensemble 监督，还需要让 `MDFrame.ensemble_forces` 返回形状为 `(M, N, 3)` 的数组。
+5. 运行 `gmd-al run` 启动完整流程。
 
 ## 当前限制
 

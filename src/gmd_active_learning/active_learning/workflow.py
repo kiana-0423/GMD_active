@@ -35,10 +35,14 @@ class ActiveLearningWorkflow:
         self.labeling_config = labeling_config
         self.retraining_config = retraining_config
         dry_run = bool(active_config.get("dry_run", True))
+        md_config = active_config.get("md", {})
         self.monitor = ReliabilityMonitor(monitor_config)
         self.candidate_queue = CandidateQueue(active_config["candidate_dir"])
         self.selector = CandidateSelector(active_config["candidate_dir"])
-        self.md_adapter = GMDAdapter(dry_run=dry_run)
+        self.md_adapter = GMDAdapter(
+            command_template=md_config.get("command_template"),
+            dry_run=dry_run,
+        )
         self.mlip_adapter = GMDSE3GNNAdapter(
             call_mode=str(retraining_config.get("call_mode", "subprocess")),
             train_command=retraining_config.get("train_command"),
