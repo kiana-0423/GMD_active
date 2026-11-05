@@ -14,6 +14,7 @@ from __future__ import annotations
 import os
 import shutil
 import stat
+import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -109,7 +110,12 @@ class ModelRegistry:
         extra_files: dict[str, str | Path] | None = None,
     ) -> ModelArtifact:
         """Copy, hash and record a model. ``extra_files`` (e.g. committee members) are stored and
-        verified exactly like the checkpoint and listed under ``metadata["extra_files"]``."""
+        verified exactly like the checkpoint and listed under ``metadata["extra_files"]``.
+
+        The model id is content-derived (checkpoint/export/extra-file hashes, dataset version, parent),
+        so registering the same artifacts again is idempotent: the existing record is re-verified and
+        returned, never overwritten (PHAL overwrote an explicitly re-used version, F-14). Safe for
+        concurrent writers (threads or processes) sharing one store."""
 
         checkpoint = Path(checkpoint)
         if not checkpoint.is_file() or checkpoint.stat().st_size == 0:
@@ -130,8 +136,9 @@ class ModelRegistry:
             self.verify(model_id)
             return self._artifact(existing)
         target = self.root / model_id
-        staging = self.root / f".{model_id}.staging"
-        shutil.rmtree(staging, ignore_errors=True)
+        # A private staging directory per writer: concurrent registrations of the same model (two
+        # controllers, or a CLI init racing a run) must not delete each other's half-written files.
+        staging = self.root / f".{model_id}.{os.getpid()}.{uuid.uuid4().hex}.staging"
         staging.mkdir(parents=True)
         stored_checkpoint = staging / f"checkpoint{checkpoint.suffix or '.pt'}"
         shutil.copy2(checkpoint, stored_checkpoint)
@@ -164,14 +171,25 @@ class ModelRegistry:
         write_json_atomic(staging / "record.json", artifact.to_dict())
         for path in staging.iterdir():
             path.chmod(stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
-        if target.exists():  # crashed after rename but before the store insert
-            shutil.rmtree(staging)
+        if target.exists():  # another writer won the race, or a crash after rename but before the store insert
+            self._discard(staging)
         else:
-            os.replace(staging, target)
+            try:
+                os.replace(staging, target)
+            except OSError:  # a concurrent writer renamed its identical copy first
+                if not target.exists():
+                    raise
+                self._discard(staging)
         self.store.record_model(artifact.to_dict(), state="registered")
         self.verify(model_id)
         LOGGER.info("registered model %s (dataset %s, parent %s)", model_id, dataset_version, parent_model_id)
         return artifact
+
+    @staticmethod
+    def _discard(staging: Path) -> None:
+        for path in staging.iterdir():
+            path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+        shutil.rmtree(staging)
 
     def register_external(self, *, checkpoint: str | Path, export: str | Path | None, species: list[int], cutoff: float | None, backend: str, metadata: dict[str, Any] | None = None) -> ModelArtifact:
         """Register an initial (externally trained) model; it still needs promotion."""

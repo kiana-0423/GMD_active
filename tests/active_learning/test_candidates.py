@@ -45,9 +45,14 @@ def test_isolated_atoms_candidate_does_not_block_later_candidates() -> None:
 def test_periodic_regions_use_minimum_image_distances() -> None:
     cell = np.eye(3) * 6.0
     across = _region("pbc", np.array([[0.2, 3, 3], [5.8, 3, 3]]), np.array([6, 6]), cell=cell, pbc=(True,) * 3)
-    config = CandidateConfig(fingerprint="pair_distance_histogram", fingerprint_bins=16, fingerprint_cutoff=8.0)
+    config = CandidateConfig(fingerprint="pair_distance_histogram", fingerprint_bins=16, fingerprint_cutoff=8.0,
+                             histogram_normalisation="probability")
     histogram = fingerprint_region(across, config)
     assert histogram[0] == 1.0  # 0.4 A apart through the boundary, not 5.6 A
+    density = fingerprint_region(across, config.model_copy(update={"histogram_normalisation": "density"}))
+    assert density[0] == 2.0  # PHAL normalisation: probability / bin width (0.5 A)
+    plain = fingerprint_region(across, config.model_copy(update={"pair_distances": "plain"}))
+    assert plain[11] == 1.0  # PHAL's plain pdist: 5.6 A
 
 
 def test_selection_ranks_by_score_deduplicates_and_records_reasons() -> None:

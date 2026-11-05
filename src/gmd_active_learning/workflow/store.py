@@ -128,6 +128,17 @@ CREATE TABLE IF NOT EXISTS promotions (
     at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS blobs (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS rounds (
+    run_id TEXT NOT NULL,
+    round_id INTEGER NOT NULL,
+    n_events INTEGER NOT NULL,
+    n_candidates INTEGER NOT NULL,
+    n_selected INTEGER NOT NULL,
+    n_rejected INTEGER NOT NULL,
+    rejected_reasons TEXT NOT NULL DEFAULT '{}',
+    at TEXT NOT NULL,
+    PRIMARY KEY (run_id, round_id)
+);
 """
 
 TERMINAL_TASK_STATES = frozenset({"ingested", "invalid", "failed", "cancelled", "abandoned"})
@@ -322,13 +333,18 @@ class WorkflowStore:
         with self.transaction() as cursor:
             cursor.execute("UPDATE candidates SET state=?, reason=? WHERE candidate_id=?", (state, reason, candidate_id))
 
-    def candidates(self, run_id: str, *, state: str | None = None, cycle: int | None = None) -> list[dict[str, Any]]:
+    def candidates(self, run_id: str, *, state: str | None = None, cycle: int | None = None, order: str = "score") -> list[dict[str, Any]]:
+        """Candidates ordered by descending score (ties by id), or by insertion (``order="insertion"``)."""
+
         query, params = "SELECT * FROM candidates WHERE run_id=?", [run_id]
         if state is not None:
             query, params = query + " AND state=?", [*params, state]
         if cycle is not None:
             query, params = query + " AND cycle=?", [*params, cycle]
-        rows = self._connection.execute(query + " ORDER BY score DESC, candidate_id", params).fetchall()
+        ordering = {"score": " ORDER BY score DESC, candidate_id", "insertion": " ORDER BY rowid"}
+        if order not in ordering:
+            raise WorkflowError(f"unknown candidate order {order!r}")
+        rows = self._connection.execute(query + ordering[order], params).fetchall()
         return [{**dict(row), "fingerprint": json.loads(row["fingerprint"])} for row in rows]
 
     def upsert_task(self, task_id: str, **fields: Any) -> None:
@@ -438,6 +454,25 @@ class WorkflowStore:
     def promotions(self, run_id: str) -> list[dict[str, Any]]:
         rows = self._connection.execute("SELECT * FROM promotions WHERE run_id=? ORDER BY seq", (run_id,)).fetchall()
         return [dict(row) for row in rows]
+
+    # ------------------------------------------------------------------ per-round summaries (PHAL RoundSummary)
+    def record_round(self, run_id: str, round_id: int, *, n_events: int, n_candidates: int, n_selected: int,
+                     rejected_reasons: dict[str, int] | None = None) -> None:
+        """Upsert the selection summary of one round (= workflow cycle); PHAL's field names."""
+
+        reasons = dict(rejected_reasons or {})
+        with self.transaction() as cursor:
+            cursor.execute(
+                "INSERT INTO rounds(run_id, round_id, n_events, n_candidates, n_selected, n_rejected, rejected_reasons, at) "
+                "VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(run_id, round_id) DO UPDATE SET n_events=excluded.n_events, "
+                "n_candidates=excluded.n_candidates, n_selected=excluded.n_selected, n_rejected=excluded.n_rejected, "
+                "rejected_reasons=excluded.rejected_reasons, at=excluded.at",
+                (run_id, int(round_id), int(n_events), int(n_candidates), int(n_selected), int(sum(reasons.values())), _dumps(reasons), utc_now()),
+            )
+
+    def rounds(self, run_id: str) -> list[dict[str, Any]]:
+        rows = self._connection.execute("SELECT * FROM rounds WHERE run_id=? ORDER BY round_id", (run_id,)).fetchall()
+        return [{**dict(row), "rejected_reasons": json.loads(row["rejected_reasons"])} for row in rows]
 
     # ------------------------------------------------------------------ opaque component state
     def put_blob(self, key: str, value: Any) -> None:

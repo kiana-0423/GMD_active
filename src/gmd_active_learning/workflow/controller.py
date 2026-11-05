@@ -332,7 +332,8 @@ class ActiveLearningController:
         self._transition(Stage.SELECTION)
 
     def _stage_selection(self) -> None:
-        pending = self.store.candidates(self.run_id, state="pending")
+        order = "insertion" if self.config.candidates.tie_break == "insertion" else "score"
+        pending = self.store.candidates(self.run_id, state="pending", order=order)
         labeled_states = {"selected", "labeled"}
         history = [np.asarray(row["fingerprint"]) for row in self.store.candidates(self.run_id) if row["state"] in labeled_states]
         total = len([row for row in self.store.candidates(self.run_id) if row["state"] in labeled_states])
@@ -345,6 +346,14 @@ class ActiveLearningController:
             self.store.set_candidate_state(candidate.candidate_id, "selected")
         for candidate_id, reason in decision.rejected.items():
             self.store.set_candidate_state(candidate_id, "rejected", reason)
+        cycle = self._run.cycle
+        reasons: dict[str, int] = {}
+        for reason in decision.rejected.values():
+            reasons[reason] = reasons.get(reason, 0) + 1
+        self.store.record_round(
+            self.run_id, cycle, n_events=len([row for row in self.store.events(self.run_id) if row["cycle"] == cycle]),
+            n_candidates=len(candidates), n_selected=len(decision.selected), rejected_reasons=reasons,
+        )
         self._transition(Stage.SUBMISSION, detail={"selected": len(decision.selected), "rejected": len(decision.rejected)})
 
     # ================================================================== SUBMISSION / POLLING / INGESTION
@@ -381,8 +390,15 @@ class ActiveLearningController:
                 continue  # already submitted or finished: never duplicate
             # write-ahead: record the intent, then submit, then record the job
             self._save_task(task, "submitting", candidate_id=row["candidate_id"])
-            found = self.labeler.find_submission(task)
-            task = found if found is not None else self.labeler.submit(task)
+            try:
+                found = self.labeler.find_submission(task)
+                task = found if found is not None else self.labeler.submit(task)
+            except Exception as exc:  # noqa: BLE001 - PHAL OnlineEventScheduler: a raising submitter fails the task, the queue continues
+                LOGGER.warning("submission of %s failed: %s", task.task_id, exc)
+                task.failure_reasons = [*task.failure_reasons, f"submission failed: {type(exc).__name__}: {exc}"]
+                self._save_task(task, "failed")
+                self.store.set_candidate_state(row["candidate_id"], "failed", task.failure_reasons[-1][-500:])
+                continue
             self._save_task(task, "submitted")
             self.store.set_candidate_state(row["candidate_id"], "labeling")
         self._transition(Stage.POLLING)
@@ -594,4 +610,5 @@ def summarize(store: WorkflowStore, run_id: str) -> dict[str, Any]:
         "samples": len(store.samples(run_id)),
         "models": [{"model_id": m["model_id"], "state": m["state"], "metrics": m["metrics"]} for m in store.models()],
         "promotions": [{k: p[k] for k in ("model_id", "previous_model_id", "action", "reason")} for p in store.promotions(run_id)],
+        "rounds": [{k: r[k] for k in ("round_id", "n_events", "n_candidates", "n_selected", "n_rejected", "rejected_reasons")} for r in store.rounds(run_id)],
     }

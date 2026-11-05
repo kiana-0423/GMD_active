@@ -1,21 +1,33 @@
 # Ported from PHAL (hotspot_al.active_learning.candidate_pool / deduplication) at 96263b6; MIT License, see NOTICE.
 """Candidate ranking, diversity selection and labeling budgets.
 
-Changes from PHAL:
-- fingerprints are finite for any region (PHAL produced NaN when no pair fell under the
-  cutoff, which silently rejected the candidate and could block later ones; F-30);
-- periodic regions use minimum-image pair distances (PHAL used plain ``pdist``);
-- diversity is checked against previously labeled fingerprints as well as within the batch;
-- budgets per cycle, per event and in total are explicit, and every rejection is recorded.
+PHAL parity (ledger AL-002..004): fingerprints are pair-distance histograms over ``[0, cutoff)``
+with ``histogram_normalisation: density`` (``np.histogram(..., density=True)``, so
+``diversity_threshold`` keeps PHAL's meaning), compared with the L2 distance; a candidate is kept
+iff its distance to every kept fingerprint is ``>= diversity_threshold`` (boundary kept); ties in
+score keep insertion order (``tie_break: insertion``); the unique set is recomputed from scratch on
+every selection, so admitting a high-scoring candidate that suppresses a suppressor re-admits the
+third (PHAL's eviction scenario).
+
+Deliberate changes from PHAL:
+- fingerprints are finite for any region: PHAL's density histogram is NaN when no pair lies inside
+  the cutoff, which silently rejected the candidate and, if it was kept first, every later one
+  (finding F-30); here such a histogram is all zeros;
+- ``pair_distances: minimum_image`` (default) uses minimum-image distances for periodic regions;
+  PHAL used plain ``pdist`` (``pair_distances: plain``), which is identical for the non-periodic
+  regions of the default cluster mode and wrong for periodic slab/block regions;
+- diversity is also checked against previously labeled fingerprints (``compare_with_labeled``);
+- budgets per cycle, per event (``max_per_event``, ``None`` = PHAL's unlimited) and in total are
+  explicit, an optional ``min_score`` filter exists, and every rejection is recorded with a reason.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Iterable
+from typing import Any, Iterable, Literal
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from gmd_active_learning.contracts import ExtractedRegion
 from gmd_active_learning.utils.logging import get_logger
@@ -24,50 +36,81 @@ from gmd_active_learning.utils.periodic import minimum_image_vectors
 LOGGER = get_logger(__name__)
 REFERENCE_ATOMIC_NUMBER = 100.0
 
+#: PHAL's accepted fingerprint names (deduplication.fingerprint_region) -> canonical name.
+FINGERPRINT_ALIASES: dict[str, str] = {
+    "pair_distance_histogram": "pair_distance_histogram",
+    "pair_distance": "pair_distance_histogram",
+    "distance": "pair_distance_histogram",
+    "type_weighted_pair_distance_histogram": "type_weighted_pair_distance_histogram",
+    "type_weighted_pair_distance": "type_weighted_pair_distance_histogram",
+    "weighted_pair": "type_weighted_pair_distance_histogram",
+}
+
+
+def canonical_fingerprint(mode: str) -> str:
+    try:
+        return FINGERPRINT_ALIASES[str(mode).lower()]
+    except KeyError as exc:
+        raise ValueError(f"Unsupported candidate fingerprint mode: {mode}") from exc
+
 
 class CandidateConfig(BaseModel):
-    """``candidates`` config section."""
+    """``workflow.candidates`` config section."""
 
     model_config = ConfigDict(extra="forbid")
 
     enabled: bool = True
-    fingerprint: str = Field("type_weighted_pair_distance_histogram", pattern="^(pair_distance_histogram|type_weighted_pair_distance_histogram)$")
+    fingerprint: str = Field("type_weighted_pair_distance_histogram", description="pair_distance_histogram | type_weighted_pair_distance_histogram (PHAL aliases accepted)")
     fingerprint_bins: int = Field(16, ge=2)
     fingerprint_cutoff: float = Field(8.0, gt=0.0)
+    pair_distances: Literal["minimum_image", "plain"] = Field("minimum_image", description="plain = PHAL pdist (ignores periodicity)")
+    histogram_normalisation: Literal["density", "probability"] = Field("density", description="density = PHAL (threshold meaning); probability sums to 1")
     deduplicate: bool = True
     diversity_threshold: float = Field(0.1, ge=0.0)
     compare_with_labeled: bool = True
+    tie_break: Literal["insertion", "candidate_id"] = Field("insertion", description="order of equal scores; insertion = PHAL stable sort")
     max_per_cycle: int = Field(20, ge=0)
-    max_per_event: int = Field(4, ge=0)
+    max_per_event: int | None = Field(4, ge=0, description="None = no per-event budget (PHAL)")
     max_total: int | None = Field(None, ge=0)
-    min_score: float = 0.0
+    min_score: float | None = Field(0.0, description="None disables the score filter (PHAL had none)")
     core_atoms_only_for_ranking: bool = False
 
+    @field_validator("fingerprint")
+    @classmethod
+    def _canonical(cls, value: str) -> str:
+        return canonical_fingerprint(value)
 
-def _pair_distances(region: ExtractedRegion) -> np.ndarray:
-    positions = region.positions
+
+def pair_distances(region: ExtractedRegion, *, minimum_image: bool = True) -> np.ndarray:
+    """Upper-triangle pair distances in ``scipy.spatial.distance.pdist`` order."""
+
+    positions = np.asarray(region.positions, dtype=float)
     if len(positions) < 2:
         return np.zeros(0)
     left, right = np.triu_indices(len(positions), k=1)
     vectors = positions[right] - positions[left]
-    if any(region.pbc) and region.cell is not None:
+    if minimum_image and any(region.pbc) and region.cell is not None:
         vectors = minimum_image_vectors(vectors, cell=region.cell, pbc=region.pbc)
     return np.linalg.norm(vectors, axis=1)
 
 
-def _normalised_histogram(distances: np.ndarray, *, bins: int, cutoff: float, weights: np.ndarray | None = None) -> np.ndarray:
-    counts, _ = np.histogram(distances, bins=bins, range=(0.0, cutoff), weights=weights)
+def _histogram(distances: np.ndarray, *, bins: int, cutoff: float, normalisation: str) -> np.ndarray:
+    counts, edges = np.histogram(distances, bins=bins, range=(0.0, cutoff))
     total = float(np.sum(counts))
-    return np.zeros(bins) if total <= 0.0 else counts.astype(float) / total
+    if total <= 0.0:  # PHAL: density=True gives NaN here (F-30)
+        return np.zeros(bins)
+    probability = counts.astype(float) / total
+    return probability / np.diff(edges) if normalisation == "density" else probability
 
 
 def fingerprint_region(region: ExtractedRegion, config: CandidateConfig) -> np.ndarray:
     """Intensive, always-finite geometric fingerprint of a region."""
 
-    bins, cutoff = config.fingerprint_bins, config.fingerprint_cutoff
-    distances = _pair_distances(region)
-    plain = _normalised_histogram(distances, bins=bins, cutoff=cutoff)
-    if config.fingerprint == "pair_distance_histogram":
+    bins, cutoff, normalisation = config.fingerprint_bins, config.fingerprint_cutoff, config.histogram_normalisation
+    mode = canonical_fingerprint(config.fingerprint)
+    distances = pair_distances(region, minimum_image=config.pair_distances == "minimum_image")
+    plain = _histogram(distances, bins=bins, cutoff=cutoff, normalisation=normalisation)
+    if mode == "pair_distance_histogram":
         return plain
     if len(distances) == 0:
         return np.zeros(3 * bins)
@@ -82,6 +125,12 @@ def fingerprint_region(region: ExtractedRegion, config: CandidateConfig) -> np.n
     if not np.all(np.isfinite(fingerprint)):  # defensive: must never happen
         raise ValueError(f"non-finite fingerprint for region {region.region_id}")
     return fingerprint
+
+
+def fingerprint_distance(left: np.ndarray, right: np.ndarray) -> float:
+    """L2 distance between fingerprints (PHAL's metric)."""
+
+    return float(np.linalg.norm(np.asarray(left, dtype=float) - np.asarray(right, dtype=float)))
 
 
 @dataclass(slots=True)
@@ -103,6 +152,16 @@ class SelectionDecision:
     rejected: dict[str, str]  # candidate_id -> reason
 
 
+def deduplicate_candidates(candidates: Iterable[Candidate], *, diversity_threshold: float) -> list[Candidate]:
+    """PHAL's greedy pass: by descending score (stable), keep iff distance >= threshold to all kept."""
+
+    unique: list[Candidate] = []
+    for candidate in sorted(candidates, key=lambda item: -item.score):
+        if all(fingerprint_distance(candidate.fingerprint, kept.fingerprint) >= diversity_threshold for kept in unique):
+            unique.append(candidate)
+    return unique
+
+
 class CandidateSelector:
     """Greedy score-ordered selection with diversity and budget constraints.
 
@@ -122,6 +181,11 @@ class CandidateSelector:
             metadata=dict(metadata or {}),
         )
 
+    def _ordered(self, candidates: Iterable[Candidate]) -> list[Candidate]:
+        if self.config.tie_break == "insertion":
+            return sorted(candidates, key=lambda item: -item.score)  # stable: ties keep insertion order
+        return sorted(candidates, key=lambda item: (-item.score, item.candidate_id))
+
     def select(
         self,
         candidates: Iterable[Candidate],
@@ -131,31 +195,33 @@ class CandidateSelector:
     ) -> SelectionDecision:
         config = self.config
         rejected: dict[str, str] = {}
-        pool = sorted(candidates, key=lambda item: (-item.score, item.candidate_id))
+        pool = self._ordered(candidates)
         if not config.enabled:
             return SelectionDecision([], {item.candidate_id: "selection_disabled" for item in pool})
         budget = config.max_per_cycle
         if config.max_total is not None:
             budget = min(budget, max(0, config.max_total - already_labeled_total))
         history = [np.asarray(item, dtype=float) for item in labeled_fingerprints] if config.compare_with_labeled else []
+        unique: list[Candidate] = []  # PHAL's dedup set (before budgets)
         kept: list[Candidate] = []
         per_event: dict[str | None, int] = {}
         for candidate in pool:
-            if candidate.score < config.min_score:
+            if config.min_score is not None and candidate.score < config.min_score:
                 rejected[candidate.candidate_id] = "below_min_score"
                 continue
             if config.deduplicate:
-                references = [*history, *(item.fingerprint for item in kept)]
+                references = [*history, *(item.fingerprint for item in unique)]
                 if any(
                     reference.shape == candidate.fingerprint.shape
-                    and float(np.linalg.norm(candidate.fingerprint - reference)) < config.diversity_threshold
+                    and fingerprint_distance(candidate.fingerprint, reference) < config.diversity_threshold
                     for reference in references
                 ):
                     rejected[candidate.candidate_id] = "duplicate"
                     continue
-            if per_event.get(candidate.event_id, 0) >= config.max_per_event:
-                rejected[candidate.candidate_id] = "event_budget"
+            if config.max_per_event is not None and per_event.get(candidate.event_id, 0) >= config.max_per_event:
+                rejected[candidate.candidate_id] = "event_budget"  # does not suppress candidates of other events
                 continue
+            unique.append(candidate)
             if len(kept) >= budget:
                 rejected[candidate.candidate_id] = "cycle_budget" if budget == config.max_per_cycle else "total_budget"
                 continue
