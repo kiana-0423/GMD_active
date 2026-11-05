@@ -1,0 +1,255 @@
+# syntax=docker/dockerfile:1
+# Ported from PHAL (containers/Dockerfile.cp2k-ml) at 96263b6; MIT License, see NOTICE.
+#
+# EXPERIMENTAL development/toolchain image for the external cp2k-ml-scf fork.
+# Status: NOT BUILT for GMD_active, NOT VALIDATED (versions.yaml
+# stacks.cp2k_ml.status: development). The production labeling image is
+# Dockerfile.cp2k.
+#
+# CP2K-ML development environment.
+#
+# This image is a *build environment*, not a CP2K release. It never clones,
+# copies, or compiles CP2K: the source lives in the external `cp2k-ml-scf`
+# repository and is bind-mounted at /workspace/cp2k-ml-scf, where that
+# repository's own build.sh compiles it.
+#
+# The one exception is deliberate and narrow. CP2K's scientific dependencies
+# (Libint, LibXC, ELPA) have no usable Ubuntu 24.04 packages at the versions
+# v2026.2 expects, so they are built by CP2K's own toolchain script. The
+# `toolchain` stage below extracts *only* tools/toolchain/ from the pinned
+# commit, builds the dependency prefix, and is discarded. No CP2K source
+# reaches the final image; `find / -name qs_scf.F` in the shipped image
+# returns nothing.
+#
+# Pinned inputs: ../cp2k-ml-scf/VERSION_LOCK.md and containers/versions.yaml
+# (stacks.cp2k_ml). Build context: repository root, ignore file
+# containers/Dockerfile.cp2k-ml.dockerignore.
+
+ARG BASE_IMAGE=ubuntu:24.04
+
+# =============================================================================
+# Stage: toolchain — Libint / LibXC / ELPA / FFTW / OpenBLAS / ScaLAPACK
+# =============================================================================
+FROM ${BASE_IMAGE} AS toolchain
+
+ARG CP2K_VERSION
+ARG CP2K_COMMIT
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# This list is CP2K's own tools/toolchain/install_requirements_ubuntu.sh at the
+# pinned commit, plus cmake/ninja/OpenMPI (passed as =system so the toolchain
+# does not rebuild them) and curl (used to fetch the toolchain itself).
+# xz-utils is not optional: the Libint tarball is .tar.xz.
+RUN test -n "${CP2K_COMMIT}" \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        autoconf \
+        autogen \
+        automake \
+        autotools-dev \
+        bzip2 \
+        ca-certificates \
+        cmake \
+        curl \
+        g++ \
+        gcc \
+        gfortran \
+        git \
+        less \
+        libopenmpi-dev \
+        libtool \
+        libtool-bin \
+        make \
+        nano \
+        ninja-build \
+        openmpi-bin \
+        patch \
+        pkg-config \
+        python3 \
+        python3-dev \
+        python3-pip \
+        unzip \
+        wget \
+        xxd \
+        xz-utils \
+        zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Fetch only tools/toolchain from the pinned commit. --strip-components=3 drops
+# the archive's `cp2k-<sha>/tools/toolchain/` prefix, so nothing outside the
+# toolchain directory is ever written to disk. The two tests are the guard:
+# the installer must be present and no CP2K src/ tree may have landed.
+WORKDIR /opt/cp2k-toolchain-src
+RUN curl -fsSL "https://github.com/cp2k/cp2k/archive/${CP2K_COMMIT}.tar.gz" \
+      | tar -xz --strip-components=3 "cp2k-${CP2K_COMMIT}/tools/toolchain" \
+    && test -x ./install_cp2k_toolchain.sh \
+    && test ! -d /opt/cp2k-toolchain-src/src
+
+# Packages are selected explicitly; --install-all is deliberately NOT used.
+# It pulls DeePMD, GauXC, COSMA, tblite and friends that nothing here needs,
+# and — decisively — install_cp2k_toolchain.sh lines 1215-1221 make DeePMD and
+# GauXC force with_libtorch=__INSTALL__, silently overriding --with-libtorch=no.
+# That would put a second LibTorch in the prefix alongside the PyTorch wheel's,
+# which is the one divergence VERSION_LOCK.md promises cannot happen. (It also
+# fails to link DeePMD on arm64.)
+#
+# --with-*=system reuses the apt packages pinned in VERSION_LOCK.md rather than
+# rebuilding a second compiler or MPI. --with-openmpi=system also sets
+# MPI_MODE=openmpi, which is what makes ScaLAPACK and ELPA link against it.
+RUN ./install_cp2k_toolchain.sh \
+        --with-gcc=system \
+        --with-openmpi=system \
+        --with-cmake=system \
+        --with-ninja=system \
+        --with-openblas=install \
+        --with-scalapack=install \
+        --with-fftw=install \
+        --with-libint=install \
+        --with-libxc=install \
+        --with-elpa=install \
+        --with-libtorch=no \
+        --with-deepmd=no \
+        --with-gauxc=no \
+        --with-cosma=no \
+        --with-sirius=no \
+        --with-plumed=no \
+        --with-libxsmm=no \
+        --with-spglib=no \
+        --with-libvori=no \
+        --with-hdf5=no \
+        --with-trexio=no \
+    && ! ls -d /opt/cp2k-toolchain-src/install/libtorch* >/dev/null 2>&1 \
+    && rm -rf /opt/cp2k-toolchain-src/build /opt/cp2k-toolchain-src/*.tar.gz
+
+# =============================================================================
+# Stage: development — the build environment for ../cp2k-ml-scf
+# =============================================================================
+FROM ${BASE_IMAGE} AS development
+
+ARG IMAGE_TAG
+ARG CP2K_VERSION
+ARG CP2K_COMMIT
+ARG PYTORCH_VERSION
+ARG NUMPY_VERSION
+ARG SCIPY_VERSION
+ARG PYYAML_VERSION
+ARG ASE_VERSION
+
+LABEL org.opencontainers.image.title="GMD_active CP2K-ML development environment (experimental)" \
+      org.opencontainers.image.description="Toolchain and ML runtime for an externally managed CP2K ML-SCF fork" \
+      org.opencontainers.image.version="${IMAGE_TAG}" \
+      org.opencontainers.image.source="containers/Dockerfile.cp2k-ml" \
+      org.gmd-al.versions-file="containers/versions.yaml" \
+      org.gmd-al.role="dft-ml-development" \
+      org.gmd-al.cp2k-version="${CP2K_VERSION}" \
+      org.gmd-al.cp2k-commit="${CP2K_COMMIT}" \
+      org.gmd-al.cp2k-source="external"
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    GMD_AL_HOME=/opt/gmd_al \
+    GMD_AL_RUNTIME_DIR=/runtime \
+    CP2K_ML_SOURCE_DIR=/workspace/cp2k-ml-scf \
+    CP2K_ML_RUNTIME_DIR=/runtime/cp2k_ml \
+    CP2K_VERSION_EXPECTED=${CP2K_VERSION} \
+    CP2K_COMMIT_EXPECTED=${CP2K_COMMIT} \
+    CP2K_TOOLCHAIN_ROOT=/opt/cp2k-toolchain-src \
+    TOOLCHAIN_ENV=/opt/cp2k-toolchain-src/install/setup \
+    LIBTORCH_ROOT=/opt/libtorch \
+    CMAKE_PREFIX_PATH=/opt/libtorch/share/cmake
+
+RUN test -n "${CP2K_COMMIT}" \
+    && test -n "${PYTORCH_VERSION}" \
+    && test -n "${NUMPY_VERSION}" \
+    && test -n "${SCIPY_VERSION}" \
+    && test -n "${PYYAML_VERSION}" \
+    && test -n "${ASE_VERSION}" \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        cmake \
+        curl \
+        g++ \
+        gcc \
+        gfortran \
+        git \
+        libblas-dev \
+        libfftw3-dev \
+        liblapack-dev \
+        libopenmpi-dev \
+        libscalapack-openmpi-dev \
+        make \
+        ninja-build \
+        openmpi-bin \
+        pkg-config \
+        python3 \
+        python3-dev \
+        python3-pip \
+        python3-venv \
+        vim \
+        wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Libint, LibXC, ELPA and friends, built from the pinned CP2K toolchain.
+# Copied to the SAME path it was built at: install/setup sources
+# ../scripts/tool_kit.sh by absolute path, so relocating the prefix silently
+# breaks every build that sources it. This directory holds only the contents of
+# CP2K's tools/toolchain (installer + scripts + built prefix); the assertion
+# below proves no CP2K source came with it.
+COPY --from=toolchain /opt/cp2k-toolchain-src /opt/cp2k-toolchain-src
+
+# The PyTorch wheel supplies the LibTorch runtime under torch/lib. CP2K source
+# and the ML-SCF implementation are deliberately not cloned or copied here.
+#
+# ASE is installed at build time, not at run time: the fork's dataset tooling
+# reads structures with it, and a compute node with no outbound network cannot
+# pip-install it per job. The import check below makes the image's offline
+# usability a build-time property rather than a hope.
+RUN python3 -m pip install --break-system-packages \
+        "torch==${PYTORCH_VERSION}" \
+        "numpy==${NUMPY_VERSION}" \
+        "scipy==${SCIPY_VERSION}" \
+        "PyYAML==${PYYAML_VERSION}" \
+        "ase==${ASE_VERSION}" \
+    && python3 -c "import pathlib, torch; assert (pathlib.Path(torch.__file__).parent / 'lib').is_dir()" \
+    && python3 -c "import ase, ase.io, ase.build; print('ase', ase.__version__)"
+
+RUN ln -s "$(python3 -c 'import pathlib, torch; print(pathlib.Path(torch.__file__).resolve().parent)')" "${LIBTORCH_ROOT}"
+
+ENV LD_LIBRARY_PATH=/opt/libtorch/lib
+
+RUN mkdir -p \
+        /workspace/cp2k-ml-scf \
+        /runtime/cp2k_ml/models \
+        /runtime/cp2k_ml/checkpoints \
+        /runtime/cp2k_ml/validation \
+        /runtime/cp2k_ml/logs \
+        /runtime/cp2k_ml/cache
+
+# Fail loudly if a CP2K source tree ever leaks into a layer, and prove the
+# toolchain environment is actually usable rather than merely present.
+RUN test ! -d /opt/cp2k-toolchain-src/src \
+    && ! find / -xdev -name "qs_scf.F" -print -quit | grep -q . \
+    && echo "verified: no CP2K source in image" \
+    && bash -c 'set -e; source "${TOOLCHAIN_ENV}"; command -v mpicc >/dev/null' \
+    && echo "verified: toolchain setup sources cleanly"
+
+WORKDIR /workspace/cp2k-ml-scf
+
+VOLUME ["/workspace/cp2k-ml-scf", "/runtime"]
+
+CMD ["/bin/bash"]
+
+# =============================================================================
+# Stage: probe — toolchain self-check, still no CP2K
+# =============================================================================
+FROM development AS probe
+
+COPY containers/scripts/validate_cp2k_ml_stack.py /opt/gmd_al/containers/scripts/validate_cp2k_ml_stack.py
+
+RUN python3 /opt/gmd_al/containers/scripts/validate_cp2k_ml_stack.py --output /tmp/cp2k-ml-probe.json
+
+CMD ["python3", "/opt/gmd_al/containers/scripts/validate_cp2k_ml_stack.py"]

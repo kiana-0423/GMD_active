@@ -1,0 +1,14 @@
+# BuildKit reads this file (not a root .dockerignore) for
+# containers/Dockerfile.gmd because it sits next to the Dockerfile and is named
+# <Dockerfile>.dockerignore. The build context is the repository root, so the
+# file is an allowlist: everything is excluded except what the Dockerfile
+# COPYs. GMD and GMD_SGT sources arrive through named contexts (build.sh).
+*
+!containers/scripts/validate_platform.py
+!containers/scripts/validate_sgt_stack.py
+!containers/scripts/build_gmd_probe_model.py
+!containers/scripts/validate_gmd_stack.py
+!containers/probes/gmd
+**/__pycache__
+**/*.py[cod]
+**/.DS_Store

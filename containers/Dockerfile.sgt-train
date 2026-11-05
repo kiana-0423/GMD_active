@@ -1,0 +1,95 @@
+# syntax=docker/dockerfile:1.7
+# Ported from PHAL (containers/Dockerfile.train-probe) at 96263b6; MIT License, see NOTICE.
+#
+# GMD_SGT training-role image. Replaces PHAL's NequIP/Allegro train-probe and
+# the empty Milestone-1 train scaffold. Same NGC PyTorch base (and therefore
+# the same LibTorch) as Dockerfile.gmd, so a model exported here loads in GMD.
+#
+# Build through containers/build.sh; it resolves every ARG from
+# containers/versions.yaml and supplies the named build context
+#   gmd_sgt_src  `git archive` of the pinned GMD_SGT commit (or a git URL#commit)
+# The primary build context is the repository root; BuildKit reads
+# containers/Dockerfile.sgt-train.dockerignore for it.
+#
+# F-32 fix: PHAL's train-probe copied a top-level `config/` that no longer
+# existed. Every COPY source below exists in this repository or comes from the
+# named context, and tests/tools/test_containers.py enforces that statically.
+#
+# Status: NOT BUILT, NOT VALIDATED (see versions.yaml stacks.sgt_train.status).
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE} AS runtime
+
+ARG BASE_IMAGE
+ARG IMAGE_TAG
+ARG GMD_SGT_VERSION
+ARG GMD_SGT_COMMIT
+ARG E3NN_VERSION
+ARG ASE_VERSION
+ARG PYYAML_VERSION
+
+LABEL org.opencontainers.image.title="GMD_active GMD_SGT training image" \
+      org.opencontainers.image.description="GMD_SGT training stack on NGC PyTorch for Miyabi-G GH200 (linux/arm64)" \
+      org.opencontainers.image.version="${IMAGE_TAG}" \
+      org.opencontainers.image.source="containers/Dockerfile.sgt-train" \
+      org.opencontainers.image.base.name="${BASE_IMAGE}" \
+      org.gmd-al.versions-file="containers/versions.yaml" \
+      org.gmd-al.role="train" \
+      org.gmd-al.gmd-sgt-version="${GMD_SGT_VERSION}" \
+      org.gmd-al.gmd-sgt-commit="${GMD_SGT_COMMIT}"
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    GMD_AL_HOME=/opt/gmd_al \
+    GMD_AL_RUNTIME_DIR=/runtime \
+    GMD_SGT_CONFIG_DIR=/opt/gmd_sgt/configs
+
+RUN test -n "${GMD_SGT_VERSION}" \
+    && test -n "${GMD_SGT_COMMIT}" \
+    && test -n "${E3NN_VERSION}" \
+    && test -n "${ASE_VERSION}" \
+    && test -n "${PYYAML_VERSION}" \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# CUDA, Torch and NumPy are inherited from the NVIDIA PyTorch base image.
+# Installing a second CUDA toolkit or a PyPI torch wheel here would invalidate
+# the probe, so GMD_SGT itself is installed with --no-deps.
+RUN python -m pip install \
+        "e3nn==${E3NN_VERSION}" \
+        "ase==${ASE_VERSION}" \
+        "PyYAML==${PYYAML_VERSION}"
+
+COPY --from=gmd_sgt_src . /opt/src/gmd_sgt
+RUN cd /opt/src/gmd_sgt \
+    && if [ -f .gmd_al_source_commit ]; then \
+           test "$(cat .gmd_al_source_commit)" = "${GMD_SGT_COMMIT}"; \
+       fi \
+    && python -m pip install --no-deps /opt/src/gmd_sgt \
+    && mkdir -p /opt/gmd_sgt \
+    && cp -r /opt/src/gmd_sgt/configs "${GMD_SGT_CONFIG_DIR}" \
+    && printf '%s\n' "${GMD_SGT_COMMIT}" > /opt/gmd_sgt/GMD_SGT_COMMIT \
+    && rm -rf /opt/src/gmd_sgt
+
+WORKDIR /opt/gmd_al
+
+COPY containers/scripts/validate_platform.py /opt/gmd_al/containers/scripts/validate_platform.py
+COPY containers/scripts/validate_sgt_stack.py /opt/gmd_al/containers/scripts/validate_sgt_stack.py
+
+# Build-time checks: imports, the pinned GMD_SGT version, the gmd-train entry
+# point, and a random tiny model on CPU (CUDA is checked under PBS with --nv).
+RUN mkdir -p \
+        /runtime/models \
+        /runtime/datasets \
+        /runtime/checkpoints \
+        /runtime/logs \
+    && python --version \
+    && python -c "import torch; print(torch.__version__)" \
+    && python -c "import e3nn; print(e3nn.__version__)" \
+    && python -c "import gmd_sgt, sys; print(gmd_sgt.__version__); sys.exit(gmd_sgt.__version__ != '${GMD_SGT_VERSION}')" \
+    && command -v gmd-train \
+    && python /opt/gmd_al/containers/scripts/validate_sgt_stack.py --devices cpu
+
+CMD ["python", "/opt/gmd_al/containers/scripts/validate_platform.py"]

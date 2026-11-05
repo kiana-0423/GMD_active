@@ -1,0 +1,262 @@
+# Ported from PHAL (containers/versions.yaml) at 96263b6; MIT License, see NOTICE.
+#
+# Single version manifest for GMD_active container images (GMD, GMD_SGT, CP2K).
+# containers/build.sh reads it with a small awk reader: keep 2-space
+# indentation and scalar values for every key build.sh resolves.
+#
+# Honesty rules for this file:
+# - Every pin is exact: a 40-hex commit, an exact version, or a fixed tag plus
+#   digest. No latest/stable/main, no ranges.
+# - Nothing here has been built or validated. Docker was not running when this
+#   manifest was written and no image, OCI digest or SIF hash exists yet, so
+#   every output digest is null and every status is not_built / not_validated.
+# - Base-image digests are not invented: the two that are filled in were
+#   recorded by PHAL (NGC Registry V2 query on 2026-07-10; ../cp2k-ml-scf
+#   VERSION_LOCK.md) and are marked with their provenance. A null digest makes
+#   build.sh print "base_image_digest=unpinned" and refuse to push.
+schema_version: 1
+infrastructure_revision: "gmd-al-containers-1"
+status: not_built
+
+platform:
+  os: linux
+  architecture: arm64
+  target_system: miyabi-g
+  cpu: nvidia-grace
+  gpu: gh200
+  scheduler: pbs-professional
+  apptainer: "1.3.5"
+  default_oci_platform: "linux/arm64"
+
+stacks:
+  # MD role: GMD built with -DGMD_ENABLE_TORCH=ON against the LibTorch shipped
+  # in the NGC PyTorch wheel, plus GMD_SGT (used only to export the random
+  # integration-probe model at image build time).
+  gmd:
+    image_tag: "gmd-v2.5-9-g54ac558-a1"
+    dockerfile: "containers/Dockerfile.gmd"
+    base_image: "nvcr.io/nvidia/pytorch:25.09-py3"
+    base_image_digest: "sha256:89172d8ef9c4641aacdcddf02c085bf7a736501b443ce2c4e0a660754f67106b"
+    base_image_digest_source: "PHAL containers/versions.yaml candidates.train_stack_a at 96263b6 (NGC Registry V2 query, 2026-07-10); not re-queried"
+    inherited:
+      os: "ubuntu:24.04"
+      python: "3.12"
+      cuda: "13.0.1"
+      torch: "2.9.0a0+50eac811a6"
+      torch_cxx11_abi: true
+    gmd:
+      repository: "https://github.com/kiana-0423/GMD.git"
+      source: sibling-checkout
+      default_source_path: "../GMD"
+      version: "v2.5-9-g54ac558"
+      cmake_project_version: "2.4.0"
+      base_tag: "v2.5"
+      base_tag_commit: "1301bb7cca4c03585ec03372d5b8217f3316679d"
+      branch: "al-integration"
+      commit: "54ac558e30f9fb85a3474f7749016e24aa109a46"
+      binary: "gmd"
+      cmake:
+        build_type: "Release"
+        enable_torch: true
+        enable_mpi: false
+        enable_cuda: false
+        torch_device: "cpu"
+    gmd_sgt:
+      version: "0.4.0"
+      commit: "49ece72edabf46e1e5ee9a3949071acc650c7a13"
+    python_packages:
+      e3nn: "0.6.0"
+      ase: "3.29.0"
+      pyyaml: "6.0.3"
+    probe_model:
+      purpose: "integration_probe_only"
+      scientifically_valid: false
+      training_steps: 0
+      model_type: "AllegroStyleBackbone"
+      path: "/opt/gmd_al/probes/gmd/sgt-probe.pt"
+      sha256: null
+    oci_image: null
+    oci_digest: null
+    sif_sha256: null
+    status: not_built
+    validation:
+      image_build: not_run
+      static_binary_check: not_run
+      sif_conversion: not_run
+      run0: not_run
+      run10: not_run
+      energy_finite: not_run
+      miyabi_gh200: not_run
+      status: not_validated
+
+  # Training role: GMD_SGT on the same NGC PyTorch base as the gmd image, so a
+  # model exported here is loaded by the identical LibTorch in GMD.
+  sgt_train:
+    image_tag: "sgt-train-v0.4.0-49ece72-a1"
+    dockerfile: "containers/Dockerfile.sgt-train"
+    base_image: "nvcr.io/nvidia/pytorch:25.09-py3"
+    base_image_digest: "sha256:89172d8ef9c4641aacdcddf02c085bf7a736501b443ce2c4e0a660754f67106b"
+    base_image_digest_source: "PHAL containers/versions.yaml candidates.train_stack_a at 96263b6 (NGC Registry V2 query, 2026-07-10); not re-queried"
+    inherited:
+      os: "ubuntu:24.04"
+      python: "3.12"
+      cuda: "13.0.1"
+      torch: "2.9.0a0+50eac811a6"
+    gmd_sgt:
+      repository: "https://github.com/kiana-0423/GMD_SGT.git"
+      source: sibling-checkout
+      default_source_path: "../GMD_SGT"
+      distribution: "gmd-sgt"
+      module: "gmd_sgt"
+      version: "0.4.0"
+      describe: "v0.2-11-g49ece72"
+      branch: "al-weighted-training"
+      commit: "49ece72edabf46e1e5ee9a3949071acc650c7a13"
+    python_packages:
+      e3nn: "0.6.0"
+      ase: "3.29.0"
+      pyyaml: "6.0.3"
+    not_installed:
+      torch_cluster: "optional GMD_SGT extra; no pinned linux/arm64 wheel for the NGC torch build, GMD_SGT falls back to its dense neighbour search"
+      torch_scatter: "optional GMD_SGT extra; GMD_SGT uses its pure-torch scatter"
+    oci_image: null
+    oci_digest: null
+    sif_sha256: null
+    status: not_built
+    validation:
+      image_build: not_run
+      sif_conversion: not_run
+      cpu_inference: not_run
+      cuda_inference: not_run
+      miyabi_gh200: not_run
+      status: not_validated
+
+  # Labeling role: plain production CP2K (cp2k.psmp, OpenMPI) built from the
+  # pinned upstream commit with CP2K's own toolchain for its dependencies.
+  cp2k:
+    image_tag: "cp2k-v2026.2-a1"
+    probe_tag: "cp2k-v2026.2-a1-probe"
+    dockerfile: "containers/Dockerfile.cp2k"
+    base_image: "ubuntu:24.04"
+    base_image_digest: "sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90"
+    base_image_digest_source: "PHAL containers/versions.yaml future_stacks.cp2k_ml at 96263b6 and ../cp2k-ml-scf/VERSION_LOCK.md; not re-queried"
+    upstream:
+      name: CP2K
+      version: "v2026.2"
+      commit: "67b5da876dd6a76b8b021d5a04d1c81ba79a4c50"
+      tag_object: "09496e055e132aa3dba53a7751ebdf432b4ebb78"
+      repository_url: "https://github.com/cp2k/cp2k.git"
+      revision_string: "git:c92cc08"
+      build_system: cmake
+    binary: "cp2k.psmp"
+    install_prefix: "/opt/cp2k"
+    compiler:
+      family: GCC/GFortran
+      source: "ubuntu:24.04 apt (gcc/g++/gfortran 13)"
+    mpi:
+      implementation: OpenMPI
+      source: "ubuntu:24.04 apt (OpenMPI 4.1)"
+    math_libraries:
+      provider: cp2k-toolchain
+      prefix: "/opt/cp2k-toolchain-src/install"
+      enabled: "openblas scalapack fftw libint libxc elpa"
+    cmake_options:
+      mpi: true
+      mpi_f08: true
+      fftw3: true
+      libint2: true
+      libxc: true
+      elpa: true
+      libtorch: false
+      accel: "NONE"
+    oci_image: null
+    oci_digest: null
+    sif_sha256: null
+    status: not_built
+    validation:
+      image_build: not_run
+      version_banner: not_run
+      h2_single_point_docker: not_run
+      sif_conversion: not_run
+      h2_single_point_sif_pbs: not_run
+      status: not_validated
+
+  # Experimental development/toolchain image for the external cp2k-ml-scf fork
+  # (bind-mounted at /workspace/cp2k-ml-scf). It contains no CP2K. Pins mirror
+  # ../cp2k-ml-scf/VERSION_LOCK.md, which is authoritative.
+  cp2k_ml:
+    dockerfile: "containers/Dockerfile.cp2k-ml"
+    repository: external
+    source: git-managed-fork
+    upstream:
+      name: CP2K
+      version: "v2026.2"
+      commit: "67b5da876dd6a76b8b021d5a04d1c81ba79a4c50"
+      tag_object: "09496e055e132aa3dba53a7751ebdf432b4ebb78"
+      support_branch: "support/v2026.2"
+      repository_url: "https://github.com/cp2k/cp2k.git"
+      revision_string: "git:c92cc08"
+      build_system: cmake
+    fork:
+      path: "../cp2k-ml-scf"
+      version_lock: "../cp2k-ml-scf/VERSION_LOCK.md"
+      hooks_verified_against: "v2026.2"
+    base_image: "ubuntu:24.04"
+    base_image_digest: "sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90"
+    base_image_digest_source: "PHAL containers/versions.yaml future_stacks.cp2k_ml at 96263b6 and ../cp2k-ml-scf/VERSION_LOCK.md; not re-queried"
+    compiler:
+      family: GCC/GFortran
+      gcc: "4:13.2.0-7ubuntu1"
+      gxx: "4:13.2.0-7ubuntu1"
+      gfortran: "4:13.2.0-7ubuntu1"
+      reported_version: "13.3.0"
+    mpi:
+      implementation: OpenMPI
+      openmpi: "4.1.6-7ubuntu2"
+    build_tools:
+      cmake: "3.28.3-1build7"
+      ninja: "1.11.1-2"
+      python3: "3.12.3-0ubuntu2.1"
+    math_libraries:
+      provider: cp2k-toolchain
+      prefix: "/opt/cp2k-toolchain-src/install"
+      blas: "openblas-0.3.33"
+      lapack: "openblas-0.3.33"
+      scalapack: "scalapack-2.2.3"
+      fftw: "fftw-3.3.11"
+      libint: "libint-v2.13.1-cp2k-lmax-5"
+      libxc: "libxc-7.0.0"
+      elpa: "elpa-2026.02.002"
+      eigen: "eigen-5.0.1"
+      dbcsr: "dbcsr-2.10.0"
+      cosma: disabled
+      cuda: disabled
+    ml_runtime:
+      libtorch: pytorch-wheel
+      pytorch: "2.5.1"
+      numpy: "2.1.3"
+      scipy: "1.14.1"
+      pyyaml: "6.0.2"
+      ase: "3.26.0"
+    build_targets:
+      native: cp2k-native
+      ml: cp2k-ml
+      binary: "cp2k.psmp"
+    images:
+      development_tag: "cp2k-ml-v2026-2-development"
+      probe_tag: "cp2k-ml-v2026-2-probe"
+    oci_image: null
+    oci_digest: null
+    status: development
+    validation:
+      image_build: not_run
+      toolchain_probe: not_run
+      phal_record: "PHAL recorded image_build/toolchain_probe/native_scf_h2 as passed for its own phal/cp2k-ml image (versions.yaml future_stacks.cp2k_ml.validation at 96263b6); no GMD_active image has been built"
+      status: not_validated
+
+validated:
+  release_baseline: null
+  selected_gmd_stack: null
+  selected_sgt_train_stack: null
+  selected_cp2k_stack: null
+  phal_historical_baseline: "docs/migration/phal_release_baseline/"

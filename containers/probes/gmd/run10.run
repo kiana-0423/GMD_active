@@ -1,0 +1,13 @@
+# GMD integration probe: 10 NVE steps with the random GMD_SGT probe model.
+# A smoke test of the engine/model coupling, not a formal MD simulation.
+run 10
+time_step 0.1
+velocity 1.0
+velocity_init random
+velocity_seed 20251103
+output_interval 1
+force_field ml
+model_path sgt-probe.pt
+ml_jit_optimize off
+status_file status.json
+run_id gmd-probe-run10

@@ -1,0 +1,11 @@
+# BuildKit reads this file (not a root .dockerignore) for
+# containers/Dockerfile.cp2k-ml because it sits next to the Dockerfile and is
+# named <Dockerfile>.dockerignore. The build context is the repository root, so
+# the file is an allowlist: everything is excluded except what the Dockerfile
+# COPYs. No CP2K source may enter the context; the cp2k-ml-scf fork is
+# bind-mounted at run time.
+*
+!containers/scripts/validate_cp2k_ml_stack.py
+**/__pycache__
+**/*.py[cod]
+**/.DS_Store

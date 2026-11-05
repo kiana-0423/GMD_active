@@ -1,0 +1,220 @@
+# syntax=docker/dockerfile:1.7
+# Ported from PHAL (containers/Dockerfile.cp2k-ml, toolchain stage) at 96263b6; MIT License, see NOTICE.
+#
+# Plain production CP2K labeling image: upstream CP2K v2026.2 (pinned commit),
+# cp2k.psmp with OpenMPI, Libint/LibXC/ELPA/FFTW/OpenBLAS/ScaLAPACK built by
+# CP2K's own toolchain. No ML-SCF hooks and no LibTorch: the experimental
+# cp2k-ml-scf fork has its own development image (Dockerfile.cp2k-ml).
+#
+# Stages:
+#   toolchain  CP2K tools/toolchain only; builds the dependency prefix
+#   build      full CP2K source at CP2K_COMMIT; cmake + ninja; discarded
+#   runtime    cp2k.psmp + dependency prefix + validator  (target `cp2k`)
+#   probe      runtime + H2 single point at build time    (target `cp2k-probe`)
+#
+# Status: NOT BUILT, NOT VALIDATED (see versions.yaml stacks.cp2k.status).
+
+ARG BASE_IMAGE
+
+# =============================================================================
+# Stage: toolchain - OpenBLAS / ScaLAPACK / FFTW / Libint / LibXC / ELPA
+# =============================================================================
+FROM ${BASE_IMAGE} AS toolchain
+
+ARG CP2K_COMMIT
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# CP2K's tools/toolchain/install_requirements_ubuntu.sh at the pinned commit,
+# plus cmake/ninja/OpenMPI (reused as =system) and curl. xz-utils is required:
+# the Libint tarball is .tar.xz.
+RUN test -n "${CP2K_COMMIT}" \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        autoconf \
+        autogen \
+        automake \
+        autotools-dev \
+        bzip2 \
+        ca-certificates \
+        cmake \
+        curl \
+        g++ \
+        gcc \
+        gfortran \
+        git \
+        less \
+        libopenmpi-dev \
+        libtool \
+        libtool-bin \
+        make \
+        ninja-build \
+        openmpi-bin \
+        patch \
+        pkg-config \
+        python3 \
+        python3-dev \
+        unzip \
+        wget \
+        xxd \
+        xz-utils \
+        zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Only tools/toolchain is extracted here; the full source is fetched in `build`.
+WORKDIR /opt/cp2k-toolchain-src
+RUN curl -fsSL "https://github.com/cp2k/cp2k/archive/${CP2K_COMMIT}.tar.gz" \
+      | tar -xz --strip-components=3 "cp2k-${CP2K_COMMIT}/tools/toolchain" \
+    && test -x ./install_cp2k_toolchain.sh \
+    && test ! -d /opt/cp2k-toolchain-src/src
+
+# Packages selected explicitly; --install-all is NOT used (it enables DeePMD and
+# GauXC, which force with_libtorch=install and pull a LibTorch nobody needs).
+RUN ./install_cp2k_toolchain.sh \
+        --with-gcc=system \
+        --with-openmpi=system \
+        --with-cmake=system \
+        --with-ninja=system \
+        --with-openblas=install \
+        --with-scalapack=install \
+        --with-fftw=install \
+        --with-libint=install \
+        --with-libxc=install \
+        --with-elpa=install \
+        --with-libtorch=no \
+        --with-deepmd=no \
+        --with-gauxc=no \
+        --with-cosma=no \
+        --with-sirius=no \
+        --with-plumed=no \
+        --with-libxsmm=no \
+        --with-spglib=no \
+        --with-libvori=no \
+        --with-hdf5=no \
+        --with-trexio=no \
+    && ! ls -d /opt/cp2k-toolchain-src/install/libtorch* >/dev/null 2>&1 \
+    && rm -rf /opt/cp2k-toolchain-src/build /opt/cp2k-toolchain-src/*.tar.gz
+
+# =============================================================================
+# Stage: build - CP2K v2026.2 cp2k.psmp; discarded
+# =============================================================================
+FROM toolchain AS build
+
+ARG CP2K_VERSION
+ARG CP2K_COMMIT
+ARG CP2K_BUILD_JOBS=4
+
+WORKDIR /opt/src
+RUN test -n "${CP2K_VERSION}" \
+    && curl -fsSL "https://github.com/cp2k/cp2k/archive/${CP2K_COMMIT}.tar.gz" | tar -xz \
+    && mv "cp2k-${CP2K_COMMIT}" cp2k \
+    && grep -q "VERSION \"${CP2K_VERSION#v}\"" cp2k/CMakeLists.txt
+
+# Enabled explicitly (every CP2K_USE_* defaults to OFF); the same option set as
+# ../cp2k-ml-scf/build.sh's native control build. The toolchain environment is
+# sourced with `set +u`: its setup script appends to unset variables.
+RUN bash -c 'set -eo pipefail; set +u; source /opt/cp2k-toolchain-src/install/setup; set -u; \
+        cmake -S /opt/src/cp2k -B /opt/src/cp2k/build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/opt/cp2k \
+            -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCP2K_DATA_DIR=/opt/cp2k/share/cp2k/data \
+            -DCP2K_USE_MPI=ON \
+            -DCP2K_USE_MPI_F08=ON \
+            -DCP2K_USE_FFTW3=ON \
+            -DCP2K_USE_LIBINT2=ON \
+            -DCP2K_USE_LIBXC=ON \
+            -DCP2K_USE_ELPA=ON \
+            -DCP2K_USE_LIBTORCH=OFF \
+            -DCP2K_USE_ACCEL=NONE \
+        && cmake --build /opt/src/cp2k/build --parallel "${CP2K_BUILD_JOBS}" \
+        && cmake --install /opt/src/cp2k/build' \
+    && test -x /opt/cp2k/bin/cp2k.psmp \
+    && mkdir -p /opt/cp2k/share/cp2k \
+    && rm -rf /opt/cp2k/share/cp2k/data \
+    && cp -r /opt/src/cp2k/data /opt/cp2k/share/cp2k/data \
+    && printf '%s\n' "${CP2K_COMMIT}" > /opt/cp2k/CP2K_COMMIT
+
+# =============================================================================
+# Stage: runtime - production labeling image (target `cp2k`)
+# =============================================================================
+FROM ${BASE_IMAGE} AS runtime
+
+ARG BASE_IMAGE
+ARG IMAGE_TAG
+ARG CP2K_VERSION
+ARG CP2K_COMMIT
+
+LABEL org.opencontainers.image.title="GMD_active CP2K labeling image" \
+      org.opencontainers.image.description="Upstream CP2K cp2k.psmp + OpenMPI for linux/arm64" \
+      org.opencontainers.image.version="${IMAGE_TAG}" \
+      org.opencontainers.image.source="containers/Dockerfile.cp2k" \
+      org.opencontainers.image.base.name="${BASE_IMAGE}" \
+      org.gmd-al.versions-file="containers/versions.yaml" \
+      org.gmd-al.role="dft" \
+      org.gmd-al.cp2k-version="${CP2K_VERSION}" \
+      org.gmd-al.cp2k-commit="${CP2K_COMMIT}"
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    GMD_AL_HOME=/opt/gmd_al \
+    GMD_AL_RUNTIME_DIR=/runtime \
+    CP2K_HOME=/opt/cp2k \
+    CP2K_DATA_DIR=/opt/cp2k/share/cp2k/data \
+    CP2K_VERSION_EXPECTED=${CP2K_VERSION} \
+    CP2K_COMMIT_EXPECTED=${CP2K_COMMIT} \
+    TOOLCHAIN_ENV=/opt/cp2k-toolchain-src/install/setup \
+    OMP_NUM_THREADS=1
+
+RUN test -n "${CP2K_VERSION}" \
+    && test -n "${CP2K_COMMIT}" \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        libgfortran5 \
+        libgomp1 \
+        libopenmpi-dev \
+        openmpi-bin \
+        python3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# The dependency prefix must stay at the path it was built at: install/setup
+# sources ../scripts/tool_kit.sh by absolute path.
+COPY --from=toolchain /opt/cp2k-toolchain-src /opt/cp2k-toolchain-src
+COPY --from=build /opt/cp2k /opt/cp2k
+
+# The toolchain environment is required at run time (ELPA/LibXC/OpenBLAS live
+# under the toolchain prefix), so the public entry point sources it first.
+RUN printf '%s\n' \
+        '#!/bin/bash' \
+        'set +u' \
+        'source "${TOOLCHAIN_ENV:-/opt/cp2k-toolchain-src/install/setup}" >/dev/null' \
+        'exec /opt/cp2k/bin/cp2k.psmp "$@"' \
+        > /usr/local/bin/cp2k.psmp \
+    && chmod 0755 /usr/local/bin/cp2k.psmp \
+    && test "$(cat /opt/cp2k/CP2K_COMMIT)" = "${CP2K_COMMIT}"
+
+WORKDIR /opt/gmd_al
+
+COPY containers/scripts/validate_cp2k_stack.py /opt/gmd_al/containers/scripts/validate_cp2k_stack.py
+COPY containers/probes/cp2k /opt/gmd_al/probes/cp2k
+
+# Docker builds run as root; OpenMPI refuses root without these. They are set
+# only for this check, never in the image environment.
+RUN mkdir -p /runtime/cp2k/inputs /runtime/cp2k/outputs /runtime/logs \
+    && OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+        cp2k.psmp --version | tee /tmp/cp2k-version.txt \
+    && grep -q "CP2K version ${CP2K_VERSION#v}" /tmp/cp2k-version.txt \
+    && rm -f /tmp/cp2k-version.txt
+
+CMD ["python3", "/opt/gmd_al/containers/scripts/validate_cp2k_stack.py"]
+
+# =============================================================================
+# Stage: probe - H2 single point at build time (target `cp2k-probe`)
+# =============================================================================
+FROM runtime AS probe
+
+RUN OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+    python3 /opt/gmd_al/containers/scripts/validate_cp2k_stack.py \
+        --workdir /tmp/cp2k-probe --output /opt/gmd_al/probes/cp2k/build-time-validation.json \
+    && rm -rf /tmp/cp2k-probe
