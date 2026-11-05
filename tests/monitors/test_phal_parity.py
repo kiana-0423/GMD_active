@@ -33,10 +33,12 @@ CORRECTED_LJ_DEVIATIONS = {
 }
 
 
-def _replay(scenario: Scenario, *, negate_lj: bool) -> tuple[list[StagedEvaluation], list, OnlineMonitorDriver]:
+def _replay(
+    scenario: Scenario, *, negate_lj: bool, legacy_scoring: bool = True
+) -> tuple[list[StagedEvaluation], list, OnlineMonitorDriver]:
     """Replay a scenario through the driver; the monitor's LJ estimator is reachable via ``driver.monitor``."""
 
-    config = monitor_config_from_phal(scenario.config, legacy_scoring=True)
+    config = monitor_config_from_phal(scenario.config, legacy_scoring=legacy_scoring)
     estimator = LocalLJEstimator(cutoff=config.neighbors.lj_cutoff)
     monitor = StagedOODMonitor(
         config,
@@ -202,3 +204,23 @@ def test_lj_is_fitted_once_per_escalated_frame_on_the_fixture_f16() -> None:
     fitted = [e for e in escalated if e.result.metadata.get("lj_fit_count", 0) > 0]
     assert len(escalated) == 13
     assert driver.monitor.lj_estimator.calls == len(fitted) == 12  # frame 0 has no suspicious atom
+
+
+def test_full_defaults_change_no_stage_and_no_event(scenario: Scenario) -> None:
+    """Corrected LJ + default warmup/first-frame conventions: stages and events as with the LJ fix alone."""
+
+    evaluations, events, _driver = _replay(scenario, negate_lj=False, legacy_scoring=False)
+    assert [e.result.stage.value for e in evaluations] == [record["stage"] for record in scenario.results]
+    triggered_diff = {i for i, (e, r) in enumerate(zip(evaluations, scenario.results)) if e.result.triggered != r["triggered"]}
+    assert triggered_diff == CORRECTED_LJ_DEVIATIONS[scenario.name]["triggered"]
+    expected_steps = (
+        [[50, 60, 70], [90, 100, 110]]
+        if scenario.name == "polyethylene_chains"
+        else [ref["metadata"]["trigger_steps"] for ref in scenario.events]
+    )
+    assert [event.trigger_steps for event in events] == expected_steps
+    # Warmup frames: no raw eV/A values masquerading as z-scores.
+    for evaluation in evaluations[:5]:
+        for name in ("force", "delta_force", "displacement", "mlip_force_deviation"):
+            if name in evaluation.metric_scores:
+                assert np.all(evaluation.metric_scores[name] == 0.0)

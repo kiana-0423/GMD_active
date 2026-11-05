@@ -60,3 +60,23 @@ def test_hotspot_center_is_anchor_relative_and_rejects_empty() -> None:
     np.testing.assert_allclose(center, [0.5 + (0.0 - 0.8 - 0.6) / 3.0, 1.0, 1.0], atol=1e-12)
     with pytest.raises(ValueError):
         hotspot_center(positions, [])
+
+
+def test_padded_cluster_cell_reproduces_phal_cluster_region_cells() -> None:
+    import json
+    from pathlib import Path
+
+    fixtures = Path(__file__).resolve().parents[1] / "fixtures" / "phal_reference"
+    checked = 0
+    for scenario in ("ethane_box", "polyethylene_chains", "pt111_co_slab"):
+        config = json.loads((fixtures / scenario / "config.json").read_text(encoding="utf-8"))
+        padding = float(config["extraction"]["vacuum_padding"])
+        for event in json.loads((fixtures / scenario / "events.json").read_text(encoding="utf-8")):
+            payload = json.loads((fixtures / scenario / "regions" / event["event_id"] / "cluster.json").read_text(encoding="utf-8"))
+            if isinstance(payload, dict):
+                continue
+            for record in payload:
+                atoms = record["raw_region"]["atoms"]
+                np.testing.assert_allclose(padded_cluster_cell(np.asarray(atoms["positions"]), padding), np.asarray(atoms["cell"]), atol=1e-12)
+                checked += 1
+    assert checked >= 8

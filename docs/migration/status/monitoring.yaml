@@ -1,0 +1,419 @@
+# Migration status: monitoring, events, hotspots (+ CORE/UTIL entries assigned to this slice).
+# Test paths are relative to the GMD_active root. User documentation: docs/monitoring.md.
+
+- id: MON-001
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/force.py, src/gmd_active_learning/monitors/staged_monitor.py]
+  evidence:
+    - tests/monitors/test_metrics.py::test_force_and_delta_force_norms
+    - tests/monitors/test_phal_parity.py::test_phal_math_reproduces_every_frame_decision_and_metric
+  findings: [F-16]
+  notes: "Temporal reference = previous processed frame, aligned by stable atom ID (not array position).
+    Deviation: with no previous frame the delta is NOT_EVALUATED (running_stats.first_frame_deltas: not_evaluated)
+    instead of PHAL's measured zeros that biased the baseline; 'zero' reproduces PHAL. Keys: metrics.force/delta_force.{enabled,weight,z_threshold}."
+
+- id: MON-002
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/geometry.py]
+  evidence:
+    - tests/monitors/test_metrics.py::test_displacement_norms_match_explicit_minimum_image
+  findings: [F-34]
+  notes: "Exact MIC from utils/periodic.py (sub-lattice fix F-34 for skewed partial PBC). Same first-frame policy as MON-001."
+
+- id: MON-003
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/geometry.py, src/gmd_active_learning/monitors/scoring.py, src/gmd_active_learning/monitors/staged_monitor.py]
+  evidence:
+    - tests/monitors/test_metrics.py::test_rmin_equals_brute_force_for_atoms_with_neighbours
+    - tests/monitors/test_metrics.py::test_atom_without_neighbour_reports_cutoff_not_zero
+    - tests/monitors/test_staged_monitor.py::test_rmin_score_for_a_0_6_angstrom_contact_with_threshold_1
+    - tests/monitors/test_staged_monitor.py::test_close_contact_is_scored_with_default_threshold_and_stops
+    - tests/monitors/test_scoring.py::test_rmin_scoring_threshold_and_null
+  findings: [F-16]
+  notes: "F-16 fixed: metrics.rmin.threshold defaults to 0.8 A (PHAL null scored nothing); null still means
+    measured-not-scored. rmin comes from the shared neighbour list for every system size; atoms without a
+    neighbour report the cutoff (PHAL: exact distance below 512 atoms); threshold must be < cutoff (validated).
+    GMD physical_checks hard-stop semantics kept as actions.stop_min_distance (0.6 A) -> FrameAction.STOP.
+    A contact contributes at most weight*1 to the atom score (PHAL formula), documented."
+
+- id: MON-004
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/coordination.py]
+  evidence:
+    - tests/monitors/test_metrics.py::test_smooth_coordination_matches_reference_within_cutoff
+    - tests/monitors/test_metrics.py::test_coordination_scale_and_power_are_honoured
+    - tests/monitors/test_metrics.py::test_coordination_deltas_zero_on_first_frame
+    - tests/monitors/test_scoring.py::test_delta_q_threshold_scoring_without_stats
+  findings: [F-16]
+  notes: "Decision: coordination_scale / coordination_smoothing_power are HONOURED (metrics.delta_q.scale/power,
+    defaults 1.15/6 = PHAL's hard-coded values, so PHAL parity holds). One vectorised path for all sizes
+    (tested at 32 and 256 atoms); the cutoff truncation without smoothing is kept."
+
+- id: MON-005
+  status: verified
+  implementation: [src/gmd_active_learning/utils/neighbors.py]
+  evidence:
+    - tests/utils/test_neighbors.py::test_pairs_equal_brute_force_image_search
+    - tests/utils/test_neighbors.py::test_vectors_point_from_i_to_j
+    - tests/utils/test_neighbors.py::test_monitor_neighbors_rebuilds_for_new_atom_counts
+  findings: []
+  notes: "One ase.neighborlist.neighbor_list('ijdD') call per frame shared by rmin, coordination and LJ
+    (PHAL built up to three lists per physics frame). Vectors point i -> j; every periodic image within the
+    cutoff is a separate pair. Checked against brute force for open, orthorhombic, triclinic and skewed partial-PBC cells."
+
+- id: MON-006
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/lj_local.py, src/gmd_active_learning/monitors/staged_monitor.py]
+  evidence:
+    - tests/monitors/test_lj_local.py::test_exact_lj_forces_fit_with_zero_residual_and_recover_parameters
+    - tests/monitors/test_lj_local.py::test_negated_forces_are_rejected_f01
+    - tests/monitors/test_lj_local.py::test_corrected_fit_on_f_equals_phal_fit_on_minus_f
+    - tests/monitors/test_lj_local.py::test_lazy_mask_fits_only_masked_atoms
+    - tests/monitors/test_lj_local.py::test_collinear_and_ill_conditioned_geometries_are_invalid
+    - tests/monitors/test_phal_parity.py::test_lj_residuals_match_phal_on_negated_forces
+    - tests/monitors/test_phal_parity.py::test_corrected_lj_deviates_only_where_documented_f01
+  findings: [F-01, F-20]
+  notes: "F-01 fixed: basis a = sum -2d/r^14, b = sum d/r^8 (F = -grad E); corrected(F) == PHAL(-F) exactly, which
+    the parity tests use. ASE LennardJones Ar cluster: valid, residual < 1e-8, eps/sigma to 1e-6. The F-20 doc drift
+    (2x2 Gram vs 3x2 lstsq) is resolved by documenting the 3x2 solve. Limits/thresholds from metrics.lj_residual.*.
+    Invalid fits still report 1.0 (as PHAL); counts in result.metadata.lj_fit_count / lj_invalid_count."
+
+- id: MON-007
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/lj_local.py]
+  evidence:
+    - tests/monitors/test_lj_local.py::test_nonlinear_reference_estimator_agrees_with_linear_on_exact_forces
+  findings: [F-01]
+  notes: "Sign-corrected nonlinear (scipy) estimator. Deviation: lives in monitors/lj_local.py (not
+    tools/diagnostics) and is selectable with metrics.lj_residual.estimator: nonlinear (default linear);
+    documented as diagnostics-only because its residual scale differs."
+
+- id: MON-008
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/ensemble_deviation.py, src/gmd_active_learning/monitors/staged_monitor.py]
+  evidence:
+    - tests/monitors/test_metrics.py::test_committee_deviation_matches_gmd_ensemble_deviation
+    - tests/monitors/test_staged_monitor.py::test_committee_is_unavailable_not_zero_without_committee_f06
+    - tests/monitors/test_staged_monitor.py::test_single_member_committee_is_unavailable
+    - tests/monitors/test_scoring.py::test_unavailable_and_unevaluated_metrics_score_zero_and_skip_stats_f06
+  findings: [F-06]
+  notes: "Merged: compute_ensemble_deviation now uses committee_force_deviation. Source: Frame.committee_forces
+    (or an optional CommitteeForceProvider); no committee or < metrics.committee.min_members (2) -> UNAVAILABLE,
+    all-NaN, never zero, never in stats."
+
+- id: MON-009
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/force_disagreement.py, src/gmd_active_learning/monitors/staged_monitor.py]
+  evidence:
+    - tests/monitors/test_metrics.py::test_mlip_force_deviation_is_delta_on_one_atom
+    - tests/monitors/test_metrics.py::test_reference_forces_are_validated
+    - tests/monitors/test_staged_monitor.py::test_scheduled_full_frames_and_reference_call_count
+    - tests/monitors/test_staged_monitor.py::test_light_trigger_failing_physics_stays_physics_and_untriggered
+  findings: []
+  notes: "No backend construction in monitors: the caller passes a ReferenceForceProvider (callable Frame -> (N,3)),
+    called only on physics/full frames; no provider -> UNAVAILABLE. PHAL's unused metrics['mlip_force'] dropped.
+    Pure z scoring kept (precision-drift risk documented; tune running_stats.min_std)."
+
+- id: MON-010
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/running_stats.py, src/gmd_active_learning/monitors/scoring.py]
+  evidence:
+    - tests/monitors/test_scoring.py::test_running_stats_batch_chunked_and_state_round_trip
+    - tests/monitors/test_scoring.py::test_warmup_counts_frames_not_atoms
+    - tests/monitors/test_scoring.py::test_warmup_raw_policy_reproduces_phal_and_suppress_drops_z_parts_f16
+    - tests/monitors/test_staged_monitor.py::test_state_round_trip_resumes_identically
+  findings: [F-16]
+  notes: "F-16 (warmup) reproduced (warmup_policy: raw reproduces PHAL's raw-vs-z comparison) and fixed by default
+    (suppress). Stats persisted via to_state/load_state. Still pooled over species with no decay (documented)."
+
+- id: MON-011
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/scoring.py]
+  evidence:
+    - tests/monitors/test_phal_parity.py::test_phal_math_reproduces_every_frame_decision_and_metric
+    - tests/monitors/test_scoring.py::test_gated_z_thresholds
+    - tests/monitors/test_scoring.py::test_non_finite_evaluated_metric_is_rejected
+    - tests/monitors/test_scoring.py::test_unavailable_and_unevaluated_metrics_score_zero_and_skip_stats_f06
+  findings: [F-06, F-16]
+  notes: "Golden per-atom metric scores of all 3 scenarios reproduced (rtol 1e-4: inputs stored with 8 decimals).
+    F-16 'LJ computed twice' reproduced against the reference tree (21 fits for 13 escalated ethane_box frames) and
+    fixed (12 = one per escalated frame with a suspicious atom). Non-finite metrics are rejected by the MetricValues
+    contract (DataContractError). Absent/unavailable metrics score 0 and never get z(0)."
+
+- id: MON-012
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/scoring.py, src/gmd_active_learning/monitors/staged_monitor.py]
+  evidence:
+    - tests/monitors/test_phal_parity.py::test_phal_math_reproduces_every_frame_decision_and_metric
+    - tests/monitors/test_scoring.py::test_min_trigger_atoms_and_empty_frame
+    - tests/monitors/test_scoring.py::test_triggered_without_label_hotspots_falls_back_to_argmax
+    - tests/monitors/test_scoring.py::test_stage_weighted_sum_order_and_reasons_rank_unweighted
+  findings: [F-16]
+  notes: "Atom scores, triggers, hotspot atoms (as stable IDs) and ordered reasons identical to PHAL on all fixture
+    frames. F-16 (two hotspot thresholds) fixed: stages.label_threshold is the only one; hotspots/ clusters the
+    monitor's hotspot_atom_ids. Per-metric evaluation recorded via MetricStatus; frame-level decision via FrameAction."
+
+- id: MON-013
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/staged_monitor.py, src/gmd_active_learning/monitors/config.py]
+  evidence:
+    - tests/monitors/test_staged_monitor.py::test_scheduled_full_frames_and_reference_call_count
+    - tests/monitors/test_staged_monitor.py::test_cascade_from_light_to_physics_to_full
+    - tests/monitors/test_staged_monitor.py::test_interval_due
+    - tests/monitors/test_staged_monitor.py::test_integer_physics_interval_escalates_only_on_multiples
+    - tests/monitors/test_staged_monitor.py::test_light_interval_skips_scoring_but_keeps_temporal_state_and_stop_rules
+    - tests/monitors/test_staged_monitor.py::test_invalid_interval_string_is_a_config_error_not_triggered
+  findings: []
+  notes: "monitor_freq=2 -> [full, light, full] with 2 reference evaluations. Deviations: skipped frames get
+    Stage.SKIPPED (not 'light' + metadata); unparsable interval strings are a ConfigurationError instead of a
+    silent 'triggered'. Keys: stages.{light,physics,full}_interval, stages.scheduled_full_interval (= online.monitor_freq)."
+
+- id: MON-014
+  status: migrated
+  implementation: [src/gmd_active_learning/monitors/online.py]
+  evidence:
+    - tests/monitors/test_online_driver.py::test_trigger_produces_one_event_via_callback
+    - tests/monitors/test_online_driver.py::test_frame_source_distinguishes_timeout_from_end_of_stream
+    - tests/monitors/test_online_driver.py::test_stop_action_ends_run_and_marks_open_event_stopped
+    - tests/monitors/test_online_driver.py::test_continue_after_frame_error_within_budget
+    - tests/monitors/test_online_driver.py::test_error_without_budget_raises_and_flushes_open_event_as_error
+    - tests/monitors/test_online_driver.py::test_progress_callback_and_progress_file
+    - tests/monitors/test_online_driver.py::test_segmented_run_with_persisted_state_matches_continuous_run
+  findings: [F-07, F-19]
+  notes: "OnlineMonitorDriver: process(frame) (callback mode) or run(iterable | FrameSource); explicit FrameAction
+    per frame; POLL_TIMEOUT vs None; pending event flushed incomplete with the stop reason; atomic progress file;
+    full state persistence. Not 'verified' because acceptance (b) needs the GMD frame stream, which belongs to the
+    GMD adapter slice; the in-memory path is tested."
+
+- id: MON-015
+  status: replaced
+  implementation: [src/gmd_active_learning/monitors/online.py, src/gmd_active_learning/monitors/staged_monitor.py]
+  evidence:
+    - tests/monitors/test_staged_monitor.py::test_physics_and_full_stages_can_be_disabled
+  findings: []
+  notes: "The offline light-only example is replaced by feeding any Frame iterable (e.g. Frame.from_atoms over an
+    extxyz) to OnlineMonitorDriver with stages.physics_interval/full_interval = never; there is no duplicated
+    metric assembly to drift. No tools/examples script is shipped from this slice."
+
+- id: MON-016
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/lj_projection.py, src/gmd_active_learning/monitors/lj_local.py]
+  evidence:
+    - tests/monitors/test_lj_local.py::test_both_projection_modes_accept_physical_lj_forces_mon016
+    - tests/test_lj_projection.py
+  findings: [F-01, F-33]
+  notes: "fit_lj_projection(mode='global_pair' | 'local_atom') under one sign convention; both accept ASE LJ forces
+    (residual < 1e-6) and recover eps/sigma. Global mode is selectable as monitor.engine: global_lj (GlobalLJMonitor)."
+
+- id: MON-017
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/__init__.py, src/gmd_active_learning/events/__init__.py, src/gmd_active_learning/hotspots/__init__.py]
+  evidence:
+    - tests/monitors/test_config_and_layering.py::test_every_module_imports
+    - tests/monitors/test_config_and_layering.py::test_importing_monitors_pulls_in_no_torch_or_adapter
+  findings: []
+  notes: "PHAL's detectors/ facade dropped (monitors/ + hotspots/ cover it)."
+
+- id: EVT-001
+  status: verified
+  implementation: [src/gmd_active_learning/events/rolling_buffer.py, src/gmd_active_learning/events/config.py, src/gmd_active_learning/events/serialization.py]
+  evidence:
+    - tests/events/test_rolling_buffer.py
+    - tests/monitors/test_phal_parity.py::test_phal_math_reproduces_events
+    - tests/monitors/test_phal_parity.py::test_truncated_event_is_marked_incomplete_f07
+    - tests/monitors/test_phal_parity.py::test_event_ids_are_deterministic_across_reruns_f15
+  findings: [F-07, F-15]
+  notes: "PHAL merge semantics kept (window not extended). F-07: complete/truncation_reason, no unbounded events list
+    (retain_recent summaries). F-15: event_id = stable_id('evt', run_id, first trigger step). New: cooldown_steps,
+    to_state/from_state. Deviations: default history = pre_trigger_frames + 1; merge with a different atom set raises
+    MonitorError (PHAL ValueError on shape) and keeps the pending event; pre_frames_requested is in event metadata."
+
+- id: EVT-002
+  status: migrated
+  implementation: [src/gmd_active_learning/events/event_store.py, src/gmd_active_learning/monitors/online.py]
+  evidence:
+    - tests/events/test_event_store.py::test_written_event_round_trips_bit_exactly
+    - tests/events/test_event_store.py::test_rewriting_an_event_is_idempotent
+    - tests/monitors/test_online_driver.py::test_trigger_produces_one_event_via_callback
+    - tests/monitors/test_online_driver.py::test_event_store_writes_each_event
+  findings: []
+  notes: "event.json follows the EventRecord contract summary (not PHAL's key set, so the 'identical keys' part of
+    the acceptance is deliberately not met); written atomically last; frames.npz bit-exact plus frames.extxyz.
+    Events reach on_event exactly once; scheduler hand-off is the caller's on_event (no synchronous draining)."
+
+- id: HOT-001
+  status: verified
+  implementation: [src/gmd_active_learning/hotspots/cluster.py]
+  evidence:
+    - tests/hotspots/test_hotspots.py::test_clusters_match_reference_loop_under_pbc
+    - tests/hotspots/test_hotspots.py::test_distance_equal_to_merge_radius_merges
+  findings: []
+  notes: "Same clusters and order as PHAL's union-find loop (orthorhombic, triclinic, skewed partial PBC); chunked
+    exact MIC pairs instead of a full scipy matrix."
+
+- id: HOT-002
+  status: verified
+  implementation: [src/gmd_active_learning/hotspots/detector.py, src/gmd_active_learning/hotspots/config.py]
+  evidence:
+    - tests/hotspots/test_hotspots.py::test_nearby_atoms_merge_and_far_ones_split
+    - tests/hotspots/test_hotspots.py::test_sorted_by_max_score
+    - tests/hotspots/test_hotspots.py::test_none_below_threshold_single_atom_and_exact_threshold
+    - tests/hotspots/test_hotspots.py::test_hotspots_are_invariant_to_engine_atom_order
+    - tests/hotspots/test_hotspots.py::test_hotspots_from_result_use_the_monitor_hotspot_atoms_only
+  findings: [F-16]
+  notes: "Stable atom IDs, deterministic hotspot_id, canonical ordering. hotspot.threshold removed (F-16): clustering
+    uses MonitorResult.hotspot_atom_ids; detect_hotspots(threshold=...) kept for score-based use."
+
+- id: CORE-001
+  status: migrated
+  implementation: [src/gmd_active_learning/contracts/frame.py, src/gmd_active_learning/events/serialization.py]
+  evidence:
+    - tests/contracts/test_contracts.py::test_frame_round_trips_through_ase
+    - tests/events/test_event_store.py::test_event_state_and_pickle_round_trip
+  findings: []
+  notes: "Frame contract (lead) pickles and JSON round-trips with committee forces and metadata (frame_to_state).
+    Gaps against the acceptance: Frame carries no ASE constraints/extra per-atom arrays, and there is no
+    MDFrame <-> Frame converter (core/data_types.MDFrame); both belong to the contracts/adapters owners."
+
+- id: CORE-002
+  status: migrated
+  implementation: [src/gmd_active_learning/contracts/monitoring.py, src/gmd_active_learning/monitors/staged_monitor.py]
+  evidence:
+    - tests/monitors/test_phal_parity.py::test_phal_math_reproduces_every_frame_decision_and_metric
+  findings: [F-06]
+  notes: "MonitorResult carries atom scores, per-metric raw values with evaluated masks/status, stage (incl. SKIPPED),
+    triggered, stable hotspot IDs, reasons and FrameAction. PHAL golden results map onto it, but the per-metric
+    SCORES live in StagedEvaluation.metric_scores, not in the contract; adding a metric_scores field to
+    MonitorResult would make the mapping lossless (requested from the contracts owner). Hotspot.atom_indices alias dropped."
+
+- id: CORE-003
+  status: migrated
+  implementation: [src/gmd_active_learning/contracts/events.py, src/gmd_active_learning/events/serialization.py]
+  evidence:
+    - tests/events/test_event_store.py::test_event_state_and_pickle_round_trip
+    - tests/events/test_rolling_buffer.py::test_flush_marks_an_unfinished_event_incomplete_f07
+  findings: [F-07]
+  notes: "EventRecord has complete/post_frames_requested/truncation_reason; nested frames round-trip (pickle and
+    JSON state). pre_frames_requested is stored in metadata (no contract field). The ExtractedRegion half belongs to
+    the extraction slice."
+
+- id: CORE-004
+  status: migrated
+  implementation: [src/gmd_active_learning/monitors/online.py]
+  evidence:
+    - tests/monitors/test_online_driver.py::test_frame_source_distinguishes_timeout_from_end_of_stream
+  findings: [F-19]
+  notes: "FrameSource protocol (next_frame(timeout) -> Frame | None | POLL_TIMEOUT) and in-memory iterables accepted
+    by the driver. Lives in monitors/online.py, not contracts/protocols.py (contracts are read-only for this slice);
+    the GMD frame source and backend registry belong to the adapter slice. No module-global factory."
+
+- id: CORE-005
+  status: not-started
+  implementation: []
+  evidence: []
+  findings: []
+  notes: "core/exceptions.py is outside this slice. Monitoring uses MonitorError, DataContractError and
+    ConfigurationError; PHAL's DataError role is covered by DataContractError (MetricValues finiteness).
+    CooldownSkip is not needed here (cooldown is a counter, not an exception)."
+
+- id: CORE-006
+  status: migrated
+  implementation: [src/gmd_active_learning/monitors/__init__.py, src/gmd_active_learning/events/__init__.py, src/gmd_active_learning/hotspots/__init__.py]
+  evidence:
+    - tests/monitors/test_config_and_layering.py::test_importing_monitors_pulls_in_no_torch_or_adapter
+  findings: []
+  notes: "Importing gmd_active_learning and the three monitoring packages loads no adapter or torch (checked in a
+    clean subprocess). The top-level facade decisions (runtime/workflows/schedulers) belong to the lead."
+
+- id: CORE-007
+  status: in-progress
+  implementation: []
+  evidence:
+    - tests/monitors/test_config_and_layering.py::test_core_packages_do_not_import_infrastructure
+  findings: []
+  notes: "Slice-level guard for monitors/events/hotspots/utils.neighbors (torch, subprocess, gmd_sgt, adapters,
+    hotspot_al, and any relative import). The repository-wide tests/architecture/test_layering.py is outside this slice."
+
+- id: CORE-008
+  status: in-progress
+  implementation: []
+  evidence:
+    - tests/monitors/test_config_and_layering.py::test_every_module_imports
+  findings: []
+  notes: "Imports every module of monitors/events/hotspots; the repository-wide tests/test_import_all.py is outside this slice."
+
+- id: UTIL-001
+  status: verified
+  implementation: [src/gmd_active_learning/utils/periodic.py, src/gmd_active_learning/utils/geometry.py]
+  evidence:
+    - tests/utils/test_periodic.py::test_minimum_image_matches_explicit_lattice_search
+    - tests/utils/test_geometry_helpers.py::test_vectorised_mic_matches_loop_for_orthogonal_and_skewed_cells
+    - tests/utils/test_geometry_helpers.py::test_non_periodic_axis_is_untouched
+    - tests/test_physical_checks.py
+    - tests/test_lj_projection.py
+  findings: [F-34]
+  notes: "Lead's port; verified against explicit lattice search (incl. strongly skewed cells, where naive rounding
+    fails) and GMD minimum_image delegates to it."
+
+- id: UTIL-002
+  status: verified
+  implementation: [src/gmd_active_learning/utils/geometry.py]
+  evidence:
+    - tests/utils/test_geometry_helpers.py::test_distances_to_group_matches_brute_force_on_a_non_orthogonal_cell
+    - tests/utils/test_geometry_helpers.py::test_padded_cluster_cell_reproduces_phal_cluster_region_cells
+    - tests/utils/test_geometry_helpers.py::test_padded_cluster_cell_and_row_norms
+  findings: []
+  notes: "padded_cluster_cell reproduces every PHAL cluster-region cell in the golden fixtures."
+
+- id: UTIL-003
+  status: verified
+  implementation: [src/gmd_active_learning/utils/bonds.py]
+  evidence:
+    - tests/utils/test_bond_inference.py::test_ethane_has_seven_bonds_and_symmetric_adjacency
+    - tests/utils/test_bond_inference.py::test_pair_bonded_through_two_images_is_reported_once
+    - tests/utils/test_periodic.py::test_bonds_are_found_across_periodic_images_without_duplicates
+    - tests/utils/test_bond_inference.py::test_bond_sets_match_phal_on_periodic_and_molecular_fixtures
+  findings: []
+  notes: "Lead's port lives in utils/bonds.py (ledger destination said utils/neighbors.py, which now holds MonitorNeighbors).
+    The PHAL-equality test is optional (skipped without ref/lammps_monitor)."
+
+- id: UTIL-004
+  status: verified
+  implementation: [src/gmd_active_learning/utils/atomic_io.py]
+  evidence:
+    - tests/utils/test_atomic_io.py
+  findings: []
+  notes: "Demonstrated and fixed: a failure while writing the temp file (e.g. fsync) left a .tmp file behind
+    (test_crash_after_writing_the_temp_file_leaves_no_debris). Used by the event store, driver progress file and
+    driver state. Kept as utils/atomic_io.py rather than merged into utils/io.py."
+
+- id: UTIL-005
+  status: not-started
+  implementation: []
+  evidence: []
+  findings: []
+  notes: "utils/yaml.py / config loading is outside this slice. Monitoring sections validate through
+    load_monitor_config / load_events_config / load_hotspots_config (pydantic -> ConfigurationError)."
+
+- id: UTIL-006
+  status: not-started
+  implementation: []
+  evidence: []
+  findings: []
+  notes: "utils/logging.py is outside this slice; monitoring modules use logging.getLogger(__name__)."
+
+- id: UTIL-007
+  status: verified
+  implementation: [src/gmd_active_learning/utils/electronic_state.py]
+  evidence:
+    - tests/utils/test_electronic_state.py
+  findings: []
+  notes: "Lead's port; PHAL test_electronic_state.py core rules ported (CP2K/ORCA/Gaussian input checks belong to labeling)."
+
+- id: UTIL-008
+  status: not-started
+  implementation: []
+  evidence: []
+  findings: []
+  notes: "Benchmark tool (tools/benchmarks/) is outside this slice. The PHAL 'speedups' compared different estimators;
+    a port should time the shared neighbour list path (utils/neighbors.py) instead."
