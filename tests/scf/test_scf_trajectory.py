@@ -443,3 +443,25 @@ def test_scf_table_parsing_ignores_printed_matrix_rows():
     history = parse_scf_history(cp2k_output(n_iterations=6, nao=8, electrons=4.0))
 
     assert [iteration.step for iteration in history.iterations] == [1, 2, 3, 4, 5, 6]
+
+
+def test_frame_tolerances_come_from_the_recording_config(tmp_path):
+    """scf.recording.electron_tolerance / hermitian_tolerance reach the frame gate."""
+
+    from gmd_active_learning.adapters.dft.scf.config import scf_config
+
+    densities, overlap, electrons = load_fixture("h2")
+    shifted = densities[0] * (1.0 + 5e-3)
+
+    with pytest.raises(SCFTrajectoryError):
+        validate_frame(shifted, overlap, expected_electrons=electrons, label="f")
+    loose = scf_config({"scf": {"recording": {"electron_tolerance": 1e-2}}}).recording
+    counted = validate_frame(
+        shifted,
+        overlap,
+        expected_electrons=electrons,
+        label="f",
+        electron_tolerance=loose.electron_tolerance,
+        hermitian_tolerance=loose.hermitian_tolerance,
+    )
+    assert counted == pytest.approx(electrons * 1.005, rel=1e-6)

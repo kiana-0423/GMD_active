@@ -241,7 +241,8 @@ def _reference_electron_count(
     """
 
     if not wants_density:
-        return float(sample.electronic_state.n_electrons)
+        # Deliberate fix (finding F-23): populations hold the GTH valence count too.
+        return _valence_electrons(sample)
     recorded = sample.artifacts.density_electron_count
     if recorded is not None:
         return float(recorded)
@@ -344,7 +345,9 @@ def atomic_population_target(sample: SCFSample) -> np.ndarray:
     if weights.sum() <= 0.0:
         weights = np.ones(sample.structure.n_atoms, dtype=float)
     share = weights / weights.sum()
-    electrons = float(sample.electronic_state.n_electrons)
+    # Deliberate fix (finding F-23): the shares are valence shares, and so is the
+    # total; PHAL scaled them to the all-electron sum(Z) - charge.
+    electrons = _valence_electrons(sample)
 
     if sample.electronic_state.spin_channels == 1:
         return (share * electrons)[None, :]
@@ -352,6 +355,16 @@ def atomic_population_target(sample: SCFSample) -> np.ndarray:
     alpha = share * (electrons + unpaired) / 2.0
     beta = share * (electrons - unpaired) / 2.0
     return np.vstack([alpha, beta])
+
+
+def _valence_electrons(sample: SCFSample) -> float:
+    from gmd_active_learning.adapters.dft.scf.density.prediction import PredictionError
+    from gmd_active_learning.adapters.dft.scf.density.predictor import expected_density_electrons
+
+    try:
+        return expected_density_electrons(sample.structure, sample.electronic_state)
+    except PredictionError as exc:
+        raise DataError(f"{sample.sample_id}: {exc}") from exc
 
 
 def load_split(

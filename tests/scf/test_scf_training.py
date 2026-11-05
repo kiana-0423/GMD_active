@@ -81,7 +81,8 @@ def test_build_examples_produces_conserving_targets() -> None:
     assert len(examples) == 1
     example = examples[0]
     assert example.density_target.shape == (1, 3)
-    assert example.density_target.sum() == pytest.approx(10.0)
+    # GTH valence count (8), not PHAL's sum(Z) = 10 (finding F-23).
+    assert example.density_target.sum() == pytest.approx(8.0)
     assert example.n_scf_iterations == 3
     assert example.density_format.startswith("phal-atomic-population")
 
@@ -173,8 +174,9 @@ def test_atomic_population_target_matches_the_spin_channels() -> None:
     target = atomic_population_target(open_shell)
 
     assert target.shape == (2, 2)
-    assert target[0].sum() == pytest.approx(5.0)
-    assert target[1].sum() == pytest.approx(4.0)
+    # Valence 7 = 4 alpha + 3 beta (PHAL: all-electron 9 = 5 + 4; finding F-23).
+    assert target[0].sum() == pytest.approx(4.0)
+    assert target[1].sum() == pytest.approx(3.0)
 
 
 def test_load_split_reads_a_dataset_directory(tmp_path: Path) -> None:

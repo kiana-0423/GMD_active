@@ -159,6 +159,8 @@ def validate_frame(
     *,
     expected_electrons: float,
     label: str,
+    hermitian_tolerance: float = HERMITIAN_TOLERANCE,
+    electron_tolerance: float = ELECTRON_TOLERANCE,
 ) -> float:
     """Check one frame and return its electron count ``Tr(P S)``.
 
@@ -178,7 +180,7 @@ def validate_frame(
         raise SCFTrajectoryError(f"{label}: overlap contains non-finite values")
 
     asymmetry = float(np.abs(matrices - np.swapaxes(matrices, 1, 2)).max())
-    if asymmetry > HERMITIAN_TOLERANCE:
+    if asymmetry > hermitian_tolerance:
         raise SCFTrajectoryError(f"{label}: density is not Hermitian (max asymmetry {asymmetry:g})")
 
     if overlap.shape != matrices.shape[1:]:
@@ -187,7 +189,7 @@ def validate_frame(
         )
 
     counted = electron_count(matrices, overlap)
-    tolerance = ELECTRON_TOLERANCE * max(1.0, abs(expected_electrons))
+    tolerance = electron_tolerance * max(1.0, abs(expected_electrons))
     if abs(counted - expected_electrons) > tolerance:
         raise SCFTrajectoryError(
             f"{label}: density integrates to {counted:.6f} electrons, expected "
@@ -298,13 +300,19 @@ def record_scf_trajectory(
                 )
             pulay_by_iteration = {record.iteration: record for record in records}
 
+    recording = _recording_config(config)
     recorded: list[TrajectoryFrame] = []
     for index, density in enumerate(frames):
         is_final = index == final_index
         label = FINAL_DIR_NAME if is_final else f"iter_{index:04d}"
         try:
             counted = validate_frame(
-                density, overlap, expected_electrons=expected_electrons, label=f"{task_id}/{label}"
+                density,
+                overlap,
+                expected_electrons=expected_electrons,
+                label=f"{task_id}/{label}",
+                hermitian_tolerance=float(recording["hermitian_tolerance"]),
+                electron_tolerance=float(recording["electron_tolerance"]),
             )
         except SCFTrajectoryError:
             if strict:
