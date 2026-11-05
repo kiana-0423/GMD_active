@@ -1,8 +1,8 @@
-# Ported from PHAL (scripts.train_density_guess) at 96263b6; MIT License, see NOTICE.
 #!/usr/bin/env python3
+# Ported from PHAL (scripts.train_density_guess) at 96263b6; MIT License, see NOTICE.
 """Train and deploy the ML initial-density model from a collected dataset.
 
-    scripts/train_density_guess.py \\
+    python -m tools.scf.scripts.train_density_guess.py \\
         --dataset runtime/cp2k/pulay_dataset \\
         --checkpoint runtime/cp2k_ml/models/density.pt \\
         --deploy runtime/cp2k_ml/models/active/guess.ts.pt

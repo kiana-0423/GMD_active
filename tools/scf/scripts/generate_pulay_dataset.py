@@ -1,20 +1,20 @@
-# Ported from PHAL (scripts.generate_pulay_dataset) at 96263b6; MIT License, see NOTICE.
 #!/usr/bin/env python3
+# Ported from PHAL (scripts.generate_pulay_dataset) at 96263b6; MIT License, see NOTICE.
 """Generate a CP2K Pulay-matrix dataset.
 
 Three ways to say what to run, in increasing order of convenience:
 
     # an explicit list of CP2K inputs
-    scripts/generate_pulay_dataset.py --tasks tasks.json --binary .../cp2k.psmp
+    python -m tools.scf.scripts.generate_pulay_dataset.py --tasks tasks.json --binary .../cp2k.psmp
 
     # a structure collection (xyz / extxyz / cif) plus one input template
-    scripts/generate_pulay_dataset.py \\
+    python -m tools.scf.scripts.generate_pulay_dataset.py \\
         --structures data/structures/pulay_sampling/small_molecules.extxyz \\
         --template configs/cp2k/pulay_dataset.inp.template \\
         --cp2k-data ../cp2k-ml-scf/cp2k/data --binary .../cp2k.psmp
 
     # a sampling plan: several families, each with the settings that suit it
-    scripts/generate_pulay_dataset.py \\
+    python -m tools.scf.scripts.generate_pulay_dataset.py \\
         --plan configs/cp2k/pulay_sampling_plan.json \\
         --cp2k-data ../cp2k-ml-scf/cp2k/data --binary .../cp2k.psmp
 

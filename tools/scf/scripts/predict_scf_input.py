@@ -1,8 +1,8 @@
-# Ported from PHAL (scripts.predict_scf_input) at 96263b6; MIT License, see NOTICE.
 #!/usr/bin/env python3
+# Ported from PHAL (scripts.predict_scf_input) at 96263b6; MIT License, see NOTICE.
 """Write a CP2K input with SCF settings chosen for the structure.
 
-    scripts/predict_scf_input.py \\
+    python -m tools.scf.scripts.predict_scf_input.py \\
         --structure system.xyz \\
         --template configs/cp2k/strategy.inp.template \\
         --cp2k-data ../cp2k-ml-scf/cp2k/data \\

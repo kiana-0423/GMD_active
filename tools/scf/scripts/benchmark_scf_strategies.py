@@ -1,8 +1,8 @@
-# Ported from PHAL (scripts.benchmark_scf_strategies) at 96263b6; MIT License, see NOTICE.
 #!/usr/bin/env python3
+# Ported from PHAL (scripts.benchmark_scf_strategies) at 96263b6; MIT License, see NOTICE.
 """Run every SCF configuration on every system, and record what happened.
 
-    scripts/benchmark_scf_strategies.py \\
+    python -m tools.scf.scripts.benchmark_scf_strategies.py \\
         --structures data/structures/pulay_sampling/*.extxyz \\
         --template configs/cp2k/strategy.inp.template \\
         --cp2k-data ../cp2k-ml-scf/cp2k/data \\

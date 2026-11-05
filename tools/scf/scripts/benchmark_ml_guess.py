@@ -1,8 +1,8 @@
-# Ported from PHAL (scripts.benchmark_ml_guess) at 96263b6; MIT License, see NOTICE.
 #!/usr/bin/env python3
+# Ported from PHAL (scripts.benchmark_ml_guess) at 96263b6; MIT License, see NOTICE.
 """Benchmark the ML initial density guess against CP2K's atomic guess.
 
-    scripts/benchmark_ml_guess.py \\
+    python -m tools.scf.scripts.benchmark_ml_guess.py \\
         --structures data/structures/benchmark/molecules.extxyz \\
         --template configs/cp2k/benchmark_guess.inp.template \\
         --cp2k-data ../cp2k-ml-scf/cp2k/data \\

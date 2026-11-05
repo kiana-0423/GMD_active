@@ -1,8 +1,8 @@
-# Ported from PHAL (scripts.benchmark_controller) at 96263b6; MIT License, see NOTICE.
 #!/usr/bin/env python3
+# Ported from PHAL (scripts.benchmark_controller) at 96263b6; MIT License, see NOTICE.
 """Native CP2K against the adaptive SCF controller, on difficult systems.
 
-    scripts/benchmark_controller.py \\
+    python -m tools.scf.scripts.benchmark_controller.py \\
         --structures data/structures/pulay_sampling/transition_metal_oxides.extxyz \\
         --template configs/cp2k/pulay_dataset_smeared.inp.template \\
         --cp2k-data ../cp2k-ml-scf/cp2k/data \\

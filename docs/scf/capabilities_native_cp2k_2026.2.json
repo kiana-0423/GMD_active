@@ -1,0 +1,63 @@
+{
+  "contract_version": "gmd-cp2k-capabilities-v1",
+  "executable": "/opt/homebrew/bin/cp2k.psmp",
+  "resolved_path": "/opt/homebrew/bin/cp2k.psmp",
+  "available": true,
+  "loader_failure": false,
+  "version": "2026.2",
+  "git_commit": "c92cc08",
+  "ml_scf_supported": false,
+  "ml_mixing_supported": false,
+  "torch_supported": false,
+  "python_torch_available": true,
+  "flags": [
+    "omp",
+    "libint",
+    "fftw3",
+    "libxc",
+    "parallel",
+    "scalapack",
+    "mpi_f08",
+    "no_statm_access"
+  ],
+  "features": {
+    "ao_matrix_printing": {
+      "advertised": true,
+      "validated": true,
+      "evidence": "upstream CP2K feature, present in every working build; run: Tr(P S)=2.000000000"
+    },
+    "ml_density_guess": {
+      "advertised": false,
+      "validated": false,
+      "evidence": "cp2kflags lacks 'phal_ml_scf'"
+    },
+    "ml_inprocess_guess": {
+      "advertised": false,
+      "validated": false,
+      "evidence": "no build token advertises mode B; 'libtorch' alone does not prove it (cp2k-ml-scf hook 0009 is a placeholder)"
+    },
+    "ml_mixing": {
+      "advertised": false,
+      "validated": false,
+      "evidence": "cp2kflags lacks 'phal_ml_mixing'"
+    },
+    "native_scf": {
+      "advertised": true,
+      "validated": true,
+      "evidence": "banner version 2026.2; run: converged=True, steps=10"
+    },
+    "pulay_recorder": {
+      "advertised": false,
+      "validated": false,
+      "evidence": "no known build advertises it (existed only in the lost fork)"
+    },
+    "scf_controller": {
+      "advertised": false,
+      "validated": false,
+      "evidence": "no known build advertises it (existed only in the lost fork)"
+    }
+  },
+  "details": [
+    "this CP2K build does not advertise ML-SCF support (no 'phal_ml_scf' in cp2kflags); SCF_GUESS ML is not available"
+  ]
+}

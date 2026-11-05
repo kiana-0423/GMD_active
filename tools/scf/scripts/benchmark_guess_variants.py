@@ -1,8 +1,8 @@
-# Ported from PHAL (scripts.benchmark_guess_variants) at 96263b6; MIT License, see NOTICE.
 #!/usr/bin/env python3
+# Ported from PHAL (scripts.benchmark_guess_variants) at 96263b6; MIT License, see NOTICE.
 """Compare initial-guess strategies by what they cost the SCF.
 
-    scripts/benchmark_guess_variants.py \\
+    python -m tools.scf.scripts.benchmark_guess_variants.py \\
         --structures data/structures/benchmark/molecules.extxyz \\
         --template configs/cp2k/benchmark_guess.inp.template \\
         --cp2k-data ../cp2k-ml-scf/cp2k/data \\

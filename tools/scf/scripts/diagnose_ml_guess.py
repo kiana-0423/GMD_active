@@ -1,8 +1,8 @@
-# Ported from PHAL (scripts.diagnose_ml_guess) at 96263b6; MIT License, see NOTICE.
 #!/usr/bin/env python3
+# Ported from PHAL (scripts.diagnose_ml_guess) at 96263b6; MIT License, see NOTICE.
 """Measure why the ML initial guess is slower than the atomic one.
 
-    scripts/diagnose_ml_guess.py \\
+    python -m tools.scf.scripts.diagnose_ml_guess.py \\
         --structures data/structures/benchmark/molecules.extxyz \\
         --template configs/cp2k/diagnostic_guess.inp.template \\
         --cp2k-data ../cp2k-ml-scf/cp2k/data \\

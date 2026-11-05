@@ -1,5 +1,21 @@
-# Ported from PHAL (hotspot_al.cp2k_ml_scf.scf_strategy) at 96263b6; MIT License, see NOTICE.
-"""Choose the SCF settings *before* the calculation starts.
+# Ported from PHAL (hotspot_al.cp2k_ml_scf.scf_strategy: SCFStrategy, strategy_grid, apply_strategy,
+# StrategyOutcome, StrategyDataset, retry_ladder) at 96263b6; MIT License, see NOTICE.
+"""Static SCF strategies and the deterministic retry ladder (runtime part).
+
+The one *positive*, model-free result of PHAL's SCF work lives here: trying
+``default -> nbuffer4`` in order converged 12 of 12 solids against 9 of 12 for
+the default alone, for 4.7% more SCF iterations (docs/scf/scf_strategy_prediction.md).
+:class:`RetryLadder` turns that into a labeling-path component driven by
+``scf.retry`` (off by default). Caveat preserved from the ledger: PHAL's
+"default" uses ``NBUFFER 8``; CP2K v2026.2's own default is 4, so the
+``nbuffer4`` rung returns to upstream's default.
+
+The k-NN strategy *predictor* (a documented negative result) is tooling:
+:mod:`tools.scf.strategy_predictor`.
+
+PHAL's module docstring follows.
+
+Choose the SCF settings *before* the calculation starts.
 
 Three ML-inside-the-SCF ideas were measured and none of them paid:
 
@@ -333,3 +349,127 @@ def retry_ladder(dataset: StrategyDataset, order: Sequence[str], *, failure_cost
     }
 
 
+class RetryLadder:
+    """Deterministic SCF retry ladder for labeling runs (``scf.retry``).
+
+    ``strategy_for_attempt(0)`` is the first rung, ``(1)`` the second, ...;
+    ``None`` once the ladder is exhausted. :meth:`apply` rewrites a CP2K input's
+    ``&SCF`` body for an attempt. Disabled ladders return the unchanged input
+    and no further attempts, so the caller's behaviour is unchanged.
+    """
+
+    def __init__(self, config: Any = None) -> None:
+        from gmd_active_learning.adapters.dft.scf.config import scf_config
+
+        settings = scf_config(config).retry
+        self.enabled = settings.enabled
+        self.failure_cost = settings.failure_cost
+        base = settings.base
+        base_strategy = SCFStrategy(
+            name="default",
+            mixing_method=base.mixing_method,
+            alpha=base.alpha,
+            nbuffer=base.nbuffer,
+            smearing=base.smearing,
+            added_mos=base.added_mos,
+            electronic_temperature=base.electronic_temperature,
+            max_scf=base.max_scf,
+            eps_scf=base.eps_scf,
+        )
+        grid = {item.name: item for item in _grid_from(base_strategy)}
+        unknown = [name for name in settings.order if name not in grid]
+        if unknown:
+            from gmd_active_learning.core.exceptions import ConfigurationError
+
+            raise ConfigurationError(f"scf.retry.order names unknown strategies {unknown}; known: {sorted(grid)}")
+        self.order = tuple(settings.order)
+        self.strategies = tuple(grid[name] for name in self.order)
+
+    def strategy_for_attempt(self, attempt: int) -> SCFStrategy | None:
+        if not self.enabled:
+            return None
+        return self.strategies[attempt] if 0 <= attempt < len(self.strategies) else None
+
+    def has_next(self, attempt: int) -> bool:
+        return self.strategy_for_attempt(attempt + 1) is not None
+
+    def apply(self, input_text: str, attempt: int) -> str:
+        strategy = self.strategy_for_attempt(attempt)
+        return input_text if strategy is None else apply_strategy(input_text, strategy)
+
+    def evaluate(self, dataset: StrategyDataset) -> dict[str, Any]:
+        """Replay this ladder over recorded outcomes (see :func:`retry_ladder`)."""
+
+        return retry_ladder(dataset, self.order, failure_cost=self.failure_cost)
+
+
+def _grid_from(base: SCFStrategy) -> list[SCFStrategy]:
+    return [
+        replace(base, name="default"),
+        replace(base, name="alpha0.2", alpha=0.2),
+        replace(base, name="alpha0.1", alpha=0.1),
+        replace(base, name="nbuffer4", nbuffer=4),
+        replace(base, name="broyden", mixing_method=MIXING_BROYDEN),
+        replace(base, name="broyden-alpha0.2", mixing_method=MIXING_BROYDEN, alpha=0.2),
+    ]
+
+
+#: PHAL's measured 12-solid strategy table (docs/scf/scf_strategy_prediction.md);
+#: ``None`` is a failed run. The acceptance data for :func:`retry_ladder`.
+DOCUMENTED_STRATEGY_TABLE: dict[str, dict[str, int | None]] = {
+    "aln-wurtzite": {"default": 10, "alpha0.2": 10, "alpha0.1": 11, "nbuffer4": 11, "broyden": 11, "broyden-alpha0.2": 14},
+    "c-diamond": {"default": 7, "alpha0.2": 7, "alpha0.1": 7, "nbuffer4": 7, "broyden": 9, "broyden-alpha0.2": 9},
+    "cu2o-cuprite": {"default": 19, "alpha0.2": 26, "alpha0.1": 22, "nbuffer4": 86, "broyden": 19, "broyden-alpha0.2": 19},
+    "lih-rocksalt": {"default": None, "alpha0.2": None, "alpha0.1": None, "nbuffer4": 7, "broyden": 10, "broyden-alpha0.2": 13},
+    "mgo-rocksalt": {"default": None, "alpha0.2": None, "alpha0.1": None, "nbuffer4": 10, "broyden": 13, "broyden-alpha0.2": 14},
+    "mno-rocksalt": {"default": 71, "alpha0.2": 30, "alpha0.1": 118, "nbuffer4": 59, "broyden": 65, "broyden-alpha0.2": 39},
+    "nacl-rocksalt": {"default": None, "alpha0.2": None, "alpha0.1": None, "nbuffer4": 9, "broyden": 12, "broyden-alpha0.2": 14},
+    "nio-rocksalt": {"default": 33, "alpha0.2": 86, "alpha0.1": 66, "nbuffer4": None, "broyden": 39, "broyden-alpha0.2": 51},
+    "si-diamond": {"default": 8, "alpha0.2": 8, "alpha0.1": 8, "nbuffer4": 8, "broyden": 8, "broyden-alpha0.2": 8},
+    "si-diamond-strained": {"default": 8, "alpha0.2": 8, "alpha0.1": 8, "nbuffer4": 8, "broyden": 8, "broyden-alpha0.2": 8},
+    "tio2-rutile": {"default": 19, "alpha0.2": 14, "alpha0.1": 14, "nbuffer4": 18, "broyden": 16, "broyden-alpha0.2": 14},
+    "zno-wurtzite": {"default": 21, "alpha0.2": 22, "alpha0.1": 21, "nbuffer4": None, "broyden": 19, "broyden-alpha0.2": 21},
+}
+
+
+def documented_strategy_dataset() -> StrategyDataset:
+    """:data:`DOCUMENTED_STRATEGY_TABLE` as a :class:`StrategyDataset` (no features recorded)."""
+
+    dataset = StrategyDataset()
+    for system, row in DOCUMENTED_STRATEGY_TABLE.items():
+        dataset.features[system] = {}
+        for strategy, steps in row.items():
+            dataset.outcomes.append(
+                StrategyOutcome(
+                    system=system,
+                    strategy=strategy,
+                    converged=steps is not None,
+                    scf_steps=steps,
+                    runtime_s=None,
+                    energy=None,
+                    failure=None if steps is not None else "not converged",
+                )
+            )
+    return dataset
+
+
+__all__ = [
+    "DEFAULT_SMEARED",
+    "DEFAULT_STRATEGY",
+    "DOCUMENTED_STRATEGY_TABLE",
+    "FEATURE_NAMES",
+    "KNOWN_MIXERS",
+    "MIXING_BROYDEN",
+    "MIXING_DIRECT",
+    "MIXING_PULAY",
+    "STRATEGY_FORMAT",
+    "RetryLadder",
+    "SCFStrategy",
+    "StrategyDataset",
+    "StrategyError",
+    "StrategyOutcome",
+    "apply_strategy",
+    "documented_strategy_dataset",
+    "retry_ladder",
+    "strategy_grid",
+]
