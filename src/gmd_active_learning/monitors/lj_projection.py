@@ -77,8 +77,11 @@ class LJProjectionFitter:
                     pair = canonical_pair(symbols[i], symbols[j])
                     column_a = pair_to_col[pair]
                     column_b = column_a + 1
-                    basis_a = 12.0 * displacement / (distance ** 14)
-                    basis_b = -6.0 * displacement / (distance ** 8)
+                    # V(r) = A/r^12 - B/r^6 and d = r_j - r_i, so the force on atom i is
+                    # F_i = -dV/dr * (-d/r) = (-12 A / r^14 + 6 B / r^8) d (repulsion pushes i away from j).
+                    # Atom j receives the opposite force. See docs/migration/findings.md F-01.
+                    basis_a = -12.0 * displacement / (distance ** 14)
+                    basis_b = 6.0 * displacement / (distance ** 8)
                     X[row_offset + i * 3 : row_offset + i * 3 + 3, column_a] += basis_a
                     X[row_offset + i * 3 : row_offset + i * 3 + 3, column_b] += basis_b
                     X[row_offset + j * 3 : row_offset + j * 3 + 3, column_a] -= basis_a
@@ -91,10 +94,17 @@ class LJProjectionFitter:
                 if pair in pair_to_col:
                     theta0_vector[pair_to_col[pair]] = float(params.get("A", 0.0))
                     theta0_vector[pair_to_col[pair] + 1] = float(params.get("B", 0.0))
+        # Ridge is applied to column-normalised parameters. A and B differ by orders of magnitude
+        # (Ar: A ~ 1e5, B ~ 1e2 in eV*A^12 / eV*A^6), so an unscaled penalty collapses A toward zero
+        # and turns physical fits non-physical. With unit-norm columns, ridge_lambda is dimensionless.
+        column_scale = np.linalg.norm(X, axis=0)
+        column_scale[column_scale <= 0.0] = 1.0
+        scaled_X = X / column_scale
         ridge_sqrt = np.sqrt(self.ridge_lambda)
-        augmented_X = np.vstack([X, ridge_sqrt * np.eye(X.shape[1], dtype=float)])
-        augmented_y = np.concatenate([y, ridge_sqrt * theta0_vector])
-        theta, *_ = np.linalg.lstsq(augmented_X, augmented_y, rcond=None)
+        augmented_X = np.vstack([scaled_X, ridge_sqrt * np.eye(X.shape[1], dtype=float)])
+        augmented_y = np.concatenate([y, ridge_sqrt * theta0_vector * column_scale])
+        scaled_theta, *_ = np.linalg.lstsq(augmented_X, augmented_y, rcond=None)
+        theta = scaled_theta / column_scale
         prediction = X @ theta
         residual = prediction - y
         row_offset = 0

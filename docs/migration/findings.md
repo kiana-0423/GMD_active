@@ -180,3 +180,19 @@ run against it. The capability probe ignores `cp2k_ml_scf.environment` (`cp2k_ml
 - **Missing checks and gates:** ML-mixing support is never checked, and the documented "retry once with plain CP2K" is not implemented. `pulay_mixer.export_mixer` bypasses the experimental gate.
 - **Unread config keys:** `electron_tolerance`, `dataset_dir`, `fallback_method`, `runtime_dir`, `trajectory_strict`.
 - **Coupling:** `backends/__init__.py:19` imports the SCF backend eagerly. Core labeling depends on `cp2k/scf_history.py` (`cp2k_task_submitter.py:268`). Everything else is separable as an optional extra, with torch loaded lazily.
+
+## Found during implementation
+
+### F-33: GMD_active LJ fit applies an unscaled ridge penalty (Reproduced)
+
+`monitors/lj_projection.py` penalised the raw (A, B) vector. For Ar, A ≈ 9.9e4 and B ≈ 64, so at the
+shipped `ridge_lambda: 1e-6` exact LJ forces fitted to A = 8.3e-4, B = −1.24 (non-physical, residual 0.23).
+Fixed by applying the ridge to column-normalised parameters; λ is now dimensionless.
+Regression test: `tests/test_lj_projection.py::test_configured_ridge_does_not_bias_a_well_posed_fit`.
+
+## Resolution log
+
+| Finding | Resolution | Evidence |
+|---|---|---|
+| F-01 (GMD_active part) | Force basis sign corrected in `monitors/lj_projection.py`; self-confirming tests replaced by ASE-based tests with finite-difference checks. PHAL golden fixtures left unchanged as historical evidence. | `tests/test_lj_projection.py`, `tests/test_reliability_monitor.py` |
+| F-33 | Ridge applied in normalised coordinates. | `tests/test_lj_projection.py` |

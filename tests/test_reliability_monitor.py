@@ -39,20 +39,18 @@ def monitor_config() -> dict[str, object]:
 
 
 def test_reliability_monitor_safe() -> None:
+    """Exact Lennard-Jones forces (from ASE, independent of the fitter) must be judged safe."""
+
+    from ase import Atoms
+    from ase.calculators.lj import LennardJones
+
     monitor = ReliabilityMonitor(monitor_config())
-    positions = np.array([[0.0, 0.0, 0.0], [1.2, 0.0, 0.0], [2.8, 0.0, 0.0]], dtype=float)
-    A = 1.5
-    B = 0.7
-    forces = np.zeros_like(positions)
-    for i in range(3):
-        for j in range(i + 1, 3):
-            r_vec = positions[j] - positions[i]
-            r = np.linalg.norm(r_vec)
-            pair_force = (12.0 * A / r**14 - 6.0 * B / r**8) * r_vec
-            forces[i] += pair_force
-            forces[j] -= pair_force
-    result = monitor.evaluate(step=0, positions=positions, symbols=["Ar", "Ar", "Ar"], ml_forces=forces)
-    assert result.status == SAFE
+    positions = np.array([[0.0, 0.0, 0.0], [3.8, 0.0, 0.0], [1.9, 3.3, 0.0], [1.9, 1.1, 3.1]], dtype=float)
+    atoms = Atoms("Ar4", positions=positions)
+    atoms.calc = LennardJones(epsilon=0.0104, sigma=3.40, rc=50.0, smooth=False)
+    result = monitor.evaluate(step=0, positions=positions, symbols=["Ar"] * 4, ml_forces=atoms.get_forces())
+    assert result.status == SAFE, result.reasons
+    assert result.lj_fit_result is not None and result.lj_fit_result.is_physical
     assert result.should_stop_md is False
 
 
