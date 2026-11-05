@@ -1,0 +1,9 @@
+# embedding section: point-charge data only (gmd_active_learning.extraction.config.EmbeddingConfig).
+# QM/MM execution is unsupported; an enabled embedding is rejected by require_embedding_backend.
+embedding:
+  enabled: false
+  method: point_charge
+  charges: {}
+  default_charge: null
+  cutoff: 12.0
+  rigid_tolerance: 1.0e-06

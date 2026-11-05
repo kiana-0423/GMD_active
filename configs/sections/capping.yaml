@@ -1,0 +1,20 @@
+# capping section: H capping of cut covalent bonds (gmd_active_learning.extraction.config.CappingConfig).
+# allow_core_capping keeps PHAL's meaning (also cap inner-buffer atoms); cap_core_atoms really caps core atoms.
+capping:
+  enabled: true
+  allow_core_capping: false
+  cap_core_atoms: false
+  covalent_scale: 1.2
+  bond_lengths:
+    C: 1.09
+    Si: 1.48
+    O: 0.96
+    N: 1.01
+    S: 1.34
+    P: 1.42
+    B: 1.19
+  disabled_for_metals: true
+  disabled_for_oxides_by_default: true
+  optimize_h_only: false
+  uncapped_policy: error
+  partial_policy: warn

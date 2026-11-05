@@ -1,0 +1,24 @@
+# datasets section: samples, energy/stress policy, split and the versioned store
+# (gmd_active_learning.datasets.config.DatasetsConfig). store_root is relative to the run directory.
+datasets:
+  enabled: true
+  store_root: datasets_store
+  energy:
+    nonperiodic_weight: 0.0
+    periodic_weight: 0.0
+    allow_capped: false
+    write_energy: true
+  stress:
+    enabled: true
+    weight: 1.0
+  split:
+    enabled: true
+    val_fraction: 0.1
+    seed: 20261106
+    group_by: event
+  export:
+    extxyz: true
+    sgt_npz: true
+    split_files: true
+  require_valid_labels: true
+  float_format: shortest

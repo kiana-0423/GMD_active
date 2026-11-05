@@ -1,0 +1,57 @@
+# extraction section: region extraction around hotspots (gmd_active_learning.extraction.config.ExtractionConfig).
+# Defaults follow PHAL configs/default.yaml except where docs/extraction_and_datasets.md lists a deviation.
+extraction:
+  enabled: true
+  mode: cluster
+  extract_radius: null
+  mlip_cutoff: 6.0
+  buffer_radius: 4.0
+  core_radius: 4.0
+  boundary_thickness: 2.0
+  vacuum_padding: 4.0
+  max_atoms: null
+  min_atoms: null
+  max_atoms_policy: trim
+  min_atoms_policy: pad
+  freeze_boundary: true
+  periodic_guard:
+    policy: error
+    pair_cutoff: 3.0
+  force_weights:
+    core: 1.0
+    inner_buffer: 0.3
+    outer_buffer: 0.0
+    boundary: 0.0
+    h_cap: 0.0
+    unassigned: 0.0
+  slab:
+    lx: 16.0
+    ly: 16.0
+    z_margin: 8.0
+    z_vacuum: 6.0
+    multi_period: replicate
+    skewed_policy: error
+    period_tolerance: 1.0e-08
+  graph:
+    hops: 2
+    radial_shell: true
+    covalent_scale: 1.2
+  block:
+    scheme: spatial_grid
+    size: null
+    halo: 5.0
+    buffer:
+      inner: 3.0
+      outer: 5.0
+    frozen:
+      enabled: true
+      thickness: 2.0
+    merge_adjacent: true
+    max_merged_blocks: 4
+    max_atoms: null
+    min_atoms: null
+    min_atoms_policy: warn
+    cooldown_steps: 1000
+    cooldown_state_path: null
+    vacuum_offset: 2.0
+    cell_padding: 4.0
