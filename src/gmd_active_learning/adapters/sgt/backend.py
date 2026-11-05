@@ -11,10 +11,14 @@ from __future__ import annotations
 import importlib
 import json
 import sys
+import zipfile
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping, Sequence
 
 import numpy as np
+from ase.data import atomic_numbers as ASE_ATOMIC_NUMBERS
+from ase.data import chemical_symbols
 from ase.io import read
 from ase.neighborlist import neighbor_list
 from pydantic import BaseModel, ConfigDict, Field
@@ -64,6 +68,67 @@ def import_gmd_sgt(config: SGTConfig) -> Any:
     return module
 
 
+@dataclass(frozen=True, slots=True)
+class Prediction:
+    """One model evaluation in GMD units (eV, eV/Angstrom)."""
+
+    energy: float
+    forces: np.ndarray  # (n_atoms, 3)
+
+
+@dataclass(frozen=True, slots=True)
+class ModelInfo:
+    """What a GMD_SGT artifact declares about itself (read from its own metadata)."""
+
+    path: str
+    kind: str  # "checkpoint" | "export"
+    species: tuple[int, ...]
+    cutoff: float
+    lr_cutoff: float | None
+    gmd_sgt_version: str | None
+
+
+def check_species(numbers: Sequence[int] | np.ndarray, model_species: Sequence[int], *, model: str = "model") -> None:
+    """Refuse a structure containing species the model was not trained on (before any evaluation)."""
+
+    if not model_species:
+        raise AdapterError(f"{model} declares no species; refusing to evaluate (GMD_SGT >= 0.4 records them)")
+    unknown = sorted(set(int(z) for z in np.asarray(numbers).tolist()) - set(int(z) for z in model_species))
+    if unknown:
+        names = [chemical_symbols[z] if 0 < z < len(chemical_symbols) else str(z) for z in unknown]
+        raise ConfigurationError(f"structure contains species {names} (Z={unknown}) unknown to {model} (species {sorted(model_species)})")
+
+
+def validate_species_map(species_map: Mapping[int, str] | Sequence[str], model_species: Sequence[int], *, model: str = "model") -> dict[int, int]:
+    """Check an engine type map against the model's species; returns ``{type_id: atomic_number}``.
+
+    Replaces PHAL's Allegro ``type_names``/``lammps.type_map`` check (ledger MD-005): every name must
+    be a chemical symbol the model was trained on, and type ids must be contiguous ``1..n``
+    (a sequence is taken as types ``1..n`` in order). Names may not repeat.
+    """
+
+    mapping = {index + 1: name for index, name in enumerate(species_map)} if not isinstance(species_map, Mapping) else dict(species_map)
+    if not mapping:
+        raise ConfigurationError("species map is empty")
+    try:
+        ids = sorted(int(key) for key in mapping)
+    except (TypeError, ValueError) as exc:
+        raise ConfigurationError(f"species map keys must be integer type ids, got {list(mapping)}") from exc
+    if ids != list(range(1, len(ids) + 1)):
+        raise ConfigurationError(f"species map type ids must be contiguous 1..{len(ids)}, got {ids}")
+    names = [str(mapping[key] if key in mapping else mapping[str(key)]) for key in ids]  # type: ignore[index]
+    if len(set(names)) != len(names):
+        raise ConfigurationError(f"species map repeats element names: {names}")
+    unknown_symbols = [name for name in names if name not in ASE_ATOMIC_NUMBERS]
+    if unknown_symbols:
+        raise ConfigurationError(f"species map contains unknown element symbols {unknown_symbols}")
+    numbers = {type_id: int(ASE_ATOMIC_NUMBERS[name]) for type_id, name in zip(ids, names)}
+    absent = [name for name in names if ASE_ATOMIC_NUMBERS[name] not in set(int(z) for z in model_species)]
+    if absent:
+        raise ConfigurationError(f"species map names {absent} are absent from {model}'s species {sorted(model_species)}")
+    return numbers
+
+
 def _graph(atoms: Any, cutoff: float) -> tuple[np.ndarray, np.ndarray]:
     """Full directed neighbour graph with Cartesian image shifts (the GMD/TorchScript convention)."""
 
@@ -100,7 +165,9 @@ class GMDSGTBackend:
         self._engine_smoke = engine_smoke
 
     def __init__(self, config: SGTConfig, *, engine_smoke: Any | None = None) -> None:
-        self.config = config
+        # A private deep copy: nothing done through this backend (seeds, train overrides) leaks
+        # into the caller's configuration object (PHAL's RealAllegroBackend contract).
+        self.config = config.model_copy(deep=True)
         self.sgt = import_gmd_sgt(config)
         from gmd_sgt import api
         from gmd_sgt.inference.calculator import MLIPCalculator
@@ -109,6 +176,8 @@ class GMDSGTBackend:
         self.calculator_cls = MLIPCalculator
         self._engine_smoke = engine_smoke
         self._calculators: dict[str, Any] = {}
+        self._scripted: dict[str, Any] = {}
+        self._info: dict[str, ModelInfo] = {}
 
     # ------------------------------------------------------------------ training
     def _train_config(self, dataset: DatasetVersion, seed: int) -> dict[str, Any]:
@@ -141,12 +210,16 @@ class GMDSGTBackend:
             raise AdapterError(f"GMD_SGT did not write {summary_path}")
         return checkpoint
 
-    def train(self, dataset: DatasetVersion, *, parent: ModelArtifact | None, work_dir: Path) -> TrainOutput:
+    def train(self, dataset: DatasetVersion, *, parent: ModelArtifact | None, work_dir: Path, seed: int | None = None) -> TrainOutput:
+        """Train the primary model (``seed``, default ``mlip.seed``) and ``committee_size`` extra
+        members with seeds ``seed+1..``; the configuration object is never modified."""
+
         work_dir = Path(work_dir)
-        primary = self._train_one(dataset, parent, work_dir / "member_0", self.config.seed)
+        seed = self.config.seed if seed is None else int(seed)
+        primary = self._train_one(dataset, parent, work_dir / "member_0", seed)
         summary = json.loads((work_dir / "member_0" / "training_summary.json").read_text())
         committee = [
-            str(self._train_one(dataset, parent, work_dir / f"member_{k}", self.config.seed + k))
+            str(self._train_one(dataset, parent, work_dir / f"member_{k}", seed + k))
             for k in range(1, self.config.committee_size + 1)
         ]
         species = [int(z) for z in summary.get("species") or []]
@@ -229,6 +302,130 @@ class GMDSGTBackend:
             return {"passed": False, "reason": "no MD engine configured for the smoke test"}
         return dict(self._engine_smoke(export, work_dir))
 
+    # ------------------------------------------------------------------ inference
+    @staticmethod
+    def _is_export(path: Path) -> bool:
+        try:
+            with zipfile.ZipFile(path) as archive:
+                return any("/code/" in name for name in archive.namelist())
+        except zipfile.BadZipFile as exc:
+            raise AdapterError(f"{path} is not a GMD_SGT checkpoint or TorchScript export") from exc
+
+    def model_info(self, model: str | Path) -> ModelInfo:
+        """Species, cutoff and kind of a checkpoint or TorchScript export, from its own metadata."""
+
+        path = Path(model).expanduser().resolve()
+        key = str(path)
+        if key in self._info:
+            return self._info[key]
+        if not path.is_file():
+            raise AdapterError(f"model file {path} does not exist")
+        if self._is_export(path):
+            metadata = self.api.load_export_metadata(path) or {}
+            if not metadata.get("species"):
+                raise AdapterError(f"export {path} carries no species metadata (export with GMD_SGT >= 0.4)")
+            info = ModelInfo(key, "export", tuple(int(z) for z in metadata["species"]), float(metadata["local_cutoff"]),
+                             None if metadata.get("lr_cutoff") is None else float(metadata["lr_cutoff"]), metadata.get("version"))
+        else:
+            import torch
+            from gmd_sgt.metadata import checkpoint_species
+
+            try:
+                checkpoint = torch.load(key, map_location="cpu", weights_only=False)
+            except Exception as exc:  # noqa: BLE001 - any load failure is reported explicitly
+                raise AdapterError(f"cannot load GMD_SGT checkpoint {path}: {exc}") from exc
+            species = checkpoint_species(checkpoint) or []
+            if not species:
+                raise AdapterError(f"checkpoint {path} declares no species")
+            calc = self.calculator(path)
+            info = ModelInfo(key, "checkpoint", tuple(int(z) for z in species), float(calc.cutoff), float(calc.lr_cutoff),
+                             (checkpoint.get("metadata") or {}).get("gmd_sgt_version"))
+        self._info[key] = info
+        return info
+
+    def _scripted_model(self, path: Path) -> Any:
+        import torch
+
+        key = str(path)
+        if key not in self._scripted:
+            self._scripted[key] = torch.jit.load(key, map_location="cpu")
+        return self._scripted[key]
+
+    def predict(
+        self,
+        model: str | Path,
+        positions: np.ndarray,
+        numbers: np.ndarray,
+        cell: np.ndarray | None = None,
+        pbc: Sequence[bool] = (False, False, False),
+        *,
+        species: Sequence[int] | None = None,
+    ) -> Prediction:
+        """Energy and forces of one structure with one checkpoint or TorchScript export.
+
+        ``species`` (e.g. ``ModelArtifact.species``) overrides the model's own species list for the
+        pre-evaluation species check. Wrong shapes, unknown species, model exceptions and non-finite
+        outputs raise (``ConfigurationError`` / ``AdapterError``); nothing is turned into NaN.
+        """
+
+        path = Path(model).expanduser().resolve()
+        positions = np.asarray(positions, dtype=float)
+        numbers = np.asarray(numbers, dtype=np.int64)
+        n_atoms = len(numbers)
+        if positions.shape != (n_atoms, 3):
+            raise AdapterError(f"positions have shape {positions.shape}, expected ({n_atoms}, 3)")
+        pbc = tuple(bool(flag) for flag in pbc)
+        info = self.model_info(path)
+        check_species(numbers, info.species if species is None else species, model=path.name)
+        try:
+            if info.kind == "export":
+                import torch
+                from ase import Atoms
+
+                atoms = Atoms(numbers=numbers, positions=positions, cell=cell if cell is not None else None, pbc=pbc)
+                edge_index, edge_shift = _graph(atoms, info.cutoff)
+                out = self._scripted_model(path)(
+                    torch.as_tensor(numbers, dtype=torch.int64), torch.as_tensor(positions, dtype=torch.float32),
+                    torch.as_tensor(edge_index, dtype=torch.int64), torch.as_tensor(edge_shift, dtype=torch.float32),
+                )
+                energy = float(out["energy"].detach().sum().item())
+                forces = out["forces"].detach().cpu().numpy().astype(np.float64)
+            else:
+                out = self.calculator(path).compute(positions, numbers, cell if any(pbc) else None, pbc)
+                energy, forces = float(out["energy"]), np.asarray(out["forces"], dtype=np.float64)
+        except (AdapterError, ConfigurationError):
+            raise
+        except Exception as exc:  # noqa: BLE001 - a model failure is reported, never converted to NaN
+            raise AdapterError(f"GMD_SGT evaluation with {path.name} failed: {type(exc).__name__}: {exc}") from exc
+        if forces.shape != (n_atoms, 3):
+            raise AdapterError(f"{path.name} returned forces of shape {forces.shape}, expected ({n_atoms}, 3)")
+        if not np.isfinite(energy) or not np.all(np.isfinite(forces)):
+            raise AdapterError(f"{path.name} returned non-finite energy/forces")
+        return Prediction(energy, forces)
+
+    def predict_frame(self, frame: Frame, model: str | Path, *, species: Sequence[int] | None = None) -> Prediction:
+        return self.predict(model, frame.positions, frame.numbers, frame.cell, frame.pbc, species=species)
+
+    def predict_committee(
+        self,
+        models: Sequence[str | Path],
+        positions: np.ndarray,
+        numbers: np.ndarray,
+        cell: np.ndarray | None = None,
+        pbc: Sequence[bool] = (False, False, False),
+        *,
+        species: Sequence[int] | None = None,
+    ) -> np.ndarray:
+        """Committee forces with shape ``(n_models, n_atoms, 3)``; every member must succeed."""
+
+        if len(models) < 2:
+            raise AdapterError(f"a committee needs at least two members, got {len(models)}")
+        stacked = np.stack([self.predict(path, positions, numbers, cell, pbc, species=species).forces for path in models])
+        expected = (len(models), len(np.asarray(numbers)), 3)
+        if stacked.shape != expected:  # pragma: no cover - guarded per member already
+            raise AdapterError(f"committee forces have shape {stacked.shape}, expected {expected}")
+        return stacked
+
     # ------------------------------------------------------------------ committee enrichment
     def committee_checkpoints(self, model: ModelArtifact) -> list[str]:
         extras = model.metadata.get("extra_files") or {}
@@ -242,10 +439,7 @@ class GMDSGTBackend:
         members = self.committee_checkpoints(model)
         if not members:
             return frame
-        missing = set(frame.numbers.tolist()) - set(model.species)
-        if missing:
-            raise ConfigurationError(f"frame contains species {sorted(missing)} unknown to model {model.model_id}")
+        check_species(frame.numbers, model.species, model=f"model {model.model_id}")
         cell = frame.cell if any(frame.pbc) else None
-        forces = [np.asarray(self.calculator(path).compute(frame.positions, frame.numbers, cell, frame.pbc)["forces"]) for path in members]
-        frame.committee_forces = np.stack(forces)
+        frame.committee_forces = self.predict_committee(members, frame.positions, frame.numbers, cell, frame.pbc, species=model.species)
         return frame

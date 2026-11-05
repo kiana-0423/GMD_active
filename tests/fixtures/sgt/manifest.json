@@ -1,0 +1,60 @@
+{
+ "command": "PYTHONPATH=src python tools/fixtures/make_tiny_sgt_models.py --seeds 11 12",
+ "dataset": "tests/fixtures/datasets/tiny_h2o.extxyz",
+ "dataset_sha256": "81fac7592804447fc7c51c9d31ec3f5088a8b03c7a0bf2c40a99e3b6b38c20ce",
+ "description": "Tiny seeded GMD_SGT models trained on the synthetic tiny_h2o fixture (not DFT; no accuracy claims).",
+ "gmd_sgt_version": "0.4.0",
+ "members": [
+  {
+   "best_epoch": 2,
+   "checkpoint": "member_11/checkpoint.pt",
+   "checkpoint_sha256": "ac0a1b4c7ed6e63201b5378c4b4ce15c45662a001cda041783aaa5925610d104",
+   "cutoff": 4.0,
+   "export": "member_11/model.pt",
+   "export_sha256": "57782ad781eedbc7e611b5afbac5b0fc2802122d0fd76cc057d6228c3e110bac",
+   "seed": 11,
+   "species": [
+    1,
+    8
+   ]
+  },
+  {
+   "best_epoch": 1,
+   "checkpoint": "member_12/checkpoint.pt",
+   "checkpoint_sha256": "f7c8fd2cac14535ac8ee766b168ea948fb20fd87548398f3c6ad5ead0bf7a140",
+   "cutoff": 4.0,
+   "export": "member_12/model.pt",
+   "export_sha256": "16ba3e5c96488abd6b0d05bd47df698107a22ae2a7d176086d5f28c3306f7c51",
+   "seed": 12,
+   "species": [
+    1,
+    8
+   ]
+  }
+ ],
+ "train_config": {
+  "model": {
+   "avg_neighbors": 2.0,
+   "irreps": "8x0e",
+   "l_max": 0,
+   "local_cutoff": 4.0,
+   "long_range_type": "none",
+   "lr_cutoff": 4.0,
+   "n_basis": 4,
+   "n_blocks": 1,
+   "n_heads": 1,
+   "n_species": 10,
+   "scalar_dim": 8
+  },
+  "train": {
+   "batch_size": 2,
+   "lr": 0.003,
+   "n_epochs": 3,
+   "patience": 0,
+   "warmup_steps": 1
+  }
+ },
+ "validation_groups": [
+  "event:evt-3"
+ ]
+}
