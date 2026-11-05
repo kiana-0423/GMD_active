@@ -4,9 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "GMD_active_learning"
-version = "0.1.0"
-description = "Engineering-friendly active learning controller for connecting GMD and GMD_se3gnn."
+version = "0.4.0"
+description = "Persistent active-learning controller for GMD molecular dynamics, GMD_SGT potentials and CP2K labeling (successor to PHAL)."
 readme = "README.md"
+license = { text = "Proprietary; portions derived from PHAL under the MIT License (see NOTICE)" }
 requires-python = ">=3.10"
 dependencies = [
   "numpy>=1.24",
@@ -21,6 +22,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "pytest>=8.0",
+  "pytest-timeout>=2.3",
 ]
 
 [project.scripts]
@@ -35,3 +37,8 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+  "integration: needs real external programs (GMD binary, GMD_SGT); skipped with a reason when absent",
+  "cp2k: needs a real CP2K executable; skipped with a reason when absent",
+  "slow: long-running tests",
+]
