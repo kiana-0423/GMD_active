@@ -168,3 +168,27 @@ def compute_parameter_jump_ratio(
         ratios.append(abs(sigma - prev_sigma) / max(abs(prev_sigma), 1.0e-12))
         ratios.append(abs(epsilon - prev_epsilon) / max(abs(prev_epsilon), 1.0e-12))
     return float(max(ratios, default=0.0))
+
+
+def fit_lj_projection(mode: str, **kwargs: object) -> object:
+    """Single entry point for both LJ projection modes (one sign convention, F = -grad E).
+
+    ``mode="global_pair"``: per-species-pair (A, B) over a window of frames
+    (:meth:`LJProjectionFitter.fit_window`; kwargs ``frames``, ``cutoff``, ``ridge_lambda``,
+    ``parameter_bounds``, ``theta0``). ``mode="local_atom"``: per-atom (epsilon, sigma) residuals
+    (:func:`gmd_active_learning.monitors.lj_local.compute_local_lj_residuals`; kwargs ``pairs``,
+    ``forces``, ``cutoff``, ``mask``, ``estimator``).
+    """
+
+    if mode == "global_pair":
+        fitter = LJProjectionFitter(
+            cutoff=float(kwargs.pop("cutoff", 6.0)),  # type: ignore[arg-type]
+            ridge_lambda=float(kwargs.pop("ridge_lambda", 1.0e-6)),  # type: ignore[arg-type]
+            parameter_bounds=kwargs.pop("parameter_bounds", None),  # type: ignore[arg-type]
+        )
+        return fitter.fit_window(kwargs.pop("frames"), theta0=kwargs.pop("theta0", None))  # type: ignore[arg-type]
+    if mode == "local_atom":
+        from gmd_active_learning.monitors.lj_local import compute_local_lj_residuals
+
+        return compute_local_lj_residuals(**kwargs)  # type: ignore[arg-type]
+    raise ValueError(f"unknown LJ projection mode {mode!r}; use 'global_pair' or 'local_atom'")
