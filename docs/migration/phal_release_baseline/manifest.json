@@ -1,0 +1,33 @@
+{
+  "release": "milestone3-md-probe",
+  "git": {"branch": "main", "commit": "8ea02ebdb460153a403e046aa4434ef2b8bb7dba", "tag": "milestone3-md-probe"},
+  "train_probe": {
+    "oci": "ghcr.io/kiana-0423/train-probe@sha256:513aeaf7e997caa3b743ecc4b7c4d0defdfabd01a13de3f83841f2dc21810e86",
+    "oci_digest": "sha256:513aeaf7e997caa3b743ecc4b7c4d0defdfabd01a13de3f83841f2dc21810e86",
+    "sif": "build/containers/phal-train-probe-m2-train-probe-a-arm64.sif",
+    "sif_sha256": "fd0e73861d22fce07b7d920ea406c3185db916bed93aa3fba5ca14d9f022bc47",
+    "pbs_job": "2360507.opbs"
+  },
+  "md_probe": {
+    "oci": "ghcr.io/kiana-0423/md-probe@sha256:d684ffa628091e6277c3f4b98c4de6cd5ef53aa59b210387f253ac0b5e957885",
+    "oci_digest": "sha256:d684ffa628091e6277c3f4b98c4de6cd5ef53aa59b210387f253ac0b5e957885",
+    "sif": "build/containers/md-probe-m3-md-probe-a-arm64.sif",
+    "sif_sha256": "0b6307d80fff7a94aa69b807194854dc05d30fba6fe463f41d8906aace923627",
+    "model": "/opt/phal/probes/md/allegro-probe.nequip.pth",
+    "model_sha256": "0c800c6d94f697f461033c8ec19c0b52cc587bac873d07dd7435955a06aa2f54",
+    "pbs_job": "2362776.opbs"
+  },
+  "runtime": {
+    "gpu": "NVIDIA GH200 120GB", "gpu_capability": [9, 0], "cuda": "13.0",
+    "torch": "2.9.0a0+50eac811a6.nv25.09", "nequip": "0.18.0", "allegro": "0.8.3",
+    "lammps": "10 Sep 2025", "pair_nequip_allegro": "v0.7.0", "pair_style": "allegro/kk",
+    "apptainer": "1.3.5", "scheduler": "PBS Professional", "queue": "debug-g", "project": "gw34"
+  },
+  "validation": {
+    "architecture": "passed", "train_probe": "passed", "md_probe": "passed",
+    "cuda_tensor": "passed", "allegro_gpu_inference": "passed", "lmp_help": "passed",
+    "pair_allegro": "passed", "run0": "passed", "run10": "passed", "thermo_finite": true,
+    "train_probe_evidence": "build/evidence/release/milestone3/train-probe",
+    "md_probe_evidence": "build/evidence/release/milestone3/md-probe"
+  }
+}
