@@ -1,0 +1,16 @@
+3
+Properties=species:S:1:pos:R:3 label=co2 family=benchmark_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+C        0.00000000       0.00000000       0.00000000
+O        0.00000000       0.00000000       1.17865800
+O        0.00000000       0.00000000      -1.17865800
+3
+Properties=species:S:1:pos:R:3 label=h2o family=benchmark_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+O        0.00000000       0.00000000       0.11926200
+H        0.00000000       0.76323900      -0.47704700
+H        0.00000000      -0.76323900      -0.47704700
+4
+Properties=species:S:1:pos:R:3 label=nh3 family=benchmark_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+N        0.00000000       0.00000000       0.11648900
+H        0.00000000       0.93973100      -0.27180800
+H        0.81383100      -0.46986500      -0.27180800
+H       -0.81383100      -0.46986500      -0.27180800

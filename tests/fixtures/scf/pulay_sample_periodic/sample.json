@@ -1,0 +1,49 @@
+{
+  "input_path": "/phal/runtime/cp2k/pulay_dataset_inputs/periodic_main_group/si-diamond.inp",
+  "metric": "gspace_kerker",
+  "n_ao": 26,
+  "n_electrons": 8.000000000006626,
+  "representation": "cp2k_pulay_metric",
+  "sample_id": "si-diamond",
+  "scf_converged": true,
+  "scf_steps": 8,
+  "spin_channels": 1,
+  "structure": {
+    "cell_volume_A3": 40.04786949774999,
+    "element_counts": {
+      "Si": 2
+    },
+    "elements": [
+      "Si"
+    ],
+    "extent_A": 0.678875,
+    "family": "periodic_main_group",
+    "formula": "Si2",
+    "group": "periodic_main_group",
+    "kinds": {
+      "Si": {
+        "basis_set": "DZVP-MOLOPT-SR-GTH",
+        "potential": "GTH-PBE-q4"
+      }
+    },
+    "label": "si-diamond",
+    "min_distance_A": 2.351691983976643,
+    "n_atoms": 2,
+    "number_density_A-3": 0.049940234651243205,
+    "periodic": true,
+    "source": "data/structures/pulay_sampling/periodic.extxyz",
+    "source_index": 0,
+    "template": "configs/cp2k/pulay_dataset.inp.template"
+  },
+  "trajectory": "trajectory",
+  "validation": {
+    "accepted": true,
+    "max_pulay_deviation": 7.935874180020619e-13,
+    "n_ao": 26,
+    "n_frames": 9,
+    "n_pulay_matrices": 6,
+    "reasons": [],
+    "sample_id": "si-diamond",
+    "scf_steps": 8
+  }
+}

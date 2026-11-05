@@ -1,0 +1,123 @@
+{
+  "basis_set": null,
+  "charge": null,
+  "cp2k_version": null,
+  "electron_count_method": "trace_ps",
+  "frames": [
+    {
+      "density_path": "iter_0000/density.npy",
+      "electron_count": 8.00000000000351,
+      "energy": -8.3775388313,
+      "index": 0,
+      "is_final": false,
+      "iteration": 1,
+      "metadata_path": "iter_0000/metadata.json",
+      "residual": 1.7072739
+    },
+    {
+      "density_path": "iter_0001/density.npy",
+      "electron_count": 8.000000000006434,
+      "energy": -7.2058273107,
+      "index": 1,
+      "is_final": false,
+      "iteration": 2,
+      "metadata_path": "iter_0001/metadata.json",
+      "residual": 0.01538258
+    },
+    {
+      "density_path": "iter_0002/density.npy",
+      "electron_count": 8.000000000003803,
+      "energy": -7.2103993623,
+      "index": 2,
+      "is_final": false,
+      "iteration": 3,
+      "metadata_path": "iter_0002/metadata.json",
+      "residual": 0.02921179
+    },
+    {
+      "density_path": "iter_0003/density.npy",
+      "electron_count": 8.000000000004665,
+      "energy": -7.2475403449,
+      "index": 3,
+      "is_final": false,
+      "iteration": 4,
+      "metadata_path": "iter_0003/metadata.json",
+      "residual": 0.00033469
+    },
+    {
+      "density_path": "iter_0004/density.npy",
+      "electron_count": 8.000000000002778,
+      "energy": -7.2477903758,
+      "index": 4,
+      "is_final": false,
+      "iteration": 5,
+      "metadata_path": "iter_0004/metadata.json",
+      "residual": 2.756e-05
+    },
+    {
+      "density_path": "iter_0005/density.npy",
+      "electron_count": 8.000000000000842,
+      "energy": -7.2477496771,
+      "index": 5,
+      "is_final": false,
+      "iteration": 6,
+      "metadata_path": "iter_0005/metadata.json",
+      "residual": 2.197e-05
+    },
+    {
+      "density_path": "iter_0006/density.npy",
+      "electron_count": 8.000000000004292,
+      "energy": -7.2477484816,
+      "index": 6,
+      "is_final": false,
+      "iteration": 7,
+      "metadata_path": "iter_0006/metadata.json",
+      "residual": 1.235e-05
+    },
+    {
+      "density_path": "iter_0007/density.npy",
+      "electron_count": 8.000000000005112,
+      "energy": -7.2477481029,
+      "index": 7,
+      "is_final": false,
+      "iteration": 8,
+      "metadata_path": "iter_0007/metadata.json",
+      "residual": 1.1e-07
+    },
+    {
+      "density_path": "final/density.npy",
+      "electron_count": 8.000000000006626,
+      "energy": null,
+      "index": 8,
+      "is_final": true,
+      "iteration": null,
+      "metadata_path": "final/metadata.json",
+      "residual": null
+    }
+  ],
+  "functional": null,
+  "matrix_format": "ao-density-matrix-spin-major-v1",
+  "multiplicity": null,
+  "n_ao": 26,
+  "n_electrons": 8.000000000006626,
+  "n_frames": 9,
+  "n_pulay_matrices": 6,
+  "overlap_path": "overlap.npy",
+  "potential": null,
+  "pulay_metric": "gspace_kerker",
+  "pulay_representation": "cp2k_pulay_metric",
+  "pulay_verification": {
+    "failed_iterations": [],
+    "max_deviation": 7.935874180020619e-13,
+    "metric": "gspace_kerker",
+    "n_records": 6,
+    "n_verified": 6,
+    "representation": "cp2k_pulay_metric",
+    "tolerance": 1e-06
+  },
+  "representation": "ao-nonorthogonal",
+  "scf_converged": true,
+  "spin_channels": 1,
+  "task_id": "si-diamond",
+  "trajectory_format": "ao-density-trajectory-v1"
+}

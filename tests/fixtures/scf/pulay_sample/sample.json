@@ -1,0 +1,26 @@
+{
+  "input_path": "/validation/dsgen/h2-r0.74.inp",
+  "metric": "gspace_kerker",
+  "n_ao": 10,
+  "n_electrons": 2.0000000000003397,
+  "representation": "cp2k_pulay_metric",
+  "sample_id": "h2-r0.74",
+  "scf_converged": true,
+  "scf_steps": 10,
+  "spin_channels": 1,
+  "structure": {
+    "bond_length_A": 0.74,
+    "system": "H2"
+  },
+  "trajectory": "/validation/pulay_dataset/h2-r0.74/trajectory",
+  "validation": {
+    "accepted": true,
+    "max_pulay_deviation": 8.629430503503954e-11,
+    "n_ao": 10,
+    "n_frames": 11,
+    "n_pulay_matrices": 8,
+    "reasons": [],
+    "sample_id": "h2-r0.74",
+    "scf_steps": 10
+  }
+}

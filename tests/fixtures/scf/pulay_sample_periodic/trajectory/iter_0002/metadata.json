@@ -1,0 +1,46 @@
+{
+  "electron_count": 8.000000000003803,
+  "electron_count_method": "trace_ps",
+  "energy": -7.2103993623,
+  "index": 2,
+  "is_final": false,
+  "iteration": 3,
+  "matrix_format": "ao-density-matrix-spin-major-v1",
+  "n_ao": 26,
+  "overlap_path": "../overlap.npy",
+  "pulay_depth": 3,
+  "pulay_diagnostics": {
+    "asymmetry": 0.0,
+    "coefficient_l1": 1.4556207350901602,
+    "condition_limit": 100000000.0,
+    "condition_number": 156501.82781087115,
+    "depth": 3,
+    "eigenvalue_max": 296.73184752780094,
+    "eigenvalue_min": 0.0018960279996626912,
+    "eigenvalues": [
+      0.0018960279996626912,
+      0.04009446345063388,
+      296.73184752780094
+    ],
+    "finite": true,
+    "positive_definite": true,
+    "rank": 3,
+    "rank_deficient": false,
+    "rank_tolerance": 1.9766311755895556e-13,
+    "regularization_relative": 0.0,
+    "regularization_required": false,
+    "regularization_shift": 0.0
+  },
+  "pulay_matrix_path": "pulay_matrix.npy",
+  "pulay_metric": "gspace_kerker",
+  "pulay_native_coefficients": [
+    0.13830956006477185,
+    -0.2278103675450339,
+    1.0895008074802621
+  ],
+  "pulay_representation": "cp2k_pulay_metric",
+  "representation": "ao-nonorthogonal",
+  "residual": 0.02921179,
+  "spin_channels": 1,
+  "task_id": "si-diamond"
+}

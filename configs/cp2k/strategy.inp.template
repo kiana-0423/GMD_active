@@ -1,0 +1,45 @@
+! CP2K input template for SCF strategy selection.
+!
+! The &SCF body is rewritten wholesale by
+! hotspot_al.cp2k_ml_scf.scf_strategy.apply_strategy, so whatever appears
+! between &SCF and &END SCF here is a placeholder: it is replaced, never
+! merged. Patching line by line would leave settings nobody chose in inputs
+! that are supposed to differ in exactly one way.
+!
+! The density-matrix printing the dataset template carries is deliberately
+! absent: this template is for step counts and wall time, and printing every
+! iteration would dominate both.
+
+&GLOBAL
+  PROJECT {{PROJECT}}
+  RUN_TYPE ENERGY
+  PRINT_LEVEL MEDIUM
+&END GLOBAL
+&FORCE_EVAL
+  METHOD QUICKSTEP
+  &DFT
+    BASIS_SET_FILE_NAME BASIS_MOLOPT
+    POTENTIAL_FILE_NAME POTENTIAL
+    &SCF
+      EPS_SCF 1.0E-6
+      MAX_SCF 60
+    &END SCF
+    &XC
+      &XC_FUNCTIONAL PBE
+      &END XC_FUNCTIONAL
+    &END XC
+    &MGRID
+      CUTOFF 320
+      REL_CUTOFF 50
+    &END MGRID
+  &END DFT
+  &SUBSYS
+    &CELL
+{{CELL}}
+    &END CELL
+    &COORD
+{{COORD}}
+    &END COORD
+{{KIND}}
+  &END SUBSYS
+&END FORCE_EVAL

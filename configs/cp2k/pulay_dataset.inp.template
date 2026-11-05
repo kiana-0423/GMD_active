@@ -1,0 +1,66 @@
+! CP2K input template for Pulay-matrix dataset generation.
+!
+! Rendered per structure by hotspot_al.cp2k_ml_scf.structures. The recognised
+! placeholders are PROJECT, COORD, CELL and KIND, each written in double
+! braces; any other placeholder is rejected rather than passed through to CP2K.
+! (They are named rather than shown here because this comment is itself part of
+! the template, and a shown placeholder would be substituted.)
+!
+! Three settings here are load-bearing for the dataset and should not be
+! changed casually:
+!
+!   METHOD PULAY_MIXING   -- the whole point. Broyden records no Pulay matrix,
+!                            so the sample would be rejected for having none.
+!   NBUFFER 8             -- the history depth, and therefore the size of B.
+!                            A dataset with one depth teaches a model one
+!                            input shape.
+!   &AO_MATRICES           -- DENSITY and OVERLAP are how the trajectory and
+!                            the electron-count check (Tr(P S)) get their data.
+!                            Printing is O(nao^2) per iteration, which is why
+!                            this template is for dataset runs only.
+
+&GLOBAL
+  PROJECT {{PROJECT}}
+  RUN_TYPE ENERGY
+  PRINT_LEVEL MEDIUM
+&END GLOBAL
+&FORCE_EVAL
+  METHOD QUICKSTEP
+  &DFT
+    BASIS_SET_FILE_NAME BASIS_MOLOPT
+    POTENTIAL_FILE_NAME POTENTIAL
+    &SCF
+      EPS_SCF 1.0E-6
+      MAX_SCF 60
+      &MIXING
+        METHOD PULAY_MIXING
+        ALPHA 0.4
+        NBUFFER 8
+      &END MIXING
+    &END SCF
+    &XC
+      &XC_FUNCTIONAL PBE
+      &END XC_FUNCTIONAL
+    &END XC
+    &MGRID
+      CUTOFF 320
+      REL_CUTOFF 50
+    &END MGRID
+    &PRINT
+      &AO_MATRICES
+        DENSITY .TRUE.
+        OVERLAP .TRUE.
+        NDIGITS 12
+      &END AO_MATRICES
+    &END PRINT
+  &END DFT
+  &SUBSYS
+    &CELL
+{{CELL}}
+    &END CELL
+    &COORD
+{{COORD}}
+    &END COORD
+{{KIND}}
+  &END SUBSYS
+&END FORCE_EVAL

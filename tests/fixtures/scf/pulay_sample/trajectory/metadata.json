@@ -1,0 +1,143 @@
+{
+  "basis_set": "DZVP-MOLOPT-GTH",
+  "charge": null,
+  "cp2k_version": null,
+  "electron_count_method": "trace_ps",
+  "frames": [
+    {
+      "density_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0000/density.npy",
+      "electron_count": 2.000000000000698,
+      "energy": -0.9713782115,
+      "index": 0,
+      "is_final": false,
+      "iteration": 1,
+      "metadata_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0000/metadata.json",
+      "residual": 0.49668673
+    },
+    {
+      "density_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0001/density.npy",
+      "electron_count": 2.0000000000020304,
+      "energy": -0.8691673771,
+      "index": 1,
+      "is_final": false,
+      "iteration": 2,
+      "metadata_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0001/metadata.json",
+      "residual": 0.01342469
+    },
+    {
+      "density_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0002/density.npy",
+      "electron_count": 2.0000000000019886,
+      "energy": -1.109283488,
+      "index": 2,
+      "is_final": false,
+      "iteration": 3,
+      "metadata_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0002/metadata.json",
+      "residual": 0.02208238
+    },
+    {
+      "density_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0003/density.npy",
+      "electron_count": 2.0000000000011124,
+      "energy": -1.1650146258,
+      "index": 3,
+      "is_final": false,
+      "iteration": 4,
+      "metadata_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0003/metadata.json",
+      "residual": 0.00071177
+    },
+    {
+      "density_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0004/density.npy",
+      "electron_count": 2.0000000000018505,
+      "energy": -1.1651462136,
+      "index": 4,
+      "is_final": false,
+      "iteration": 5,
+      "metadata_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0004/metadata.json",
+      "residual": 0.0005003
+    },
+    {
+      "density_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0005/density.npy",
+      "electron_count": 2.000000000001282,
+      "energy": -1.1657928982,
+      "index": 5,
+      "is_final": false,
+      "iteration": 6,
+      "metadata_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0005/metadata.json",
+      "residual": 4.536e-05
+    },
+    {
+      "density_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0006/density.npy",
+      "electron_count": 1.9999999999997815,
+      "energy": -1.1657888188,
+      "index": 6,
+      "is_final": false,
+      "iteration": 7,
+      "metadata_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0006/metadata.json",
+      "residual": 5.148e-05
+    },
+    {
+      "density_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0007/density.npy",
+      "electron_count": 2.0000000000018523,
+      "energy": -1.1659143968,
+      "index": 7,
+      "is_final": false,
+      "iteration": 8,
+      "metadata_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0007/metadata.json",
+      "residual": 1.54e-05
+    },
+    {
+      "density_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0008/density.npy",
+      "electron_count": 2.0000000000013993,
+      "energy": -1.165954133,
+      "index": 8,
+      "is_final": false,
+      "iteration": 9,
+      "metadata_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0008/metadata.json",
+      "residual": 3.03e-06
+    },
+    {
+      "density_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0009/density.npy",
+      "electron_count": 1.9999999999997065,
+      "energy": -1.1659583731,
+      "index": 9,
+      "is_final": false,
+      "iteration": 10,
+      "metadata_path": "/validation/pulay_dataset/h2-r0.74/trajectory/iter_0009/metadata.json",
+      "residual": 1.4e-07
+    },
+    {
+      "density_path": "/validation/pulay_dataset/h2-r0.74/trajectory/final/density.npy",
+      "electron_count": 2.0000000000003397,
+      "energy": null,
+      "index": 10,
+      "is_final": true,
+      "iteration": null,
+      "metadata_path": "/validation/pulay_dataset/h2-r0.74/trajectory/final/metadata.json",
+      "residual": null
+    }
+  ],
+  "functional": "PBE",
+  "matrix_format": "ao-density-matrix-spin-major-v1",
+  "multiplicity": null,
+  "n_ao": 10,
+  "n_electrons": 2.0000000000003397,
+  "n_frames": 11,
+  "n_pulay_matrices": 8,
+  "overlap_path": "overlap.npy",
+  "potential": "GTH-PBE",
+  "pulay_metric": "gspace_kerker",
+  "pulay_representation": "cp2k_pulay_metric",
+  "pulay_verification": {
+    "failed_iterations": [],
+    "max_deviation": 8.629430503503954e-11,
+    "metric": "gspace_kerker",
+    "n_records": 8,
+    "n_verified": 8,
+    "representation": "cp2k_pulay_metric",
+    "tolerance": 1e-06
+  },
+  "representation": "ao-nonorthogonal",
+  "scf_converged": true,
+  "spin_channels": 1,
+  "task_id": "h2-r0.74",
+  "trajectory_format": "ao-density-trajectory-v1"
+}

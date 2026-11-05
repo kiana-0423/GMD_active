@@ -1,0 +1,33 @@
+{
+  "comment": [
+    "Sampling plan for the ML-Pulay dataset. Each group is a family of systems",
+    "and the CP2K settings that suit it. The point of grouping is diversity: a",
+    "dataset drawn from one family teaches a mixer that family's B and nothing",
+    "else, which is how the first trained model failed to transfer.",
+    "Groups are cheap-to-expensive top to bottom; a run can stop early and",
+    "still produce a valid, if narrower, dataset."
+  ],
+  "groups": [
+    {
+      "name": "small_molecules",
+      "description": "Closed-shell molecules, equilibrium and strained. Small n_ao, short SCF, cheap.",
+      "structures": ["data/structures/pulay_sampling/small_molecules.extxyz"],
+      "template": "configs/cp2k/pulay_dataset.inp.template"
+    },
+    {
+      "name": "periodic_main_group",
+      "description": "Semiconductors and ionic solids. Periodic boundary conditions change the g-space residual, and therefore B.",
+      "structures": ["data/structures/pulay_sampling/periodic.extxyz"],
+      "template": "configs/cp2k/pulay_dataset.inp.template"
+    },
+    {
+      "name": "transition_metal_oxides",
+      "description": "Open d shells: the slowest-converging systems here, and the ones a mixer is actually wanted for. Smeared occupations and empty states.",
+      "structures": [
+        "data/structures/pulay_sampling/transition_metal_oxides.extxyz",
+        "data/structures/pulay_sampling/tio2_anatase.cif"
+      ],
+      "template": "configs/cp2k/pulay_dataset_smeared.inp.template"
+    }
+  ]
+}

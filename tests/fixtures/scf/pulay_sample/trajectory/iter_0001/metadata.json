@@ -1,0 +1,23 @@
+{
+  "electron_count": 2.0000000000020304,
+  "electron_count_method": "trace_ps",
+  "energy": -0.8691673771,
+  "index": 1,
+  "is_final": false,
+  "iteration": 2,
+  "matrix_format": "ao-density-matrix-spin-major-v1",
+  "n_ao": 10,
+  "overlap_path": "../overlap.npy",
+  "pulay_depth": 2,
+  "pulay_matrix_path": "pulay_matrix.npy",
+  "pulay_metric": "gspace_kerker",
+  "pulay_native_coefficients": [
+    -1.2143969088142115,
+    2.2143969088142117
+  ],
+  "pulay_representation": "cp2k_pulay_metric",
+  "representation": "ao-nonorthogonal",
+  "residual": 0.01342469,
+  "spin_channels": 1,
+  "task_id": "h2-r0.74"
+}

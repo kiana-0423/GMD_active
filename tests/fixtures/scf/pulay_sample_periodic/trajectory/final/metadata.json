@@ -1,0 +1,21 @@
+{
+  "electron_count": 8.000000000006626,
+  "electron_count_method": "trace_ps",
+  "energy": null,
+  "index": 8,
+  "is_final": true,
+  "iteration": null,
+  "matrix_format": "ao-density-matrix-spin-major-v1",
+  "n_ao": 26,
+  "overlap_path": "../overlap.npy",
+  "pulay_depth": null,
+  "pulay_diagnostics": null,
+  "pulay_matrix_path": null,
+  "pulay_metric": null,
+  "pulay_native_coefficients": null,
+  "pulay_representation": null,
+  "representation": "ao-nonorthogonal",
+  "residual": null,
+  "spin_channels": 1,
+  "task_id": "si-diamond"
+}

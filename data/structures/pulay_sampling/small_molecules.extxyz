@@ -1,0 +1,89 @@
+2
+Properties=species:S:1:pos:R:3 label=h2 family=small_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+H        0.00000000       0.00000000       0.36858300
+H        0.00000000       0.00000000      -0.36858300
+3
+Properties=species:S:1:pos:R:3 label=h2o family=small_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+O        0.00000000       0.00000000       0.11926200
+H        0.00000000       0.76323900      -0.47704700
+H        0.00000000      -0.76323900      -0.47704700
+4
+Properties=species:S:1:pos:R:3 label=nh3 family=small_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+N        0.00000000       0.00000000       0.11648900
+H        0.00000000       0.93973100      -0.27180800
+H        0.81383100      -0.46986500      -0.27180800
+H       -0.81383100      -0.46986500      -0.27180800
+5
+Properties=species:S:1:pos:R:3 label=ch4 family=small_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+C        0.00000000       0.00000000       0.00000000
+H        0.62911800       0.62911800       0.62911800
+H       -0.62911800      -0.62911800       0.62911800
+H        0.62911800      -0.62911800      -0.62911800
+H       -0.62911800       0.62911800      -0.62911800
+3
+Properties=species:S:1:pos:R:3 label=co2 family=small_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+C        0.00000000       0.00000000       0.00000000
+O        0.00000000       0.00000000       1.17865800
+O        0.00000000       0.00000000      -1.17865800
+2
+Properties=species:S:1:pos:R:3 label=co family=small_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+O        0.00000000       0.00000000       0.49300300
+C        0.00000000       0.00000000      -0.65733700
+2
+Properties=species:S:1:pos:R:3 label=n2 family=small_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+N        0.00000000       0.00000000       0.56499000
+N        0.00000000       0.00000000      -0.56499000
+2
+Properties=species:S:1:pos:R:3 label=hf family=small_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+F        0.00000000       0.00000000       0.09338900
+H        0.00000000       0.00000000      -0.84050200
+2
+Properties=species:S:1:pos:R:3 label=lih family=small_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+Li       0.00000000       0.00000000       0.41000000
+H        0.00000000       0.00000000      -1.23000000
+6
+Properties=species:S:1:pos:R:3 label=c2h4 family=small_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+C        0.00000000       0.00000000       0.66748000
+C        0.00000000       0.00000000      -0.66748000
+H        0.00000000       0.92283200       1.23769500
+H        0.00000000      -0.92283200       1.23769500
+H        0.00000000       0.92283200      -1.23769500
+H        0.00000000      -0.92283200      -1.23769500
+3
+Properties=species:S:1:pos:R:3 label=hcn family=small_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+C        0.00000000       0.00000000      -0.51174700
+N        0.00000000       0.00000000       0.66446100
+H        0.00000000       0.00000000      -1.58074600
+4
+Properties=species:S:1:pos:R:3 label=h2co family=small_molecules generator=gmd-scf-structures-v1 pbc="F F F"
+O        0.00000000       0.00000000       0.68350100
+C        0.00000000       0.00000000      -0.53661400
+H        0.00000000       0.93439000      -1.12416400
+H        0.00000000      -0.93439000      -1.12416400
+3
+Properties=species:S:1:pos:R:3 label=h2o-strained family=small_molecules generator=gmd-scf-structures-v1 note="distances x1.15" pbc="F F F"
+O       -0.01677161       0.00289892       0.16362860
+H        0.00024364       0.89695141      -0.50687499
+H        0.00473185      -0.87484206      -0.48855974
+4
+Properties=species:S:1:pos:R:3 label=nh3-strained family=small_molecules generator=gmd-scf-structures-v1 note="distances x1.15" pbc="F F F"
+N        0.01025063      -0.00369743       0.16268899
+H       -0.01710586       1.07747489      -0.27465283
+H        0.94859202      -0.54173216      -0.29944185
+H       -0.94685091      -0.54550114      -0.28441239
+5
+Properties=species:S:1:pos:R:3 label=ch4-strained family=small_molecules generator=gmd-scf-structures-v1 note="distances x1.15" pbc="F F F"
+C       -0.01105624      -0.01632679       0.00531317
+H        0.71252224       0.74100062       0.74314045
+H       -0.71163030      -0.74220412       0.71694047
+H        0.70752637      -0.71047793      -0.73350605
+H       -0.74201740       0.70498799      -0.70543511
+3
+Properties=species:S:1:pos:R:3 label=co2-strained family=small_molecules generator=gmd-scf-structures-v1 note="distances x1.10" pbc="F F F"
+C       -0.01180027       0.00878108       0.00967518
+O        0.01638231       0.00138696       1.30627727
+O       -0.01472707       0.01638669      -1.30583122
+2
+Properties=species:S:1:pos:R:3 label=n2-strained family=small_molecules generator=gmd-scf-structures-v1 note="distances x1.20" pbc="F F F"
+N       -0.00014489      -0.00166677       0.66321661
+N        0.01501223       0.01683001      -0.69600451

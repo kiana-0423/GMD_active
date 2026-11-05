@@ -1,0 +1,30 @@
+6
+Lattice="4.594 0.0 0.0 0.0 4.594 0.0 0.0 0.0 2.959" Properties=species:S:1:pos:R:3:spacegroup_kinds:I:1 label=tio2-rutile family=transition_metal_oxides generator=gmd-scf-structures-v1 pbc="T T T"
+Ti       0.00000000       0.00000000       0.00000000        0
+Ti       2.29700000       2.29700000       1.47950000        0
+O        1.40117000       1.40117000       0.00000000        1
+O        3.19283000       3.19283000       0.00000000        1
+O        0.89583000       3.69817000       1.47950000        1
+O        3.69817000       0.89583000       1.47950000        1
+2
+Lattice="0.0 2.0885 2.0885 2.0885 0.0 2.0885 2.0885 2.0885 0.0" Properties=species:S:1:pos:R:3 label=nio-rocksalt family=transition_metal_oxides generator=gmd-scf-structures-v1 note="non-magnetic primitive cell; PHAL's spin setup is unknown" pbc="T T T"
+Ni       0.00000000       0.00000000       0.00000000
+O        2.08850000       0.00000000       0.00000000
+2
+Lattice="0.0 2.2225 2.2225 2.2225 0.0 2.2225 2.2225 2.2225 0.0" Properties=species:S:1:pos:R:3 label=mno-rocksalt family=transition_metal_oxides generator=gmd-scf-structures-v1 note="non-magnetic primitive cell; PHAL's spin setup is unknown" pbc="T T T"
+Mn       0.00000000       0.00000000       0.00000000
+O        2.22250000       0.00000000       0.00000000
+4
+Lattice="3.25 0.0 0.0 -1.625 2.8145825622994254 0.0 0.0 0.0 5.207" Properties=species:S:1:pos:R:3 label=zno-wurtzite family=transition_metal_oxides generator=gmd-scf-structures-v1 pbc="T T T"
+Zn       0.00000000       0.00000000       0.00000000
+O       -0.00000000       1.87638837       0.61442600
+Zn      -0.00000000       1.87638837       2.60350000
+O        0.00000000       0.00000000       3.21792600
+6
+Lattice="4.27 0.0 0.0 0.0 4.27 0.0 0.0 0.0 4.27" Properties=species:S:1:pos:R:3:spacegroup_kinds:I:1 label=cu2o-cuprite family=transition_metal_oxides generator=gmd-scf-structures-v1 pbc="T T T"
+Cu       0.00000000       0.00000000       0.00000000        0
+Cu       2.13500000       2.13500000       0.00000000        0
+Cu       2.13500000       0.00000000       2.13500000        0
+Cu       0.00000000       2.13500000       2.13500000        0
+O        1.06750000       1.06750000       1.06750000        1
+O        3.20250000       3.20250000       3.20250000        1

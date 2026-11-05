@@ -1,0 +1,30 @@
+2
+Lattice="0.0 2.7155 2.7155 2.7155 0.0 2.7155 2.7155 2.7155 0.0" Properties=species:S:1:pos:R:3 label=si-diamond family=periodic_main_group generator=gmd-scf-structures-v1 note="matches the PHAL fixture" pbc="T T T"
+Si       0.00000000       0.00000000       0.00000000
+Si       1.35775000       1.35775000       1.35775000
+2
+Lattice="0.0 2.796965 2.796965 2.796965 0.0 2.796965 2.796965 2.796965 0.0" Properties=species:S:1:pos:R:3 label=si-diamond-strained family=periodic_main_group generator=gmd-scf-structures-v1 note="lattice x1.03 (PHAL's strain is unknown)" pbc="T T T"
+Si       0.00000000       0.00000000       0.00000000
+Si       1.39848250       1.39848250       1.39848250
+2
+Lattice="0.0 1.7835 1.7835 1.7835 0.0 1.7835 1.7835 1.7835 0.0" Properties=species:S:1:pos:R:3 label=c-diamond family=periodic_main_group generator=gmd-scf-structures-v1 pbc="T T T"
+C        0.00000000       0.00000000       0.00000000
+C        0.89175000       0.89175000       0.89175000
+4
+Lattice="3.112 0.0 0.0 -1.556 2.695071056577173 0.0 0.0 0.0 4.982" Properties=species:S:1:pos:R:3 label=aln-wurtzite family=periodic_main_group generator=gmd-scf-structures-v1 pbc="T T T"
+Al       0.00000000       0.00000000       0.00000000
+N       -0.00000000       1.79671404       0.58787600
+Al      -0.00000000       1.79671404       2.49100000
+N        0.00000000       0.00000000       3.07887600
+2
+Lattice="0.0 2.0415 2.0415 2.0415 0.0 2.0415 2.0415 2.0415 0.0" Properties=species:S:1:pos:R:3 label=lih-rocksalt family=periodic_main_group generator=gmd-scf-structures-v1 pbc="T T T"
+Li       0.00000000       0.00000000       0.00000000
+H        2.04150000       0.00000000       0.00000000
+2
+Lattice="0.0 2.106 2.106 2.106 0.0 2.106 2.106 2.106 0.0" Properties=species:S:1:pos:R:3 label=mgo-rocksalt family=periodic_main_group generator=gmd-scf-structures-v1 pbc="T T T"
+Mg       0.00000000       0.00000000       0.00000000
+O        2.10600000       0.00000000       0.00000000
+2
+Lattice="0.0 2.82 2.82 2.82 0.0 2.82 2.82 2.82 0.0" Properties=species:S:1:pos:R:3 label=nacl-rocksalt family=periodic_main_group generator=gmd-scf-structures-v1 pbc="T T T"
+Na       0.00000000       0.00000000       0.00000000
+Cl       2.82000000       0.00000000       0.00000000

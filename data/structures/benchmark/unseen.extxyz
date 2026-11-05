@@ -1,0 +1,30 @@
+6
+Properties=species:S:1:pos:R:3 label=h2cchf family=benchmark_unseen generator=gmd-scf-structures-v1 pbc="F F F"
+C        0.00000000       0.43771400       0.00000000
+C        1.19192300      -0.14508700       0.00000000
+F       -1.14892900      -0.27833200       0.00000000
+H       -0.18644500       1.50577800       0.00000000
+H        1.29134800      -1.22283300       0.00000000
+H        2.08392400       0.46627900       0.00000000
+5
+Properties=species:S:1:pos:R:3 label=hcf3 family=benchmark_unseen generator=gmd-scf-structures-v1 note="built by hand; not in ASE G2" pbc="F F F"
+C        0.00000000       0.00000000       0.00000000
+H        0.62931179       0.62931179       0.62931179
+F        0.76787586      -0.76787586      -0.76787586
+F       -0.76787586       0.76787586      -0.76787586
+F       -0.76787586      -0.76787586       0.76787586
+5
+Properties=species:S:1:pos:R:3 label=hcooh family=benchmark_unseen generator=gmd-scf-structures-v1 pbc="F F F"
+O       -1.04094500      -0.43643200       0.00000000
+C        0.00000000       0.42394900       0.00000000
+O        1.16937200       0.10374100       0.00000000
+H       -0.64957000      -1.33513400       0.00000000
+H       -0.37784700       1.45296700       0.00000000
+6
+Properties=species:S:1:pos:R:3 label=n2h4 family=benchmark_unseen generator=gmd-scf-structures-v1 pbc="F F F"
+N        0.00000000       0.71895900      -0.07768700
+N        0.00000000      -0.71895900      -0.07768700
+H        0.21108200       1.09275200       0.84788700
+H       -0.94821400       1.00502600      -0.30407800
+H       -0.21108200      -1.09275200       0.84788700
+H        0.94821400      -1.00502600      -0.30407800
