@@ -1,0 +1,56 @@
+{
+  "mode": "slab",
+  "center": [
+    1.3947756716675879,
+    2.9352891827812764,
+    1.1968454206946972
+  ],
+  "xy_lengths": [
+    9.0,
+    9.0
+  ],
+  "z_thickness": 8.0,
+  "event_id": "evt-80-00000001",
+  "hotspot_id": "evt-80-00000001_hs000",
+  "backend": "fake_allegro",
+  "original_frame_id": 80,
+  "h_caps": [
+    {
+      "parent_local_index": 12,
+      "parent_original_index": 24,
+      "broken_partner_original_index": 26,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 13,
+      "parent_original_index": 25,
+      "broken_partner_original_index": 31,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 28,
+      "parent_original_index": 144,
+      "broken_partner_original_index": 148,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 35,
+      "parent_original_index": 160,
+      "broken_partner_original_index": 161,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 35,
+      "parent_original_index": 160,
+      "broken_partner_original_index": 163,
+      "bond_length": 1.09
+    }
+  ],
+  "h_cap_parent_local_indices": [
+    12,
+    13,
+    28,
+    35,
+    35
+  ]
+}

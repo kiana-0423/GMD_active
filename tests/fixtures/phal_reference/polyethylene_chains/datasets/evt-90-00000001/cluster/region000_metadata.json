@@ -1,0 +1,181 @@
+{
+  "mode": "cluster",
+  "center": [
+    5.076069068008682,
+    2.969394694450638,
+    6.305966678988374
+  ],
+  "extract_radius": 5.5,
+  "core_radius": 2.5,
+  "boundary_thickness": 2.0,
+  "vacuum_padding": 4.0,
+  "event_id": "evt-90-00000001",
+  "hotspot_id": "evt-90-00000001_hs000",
+  "backend": "fake_allegro",
+  "original_frame_id": 90,
+  "h_caps": [
+    {
+      "parent_local_index": 0,
+      "parent_original_index": 3,
+      "broken_partner_original_index": 0,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 0,
+      "parent_original_index": 3,
+      "broken_partner_original_index": 5,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 17,
+      "parent_original_index": 21,
+      "broken_partner_original_index": 23,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 17,
+      "parent_original_index": 21,
+      "broken_partner_original_index": 24,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 19,
+      "parent_original_index": 36,
+      "broken_partner_original_index": 69,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 43,
+      "parent_original_index": 60,
+      "broken_partner_original_index": 63,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 47,
+      "parent_original_index": 78,
+      "broken_partner_original_index": 75,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 47,
+      "parent_original_index": 78,
+      "broken_partner_original_index": 79,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 49,
+      "parent_original_index": 81,
+      "broken_partner_original_index": 82,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 54,
+      "parent_original_index": 87,
+      "broken_partner_original_index": 88,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 56,
+      "parent_original_index": 90,
+      "broken_partner_original_index": 91,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 56,
+      "parent_original_index": 90,
+      "broken_partner_original_index": 93,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 60,
+      "parent_original_index": 117,
+      "broken_partner_original_index": 114,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 63,
+      "parent_original_index": 120,
+      "broken_partner_original_index": 122,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 65,
+      "parent_original_index": 123,
+      "broken_partner_original_index": 126,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 69,
+      "parent_original_index": 147,
+      "broken_partner_original_index": 144,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 87,
+      "parent_original_index": 165,
+      "broken_partner_original_index": 168,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 93,
+      "parent_original_index": 258,
+      "broken_partner_original_index": 255,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 96,
+      "parent_original_index": 261,
+      "broken_partner_original_index": 262,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 96,
+      "parent_original_index": 261,
+      "broken_partner_original_index": 263,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 97,
+      "parent_original_index": 264,
+      "broken_partner_original_index": 267,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 100,
+      "parent_original_index": 270,
+      "broken_partner_original_index": 267,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 100,
+      "parent_original_index": 270,
+      "broken_partner_original_index": 273,
+      "bond_length": 1.09
+    }
+  ],
+  "h_cap_parent_local_indices": [
+    0,
+    0,
+    17,
+    17,
+    19,
+    43,
+    47,
+    47,
+    49,
+    54,
+    56,
+    56,
+    60,
+    63,
+    65,
+    69,
+    87,
+    93,
+    96,
+    96,
+    97,
+    100,
+    100
+  ]
+}

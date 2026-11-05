@@ -1,0 +1,18 @@
+{
+  "mode": "cluster",
+  "center": [
+    8.295590721791209,
+    0.008398209935572096,
+    7.994626855587294
+  ],
+  "extract_radius": 6.0,
+  "core_radius": 3.0,
+  "boundary_thickness": 2.0,
+  "vacuum_padding": 4.0,
+  "event_id": "evt-30-00000000",
+  "hotspot_id": "evt-30-00000000_hs001",
+  "backend": "fake_allegro",
+  "original_frame_id": 30,
+  "h_capping_skipped": true,
+  "h_capping_skipped_reason": "metal_system"
+}

@@ -1,0 +1,98 @@
+{
+  "mode": "slab",
+  "center": [
+    2.1882721054080956,
+    11.768235480906025,
+    12.222298449937394
+  ],
+  "xy_lengths": [
+    9.0,
+    9.0
+  ],
+  "z_thickness": 8.0,
+  "event_id": "evt-110-00000002",
+  "hotspot_id": "evt-110-00000002_hs000",
+  "backend": "fake_allegro",
+  "original_frame_id": 110,
+  "h_caps": [
+    {
+      "parent_local_index": 2,
+      "parent_original_index": 17,
+      "broken_partner_original_index": 16,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 12,
+      "parent_original_index": 49,
+      "broken_partner_original_index": 48,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 12,
+      "parent_original_index": 49,
+      "broken_partner_original_index": 53,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 26,
+      "parent_original_index": 120,
+      "broken_partner_original_index": 121,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 26,
+      "parent_original_index": 120,
+      "broken_partner_original_index": 123,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 26,
+      "parent_original_index": 120,
+      "broken_partner_original_index": 124,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 29,
+      "parent_original_index": 137,
+      "broken_partner_original_index": 136,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 29,
+      "parent_original_index": 137,
+      "broken_partner_original_index": 143,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 38,
+      "parent_original_index": 193,
+      "broken_partner_original_index": 192,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 38,
+      "parent_original_index": 193,
+      "broken_partner_original_index": 198,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 42,
+      "parent_original_index": 208,
+      "broken_partner_original_index": 209,
+      "bond_length": 1.09
+    }
+  ],
+  "h_cap_parent_local_indices": [
+    2,
+    12,
+    12,
+    26,
+    26,
+    26,
+    29,
+    29,
+    38,
+    38,
+    42
+  ]
+}

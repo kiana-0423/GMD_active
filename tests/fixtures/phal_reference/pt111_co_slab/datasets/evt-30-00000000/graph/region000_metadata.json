@@ -1,0 +1,34 @@
+{
+  "mode": "graph",
+  "center": [
+    11.08392955006915,
+    -0.0015845965052618816,
+    14.451165890102377
+  ],
+  "extract_radius": 6.0,
+  "core_radius": 3.0,
+  "boundary_thickness": 2.0,
+  "vacuum_padding": 4.0,
+  "graph_hops": 2,
+  "graph_atom_indices": [
+    32,
+    44,
+    45,
+    48,
+    49,
+    51,
+    52,
+    55,
+    60,
+    61,
+    64,
+    65
+  ],
+  "n_graph_atoms": 12,
+  "event_id": "evt-30-00000000",
+  "hotspot_id": "evt-30-00000000_hs000",
+  "backend": "fake_allegro",
+  "original_frame_id": 30,
+  "h_capping_skipped": true,
+  "h_capping_skipped_reason": "metal_system"
+}

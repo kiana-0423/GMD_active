@@ -1,0 +1,19 @@
+{
+  "mode": "slab",
+  "center": [
+    8.295590721791209,
+    0.008398209935572096,
+    7.994626855587294
+  ],
+  "xy_lengths": [
+    9.0,
+    9.0
+  ],
+  "z_thickness": 12.0,
+  "event_id": "evt-30-00000000",
+  "hotspot_id": "evt-30-00000000_hs001",
+  "backend": "fake_allegro",
+  "original_frame_id": 30,
+  "h_capping_skipped": true,
+  "h_capping_skipped_reason": "metal_system"
+}

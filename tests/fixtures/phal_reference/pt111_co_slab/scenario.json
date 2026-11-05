@@ -1,0 +1,48 @@
+{
+ "description": {
+  "frames": 16,
+  "injections": {
+   "frame 11": "surface Pt 48 displaced +0.5 A in x",
+   "frame 6": "opposing z force burst on C 64 / O 65"
+  },
+  "step_stride": 5,
+  "system": "Pt(111) 4x4x4 slab, 8 A vacuum, pbc=(T,T,F), CO adsorbed on top; 66 atoms"
+ },
+ "name": "pt111_co_slab",
+ "overrides": {
+  "buffer": {
+   "maxlen": 12,
+   "post_trigger_frames": 2,
+   "pre_trigger_frames": 2
+  },
+  "extraction": {
+   "block": {
+    "halo": 3.0,
+    "max_atoms": 600,
+    "min_atoms": 10,
+    "size": [
+     5.6,
+     4.9,
+     30.0
+    ]
+   },
+   "buffer_radius": 3.0,
+   "core_radius": 3.0,
+   "extract_radius": 6.0,
+   "min_atoms": 10,
+   "slab": {
+    "lx": 9.0,
+    "ly": 9.0,
+    "z_margin": 6.0
+   }
+  },
+  "monitor": {
+   "coordination_cutoff": 5.0,
+   "lj_cutoff": 5.0
+  },
+  "online": {
+   "monitor_freq": 4
+  }
+ },
+ "seed": 20261106
+}

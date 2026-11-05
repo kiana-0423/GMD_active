@@ -1,0 +1,183 @@
+{
+  "mode": "graph",
+  "center": [
+    11.45408477954977,
+    2.386784363237219,
+    12.172652392481872
+  ],
+  "extract_radius": 6.0,
+  "core_radius": 3.0,
+  "boundary_thickness": 2.0,
+  "vacuum_padding": 4.0,
+  "graph_hops": 2,
+  "graph_atom_indices": [
+    160,
+    161,
+    162,
+    163,
+    164
+  ],
+  "n_graph_atoms": 5,
+  "event_id": "evt-50-00000000",
+  "hotspot_id": "evt-50-00000000_hs000",
+  "backend": "fake_allegro",
+  "original_frame_id": 50,
+  "h_caps": [
+    {
+      "parent_local_index": 0,
+      "parent_original_index": 0,
+      "broken_partner_original_index": 2,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 0,
+      "parent_original_index": 0,
+      "broken_partner_original_index": 4,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 6,
+      "parent_original_index": 8,
+      "broken_partner_original_index": 9,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 20,
+      "parent_original_index": 40,
+      "broken_partner_original_index": 41,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 26,
+      "parent_original_index": 64,
+      "broken_partner_original_index": 65,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 26,
+      "parent_original_index": 64,
+      "broken_partner_original_index": 68,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 30,
+      "parent_original_index": 72,
+      "broken_partner_original_index": 74,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 30,
+      "parent_original_index": 72,
+      "broken_partner_original_index": 75,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 36,
+      "parent_original_index": 80,
+      "broken_partner_original_index": 81,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 49,
+      "parent_original_index": 112,
+      "broken_partner_original_index": 115,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 49,
+      "parent_original_index": 112,
+      "broken_partner_original_index": 116,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 50,
+      "parent_original_index": 113,
+      "broken_partner_original_index": 117,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 54,
+      "parent_original_index": 136,
+      "broken_partner_original_index": 137,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 82,
+      "parent_original_index": 168,
+      "broken_partner_original_index": 170,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 82,
+      "parent_original_index": 168,
+      "broken_partner_original_index": 172,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 88,
+      "parent_original_index": 176,
+      "broken_partner_original_index": 177,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 88,
+      "parent_original_index": 176,
+      "broken_partner_original_index": 178,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 100,
+      "parent_original_index": 192,
+      "broken_partner_original_index": 195,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 100,
+      "parent_original_index": 192,
+      "broken_partner_original_index": 196,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 106,
+      "parent_original_index": 200,
+      "broken_partner_original_index": 201,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 106,
+      "parent_original_index": 200,
+      "broken_partner_original_index": 203,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 106,
+      "parent_original_index": 200,
+      "broken_partner_original_index": 204,
+      "bond_length": 1.09
+    }
+  ],
+  "h_cap_parent_local_indices": [
+    0,
+    0,
+    6,
+    20,
+    26,
+    26,
+    30,
+    30,
+    36,
+    49,
+    49,
+    50,
+    54,
+    82,
+    82,
+    88,
+    88,
+    100,
+    100,
+    106,
+    106,
+    106
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "mode": "slab",
+  "center": [
+    11.775121421707158,
+    1.496915253181365,
+    12.754777965441885
+  ],
+  "xy_lengths": [
+    9.0,
+    9.0
+  ],
+  "z_thickness": 8.0,
+  "event_id": "evt-50-00000000",
+  "hotspot_id": "evt-50-00000000_hs000",
+  "backend": "fake_allegro",
+  "original_frame_id": 50,
+  "h_caps": [
+    {
+      "parent_local_index": 0,
+      "parent_original_index": 1,
+      "broken_partner_original_index": 0,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 0,
+      "parent_original_index": 1,
+      "broken_partner_original_index": 5,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 0,
+      "parent_original_index": 1,
+      "broken_partner_original_index": 7,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 2,
+      "parent_original_index": 17,
+      "broken_partner_original_index": 16,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 12,
+      "parent_original_index": 64,
+      "broken_partner_original_index": 68,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 17,
+      "parent_original_index": 73,
+      "broken_partner_original_index": 72,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 17,
+      "parent_original_index": 73,
+      "broken_partner_original_index": 78,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 24,
+      "parent_original_index": 136,
+      "broken_partner_original_index": 137,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 24,
+      "parent_original_index": 136,
+      "broken_partner_original_index": 139,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 27,
+      "parent_original_index": 144,
+      "broken_partner_original_index": 147,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 45,
+      "parent_original_index": 193,
+      "broken_partner_original_index": 192,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 45,
+      "parent_original_index": 193,
+      "broken_partner_original_index": 197,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 49,
+      "parent_original_index": 209,
+      "broken_partner_original_index": 215,
+      "bond_length": 1.09
+    }
+  ],
+  "h_cap_parent_local_indices": [
+    0,
+    0,
+    0,
+    2,
+    12,
+    17,
+    17,
+    24,
+    24,
+    27,
+    45,
+    45,
+    49
+  ]
+}

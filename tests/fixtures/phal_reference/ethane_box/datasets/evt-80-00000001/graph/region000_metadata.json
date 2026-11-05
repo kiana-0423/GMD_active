@@ -1,0 +1,162 @@
+{
+  "mode": "graph",
+  "center": [
+    2.3541840102807825,
+    2.534348622613565,
+    1.656828401560432
+  ],
+  "extract_radius": 6.0,
+  "core_radius": 3.0,
+  "boundary_thickness": 2.0,
+  "vacuum_padding": 4.0,
+  "graph_hops": 2,
+  "graph_atom_indices": [
+    0,
+    1,
+    5,
+    6,
+    7
+  ],
+  "n_graph_atoms": 5,
+  "event_id": "evt-80-00000001",
+  "hotspot_id": "evt-80-00000001_hs000",
+  "backend": "fake_allegro",
+  "original_frame_id": 80,
+  "h_caps": [
+    {
+      "parent_local_index": 32,
+      "parent_original_index": 32,
+      "broken_partner_original_index": 33,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 37,
+      "parent_original_index": 41,
+      "broken_partner_original_index": 45,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 37,
+      "parent_original_index": 41,
+      "broken_partner_original_index": 46,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 50,
+      "parent_original_index": 57,
+      "broken_partner_original_index": 56,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 55,
+      "parent_original_index": 65,
+      "broken_partner_original_index": 69,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 55,
+      "parent_original_index": 65,
+      "broken_partner_original_index": 70,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 68,
+      "parent_original_index": 81,
+      "broken_partner_original_index": 80,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 72,
+      "parent_original_index": 88,
+      "broken_partner_original_index": 91,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 80,
+      "parent_original_index": 97,
+      "broken_partner_original_index": 101,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 80,
+      "parent_original_index": 97,
+      "broken_partner_original_index": 102,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 80,
+      "parent_original_index": 97,
+      "broken_partner_original_index": 103,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 85,
+      "parent_original_index": 112,
+      "broken_partner_original_index": 113,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 85,
+      "parent_original_index": 112,
+      "broken_partner_original_index": 116,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 88,
+      "parent_original_index": 120,
+      "broken_partner_original_index": 121,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 101,
+      "parent_original_index": 153,
+      "broken_partner_original_index": 152,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 101,
+      "parent_original_index": 153,
+      "broken_partner_original_index": 158,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 105,
+      "parent_original_index": 161,
+      "broken_partner_original_index": 165,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 105,
+      "parent_original_index": 161,
+      "broken_partner_original_index": 166,
+      "bond_length": 1.09
+    },
+    {
+      "parent_local_index": 110,
+      "parent_original_index": 169,
+      "broken_partner_original_index": 168,
+      "bond_length": 1.09
+    }
+  ],
+  "h_cap_parent_local_indices": [
+    32,
+    37,
+    37,
+    50,
+    55,
+    55,
+    68,
+    72,
+    80,
+    80,
+    80,
+    85,
+    85,
+    88,
+    101,
+    101,
+    105,
+    105,
+    110
+  ]
+}
