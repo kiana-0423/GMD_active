@@ -190,9 +190,18 @@ shipped `ridge_lambda: 1e-6` exact LJ forces fitted to A = 8.3e-4, B = −1.24 (
 Fixed by applying the ridge to column-normalised parameters; λ is now dimensionless.
 Regression test: `tests/test_lj_projection.py::test_configured_ridge_does_not_bias_a_well_posed_fit`.
 
+### F-34: PHAL minimum image is wrong for skewed cells with partial PBC (Reproduced)
+
+`utils/periodic.py:_triclinic_mic` rounds coordinates in the full 3-D (reduced) basis, so the
+non-periodic cell vector leaks into the periodic coordinates. For the skewed cell
+[[6,0,0],[5,3,0],[4,2.5,2]] with `pbc=(T,T,F)`, 155 of 200 random vectors returned a non-minimal
+image (e.g. 14.70 A where 7.19 A exists). Full 3-D PBC was correct. Fixed in GMD_active by projecting
+onto the periodic sub-lattice; regression test `tests/utils/test_periodic.py`.
+
 ## Resolution log
 
 | Finding | Resolution | Evidence |
 |---|---|---|
 | F-01 (GMD_active part) | Force basis sign corrected in `monitors/lj_projection.py`; self-confirming tests replaced by ASE-based tests with finite-difference checks. PHAL golden fixtures left unchanged as historical evidence. | `tests/test_lj_projection.py`, `tests/test_reliability_monitor.py` |
 | F-33 | Ridge applied in normalised coordinates. | `tests/test_lj_projection.py` |
+| F-34 | Sub-lattice MIC; GMD_active's legacy `minimum_image` now uses it. | `tests/utils/test_periodic.py` |
