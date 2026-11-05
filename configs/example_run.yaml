@@ -1,0 +1,51 @@
+# Example GMD_active run configuration (validated by `gmd-al validate-config --config configs/example_run.yaml`).
+# Relative paths are resolved against this file's directory. Sections not listed use their defaults;
+# configs/sections/*.yaml documents every key of every section.
+
+workflow:
+  run_id: water-example
+  max_cycles: 3
+  segment_steps: 200            # MD steps per GMD segment
+  segments_per_cycle: 1
+  max_pending_tasks: 16         # bounded labeling queue (backpressure)
+  backpressure: pause_sampling  # or: stop
+  poll_interval_s: 10
+  max_poll_wait_s: 7200         # then the run parks in "waiting"; `gmd-al run` resumes it
+  candidates: {max_per_cycle: 8, max_per_event: 2, diversity_threshold: 0.05}
+  retraining: {min_new_samples: 8, interval_hours: 24}
+  promotion:
+    max_force_rmse: 0.5          # eV/A on the validation split
+    max_relative_regression: 0.05
+    require_export_validation: true
+    export_max_force_deviation: 1.0e-4
+    require_engine_smoke_test: true
+
+md:
+  executable: ../../GMD/build-torch/gmd      # GMD built with -DGMD_ENABLE_TORCH=ON
+  initial_structure: ../examples/real_cycle/water_box.xyz
+  frame_interval: 5
+  control_poll_interval: 1
+  directives: {time_step: 0.5, velocity: 300.0, velocity_init: random, velocity_seed: 1}
+
+mlip:
+  source_path: ../../GMD_SGT                 # or install GMD_SGT >= 0.4 and drop this key
+  committee_size: 1                          # 2-member committee -> committee deviation metric
+  seed: 1
+  train:
+    train: {n_epochs: 200, batch_size: 4, lr: 1.0e-3, w_energy: 0.0, w_force: 1.0}
+
+monitor:
+  stages: {label_threshold: 6.0}
+
+extraction:
+  mode: graph
+  graph: {hops: 2, radial_shell: false}
+
+backends:
+  dft: {engine: cp2k}
+  scheduler: {engine: local}                 # slurm | pbs on a cluster
+
+cp2k:
+  executable: cp2k.psmp
+  task_dir: cp2k_tasks
+  environment: {OMP_NUM_THREADS: "1"}

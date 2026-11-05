@@ -232,3 +232,14 @@ def test_no_training_on_incomplete_labels(tmp_path: Path) -> None:
     harness.initial_model(controller)
     controller.run()
     assert harness.trainer.trained == []
+
+
+def test_stop_request_from_another_process_is_persisted_and_resumable(tmp_path: Path) -> None:
+    harness = Harness(tmp_path, max_cycles=1)
+    controller = harness.controller()
+    harness.initial_model(controller)
+    other_process = harness.controller()
+    other_process.request_stop()
+    assert controller.run() == "stopped"
+    assert harness.md.runs == [] or len(harness.md.runs) <= 1
+    assert harness.controller().run() == "done"

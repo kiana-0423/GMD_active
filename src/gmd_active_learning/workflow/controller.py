@@ -141,9 +141,17 @@ class ActiveLearningController:
             self.registry.promote(self.run_id, initial_model.model_id, gate_report=None, reason="initial model", force_initial=True)
 
     def request_stop(self) -> None:
-        self._stop_requested = True
+        """Stop at the next stage boundary (and ask MD to stop at its next control boundary).
 
-    def run(self, *, max_stage_steps: int = 10_000) -> str:
+        Persisted, so a request made from another process (``gmd-al stop``) is honoured too."""
+
+        self._stop_requested = True
+        self.store.put_blob(f"{self.run_id}:stop_requested", True)
+
+    def _stop_pending(self) -> bool:
+        return self._stop_requested or bool(self.store.get_blob(f"{self.run_id}:stop_requested", False))
+
+    def run(self, *, max_stage_steps: int = 10_000, resume_stopped: bool = True) -> str:
         """Advance the state machine until DONE/STOPPED/WAITING; returns the final stage."""
 
         run = self.store.ensure_run(self.run_id, config_hash=self.config_hash, initial_model_id=None, stage=Stage.SAMPLING.value)
@@ -152,12 +160,17 @@ class ActiveLearningController:
         self._restore_component_state()
         if run.stage == Stage.WAITING.value:
             self._transition(Stage.POLLING, detail={"resumed": True})
+        elif run.stage == Stage.STOPPED.value and resume_stopped:
+            last = self.store.transitions(self.run_id)[-1]["detail"].get("resume_stage", Stage.SAMPLING.value)
+            self._transition(Stage(last), detail={"resumed_after_stop": True})
         for _ in range(max_stage_steps):
             stage = Stage(self.store.run(self.run_id).stage)
             if stage in {Stage.DONE, Stage.STOPPED, Stage.WAITING}:
                 return stage.value
-            if self._stop_requested:
-                self._transition(Stage.STOPPED, detail={"reason": "stop requested"})
+            if self._stop_pending():
+                self.store.put_blob(f"{self.run_id}:stop_requested", False)
+                self._stop_requested = False
+                self._transition(Stage.STOPPED, detail={"reason": "stop requested", "resume_stage": stage.value})
                 return Stage.STOPPED.value
             getattr(self, f"_stage_{stage.value}")()
         raise WorkflowError("state machine did not settle; possible livelock")
@@ -239,7 +252,7 @@ class ActiveLearningController:
             frame = self.enricher.enrich(frame, model)
         result = self.monitor.process(frame)
         self._record_events(self.monitor.drain_events())
-        if self._stop_requested:
+        if self._stop_pending():
             return FrameAction.STOP
         if result.action is FrameAction.STOP and not self.config.stop_md_on_monitor_stop:
             return FrameAction.SAVE
@@ -388,7 +401,7 @@ class ActiveLearningController:
             if not self.store.tasks(self.run_id, states={"submitted", "unknown", "submitting"}):
                 self._transition(Stage.INGESTION)
                 return
-            if self._clock() >= deadline or self._stop_requested:
+            if self._clock() >= deadline or self._stop_pending():
                 self._transition(Stage.WAITING, detail={"pending": self._pending_task_count()})
                 return
             self._sleep(self.config.poll_interval_s)
