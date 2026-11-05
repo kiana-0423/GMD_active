@@ -1,0 +1,102 @@
+{
+ "region_id": "ch3_radical",
+ "mode": "cluster",
+ "run_id": "fixture",
+ "parent_step": 0,
+ "event_id": "evt-fixture",
+ "symbols": [
+  "C",
+  "H",
+  "H",
+  "H"
+ ],
+ "numbers": [
+  6,
+  1,
+  1,
+  1
+ ],
+ "positions": [
+  [
+   0.0,
+   0.0,
+   0.0
+  ],
+  [
+   1.01760266488195,
+   0.0,
+   -0.3906210650043773
+  ],
+  [
+   -0.5088013324409748,
+   0.8812697587465117,
+   -0.3906210650043773
+  ],
+  [
+   -0.5088013324409755,
+   -0.8812697587465114,
+   -0.3906210650043773
+  ]
+ ],
+ "cell": null,
+ "pbc": [
+  false,
+  false,
+  false
+ ],
+ "parent_atom_ids": [
+  0,
+  1,
+  2,
+  3
+ ],
+ "image_shifts": [
+  [
+   0,
+   0,
+   0
+  ],
+  [
+   0,
+   0,
+   0
+  ],
+  [
+   0,
+   0,
+   0
+  ],
+  [
+   0,
+   0,
+   0
+  ]
+ ],
+ "roles": [
+  "core",
+  "core",
+  "core",
+  "core"
+ ],
+ "force_weights": [
+  1.0,
+  1.0,
+  1.0,
+  1.0
+ ],
+ "frozen": [
+  false,
+  false,
+  false,
+  false
+ ],
+ "hotspot_atom_ids": [
+  0
+ ],
+ "charge": 0,
+ "multiplicity": null,
+ "model_version": null,
+ "metadata": {
+  "h_capping_skipped": false
+ }
+}

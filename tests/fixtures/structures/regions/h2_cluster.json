@@ -1,0 +1,68 @@
+{
+ "region_id": "h2_cluster",
+ "mode": "cluster",
+ "run_id": "fixture",
+ "parent_step": 0,
+ "event_id": "evt-fixture",
+ "symbols": [
+  "H",
+  "H"
+ ],
+ "numbers": [
+  1,
+  1
+ ],
+ "positions": [
+  [
+   0.0,
+   0.0,
+   0.0
+  ],
+  [
+   0.74,
+   0.0,
+   0.0
+  ]
+ ],
+ "cell": null,
+ "pbc": [
+  false,
+  false,
+  false
+ ],
+ "parent_atom_ids": [
+  0,
+  1
+ ],
+ "image_shifts": [
+  [
+   0,
+   0,
+   0
+  ],
+  [
+   0,
+   0,
+   0
+  ]
+ ],
+ "roles": [
+  "core",
+  "core"
+ ],
+ "force_weights": [
+  1.0,
+  1.0
+ ],
+ "frozen": [
+  false,
+  false
+ ],
+ "hotspot_atom_ids": [
+  0
+ ],
+ "charge": 0,
+ "multiplicity": null,
+ "model_version": null,
+ "metadata": {}
+}
