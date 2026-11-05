@@ -198,6 +198,29 @@ non-periodic cell vector leaks into the periodic coordinates. For the skewed cel
 image (e.g. 14.70 A where 7.19 A exists). Full 3-D PBC was correct. Fixed in GMD_active by projecting
 onto the periodic sub-lattice; regression test `tests/utils/test_periodic.py`.
 
+### F-35: CP2K 2026.2 aborts the WAVELET Poisson solver on non-cubic cells (Reproduced, real CP2K)
+
+PHAL padded isolated clusters into non-cubic boxes, so its default cluster inputs cannot run on
+CP2K 2026.2 at all. GMD_active places isolated regions in a cubic box (labeling area;
+`tests/adapters/dft/`, real-CP2K tests).
+
+### F-36: GMD used stale periodic edge shifts between neighbour-list rebuilds (Reproduced, GMD)
+
+An atom that crossed a box face between rebuilds kept the old image offset, so ML forces were
+silently wrong until the next rebuild (1.3e-2 eV on a water molecule straddling a face). Fixed in
+GMD commit `f333537` with a regression test; ML results shift at round-off level relative to earlier
+GMD builds.
+
+### F-37: Radial clusters cut covalent bonds in small molecular boxes (Reproduced, real run)
+
+In the first real closed-loop run (4 water molecules, 7.5 A box) radial cluster extraction cut O-H
+bonds that cannot be H-capped (the kept atom is H), yielding radical fragments whose SCF did not
+converge. The bounded retry ladder made 3 attempts per task and marked every task INVALID; nothing
+was ingested. This was a configuration/science issue, not a controller defect, but two real gaps
+were fixed: hotspot atoms are now grouped per hotspot cluster (one region each, PHAL parity) and the
+example uses bonded-graph extraction, which yields whole neutral molecules. The interrupted run was
+also used as a real crash-recovery test (see the resolution log).
+
 ## Resolution log
 
 | Finding | Resolution | Evidence |
@@ -205,3 +228,29 @@ onto the periodic sub-lattice; regression test `tests/utils/test_periodic.py`.
 | F-01 (GMD_active part) | Force basis sign corrected in `monitors/lj_projection.py`; self-confirming tests replaced by ASE-based tests with finite-difference checks. PHAL golden fixtures left unchanged as historical evidence. | `tests/test_lj_projection.py`, `tests/test_reliability_monitor.py` |
 | F-33 | Ridge applied in normalised coordinates. | `tests/test_lj_projection.py` |
 | F-34 | Sub-lattice MIC; GMD_active's legacy `minimum_image` now uses it. | `tests/utils/test_periodic.py` |
+| F-01 (monitoring) | Local LJ residual sign-corrected; parity on negated forces, correctness on ASE LJ | `tests/monitors/` |
+| F-02 | GMD checkpoint v3 stores Z; continuous vs segmented ML runs bitwise identical (jit optimise off) | GMD `tests/controller_integration.py`; `tests/integration/test_gmd_real.py` |
+| F-03 | GMD_SGT per-atom `force_weight`; zero-weight perturbation changes neither loss nor gradients (exact) | GMD_SGT `tests/test_force_weights.py` |
+| F-04 | Caps extend every per-atom array (`ExtractedRegion.with_caps`); capped block regions write datasets | `tests/extraction/`, `tests/contracts/` |
+| F-05 | The labeler receives the region produced by the configured extraction mode; it never re-extracts | `tests/workflow/test_controller.py`, `tests/integration/test_closed_loop_real.py` |
+| F-06 | Missing committee is `MetricStatus.UNAVAILABLE`, never zero | `tests/contracts/`, `tests/monitors/` |
+| F-07 | `EventRecord.complete` / `truncation_reason`; bounded event memory | `tests/events/` |
+| F-08 | `slab.multi_period` replicate/single_period/error | `tests/extraction/` |
+| F-09 | Regions carry parent atom IDs and integer image shifts; periodic guard refuses torn regions by default | `tests/extraction/` |
+| F-11 | Structures regenerated reproducibly with provenance (`docs/scf/structure_provenance.md`) | `tests/scf/` |
+| F-12 | CP2K 2026.2 energy/stress parsing fixed on real output | `tests/adapters/dft/` |
+| F-13 | Trigger no longer fires on the first sample; never while labels are pending | `tests/workflow/test_store_registry.py` |
+| F-14 | Registry copies, hashes, verifies, gates promotion, records rollback | `tests/workflow/`, `tests/integration/test_rollback_real.py` |
+| F-15 | Deterministic event IDs (`stable_id`) | `tests/events/` |
+| F-16 | LJ fitted once per frame; warmup policy; `rmin_threshold` default; one hotspot threshold | `tests/monitors/` |
+| F-17 | H-only cap relaxation actually runs before the single point | `tests/adapters/dft/`, `tests/labeling/` |
+| F-21..F-23 | Negative results preserved verbatim; ML-SCF defects fixed; capability probe honest | `tests/scf/`, `docs/scf/` |
+| F-24 | Persistent closed loop polls, validates, ingests, trains and promotes | `tests/workflow/`, `tests/integration/test_closed_loop_real.py` |
+| F-25 | Native fallback resubmitted; retries bounded per failure class | `tests/labeling/`, real CP2K tests |
+| F-26 | Typed resources, command timeouts, PBS exit status, per-scheduler directives | `tests/adapters/schedulers/` |
+| F-30 | Finite fingerprints for any region | `tests/active_learning/test_candidates.py` |
+| F-31 | Plugin import errors reported; explicit `override_builtins` | `tests/adapters/test_registry.py` |
+| F-35 | Cubic box for isolated regions | `tests/adapters/dft/` |
+| F-36 | Fixed in GMD | GMD CTest suite (51/51, Torch build) |
+| F-37 | Per-hotspot regions; graph extraction for molecular systems in the example | `tests/workflow/test_assembly.py`, `tests/integration/test_closed_loop_real.py` |
+
