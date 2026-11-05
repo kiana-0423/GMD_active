@@ -31,9 +31,15 @@ def write_json_atomic(path: str | Path, payload: Any, *, indent: int = 2) -> Pat
         delete=False,
     ) as handle:
         temporary_path = Path(handle.name)
-        handle.write(text)
-        handle.flush()
-        os.fsync(handle.fileno())
+        try:
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+        except BaseException:
+            # A failure while writing must not leave the temporary file behind (UTIL-004).
+            handle.close()
+            temporary_path.unlink(missing_ok=True)
+            raise
     try:
         os.replace(temporary_path, target)
     except BaseException:
