@@ -1,0 +1,55 @@
+{
+ "checks": {
+  "engine_smoke_test": {
+   "detail": {
+    "detail": {
+     "decisions": []
+    },
+    "frames": 4,
+    "passed": true,
+    "status": "completed"
+   },
+   "passed": true
+  },
+  "export_matches_checkpoint": {
+   "limit": 0.0001,
+   "passed": true,
+   "value": 9.5367431640625e-07
+  },
+  "force_rmse": {
+   "limit": 10.0,
+   "passed": true,
+   "value": 0.6726035462380198
+  },
+  "no_regression_vs_active": {
+   "limit": 12.806551779435678,
+   "parent": 1.164231979948698,
+   "passed": true,
+   "value": 0.6726035462380198
+  },
+  "validation_samples": {
+   "passed": true,
+   "required": 1,
+   "value": 9
+  }
+ },
+ "engine_smoke": {
+  "detail": {
+   "decisions": []
+  },
+  "frames": 4,
+  "passed": true,
+  "status": "completed"
+ },
+ "export_check": {
+  "cutoff": 4.0,
+  "max_force_deviation": 9.5367431640625e-07,
+  "n_structures": 9,
+  "species": [
+   1,
+   8
+  ]
+ },
+ "model_id": "model-5f3ec958ba260dd4",
+ "passed": true
+}

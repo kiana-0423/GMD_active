@@ -1,0 +1,291 @@
+[
+ {
+  "state": "retired",
+  "backend": "gmd_sgt",
+  "checkpoint_path": "<scratch>/real_cycle3/run/models/model-feb7361d728f5f32/checkpoint.pt",
+  "checkpoint_sha256": "d7976b72429979781af978c2aad8648b0c0bfa093c4dc9298f2bfe5a2d211a1f",
+  "created_at": "2026-11-05T18:30:10.720695+00:00",
+  "cutoff": 4.0,
+  "dataset_version": "dsv-1b3cd43785597804",
+  "export_path": "<scratch>/real_cycle3/run/models/model-feb7361d728f5f32/export.pt",
+  "export_sha256": "4858002b6541ef680a2eddf07e2de9101208c467a3edaa8ca6fc547e011ee121",
+  "metadata": {
+   "extra_files": {
+    "committee_1": {
+     "path": "<scratch>/real_cycle3/run/models/model-feb7361d728f5f32/extra_committee_1.pt",
+     "sha256": "36a5ac60dba32201a2bf9883e6be242e4fb98a63cb4531b8b28f0cedf60ea457"
+    }
+   },
+   "source_checkpoint": "<scratch>/real_cycle3/seed_training/member_0/ckpt_best.pt",
+   "source_export": "<scratch>/real_cycle3/seed_training/export/model.pt"
+  },
+  "metrics": {
+   "force_rmse": 1.060918604745418,
+   "n_validation": 6.0
+  },
+  "model_id": "model-feb7361d728f5f32",
+  "parent_model_id": null,
+  "species": [
+   1,
+   8
+  ],
+  "train_mode": "fresh",
+  "units": {
+   "energy": "eV",
+   "force": "eV/Angstrom",
+   "length": "Angstrom",
+   "stress": "eV/Angstrom^3",
+   "time": "fs"
+  }
+ },
+ {
+  "state": "retired",
+  "backend": "gmd_sgt",
+  "checkpoint_path": "<scratch>/real_cycle3/run/models/model-1e4627338c2a3db9/checkpoint.pt",
+  "checkpoint_sha256": "7f56b0dee85b0baec0a4942e55057110980ee35f7bc1942fbe8ea0f420176a5a",
+  "created_at": "2026-11-05T18:30:34.390653+00:00",
+  "cutoff": 4.0,
+  "dataset_version": "dsv-57905b3f7632c3f3",
+  "export_path": "<scratch>/real_cycle3/run/models/model-1e4627338c2a3db9/export.pt",
+  "export_sha256": "8826f576e8376670fdf0efd7b9c0f1b979aabb28d0550ca84696122e3b2042a7",
+  "metadata": {
+   "extra_files": {
+    "committee_1": {
+     "path": "<scratch>/real_cycle3/run/models/model-1e4627338c2a3db9/extra_committee_1.pt",
+     "sha256": "9938afea09660b92edae5b233448598dd39f1277c6a8468776b6d67ad559aeae"
+    }
+   },
+   "parent_metrics_on_this_dataset": {
+    "force_rmse": 1.0716147562043088,
+    "n_validation": 9.0
+   },
+   "source_checkpoint": "<scratch>/real_cycle3/run/training/train-eb30bf93ec06006b/member_0/ckpt_best.pt",
+   "source_export": "<scratch>/real_cycle3/run/training/train-eb30bf93ec06006b/export/model.pt",
+   "training_summary": {
+    "best_checkpoint": "<scratch>/real_cycle3/run/training/train-eb30bf93ec06006b/member_0/ckpt_best.pt",
+    "best_checkpoint_sha256": "7f56b0dee85b0baec0a4942e55057110980ee35f7bc1942fbe8ea0f420176a5a",
+    "best_epoch": 11,
+    "committee_checkpoints": [
+     "<scratch>/real_cycle3/run/training/train-eb30bf93ec06006b/member_1/ckpt_best.pt"
+    ],
+    "cutoff": {
+     "local_cutoff": 4.0,
+     "lr_cutoff": 4.0
+    },
+    "datasets": {
+     "train_file": {
+      "path": "<scratch>/real_cycle3/run/datasets/versions/dsv-57905b3f7632c3f3/train.extxyz",
+      "read_stats": {
+       "n_dropped_no_energy": 0,
+       "n_dropped_no_forces": 0,
+       "n_frames": 2,
+       "n_loaded": 2
+      },
+      "sha256": "e2fc1ec1010d2dd222cc39847b0074af28bb87b6b741408573b597952a5ee67a"
+     },
+     "val_file": {
+      "path": "<scratch>/real_cycle3/run/datasets/versions/dsv-57905b3f7632c3f3/val.extxyz",
+      "read_stats": {
+       "n_dropped_no_energy": 0,
+       "n_dropped_no_forces": 0,
+       "n_frames": 9,
+       "n_loaded": 9
+      },
+      "sha256": "3d96f7fcf0d35fda299f3b018dbe2f0ed183bbcaa535f0609814020660af59ec"
+     }
+    },
+    "dry_run": false,
+    "final_epoch": 30,
+    "finetune_reference_energies": "keep",
+    "gmd_sgt_version": "0.4.0",
+    "loss": {
+     "energy_loss": "mae",
+     "force_loss": "rmse",
+     "w_energy": 0.0,
+     "w_force": 1.0,
+     "w_stress": 0.0
+    },
+    "metrics": {
+     "best_val": 0.8075747489929199,
+     "selection_metric": "val_total",
+     "train_energy": 0.0,
+     "train_force": 0.483864426612854,
+     "train_total": 0.483864426612854,
+     "val_energy": 0.0,
+     "val_force": 0.8075747489929199,
+     "val_loss": 0.8075747489929199,
+     "val_total": 0.8075747489929199
+    },
+    "mode": "finetune",
+    "model_type": "UnifiedEquivariantMLIP",
+    "n_structures": {
+     "test": 0,
+     "train": 2,
+     "val": 9
+    },
+    "reference_energies": {},
+    "seed": 11,
+    "species": [
+     1,
+     8
+    ],
+    "split_mode": "files",
+    "split_seed": 11,
+    "start_checkpoint": {
+     "path": "<scratch>/real_cycle3/run/models/model-feb7361d728f5f32/checkpoint.pt",
+     "sha256": "d7976b72429979781af978c2aad8648b0c0bfa093c4dc9298f2bfe5a2d211a1f"
+    },
+    "summary_format_version": 1,
+    "units": {
+     "energy": "eV",
+     "forces": "eV/Angstrom",
+     "length": "Angstrom",
+     "stress": "eV/Angstrom^3"
+    }
+   }
+  },
+  "metrics": {
+   "force_rmse": 1.164231979948698,
+   "n_validation": 9.0
+  },
+  "model_id": "model-1e4627338c2a3db9",
+  "parent_model_id": "model-feb7361d728f5f32",
+  "species": [
+   1,
+   8
+  ],
+  "train_mode": "finetune",
+  "units": {
+   "energy": "eV",
+   "force": "eV/Angstrom",
+   "length": "Angstrom",
+   "stress": "eV/Angstrom^3",
+   "time": "fs"
+  }
+ },
+ {
+  "state": "promoted",
+  "backend": "gmd_sgt",
+  "checkpoint_path": "<scratch>/real_cycle3/run/models/model-5f3ec958ba260dd4/checkpoint.pt",
+  "checkpoint_sha256": "eb77d89a58198616310bc458e2dac8a6c3b90e0aac5c03ce1bcb38d4d83c32b6",
+  "created_at": "2026-11-05T18:30:56.268101+00:00",
+  "cutoff": 4.0,
+  "dataset_version": "dsv-940cda3dd4cfa8cd",
+  "export_path": "<scratch>/real_cycle3/run/models/model-5f3ec958ba260dd4/export.pt",
+  "export_sha256": "ce56f0397bff6be30986850eaf7e30816883cd33f5e42586742a09cb12921e97",
+  "metadata": {
+   "extra_files": {
+    "committee_1": {
+     "path": "<scratch>/real_cycle3/run/models/model-5f3ec958ba260dd4/extra_committee_1.pt",
+     "sha256": "8219ea99ffa1df697a0079fe795ee2d2ee56194e6ff7c4c370d917d68f9efb72"
+    }
+   },
+   "parent_metrics_on_this_dataset": {
+    "force_rmse": 1.164231979948698,
+    "n_validation": 9.0
+   },
+   "source_checkpoint": "<scratch>/real_cycle3/run/training/train-ee83f098775e0a3d/member_0/ckpt_best.pt",
+   "source_export": "<scratch>/real_cycle3/run/training/train-ee83f098775e0a3d/export/model.pt",
+   "training_summary": {
+    "best_checkpoint": "<scratch>/real_cycle3/run/training/train-ee83f098775e0a3d/member_0/ckpt_best.pt",
+    "best_checkpoint_sha256": "eb77d89a58198616310bc458e2dac8a6c3b90e0aac5c03ce1bcb38d4d83c32b6",
+    "best_epoch": 2,
+    "committee_checkpoints": [
+     "<scratch>/real_cycle3/run/training/train-ee83f098775e0a3d/member_1/ckpt_best.pt"
+    ],
+    "cutoff": {
+     "local_cutoff": 4.0,
+     "lr_cutoff": 4.0
+    },
+    "datasets": {
+     "train_file": {
+      "path": "<scratch>/real_cycle3/run/datasets/versions/dsv-940cda3dd4cfa8cd/train.extxyz",
+      "read_stats": {
+       "n_dropped_no_energy": 0,
+       "n_dropped_no_forces": 0,
+       "n_frames": 4,
+       "n_loaded": 4
+      },
+      "sha256": "41a93f5325434e24c3063b0981d3131d6e5fd3bc9609cbda506f04cc86322dc7"
+     },
+     "val_file": {
+      "path": "<scratch>/real_cycle3/run/datasets/versions/dsv-940cda3dd4cfa8cd/val.extxyz",
+      "read_stats": {
+       "n_dropped_no_energy": 0,
+       "n_dropped_no_forces": 0,
+       "n_frames": 9,
+       "n_loaded": 9
+      },
+      "sha256": "3d96f7fcf0d35fda299f3b018dbe2f0ed183bbcaa535f0609814020660af59ec"
+     }
+    },
+    "dry_run": false,
+    "final_epoch": 30,
+    "finetune_reference_energies": "keep",
+    "gmd_sgt_version": "0.4.0",
+    "loss": {
+     "energy_loss": "mae",
+     "force_loss": "rmse",
+     "w_energy": 0.0,
+     "w_force": 1.0,
+     "w_stress": 0.0
+    },
+    "metrics": {
+     "best_val": 0.7029490868250529,
+     "selection_metric": "val_total",
+     "train_energy": 0.0,
+     "train_force": 3.99096941947937,
+     "train_total": 3.99096941947937,
+     "val_energy": 0.0,
+     "val_force": 0.7029490868250529,
+     "val_loss": 0.7029490868250529,
+     "val_total": 0.7029490868250529
+    },
+    "mode": "finetune",
+    "model_type": "UnifiedEquivariantMLIP",
+    "n_structures": {
+     "test": 0,
+     "train": 4,
+     "val": 9
+    },
+    "reference_energies": {},
+    "seed": 11,
+    "species": [
+     1,
+     8
+    ],
+    "split_mode": "files",
+    "split_seed": 11,
+    "start_checkpoint": {
+     "path": "<scratch>/real_cycle3/run/models/model-1e4627338c2a3db9/checkpoint.pt",
+     "sha256": "7f56b0dee85b0baec0a4942e55057110980ee35f7bc1942fbe8ea0f420176a5a"
+    },
+    "summary_format_version": 1,
+    "units": {
+     "energy": "eV",
+     "forces": "eV/Angstrom",
+     "length": "Angstrom",
+     "stress": "eV/Angstrom^3"
+    }
+   }
+  },
+  "metrics": {
+   "force_rmse": 0.6726035462380198,
+   "n_validation": 9.0
+  },
+  "model_id": "model-5f3ec958ba260dd4",
+  "parent_model_id": "model-1e4627338c2a3db9",
+  "species": [
+   1,
+   8
+  ],
+  "train_mode": "finetune",
+  "units": {
+   "energy": "eV",
+   "force": "eV/Angstrom",
+   "length": "Angstrom",
+   "stress": "eV/Angstrom^3",
+   "time": "fs"
+  }
+ }
+]

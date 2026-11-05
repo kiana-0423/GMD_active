@@ -1,0 +1,89 @@
+{
+ "run_id": "water-cycle",
+ "stage": "done",
+ "cycle": 1,
+ "active_model_id": "model-5f3ec958ba260dd4",
+ "active_dataset_version": "dsv-940cda3dd4cfa8cd",
+ "segments": [
+  {
+   "segment_index": 0,
+   "cycle": 0,
+   "model_id": "model-feb7361d728f5f32",
+   "status": "completed",
+   "end_step": 40
+  },
+  {
+   "segment_index": 1,
+   "cycle": 1,
+   "model_id": "model-1e4627338c2a3db9",
+   "status": "completed",
+   "end_step": 80
+  }
+ ],
+ "events": 6,
+ "candidates": {
+  "pending": 0,
+  "selected": 0,
+  "labeling": 0,
+  "labeled": 5,
+  "rejected": 16,
+  "invalid": 0,
+  "failed": 0
+ },
+ "tasks": {
+  "submitting": 0,
+  "submitted": 0,
+  "unknown": 0,
+  "collected": 0,
+  "ingested": 5,
+  "invalid": 0,
+  "failed": 0
+ },
+ "samples": 5,
+ "models": [
+  {
+   "model_id": "model-feb7361d728f5f32",
+   "state": "retired",
+   "metrics": {
+    "force_rmse": 1.060918604745418,
+    "n_validation": 6.0
+   }
+  },
+  {
+   "model_id": "model-1e4627338c2a3db9",
+   "state": "retired",
+   "metrics": {
+    "force_rmse": 1.164231979948698,
+    "n_validation": 9.0
+   }
+  },
+  {
+   "model_id": "model-5f3ec958ba260dd4",
+   "state": "promoted",
+   "metrics": {
+    "force_rmse": 0.6726035462380198,
+    "n_validation": 9.0
+   }
+  }
+ ],
+ "promotions": [
+  {
+   "model_id": "model-feb7361d728f5f32",
+   "previous_model_id": null,
+   "action": "promote",
+   "reason": "initial model"
+  },
+  {
+   "model_id": "model-1e4627338c2a3db9",
+   "previous_model_id": "model-feb7361d728f5f32",
+   "action": "promote",
+   "reason": "cycle 0 gates passed"
+  },
+  {
+   "model_id": "model-5f3ec958ba260dd4",
+   "previous_model_id": "model-1e4627338c2a3db9",
+   "action": "promote",
+   "reason": "cycle 1 gates passed"
+  }
+ ]
+}

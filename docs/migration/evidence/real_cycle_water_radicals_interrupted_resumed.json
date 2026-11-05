@@ -1,0 +1,61 @@
+{
+ "run_id": "water-cycle",
+ "stage": "done",
+ "cycle": 1,
+ "active_model_id": "model-11216db75576716d",
+ "active_dataset_version": "dsv-1b3cd43785597804",
+ "segments": [
+  {
+   "segment_index": 0,
+   "cycle": 0,
+   "model_id": "model-11216db75576716d",
+   "status": "completed",
+   "end_step": 40
+  },
+  {
+   "segment_index": 1,
+   "cycle": 1,
+   "model_id": "model-11216db75576716d",
+   "status": "completed",
+   "end_step": 80
+  }
+ ],
+ "events": 8,
+ "candidates": {
+  "pending": 0,
+  "selected": 0,
+  "labeling": 0,
+  "labeled": 0,
+  "rejected": 2,
+  "invalid": 0,
+  "failed": 6
+ },
+ "tasks": {
+  "submitting": 0,
+  "submitted": 0,
+  "unknown": 0,
+  "collected": 0,
+  "ingested": 0,
+  "invalid": 0,
+  "failed": 6
+ },
+ "samples": 0,
+ "models": [
+  {
+   "model_id": "model-11216db75576716d",
+   "state": "promoted",
+   "metrics": {
+    "force_rmse": 1.060918604745418,
+    "n_validation": 6.0
+   }
+  }
+ ],
+ "promotions": [
+  {
+   "model_id": "model-11216db75576716d",
+   "previous_model_id": null,
+   "action": "promote",
+   "reason": "initial model"
+  }
+ ]
+}

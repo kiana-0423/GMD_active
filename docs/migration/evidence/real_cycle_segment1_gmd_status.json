@@ -1,0 +1,19 @@
+{
+  "format_version": "gmd-status-v1",
+  "state": "completed",
+  "step": 80,
+  "start_step": 40,
+  "time_fs": 20,
+  "checkpoint": "<scratch>/real_cycle3/run/md/segment_00001/segment.gmdchk",
+  "checkpoint_version": 3,
+  "frame_file": "<scratch>/real_cycle3/run/md/segment_00001/frames.extxyz",
+  "frame_format": "gmd-frame-v1",
+  "frames_written": 21,
+  "force_field_kind": "ml",
+  "force_field_sha256": "8826f576e8376670fdf0efd7b9c0f1b979aabb28d0550ca84696122e3b2042a7",
+  "model_sha256": "8826f576e8376670fdf0efd7b9c0f1b979aabb28d0550ca84696122e3b2042a7",
+  "model_changed_from": "4858002b6541ef680a2eddf07e2de9101208c467a3edaa8ca6fc547e011ee121",
+  "run_id": "water-cycle",
+  "stop_reason": null,
+  "message": null
+}
