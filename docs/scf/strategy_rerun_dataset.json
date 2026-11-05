@@ -1,0 +1,1106 @@
+{
+  "dataset_format": "phal-scf-strategy-v1",
+  "feature_names": [
+    "n_atoms",
+    "log_n_atoms",
+    "periodic",
+    "cell_volume",
+    "number_density",
+    "min_distance",
+    "mean_atomic_number",
+    "max_atomic_number",
+    "n_elements",
+    "has_transition_metal",
+    "has_oxygen",
+    "electronegativity_spread",
+    "valence_electrons",
+    "charge",
+    "multiplicity"
+  ],
+  "leave_one_out": {
+    "per_system": [
+      {
+        "best": "alpha0.2",
+        "confidence": 0.7043315458394244,
+        "correct": false,
+        "default_converged": true,
+        "default_steps": 11,
+        "oracle_steps": 10,
+        "reason": "70% of the weighted vote from lih-rocksalt, mgo-rocksalt, zno-wurtzite",
+        "recommended": "nbuffer4",
+        "recommended_converged": true,
+        "recommended_steps": 11,
+        "system": "aln-wurtzite"
+      },
+      {
+        "best": "default",
+        "confidence": 0.6865980473806117,
+        "correct": true,
+        "default_converged": true,
+        "default_steps": 7,
+        "oracle_steps": 7,
+        "reason": "nearest systems disagree ({'nbuffer4': 0.3343053365205425, 'alpha0.2': 0.15259575181771529}); falling back to CP2K's defaults rather than acting on a 69% vote",
+        "recommended": "default",
+        "recommended_converged": true,
+        "recommended_steps": 7,
+        "system": "c-diamond"
+      },
+      {
+        "best": "default",
+        "confidence": 0.42984573927001335,
+        "correct": true,
+        "default_converged": true,
+        "default_steps": 14,
+        "oracle_steps": 14,
+        "reason": "nearest systems disagree ({'alpha0.1': 0.2847440847789175, 'default': 0.23681058734218907, 'alpha0.2': 0.14087851905693063}); falling back to CP2K's defaults rather than acting on a 43% vote",
+        "recommended": "default",
+        "recommended_converged": true,
+        "recommended_steps": 14,
+        "system": "cu2o-cuprite"
+      },
+      {
+        "best": "nbuffer4",
+        "confidence": 0.3480962574477353,
+        "correct": false,
+        "default_converged": false,
+        "default_steps": null,
+        "oracle_steps": 7,
+        "reason": "nearest systems disagree ({'nbuffer4': 0.23438403412415332, 'alpha0.2': 0.2242399040780348, 'default': 0.21470715660093467}); falling back to CP2K's defaults rather than acting on a 35% vote",
+        "recommended": "default",
+        "recommended_converged": false,
+        "recommended_steps": null,
+        "system": "lih-rocksalt"
+      },
+      {
+        "best": "nbuffer4",
+        "confidence": 0.3479593258417212,
+        "correct": false,
+        "default_converged": false,
+        "default_steps": null,
+        "oracle_steps": 10,
+        "reason": "nearest systems disagree ({'alpha0.2': 0.25966081639159844, 'nbuffer4': 0.2484983620982877, 'default': 0.2380798129884232}); falling back to CP2K's defaults rather than acting on a 35% vote",
+        "recommended": "default",
+        "recommended_converged": false,
+        "recommended_steps": null,
+        "system": "mgo-rocksalt"
+      },
+      {
+        "best": "alpha0.2",
+        "confidence": 0.7529720719692501,
+        "correct": false,
+        "default_converged": true,
+        "default_steps": 78,
+        "oracle_steps": 31,
+        "reason": "75% of the weighted vote from nio-rocksalt, zno-wurtzite, mgo-rocksalt",
+        "recommended": "default",
+        "recommended_converged": true,
+        "recommended_steps": 78,
+        "system": "mno-rocksalt"
+      },
+      {
+        "best": "nbuffer4",
+        "confidence": 0.677229408456227,
+        "correct": false,
+        "default_converged": false,
+        "default_steps": null,
+        "oracle_steps": 9,
+        "reason": "nearest systems disagree ({'default': 0.39083977968912825, 'alpha0.2': 0.18627600236183728}); falling back to CP2K's defaults rather than acting on a 68% vote",
+        "recommended": "default",
+        "recommended_converged": false,
+        "recommended_steps": null,
+        "system": "nacl-rocksalt"
+      },
+      {
+        "best": "default",
+        "confidence": 0.5077196119914081,
+        "correct": true,
+        "default_converged": true,
+        "default_steps": 37,
+        "oracle_steps": 37,
+        "reason": "nearest systems disagree ({'alpha0.2': 0.5134577794478995, 'default': 0.26539233387213174, 'nbuffer4': 0.23245172990399726}); falling back to CP2K's defaults rather than acting on a 51% vote",
+        "recommended": "default",
+        "recommended_converged": true,
+        "recommended_steps": 37,
+        "system": "nio-rocksalt"
+      },
+      {
+        "best": "default",
+        "confidence": 0.6709397745988502,
+        "correct": true,
+        "default_converged": true,
+        "default_steps": 8,
+        "oracle_steps": 8,
+        "reason": "nearest systems disagree ({'default': 0.760732878689191, 'nbuffer4': 0.18770672182854772, 'alpha0.2': 0.18539223877667108}); falling back to CP2K's defaults rather than acting on a 67% vote",
+        "recommended": "default",
+        "recommended_converged": true,
+        "recommended_steps": 8,
+        "system": "si-diamond"
+      },
+      {
+        "best": "default",
+        "confidence": 0.6714007486416397,
+        "correct": true,
+        "default_converged": true,
+        "default_steps": 8,
+        "oracle_steps": 8,
+        "reason": "nearest systems disagree ({'default': 0.7581329226486103, 'nbuffer4': 0.1903123430750067, 'alpha0.2': 0.1807356656090408}); falling back to CP2K's defaults rather than acting on a 67% vote",
+        "recommended": "default",
+        "recommended_converged": true,
+        "recommended_steps": 8,
+        "system": "si-diamond-strained"
+      },
+      {
+        "best": "alpha0.1",
+        "confidence": 0.7600792236440514,
+        "correct": false,
+        "default_converged": true,
+        "default_steps": 19,
+        "oracle_steps": 14,
+        "reason": "76% of the weighted vote from cu2o-cuprite, zno-wurtzite, aln-wurtzite",
+        "recommended": "default",
+        "recommended_converged": true,
+        "recommended_steps": 19,
+        "system": "tio2-rutile"
+      },
+      {
+        "best": "default",
+        "confidence": 0.652715740197684,
+        "correct": true,
+        "default_converged": true,
+        "default_steps": 19,
+        "oracle_steps": 19,
+        "reason": "nearest systems disagree ({'alpha0.1': 0.2878460168565011, 'default': 0.541002422806014}); falling back to CP2K's defaults rather than acting on a 65% vote",
+        "recommended": "default",
+        "recommended_converged": true,
+        "recommended_steps": 19,
+        "system": "zno-wurtzite"
+      }
+    ],
+    "summary": {
+      "accuracy": 0.5,
+      "default_total_steps": 201,
+      "n_default_converged_recommendation_failed": 0,
+      "n_default_failed_recommendation_converged": 0,
+      "n_degraded": 0,
+      "n_improved": 0,
+      "n_systems": 12,
+      "oracle_total_steps": 174,
+      "recommended_total_steps": 201,
+      "step_saving": 0.0
+    }
+  },
+  "systems": {
+    "aln-wurtzite": {
+      "best_strategy": "alpha0.2",
+      "features": {
+        "cell_volume": 41.784338540035606,
+        "charge": 0.0,
+        "electronegativity_spread": 1.43,
+        "has_oxygen": 0.0,
+        "has_transition_metal": 0.0,
+        "log_n_atoms": 1.3862943611198906,
+        "max_atomic_number": 13.0,
+        "mean_atomic_number": 10.0,
+        "min_distance": 1.8904442654067957,
+        "multiplicity": 1.0,
+        "n_atoms": 4.0,
+        "n_elements": 2.0,
+        "number_density": 0.09572964751296482,
+        "periodic": 1.0,
+        "valence_electrons": 16.0
+      },
+      "outcomes": [
+        {
+          "converged": true,
+          "energy": -23.800759064923948,
+          "failure": null,
+          "runtime_s": 13.295,
+          "scf_steps": 11,
+          "strategy": "alpha0.1",
+          "system": "aln-wurtzite"
+        },
+        {
+          "converged": true,
+          "energy": -23.800759545463634,
+          "failure": null,
+          "runtime_s": 11.817,
+          "scf_steps": 10,
+          "strategy": "alpha0.2",
+          "system": "aln-wurtzite"
+        },
+        {
+          "converged": true,
+          "energy": -23.800755676329246,
+          "failure": null,
+          "runtime_s": 13.236,
+          "scf_steps": 11,
+          "strategy": "broyden",
+          "system": "aln-wurtzite"
+        },
+        {
+          "converged": true,
+          "energy": -23.800760583789078,
+          "failure": null,
+          "runtime_s": 13.969,
+          "scf_steps": 12,
+          "strategy": "broyden-alpha0.2",
+          "system": "aln-wurtzite"
+        },
+        {
+          "converged": true,
+          "energy": -23.80075902568903,
+          "failure": null,
+          "runtime_s": 13.024,
+          "scf_steps": 11,
+          "strategy": "default",
+          "system": "aln-wurtzite"
+        },
+        {
+          "converged": true,
+          "energy": -23.80075924927203,
+          "failure": null,
+          "runtime_s": 13.302,
+          "scf_steps": 11,
+          "strategy": "nbuffer4",
+          "system": "aln-wurtzite"
+        }
+      ]
+    },
+    "c-diamond": {
+      "best_strategy": "default",
+      "features": {
+        "cell_volume": 11.34617131575,
+        "charge": 0.0,
+        "electronegativity_spread": 0.0,
+        "has_oxygen": 0.0,
+        "has_transition_metal": 0.0,
+        "log_n_atoms": 0.6931471805599453,
+        "max_atomic_number": 6.0,
+        "mean_atomic_number": 6.0,
+        "min_distance": 1.5445563076495463,
+        "multiplicity": 1.0,
+        "n_atoms": 2.0,
+        "n_elements": 1.0,
+        "number_density": 0.17627091503754513,
+        "periodic": 1.0,
+        "valence_electrons": 8.0
+      },
+      "outcomes": [
+        {
+          "converged": true,
+          "energy": -10.278353058020945,
+          "failure": null,
+          "runtime_s": 8.82,
+          "scf_steps": 7,
+          "strategy": "alpha0.1",
+          "system": "c-diamond"
+        },
+        {
+          "converged": true,
+          "energy": -10.278352947224944,
+          "failure": null,
+          "runtime_s": 8.869,
+          "scf_steps": 7,
+          "strategy": "alpha0.2",
+          "system": "c-diamond"
+        },
+        {
+          "converged": true,
+          "energy": -10.278353158484492,
+          "failure": null,
+          "runtime_s": 10.926,
+          "scf_steps": 9,
+          "strategy": "broyden",
+          "system": "c-diamond"
+        },
+        {
+          "converged": true,
+          "energy": -10.278353686599148,
+          "failure": null,
+          "runtime_s": 10.933,
+          "scf_steps": 9,
+          "strategy": "broyden-alpha0.2",
+          "system": "c-diamond"
+        },
+        {
+          "converged": true,
+          "energy": -10.27835293938924,
+          "failure": null,
+          "runtime_s": 8.888,
+          "scf_steps": 7,
+          "strategy": "default",
+          "system": "c-diamond"
+        },
+        {
+          "converged": true,
+          "energy": -10.278352487748208,
+          "failure": null,
+          "runtime_s": 8.926,
+          "scf_steps": 7,
+          "strategy": "nbuffer4",
+          "system": "c-diamond"
+        }
+      ]
+    },
+    "cu2o-cuprite": {
+      "best_strategy": "default",
+      "features": {
+        "cell_volume": 77.85448299999996,
+        "charge": 0.0,
+        "electronegativity_spread": 1.54,
+        "has_oxygen": 1.0,
+        "has_transition_metal": 1.0,
+        "log_n_atoms": 1.791759469228055,
+        "max_atomic_number": 29.0,
+        "mean_atomic_number": 22.0,
+        "min_distance": 1.8489642370797754,
+        "multiplicity": 1.0,
+        "n_atoms": 6.0,
+        "n_elements": 2.0,
+        "number_density": 0.07706685304171891,
+        "periodic": 1.0,
+        "valence_electrons": 56.0
+      },
+      "outcomes": [
+        {
+          "converged": true,
+          "energy": -224.35720989506564,
+          "failure": null,
+          "runtime_s": 34.392,
+          "scf_steps": 15,
+          "strategy": "alpha0.1",
+          "system": "cu2o-cuprite"
+        },
+        {
+          "converged": true,
+          "energy": -224.35720053973571,
+          "failure": null,
+          "runtime_s": 32.668,
+          "scf_steps": 14,
+          "strategy": "alpha0.2",
+          "system": "cu2o-cuprite"
+        },
+        {
+          "converged": true,
+          "energy": -224.35720935714045,
+          "failure": null,
+          "runtime_s": 32.754,
+          "scf_steps": 14,
+          "strategy": "broyden",
+          "system": "cu2o-cuprite"
+        },
+        {
+          "converged": true,
+          "energy": -224.3572067774269,
+          "failure": null,
+          "runtime_s": 36.266,
+          "scf_steps": 16,
+          "strategy": "broyden-alpha0.2",
+          "system": "cu2o-cuprite"
+        },
+        {
+          "converged": true,
+          "energy": -224.3572095033323,
+          "failure": null,
+          "runtime_s": 32.789,
+          "scf_steps": 14,
+          "strategy": "default",
+          "system": "cu2o-cuprite"
+        },
+        {
+          "converged": true,
+          "energy": -224.3572129683286,
+          "failure": null,
+          "runtime_s": 76.457,
+          "scf_steps": 40,
+          "strategy": "nbuffer4",
+          "system": "cu2o-cuprite"
+        }
+      ]
+    },
+    "lih-rocksalt": {
+      "best_strategy": "nbuffer4",
+      "features": {
+        "cell_volume": 17.016809946750005,
+        "charge": 0.0,
+        "electronegativity_spread": 1.2200000000000002,
+        "has_oxygen": 0.0,
+        "has_transition_metal": 0.0,
+        "log_n_atoms": 0.6931471805599453,
+        "max_atomic_number": 3.0,
+        "mean_atomic_number": 2.0,
+        "min_distance": 2.0415,
+        "multiplicity": 1.0,
+        "n_atoms": 2.0,
+        "n_elements": 2.0,
+        "number_density": 0.11753084192974575,
+        "periodic": 1.0,
+        "valence_electrons": 4.0
+      },
+      "outcomes": [
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "Bad condition number R_COND = 3.102E-19 (smaller than the machine working precision) O/| common/mathlib.F:739",
+          "runtime_s": 18.10680720792152,
+          "scf_steps": null,
+          "strategy": "alpha0.1",
+          "system": "lih-rocksalt"
+        },
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "Bad condition number R_COND = 2.508E-19 (smaller than the machine working precision) O/| common/mathlib.F:739",
+          "runtime_s": 18.10688541701529,
+          "scf_steps": null,
+          "strategy": "alpha0.2",
+          "system": "lih-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -8.304590591899059,
+          "failure": null,
+          "runtime_s": 19.582,
+          "scf_steps": 10,
+          "strategy": "broyden",
+          "system": "lih-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -8.30459002085044,
+          "failure": null,
+          "runtime_s": 24.121,
+          "scf_steps": 13,
+          "strategy": "broyden-alpha0.2",
+          "system": "lih-rocksalt"
+        },
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "Bad condition number R_COND = 1.628E-19 (smaller than the machine working precision) O/| common/mathlib.F:739",
+          "runtime_s": 26.146909791976213,
+          "scf_steps": null,
+          "strategy": "default",
+          "system": "lih-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -8.30458999389665,
+          "failure": null,
+          "runtime_s": 14.671,
+          "scf_steps": 7,
+          "strategy": "nbuffer4",
+          "system": "lih-rocksalt"
+        }
+      ]
+    },
+    "mgo-rocksalt": {
+      "best_strategy": "nbuffer4",
+      "features": {
+        "cell_volume": 18.681214032,
+        "charge": 0.0,
+        "electronegativity_spread": 2.13,
+        "has_oxygen": 1.0,
+        "has_transition_metal": 0.0,
+        "log_n_atoms": 0.6931471805599453,
+        "max_atomic_number": 12.0,
+        "mean_atomic_number": 10.0,
+        "min_distance": 2.106,
+        "multiplicity": 1.0,
+        "n_atoms": 2.0,
+        "n_elements": 2.0,
+        "number_density": 0.1070594232566523,
+        "periodic": 1.0,
+        "valence_electrons": 16.0
+      },
+      "outcomes": [
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "Bad condition number R_COND = 1.055E-18 (smaller than the machine working precision) O/| common/mathlib.F:739",
+          "runtime_s": 10.05866670794785,
+          "scf_steps": null,
+          "strategy": "alpha0.1",
+          "system": "mgo-rocksalt"
+        },
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "Bad condition number R_COND = 3.425E-19 (smaller than the machine working precision) O/| common/mathlib.F:739",
+          "runtime_s": 10.058732541976497,
+          "scf_steps": null,
+          "strategy": "alpha0.2",
+          "system": "mgo-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -79.03907858562816,
+          "failure": null,
+          "runtime_s": 11.685,
+          "scf_steps": 13,
+          "strategy": "broyden",
+          "system": "mgo-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -79.03907881633447,
+          "failure": null,
+          "runtime_s": 12.255,
+          "scf_steps": 14,
+          "strategy": "broyden-alpha0.2",
+          "system": "mgo-rocksalt"
+        },
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "Bad condition number R_COND = 7.103E-17 (smaller than the machine working precision) O/| common/mathlib.F:739",
+          "runtime_s": 14.071136667043902,
+          "scf_steps": null,
+          "strategy": "default",
+          "system": "mgo-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -79.039081684919,
+          "failure": null,
+          "runtime_s": 9.524,
+          "scf_steps": 10,
+          "strategy": "nbuffer4",
+          "system": "mgo-rocksalt"
+        }
+      ]
+    },
+    "mno-rocksalt": {
+      "best_strategy": "alpha0.2",
+      "features": {
+        "cell_volume": 21.956105281249997,
+        "charge": 0.0,
+        "electronegativity_spread": 1.89,
+        "has_oxygen": 1.0,
+        "has_transition_metal": 1.0,
+        "log_n_atoms": 0.6931471805599453,
+        "max_atomic_number": 25.0,
+        "mean_atomic_number": 16.5,
+        "min_distance": 2.2225,
+        "multiplicity": 1.0,
+        "n_atoms": 2.0,
+        "n_elements": 2.0,
+        "number_density": 0.0910908366661893,
+        "periodic": 1.0,
+        "valence_electrons": 21.0
+      },
+      "outcomes": [
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "SCF run NOT converged. To continue the calculation regardless, please set the keyword IGNORE_CONVERGENCE_FAILURE. O/| qs_scf.F:702",
+          "runtime_s": 98.38354812492616,
+          "scf_steps": null,
+          "strategy": "alpha0.1",
+          "system": "mno-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -119.74144763463995,
+          "failure": null,
+          "runtime_s": 29.287,
+          "scf_steps": 31,
+          "strategy": "alpha0.2",
+          "system": "mno-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -119.74144729203675,
+          "failure": null,
+          "runtime_s": 58.152,
+          "scf_steps": 68,
+          "strategy": "broyden",
+          "system": "mno-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -119.74143884246196,
+          "failure": null,
+          "runtime_s": 36.005,
+          "scf_steps": 39,
+          "strategy": "broyden-alpha0.2",
+          "system": "mno-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -119.74144907576375,
+          "failure": null,
+          "runtime_s": 65.924,
+          "scf_steps": 78,
+          "strategy": "default",
+          "system": "mno-rocksalt"
+        },
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "SCF run NOT converged. To continue the calculation regardless, please set the keyword IGNORE_CONVERGENCE_FAILURE. O/| qs_scf.F:702",
+          "runtime_s": 98.4120034170337,
+          "scf_steps": null,
+          "strategy": "nbuffer4",
+          "system": "mno-rocksalt"
+        }
+      ]
+    },
+    "nacl-rocksalt": {
+      "best_strategy": "nbuffer4",
+      "features": {
+        "cell_volume": 44.851535999999996,
+        "charge": 0.0,
+        "electronegativity_spread": 2.23,
+        "has_oxygen": 0.0,
+        "has_transition_metal": 0.0,
+        "log_n_atoms": 0.6931471805599453,
+        "max_atomic_number": 17.0,
+        "mean_atomic_number": 14.0,
+        "min_distance": 2.82,
+        "multiplicity": 1.0,
+        "n_atoms": 2.0,
+        "n_elements": 2.0,
+        "number_density": 0.0445915609222391,
+        "periodic": 1.0,
+        "valence_electrons": 16.0
+      },
+      "outcomes": [
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "Bad condition number R_COND = 2.054E-18 (smaller than the machine working precision) O/| common/mathlib.F:739",
+          "runtime_s": 6.0298514580354095,
+          "scf_steps": null,
+          "strategy": "alpha0.1",
+          "system": "nacl-rocksalt"
+        },
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "Bad condition number R_COND = 2.533E-18 (smaller than the machine working precision) O/| common/mathlib.F:739",
+          "runtime_s": 6.029885500087403,
+          "scf_steps": null,
+          "strategy": "alpha0.2",
+          "system": "nacl-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -62.7548738912865,
+          "failure": null,
+          "runtime_s": 5.155,
+          "scf_steps": 12,
+          "strategy": "broyden",
+          "system": "nacl-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -62.75487239986052,
+          "failure": null,
+          "runtime_s": 5.761,
+          "scf_steps": 14,
+          "strategy": "broyden-alpha0.2",
+          "system": "nacl-rocksalt"
+        },
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "Bad condition number R_COND = 3.744E-18 (smaller than the machine working precision) O/| common/mathlib.F:739",
+          "runtime_s": 8.042819207999855,
+          "scf_steps": null,
+          "strategy": "default",
+          "system": "nacl-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -62.754874282850125,
+          "failure": null,
+          "runtime_s": 4.131,
+          "scf_steps": 9,
+          "strategy": "nbuffer4",
+          "system": "nacl-rocksalt"
+        }
+      ]
+    },
+    "nio-rocksalt": {
+      "best_strategy": "default",
+      "features": {
+        "cell_volume": 18.219373308249995,
+        "charge": 0.0,
+        "electronegativity_spread": 1.53,
+        "has_oxygen": 1.0,
+        "has_transition_metal": 1.0,
+        "log_n_atoms": 0.6931471805599453,
+        "max_atomic_number": 28.0,
+        "mean_atomic_number": 18.0,
+        "min_distance": 2.0885,
+        "multiplicity": 1.0,
+        "n_atoms": 2.0,
+        "n_elements": 2.0,
+        "number_density": 0.10977325982416591,
+        "periodic": 1.0,
+        "valence_electrons": 24.0
+      },
+      "outcomes": [
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "SCF run NOT converged. To continue the calculation regardless, please set the keyword IGNORE_CONVERGENCE_FAILURE. O/| qs_scf.F:702",
+          "runtime_s": 130.54509895900264,
+          "scf_steps": null,
+          "strategy": "alpha0.1",
+          "system": "nio-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -184.9931358779701,
+          "failure": null,
+          "runtime_s": 110.249,
+          "scf_steps": 100,
+          "strategy": "alpha0.2",
+          "system": "nio-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -184.99313788175283,
+          "failure": null,
+          "runtime_s": 48.525,
+          "scf_steps": 39,
+          "strategy": "broyden",
+          "system": "nio-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -184.99313328309503,
+          "failure": null,
+          "runtime_s": 62.243,
+          "scf_steps": 51,
+          "strategy": "broyden-alpha0.2",
+          "system": "nio-rocksalt"
+        },
+        {
+          "converged": true,
+          "energy": -184.99313802866936,
+          "failure": null,
+          "runtime_s": 46.015,
+          "scf_steps": 37,
+          "strategy": "default",
+          "system": "nio-rocksalt"
+        },
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "SCF run NOT converged. To continue the calculation regardless, please set the keyword IGNORE_CONVERGENCE_FAILURE. O/| qs_scf.F:702",
+          "runtime_s": 130.5477959580021,
+          "scf_steps": null,
+          "strategy": "nbuffer4",
+          "system": "nio-rocksalt"
+        }
+      ]
+    },
+    "si-diamond": {
+      "best_strategy": "default",
+      "features": {
+        "cell_volume": 40.04786949774999,
+        "charge": 0.0,
+        "electronegativity_spread": 0.0,
+        "has_oxygen": 0.0,
+        "has_transition_metal": 0.0,
+        "log_n_atoms": 0.6931471805599453,
+        "max_atomic_number": 14.0,
+        "mean_atomic_number": 14.0,
+        "min_distance": 2.351691983976643,
+        "multiplicity": 1.0,
+        "n_atoms": 2.0,
+        "n_elements": 1.0,
+        "number_density": 0.049940234651243205,
+        "periodic": 1.0,
+        "valence_electrons": 8.0
+      },
+      "outcomes": [
+        {
+          "converged": true,
+          "energy": -7.247748101851479,
+          "failure": null,
+          "runtime_s": 4.688,
+          "scf_steps": 8,
+          "strategy": "alpha0.1",
+          "system": "si-diamond"
+        },
+        {
+          "converged": true,
+          "energy": -7.24774810205532,
+          "failure": null,
+          "runtime_s": 4.844,
+          "scf_steps": 8,
+          "strategy": "alpha0.2",
+          "system": "si-diamond"
+        },
+        {
+          "converged": true,
+          "energy": -7.247744728984384,
+          "failure": null,
+          "runtime_s": 4.802,
+          "scf_steps": 8,
+          "strategy": "broyden",
+          "system": "si-diamond"
+        },
+        {
+          "converged": true,
+          "energy": -7.247741395291741,
+          "failure": null,
+          "runtime_s": 4.814,
+          "scf_steps": 8,
+          "strategy": "broyden-alpha0.2",
+          "system": "si-diamond"
+        },
+        {
+          "converged": true,
+          "energy": -7.247748102924841,
+          "failure": null,
+          "runtime_s": 4.824,
+          "scf_steps": 8,
+          "strategy": "default",
+          "system": "si-diamond"
+        },
+        {
+          "converged": true,
+          "energy": -7.24774811481151,
+          "failure": null,
+          "runtime_s": 4.777,
+          "scf_steps": 8,
+          "strategy": "nbuffer4",
+          "system": "si-diamond"
+        }
+      ]
+    },
+    "si-diamond-strained": {
+      "best_strategy": "default",
+      "features": {
+        "cell_volume": 43.761388292667874,
+        "charge": 0.0,
+        "electronegativity_spread": 0.0,
+        "has_oxygen": 0.0,
+        "has_transition_metal": 0.0,
+        "log_n_atoms": 0.6931471805599453,
+        "max_atomic_number": 14.0,
+        "mean_atomic_number": 14.0,
+        "min_distance": 2.4222427434959424,
+        "multiplicity": 1.0,
+        "n_atoms": 2.0,
+        "n_elements": 1.0,
+        "number_density": 0.045702389207224844,
+        "periodic": 1.0,
+        "valence_electrons": 8.0
+      },
+      "outcomes": [
+        {
+          "converged": true,
+          "energy": -7.276882524454857,
+          "failure": null,
+          "runtime_s": 4.298,
+          "scf_steps": 8,
+          "strategy": "alpha0.1",
+          "system": "si-diamond-strained"
+        },
+        {
+          "converged": true,
+          "energy": -7.276882520867721,
+          "failure": null,
+          "runtime_s": 4.339,
+          "scf_steps": 8,
+          "strategy": "alpha0.2",
+          "system": "si-diamond-strained"
+        },
+        {
+          "converged": true,
+          "energy": -7.276882997799683,
+          "failure": null,
+          "runtime_s": 4.336,
+          "scf_steps": 8,
+          "strategy": "broyden",
+          "system": "si-diamond-strained"
+        },
+        {
+          "converged": true,
+          "energy": -7.276884946513903,
+          "failure": null,
+          "runtime_s": 4.75,
+          "scf_steps": 9,
+          "strategy": "broyden-alpha0.2",
+          "system": "si-diamond-strained"
+        },
+        {
+          "converged": true,
+          "energy": -7.276882518730122,
+          "failure": null,
+          "runtime_s": 4.319,
+          "scf_steps": 8,
+          "strategy": "default",
+          "system": "si-diamond-strained"
+        },
+        {
+          "converged": true,
+          "energy": -7.276882519910059,
+          "failure": null,
+          "runtime_s": 4.309,
+          "scf_steps": 8,
+          "strategy": "nbuffer4",
+          "system": "si-diamond-strained"
+        }
+      ]
+    },
+    "tio2-rutile": {
+      "best_strategy": "alpha0.1",
+      "features": {
+        "cell_volume": 62.449209724000006,
+        "charge": 0.0,
+        "electronegativity_spread": 1.9,
+        "has_oxygen": 1.0,
+        "has_transition_metal": 1.0,
+        "log_n_atoms": 1.791759469228055,
+        "max_atomic_number": 22.0,
+        "mean_atomic_number": 12.666666666666666,
+        "min_distance": 1.9478046688002366,
+        "multiplicity": 1.0,
+        "n_atoms": 6.0,
+        "n_elements": 2.0,
+        "number_density": 0.09607807731302843,
+        "periodic": 1.0,
+        "valence_electrons": 48.0
+      },
+      "outcomes": [
+        {
+          "converged": true,
+          "energy": -180.6971269422434,
+          "failure": null,
+          "runtime_s": 17.306,
+          "scf_steps": 14,
+          "strategy": "alpha0.1",
+          "system": "tio2-rutile"
+        },
+        {
+          "converged": true,
+          "energy": -180.69712982970233,
+          "failure": null,
+          "runtime_s": 17.375,
+          "scf_steps": 14,
+          "strategy": "alpha0.2",
+          "system": "tio2-rutile"
+        },
+        {
+          "converged": true,
+          "energy": -180.6971281478857,
+          "failure": null,
+          "runtime_s": 19.277,
+          "scf_steps": 16,
+          "strategy": "broyden",
+          "system": "tio2-rutile"
+        },
+        {
+          "converged": true,
+          "energy": -180.6971466365846,
+          "failure": null,
+          "runtime_s": 17.308,
+          "scf_steps": 14,
+          "strategy": "broyden-alpha0.2",
+          "system": "tio2-rutile"
+        },
+        {
+          "converged": true,
+          "energy": -180.69712496105183,
+          "failure": null,
+          "runtime_s": 21.963,
+          "scf_steps": 19,
+          "strategy": "default",
+          "system": "tio2-rutile"
+        },
+        {
+          "converged": true,
+          "energy": -180.69712691662843,
+          "failure": null,
+          "runtime_s": 21.035,
+          "scf_steps": 18,
+          "strategy": "nbuffer4",
+          "system": "tio2-rutile"
+        }
+      ]
+    },
+    "zno-wurtzite": {
+      "best_strategy": "default",
+      "features": {
+        "cell_volume": 47.63047705615261,
+        "charge": 0.0,
+        "electronegativity_spread": 1.79,
+        "has_oxygen": 1.0,
+        "has_transition_metal": 1.0,
+        "log_n_atoms": 1.3862943611198906,
+        "max_atomic_number": 30.0,
+        "mean_atomic_number": 19.0,
+        "min_distance": 1.9744246312653357,
+        "multiplicity": 1.0,
+        "n_atoms": 4.0,
+        "n_elements": 2.0,
+        "number_density": 0.08397984331091861,
+        "periodic": 1.0,
+        "valence_electrons": 36.0
+      },
+      "outcomes": [
+        {
+          "converged": true,
+          "energy": -152.79883799384635,
+          "failure": null,
+          "runtime_s": 35.215,
+          "scf_steps": 21,
+          "strategy": "alpha0.1",
+          "system": "zno-wurtzite"
+        },
+        {
+          "converged": true,
+          "energy": -152.79883949428796,
+          "failure": null,
+          "runtime_s": 35.115,
+          "scf_steps": 21,
+          "strategy": "alpha0.2",
+          "system": "zno-wurtzite"
+        },
+        {
+          "converged": true,
+          "energy": -152.79884023510772,
+          "failure": null,
+          "runtime_s": 33.868,
+          "scf_steps": 20,
+          "strategy": "broyden",
+          "system": "zno-wurtzite"
+        },
+        {
+          "converged": true,
+          "energy": -152.79883779926854,
+          "failure": null,
+          "runtime_s": 35.219,
+          "scf_steps": 21,
+          "strategy": "broyden-alpha0.2",
+          "system": "zno-wurtzite"
+        },
+        {
+          "converged": true,
+          "energy": -152.79884020409534,
+          "failure": null,
+          "runtime_s": 32.241,
+          "scf_steps": 19,
+          "strategy": "default",
+          "system": "zno-wurtzite"
+        },
+        {
+          "converged": false,
+          "energy": null,
+          "failure": "SCF run NOT converged. To continue the calculation regardless, please set the keyword IGNORE_CONVERGENCE_FAILURE. O/| qs_scf.F:702",
+          "runtime_s": 168.74819804204162,
+          "scf_steps": null,
+          "strategy": "nbuffer4",
+          "system": "zno-wurtzite"
+        }
+      ]
+    }
+  }
+}

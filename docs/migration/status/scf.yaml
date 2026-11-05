@@ -1,0 +1,417 @@
+# Ledger status for the experimental SCF / ML-SCF tooling area (SCF-001..044, FIX-005).
+# Runtime: src/gmd_active_learning/adapters/dft/scf/ (prefix R below); tooling: tools/scf/ (T).
+# Tests: tests/scf/ (648 collected: 641 pass, 7 skip for lost PHAL datasets; 4 marked `cp2k` run real CP2K 2026.2).
+# Measured status (docs/scf/README.md): no ML-SCF component has shown an acceleration; the positive
+# result is the model-free retry ladder.
+- id: SCF-001
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/scf_history.py]
+  evidence:
+    - tests/scf/test_scf_history.py
+    - tests/scf/test_scf_phal_parity.py::test_scf_history_parse_matches_on_a_real_trajectory_output
+    - tests/scf/test_scf_ml_regression.py::test_recording_off_writes_nothing
+    - tests/scf/test_scf_ml_regression.py::test_the_scf_history_recorder_needs_neither_torch_nor_ase
+    - tests/scf/test_scf_cp2k_native.py::test_scf_history_density_and_trajectory_are_recorded_from_a_real_run
+  findings: [F-23]
+  notes: >-
+    Destination deviation: lives in adapters/dft/scf/scf_history.py (this area's path) instead of
+    adapters/dft/cp2k/; importable without torch and ASE so core labeling can use it. Config scf.recording.*
+    (PHAL cp2k.scf_recording.* translated). Default output_dir is the relative runtime/cp2k/scf (PHAL default was
+    absolute /runtime/cp2k/scf). Extension: with record_trajectory on, the labeling path now also records the
+    per-iteration trajectory, honouring trajectory_strict (declared but never read in PHAL). Real CP2K 2026.2 H2:
+    10 iterations, -1.16593337453310 Ha.
+- id: SCF-002
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/ao_matrices.py]
+  evidence: [tests/scf/test_scf_density_recording.py, tests/scf/test_scf_trajectory.py, tests/scf/test_scf_pulay_mixer.py]
+  findings: []
+  notes: Unchanged parser; Tr(P S) = 2.000000/8.000000 on the H2/H2O fixtures and on a real native H2 run.
+- id: SCF-003
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/recording/density.py, src/gmd_active_learning/adapters/dft/scf/recording/input.py]
+  evidence:
+    - tests/scf/test_scf_density_recording.py
+    - tests/scf/test_scf_cp2k_native.py::test_scf_history_density_and_trajectory_are_recorded_from_a_real_run
+  findings: []
+  notes: >-
+    The &AO_MATRICES block PHAL emitted from its CP2K input builder is provided by recording/input.py
+    (ao_matrices_print_block / insert_ao_matrices_print) for the CP2K labeling area to use; the two PHAL
+    input-builder tests are rewritten against it. Writes remain plain write_text (as PHAL).
+- id: SCF-004
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/recording/trajectory.py]
+  evidence:
+    - tests/scf/test_scf_trajectory.py
+    - tests/scf/test_scf_cp2k_native.py::test_scf_history_density_and_trajectory_are_recorded_from_a_real_run
+  findings: [F-22]
+  notes: >-
+    H2 (11 frames) / H2O (14 frames) fixtures reproduce; a real native H2 run gives 11 frames at Tr(P S)=2 and its
+    converged density matches the PHAL fixture to 1e-5. Tolerances now from scf.recording.{electron,hermitian}_tolerance.
+    Pulay folding works only on existing dumps: no current CP2K build has the Pulay recorder.
+- id: SCF-005
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/pulay_matrix.py]
+  evidence: [tests/scf/test_pulay_matrix_record.py, tests/scf/test_pulay_b_diagnostics.py, tests/scf/test_pulay_dataset.py]
+  findings: [F-22]
+  notes: >-
+    Destination deviation: runtime (adapters/dft/scf/pulay_matrix.py), not tools/scf/pulay/records.py, because the
+    runtime trajectory recorder folds the dumps. Reads/verifies the committed fixtures; producer absent from every
+    current CP2K build.
+- id: SCF-006
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/schema.py]
+  evidence:
+    - tests/scf/test_scf_dataset.py
+    - tests/scf/test_scf_phal_parity.py::test_structure_hash_matches
+    - tests/scf/test_scf_fixes.py::test_density_artifacts_survive_a_save_and_reload
+    - tests/scf/test_scf_fixes.py::test_density_artifacts_without_the_new_fields_serialise_as_in_phal
+  findings: [F-23]
+  notes: >-
+    Fixed: SCFDensityArtifacts now persists representation, electron_count_method, spin_channels, trajectory_path
+    and trajectory_frames (written only when set, so samples without them serialise exactly as PHAL).
+    structure_hash identical to PHAL. n_electrons stays all-electron (schema identity); density consumers use the
+    valence count instead (SCF-020).
+- id: SCF-007
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/dataset.py]
+  evidence: [tests/scf/test_scf_dataset.py, tests/scf/test_scf_cli.py::test_dataset_ingest_reports_what_it_skipped, tests/scf/test_ml_scf_pipeline.py::test_recorded_runs_feed_the_dataset_and_the_benchmark]
+  findings: [F-23]
+  notes: >-
+    Dataset root comes from scf.dataset.root (PHAL's cp2k.ml_scf.dataset_dir was never read); split ratios in
+    scf.dataset.split_ratios. Charge/spin from the labeling config's cp2k section via utils.electronic_state.
+- id: SCF-008
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/validation.py]
+  evidence: [tests/scf/test_scf_dataset.py, tests/scf/test_scf_density_recording.py, tests/scf/test_scf_fixes.py::test_a_density_without_an_overlap_is_refused_not_approximated]
+  findings: [F-21, F-23]
+  notes: >-
+    Deliberate deviation: a recorded density without an overlap is an ERROR (PHAL fell back to Tr(P), contradicting
+    density_representation.md section 4). multiplicity_is_consistent now imported lazily. Hermitian tolerance 1e-6
+    here vs 1e-8 at the exchange/trajectory gates is kept and documented (docs/scf/contracts.md).
+- id: SCF-009
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/features.py]
+  evidence: [tests/scf/test_scf_dataset.py, tests/scf/test_scf_training.py]
+  findings: [F-21]
+  notes: >-
+    Unchanged, FEATURE_VERSION unchanged. Known limitation kept (changing it would change FEATURE_VERSION):
+    neighbour distances ignore minimum image, wrong for periodic solids.
+- id: SCF-010
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/export.py]
+  evidence: [tests/scf/test_scf_dataset.py, tests/scf/test_scf_cli.py::test_dataset_export_writes_artifacts]
+  findings: [F-23]
+  notes: Inherits the SCFDensityArtifacts fix (no field loss).
+- id: SCF-011
+  status: verified
+  implementation: [tools/scf/pulay_dataset.py, tools/scf/scripts/generate_pulay_dataset.py, src/gmd_active_learning/adapters/dft/scf/execution.py]
+  evidence: [tests/scf/test_pulay_dataset.py]
+  findings: [F-11, F-21, F-22]
+  notes: >-
+    Fixture verdicts, reasons, report numbers and the fake-scheduler submit-before-poll / failed-job-rejected
+    behaviour pass. Schedulers: execution.LocalSchedulerBackend or the GMD scheduler adapters via
+    resolve_scheduler('slurm'|'pbs'|'gmd-local') + GmdSchedulerBridge. Cannot produce accepted samples with any
+    current CP2K (no Pulay recorder); the documented 27/30 dataset is not reproducible.
+- id: SCF-012
+  status: verified
+  implementation: [tools/scf/structures.py]
+  evidence: [tests/scf/test_structure_tasks.py, tests/scf/test_scf_valence.py]
+  findings: [F-11]
+  notes: >-
+    test_the_shipped_plan_and_templates_agree (failing at PHAL 96263b6) passes on the regenerated collections.
+    The module-level PulayTask import is kept (tools-internal).
+- id: SCF-013
+  status: verified
+  implementation: [configs/cp2k/, data/structures/, tools/scf/generate_structures.py]
+  evidence: [tests/scf/test_scf_structures_data.py, tests/scf/test_structure_tasks.py]
+  findings: [F-11]
+  notes: >-
+    Destination deviation: configs/cp2k/ (byte-identical to PHAL, hashes checked) instead of configs/scf/.
+    tio2_anatase.cif original; small_molecules/periodic/transition_metal_oxides and benchmark/{molecules,periodic,unseen}
+    regenerated by a seeded generator (docs/scf/structure_provenance.md). si-diamond reproduces the fixture's
+    descriptors exactly; MgO/NaCl/LiH/Si/C/TiO2-rutile reproduce PHAL's measured strategy outcomes on native CP2K.
+- id: SCF-014
+  status: verified
+  implementation: [tools/scf/training/dataset_adapter.py]
+  evidence: [tests/scf/test_scf_dataset_adapter.py, tests/scf/test_scf_cost_aware_targets.py]
+  findings: [F-11, F-21]
+  notes: >-
+    The 12 tests that errored at PHAL 96263b6 (missing periodic.extxyz) pass on the regenerated file, whose
+    si-diamond frame matches the fixture. Two dataset-level tests skip (generated dataset absent).
+- id: SCF-015
+  status: verified
+  implementation: [tools/scf/difficulty.py]
+  evidence: [tests/scf/test_scf_difficulty.py, tests/scf/test_scf_cp2k_native.py::test_the_retry_ladder_rescues_mgo_on_native_cp2k]
+  findings: [F-21]
+  notes: parse_abort parses a real native MgO R_COND abort. The 30-system test skips (dataset absent).
+- id: SCF-016
+  status: verified
+  implementation: [tools/scf/controller/policy.py]
+  evidence: [tests/scf/test_scf_controller.py]
+  findings: [F-21]
+  notes: >-
+    Offline model only; PHAL tests pass unchanged. Recorded, not changed: it lacks the documented "2 actions per run",
+    "no action past 50% of MAX_SCF" and "1 rejection if irreversible" guards, and observe() speaks of restoring an
+    electronic state (docs/scf/negative_results.md). Live controller absent from every current CP2K build.
+- id: SCF-017
+  status: migrated
+  implementation: [tools/scf/controller/dataset.py]
+  evidence: [tests/scf/test_scf_controller_dataset.py]
+  findings: [F-21]
+  notes: >-
+    Fixture-level samples/labels/evaluate_policy pass; the parity target (433 iterations, 20 actions, precision
+    0.35, recall 0.09) needs the lost 27-system dataset (2 tests skip). Not reproducible.
+- id: SCF-018
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/strategy.py]
+  evidence:
+    - tests/scf/test_scf_strategy.py
+    - tests/scf/test_scf_retry_ladder.py::test_the_documented_ladder_numbers_are_reproduced
+    - tests/scf/test_scf_cp2k_native.py::test_the_retry_ladder_rescues_mgo_on_native_cp2k
+  findings: [F-21]
+  notes: >-
+    New RetryLadder driven by scf.retry (enabled, order [default, nbuffer4], base strategy, failure_cost; off by
+    default). Documented table reproduces default 9/12 556 steps and default->nbuffer4 12/12 582 steps. Native CP2K
+    2026.2 re-run on regenerated structures: MgO/NaCl/LiH abort under NBUFFER 8 (MgO R_COND = 7.103E-17 as PHAL)
+    and converge with nbuffer4 in 10/9/7 steps (docs/scf/strategy_rerun.md). Caveat kept: PHAL's default NBUFFER 8,
+    CP2K's own default is 4.
+- id: SCF-019
+  status: migrated
+  implementation: [tools/scf/strategy_predictor.py, tools/scf/scripts/benchmark_scf_strategies.py, tools/scf/scripts/predict_scf_input.py]
+  evidence: [tests/scf/test_scf_strategy.py]
+  findings: [F-21]
+  notes: >-
+    Negative result quoted verbatim. The 72-run dataset is lost, so PHAL's leave-one-out sweep (25%/250 steps at 0.5)
+    cannot be reproduced; the grid was re-run on native CP2K with regenerated structures and the re-run's own
+    leave-one-out is recorded in docs/scf/strategy_rerun.md.
+- id: SCF-020
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/density/prediction.py, src/gmd_active_learning/adapters/dft/scf/density/predictor.py]
+  evidence:
+    - tests/scf/test_scf_density_predictor.py
+    - tests/scf/test_scf_fixes.py::test_the_valence_count_is_the_reference_for_a_density
+    - tests/scf/test_scf_fixes.py::test_a_configured_electron_tolerance_is_used
+    - tests/scf/test_scf_fixes.py::test_a_density_matrix_prediction_keeps_its_overlap_on_disk
+  findings: [F-23]
+  notes: >-
+    Fixed all three PHAL bugs: declared-vs-expected now uses the GTH valence count (expected_density_electrons);
+    the dummy normalises to valence (water 8, not 10); with_output_path and write/read_prediction keep the
+    overlap. Tests that asserted 10/5/9 electrons now assert 8/4/7 (documented deviation). electron_tolerance
+    from scf.ml_scf.electron_tolerance (was unread).
+- id: SCF-021
+  status: migrated
+  implementation: [src/gmd_active_learning/adapters/dft/scf/density/exchange.py]
+  evidence: [tests/scf/test_scf_density_exchange.py, tests/scf/test_scf_phal_parity.py::test_exchange_files_are_byte_identical]
+  findings: [F-21, F-22]
+  notes: >-
+    Byte-identical to PHAL's writer for the H2/H2O converged fixtures. The fork-side half of the acceptance
+    (Fortran reader verdicts, H2 replay in 1 step) needs the Linux/aarch64 cp2k-ml-scf binary and was not run
+    here; declared by cp2k-ml-scf only. cp2k-ml-scf/tests/generate_exchange_vectors.py still imports PHAL's writer
+    and should be re-pointed at gmd_active_learning before ref/ is removed (not modified here).
+- id: SCF-022
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/density/registry.py]
+  evidence: [tests/scf/test_scf_density_predictor.py, tests/scf/test_scf_fixes.py::test_the_density_gnn_predictor_is_registered_lazily]
+  findings: [F-23]
+  notes: >-
+    torch-backed built-ins (density_gnn, torch) are resolved lazily by import path, so a missing torch affects only
+    them (PHAL's early return left density_gnn unregistered). Config scf.ml_scf.{enabled,predictor,prediction_dir}.
+    Not folded into adapters/registry.py (owned elsewhere).
+- id: SCF-023
+  status: verified
+  implementation: [tools/scf/training/dataset_loader.py]
+  evidence: [tests/scf/test_scf_training.py, tests/scf/test_scf_density_model.py]
+  findings: [F-23]
+  notes: >-
+    Deviations: no Tr(P) fallback (DataError without an overlap); atomic-population targets and their reference
+    count use the GTH valence count (PHAL: all-electron).
+- id: SCF-024
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/_torch.py]
+  evidence:
+    - tests/scf/test_scf_ml_regression.py::test_importing_the_runtime_package_never_imports_torch_or_the_tooling
+    - tests/scf/test_scf_ml_regression.py::test_torch_only_entry_points_raise_a_typed_error_without_torch
+  findings: []
+  notes: >-
+    TorchUnavailableError subclasses CapabilityUnavailableError and ImportError. model_digest unchanged.
+    No optional extra declared in pyproject (shared file); torch is already a hard dependency there.
+- id: SCF-025
+  status: verified
+  implementation: [tools/scf/experimental/atomic_population_mlp/model.py, tools/scf/experimental/atomic_population_mlp/train.py]
+  evidence: [tests/scf/test_scf_training.py, tests/scf/test_scf_ml_regression.py::test_bad_configuration_is_rejected]
+  findings: [F-21, F-23]
+  notes: >-
+    Kept in scope as experimental tooling per the Phase-0 scope decision. Predictor type 'torch' requires
+    scf.ml_scf.experimental=true; distributes the valence count. Its PHAL tests pass (count assertions updated to
+    valence). Negative-result statement carried in docs/scf/negative_results.md.
+- id: SCF-026
+  status: migrated
+  implementation: [src/gmd_active_learning/adapters/dft/scf/density/gnn_model.py, tools/scf/training/density_gnn.py, tools/scf/scripts/train_density_guess.py]
+  evidence: [tests/scf/test_scf_density_model.py, tests/scf/test_scf_valence.py]
+  findings: [F-21]
+  notes: >-
+    Model/basis/valence/checkpoint-loader in runtime (needed for serving), training loop in tools. PHAL unit tests
+    pass. The 27-system AO/valence fit and the loss-trajectory parity need the lost dataset/checkpoints. Negative
+    result (53 vs 63 steps, 0.85) preserved. Model still ignores cell/PBC (recorded).
+- id: SCF-027
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/density/gnn_predictor.py, src/gmd_active_learning/adapters/dft/scf/cp2k_ml_backend.py]
+  evidence:
+    - tests/scf/test_scf_density_model.py::test_prediction_uses_the_supplied_overlap
+    - tests/scf/test_scf_ml_backend.py::test_density_gnn_with_an_overlap_writes_an_exchange_file_cp2k_can_check
+    - tests/scf/test_scf_ml_backend.py::test_density_gnn_without_an_overlap_writes_nothing
+  findings: [F-23]
+  notes: >-
+    Fixed the dead path: the wrapper passes overlap= to predictors declaring accepts_overlap; the prediction carries
+    the overlap and the valence count, so a phal-density-matrix-v1 exchange file with OVERLAP_VALUES is written.
+    Whether the fork accepts it is declared by cp2k-ml-scf, not validated here.
+- id: SCF-028
+  status: verified
+  implementation: [tools/scf/benchmark/evaluate.py]
+  evidence: [tests/scf/test_scf_training.py, tests/scf/test_scf_capabilities_and_benchmark.py]
+  findings: [F-21]
+  notes: Unchanged.
+- id: SCF-029
+  status: migrated
+  implementation: [src/gmd_active_learning/adapters/dft/scf/deploy.py]
+  evidence: [tests/scf/test_scf_production.py]
+  findings: [F-21, F-22]
+  notes: >-
+    export_density_guess / verify_deployed / deployment_environment and the refusal cases pass. No consumer: mode B
+    is not implemented by cp2k-ml-scf (hook 0009 placeholder) and the capability contract never advertises it.
+    PHAL-output parity (rtol 1e-10) not checked (lost checkpoints).
+- id: SCF-030
+  status: verified
+  implementation: [tools/scf/experimental/neural_mixer/model.py, tools/scf/experimental/neural_mixer/export.py]
+  evidence:
+    - tests/scf/test_scf_production.py::test_mixer_exports_to_torchscript_and_answers_cp2ks_call
+    - tests/scf/test_scf_production.py::test_exporting_a_mixer_without_the_experimental_opt_in_is_refused
+  findings: [F-21]
+  notes: >-
+    Kept as gated experimental tooling (scope decision). export_mixer moved out of runtime deploy.py; requires
+    experimental=True; mixing.method=ml requires scf.ml_scf.experimental and degrades on every build lacking
+    phal_ml_mixing (all current ones). No CP2K consumer.
+- id: SCF-031
+  status: verified
+  implementation: [tools/scf/negative_results/pulay_mixer.py, tools/scf/negative_results/ml_pulay_model.py]
+  evidence: [tests/scf/test_scf_pulay_mixer.py, tests/scf/test_pulay_matrix_record.py, tests/scf/test_scf_fixes.py::test_the_pulay_mixer_export_needs_the_experimental_opt_in]
+  findings: [F-23]
+  notes: Fixed the export gate bypass (pulay_mixer.export_mixer now requires experimental=True).
+- id: SCF-032
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/capabilities.py]
+  evidence:
+    - tests/scf/test_scf_capabilities_and_benchmark.py
+    - tests/scf/test_scf_ml_backend.py::test_the_probe_uses_the_configured_environment
+    - tests/scf/test_scf_version_pin.py
+    - tests/scf/test_scf_cp2k_native.py::test_the_native_binary_is_probed_and_validated_without_claiming_ml_features
+  findings: [F-22]
+  notes: >-
+    Destination deviation: adapters/dft/scf/capabilities.py. Versioned contract gmd-cp2k-capabilities-v1 with
+    per-feature advertised/validated/evidence; exact flag tokens (PHAL substring match); probe environment includes
+    scf.ml_scf.environment (PHAL bug at cp2k_capabilities.py:246); exit-127 loader failures reported as such;
+    version normalised ("CP2K version X" -> "X"). Native CP2K 2026.2 probed and validated: no ML features
+    (docs/scf/capabilities_native_cp2k_2026.2.json). cp2k-ml-scf recorded as declared, not validated.
+- id: SCF-033
+  status: migrated
+  implementation: [src/gmd_active_learning/adapters/dft/scf/cp2k_ml_backend.py, src/gmd_active_learning/adapters/dft/scf/modes.py]
+  evidence:
+    - tests/scf/test_scf_ml_backend.py
+    - tests/scf/test_ml_scf_pipeline.py
+    - tests/scf/test_scf_cp2k_native.py::test_the_ml_wrapper_degrades_to_a_native_run_on_a_native_binary
+  findings: [F-22, F-23]
+  notes: >-
+    Rewritten as a composable wrapper over a prepared CP2K input (no CP2KBackend subclass; the CP2K labeler is owned
+    by the labeling area). Fixes: ML-mixing capability checked; one native retry (retry_request,
+    scf.ml_scf.retry_native_on_failure); accelerated only when CP2K logs an accepted guess; scf_mode always in
+    native|ml_guess|ml_full|native_fallback; env carries what the fork reads (STRUCTURE_DIGEST/BASIS/GUESS_ALPHA)
+    not MODEL/MANIFEST/MODEL_DIGEST; configured environment kept for the probe and native fallback; existing
+    &MIXING replaced not duplicated. Degradation verified on a real native binary; the acceptance run against
+    cp2k-ml-scf (H2 replay 1 step) cannot run here (Linux/aarch64).
+- id: SCF-034
+  status: verified
+  implementation: [tools/scf/benchmark/modes.py]
+  evidence: [tests/scf/test_scf_capabilities_and_benchmark.py, tests/scf/test_scf_production.py, tests/scf/test_scf_cli.py::test_benchmark_prints_the_report]
+  findings: [F-21]
+  notes: >-
+    MODE_* constants moved to runtime modes.py (backend no longer imports tooling). Not changed: warnings/headline
+    use the energy_tolerance argument rather than criteria.energy_tolerance (benchmark.py:254) - recorded.
+- id: SCF-035
+  status: migrated
+  implementation: [tools/scf/benchmark/guess.py, tools/scf/scripts/benchmark_ml_guess.py, tools/scf/scripts/benchmark_guess_variants.py, tools/scf/scripts/benchmark_controller.py]
+  evidence: [tests/scf/test_ml_guess_benchmark.py, tests/scf/test_controller_arms.py, tests/scf/test_scf_cost_aware_targets.py]
+  findings: [F-21, F-22]
+  notes: >-
+    parse_run/compare/fallback-invalidates parity passes. ML arms need mode B / controller env, which no current
+    build implements; only atomic arms run against native CP2K.
+- id: SCF-036
+  status: migrated
+  implementation: [tools/scf/diagnostics/guess.py, tools/scf/scripts/diagnose_ml_guess.py]
+  evidence: [tests/scf/test_guess_diagnostics.py]
+  findings: [F-21]
+  notes: Unit parity passes; the report needs the mode-B guess model (1 test skips). Table preserved verbatim in docs.
+- id: SCF-037
+  status: dropped
+  implementation: []
+  evidence: [tests/scf/test_ml_guess_benchmark.py, tests/scf/test_scf_capabilities_and_benchmark.py]
+  findings: []
+  notes: >-
+    scripts/benchmark_ml_scf.py not ported: no tests, superseded by tools/scf/benchmark/{modes,guess}.py, needs
+    MIXING_METHOD ML_PULAY and an env var nothing else knows.
+- id: SCF-038
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/cli.py]
+  evidence: [tests/scf/test_scf_cli.py, tests/scf/test_scf_production.py::test_the_cli_can_fail_on_a_rejected_mode]
+  findings: [F-23]
+  notes: >-
+    Group 'scf' (PHAL 'cp2k-scf'), standalone via python -m ...scf.cli; add_subparser() for the shared gmd-al CLI
+    (not registered there: shared file). New: capabilities --validate-native, --config read for dataset root and
+    scf root. benchmark needs tools/ (source checkout).
+- id: SCF-039
+  status: verified
+  implementation: [src/gmd_active_learning/adapters/dft/scf/__init__.py, src/gmd_active_learning/adapters/dft/scf/density/__init__.py, tools/scf/training/__init__.py]
+  evidence: [tests/scf/test_scf_ml_regression.py::test_importing_the_runtime_package_never_imports_torch_or_the_tooling, tests/scf/test_scf_ml_regression.py::test_the_scf_history_recorder_needs_neither_torch_nor_ase]
+  findings: []
+  notes: Package import pulls in neither torch nor ASE nor tools/; training/__init__ trimmed (no eager imports).
+- id: SCF-040
+  status: verified
+  implementation: [tests/scf/test_ml_scf_pipeline.py, tests/scf/fakes/fake_density.py, tests/scf/fakes/fake_cp2k.py]
+  evidence: [tests/scf/test_ml_scf_pipeline.py, tests/scf/test_scf_ml_backend.py::test_a_model_that_loses_electrons_never_reaches_cp2k]
+  findings: []
+  notes: >-
+    Fake output now has the v2026.2 banner and the reconstruction's ml_guess_source/prediction_success lines.
+    The bad-prediction case moved to test_scf_ml_backend.py. Fakes live under tests/scf/fakes.
+- id: SCF-041
+  status: verified
+  implementation: [docs/scf/negative_results.md, docs/scf/ml_density_failure_analysis.md, docs/scf/ml_density_v2.md, docs/scf/ml_pulay_objective.md, docs/scf/adaptive_scf_controller.md, docs/scf/scf_strategy_prediction.md]
+  evidence: [docs/scf/negative_results.md]
+  findings: [F-21]
+  notes: Five reports ported verbatim with a lost-fork banner; summary quotes the key conclusions verbatim.
+- id: SCF-042
+  status: verified
+  implementation: [docs/scf/contracts.md, docs/scf/density_representation.md, docs/scf/pulay_dataset.md]
+  evidence: [docs/scf/contracts.md, tests/scf/test_scf_fixes.py, tests/scf/test_scf_trajectory.py, tests/scf/test_pulay_dataset.py]
+  findings: [F-23]
+  notes: Every stated rule mapped to a validator and a test; the code deviations PHAL had (Tr(P) fallbacks, sum(Z)) are fixed.
+- id: SCF-043
+  status: verified
+  implementation: [docs/scf/architecture.md, docs/scf/README.md]
+  evidence: [docs/scf/architecture.md]
+  findings: [F-21]
+  notes: >-
+    Rewritten (architecture + user guide): measured status first, no acceleration claim, workspace GMD_active +
+    cp2k-ml-scf, only existing config keys/env vars.
+- id: SCF-044
+  status: verified
+  implementation: [docs/scf/cp2k_version_history.md]
+  evidence: [tests/scf/test_scf_version_pin.py::test_the_recorded_pin_matches_version_lock]
+  findings: []
+  notes: Archive page verbatim with a superseded-parts banner; pin asserted against cp2k-ml-scf/VERSION_LOCK.md.
+- id: FIX-005
+  status: verified
+  implementation: [tests/fixtures/scf/]
+  evidence: [tests/scf/test_scf_structures_data.py::test_the_scf_fixtures_are_byte_identical_to_phal]
+  findings: [F-11]
+  notes: >-
+    72 files byte-identical to phal_inventory.json. pulay_sample_periodic/sample.json references the regenerated
+    periodic.extxyz, whose si-diamond frame reproduces the recorded descriptors.
