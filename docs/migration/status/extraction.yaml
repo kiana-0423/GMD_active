@@ -1,0 +1,312 @@
+# Ledger status for the extraction / capping / embedding / masks / datasets area.
+# TRN-005 and TRN-006 are owned by the workflow lead (retraining/triggers.py, retraining/registry.py).
+- id: EXT-001
+  status: verified
+  implementation: [src/gmd_active_learning/extraction/cluster.py, src/gmd_active_learning/extraction/_placement.py]
+  evidence:
+    - tests/extraction/test_extraction_phal_parity.py::test_raw_region_matches_phal
+    - tests/extraction/test_extraction_modes.py::test_cluster_radius_beyond_half_cell_is_flagged_and_torn_regions_are_refused
+    - tests/extraction/test_extraction_modes.py::test_cluster_size_policies_are_explicit
+    - tests/extraction/test_extraction_modes.py::test_cluster_on_molecule_single_atom_and_all_hotspots
+    - tests/extraction/test_extraction_modes.py::test_triclinic_cluster_shift_invariant
+  findings: [F-09]
+  notes: >-
+    Atom sets, roles, positions and cells match PHAL on all 13 golden cluster regions (atol 5e-8 because the fixture
+    input has 8 decimals). Parent atom IDs and integer image shifts are recorded, and extract_radius > half the cell
+    width is flagged (periodic_guard.radius_exceeds_half_cell). Torn regions follow periodic_guard.policy (default
+    error). PHAL's silent min_atoms padding and max_atoms trimming are explicit (min_atoms_policy, max_atoms_policy)
+    and recorded; hotspots are never trimmed. Config: extraction.*.
+- id: EXT-002
+  status: verified
+  implementation: [src/gmd_active_learning/extraction/slab.py]
+  evidence:
+    - tests/extraction/test_extraction_phal_parity.py::test_raw_region_matches_phal
+    - tests/extraction/test_extraction_modes.py::test_slab_multi_period_window_replicates_images_instead_of_an_empty_cell
+    - tests/extraction/test_extraction_modes.py::test_slab_full_period_window_on_skewed_cell_keeps_source_lateral_vectors
+    - tests/extraction/test_extraction_modes.py::test_slab_narrow_window_is_non_periodic_without_sub_bond_contacts
+  findings: [F-08, F-09]
+  notes: >-
+    F-08 reproduced (5 A H lattice with a 16 A window) and fixed: slab.multi_period replicate (default) fills the
+    15 A cell with 3x3 images, single_period (recorded) or error. A skewed cell with both axes at full period keeps
+    the source lateral vectors; a single periodic axis in a skewed cell is UnsupportedCombinationError, or
+    nonperiodic with skewed_policy. z vacuum is slab.z_vacuum (PHAL hard-coded 6 A). Hotspots outside the window
+    are recorded.
+- id: EXT-003
+  status: verified
+  implementation: [src/gmd_active_learning/extraction/graph.py]
+  evidence:
+    - tests/extraction/test_extraction_phal_parity.py::test_raw_region_matches_phal
+    - tests/extraction/test_extraction_modes.py::test_graph_without_radial_shell_is_exactly_the_subgraph_and_all_core
+  findings: [F-05, F-09]
+  notes: >-
+    graph_atom_ids, atom sets, roles and hotspots match PHAL on all graph fixtures (radial_shell=true). With
+    radial_shell=false the region is exactly the subgraph and every atom is core (synthetic test). The bond scale
+    is extraction.graph.covalent_scale; PHAL read it from h_capping. The dispatcher honours every mode, which fixes
+    PHAL's submitter falling back to cluster (F-05) for any caller using extract_regions or EventRegionExtractor.
+- id: EXT-004
+  status: verified
+  implementation: [src/gmd_active_learning/extraction/block.py]
+  evidence:
+    - tests/extraction/test_extraction_modes.py::test_block_grid_assignment_wrap_clip_and_merging
+    - tests/extraction/test_phal_live_comparison.py::test_block_assignment_and_merging_match_phal
+    - tests/extraction/test_extraction_phal_parity.py::test_raw_region_matches_phal
+  findings: []
+  notes: >-
+    Atom->block maps and merged groups are identical to PHAL on randomized orthorhombic, triclinic, 2-D periodic
+    and non-periodic cells (live comparison, skipped once ref/ is removed; golden block regions also match). Block
+    mode now requires a non-degenerate cell (PHAL passed a singular cell unchecked).
+- id: EXT-005
+  status: verified
+  implementation: [src/gmd_active_learning/extraction/block.py]
+  evidence:
+    - tests/extraction/test_extraction_phal_parity.py::test_raw_region_matches_phal
+    - tests/extraction/test_extraction_phal_parity.py::test_capped_block_regions_write_a_dataset
+    - tests/extraction/test_capping_embedding.py::test_block_region_with_caps_writes_a_dataset
+    - tests/extraction/test_extraction_modes.py::test_block_roles_trimming_and_policies
+  findings: [F-04, F-09, F-18]
+  notes: >-
+    Roles, trimming and max/min-atom errors match PHAL. Trimming is recorded (trimmed_atom_ids). Block roles live
+    only in ExtractedRegion.roles (no separate atom_role list), so capped block regions write datasets with
+    region_code of length n_atoms (F-04). training_weights metadata uses the reconciled 0.3 inner-buffer weight
+    (F-18). The hard-coded 2 A offset and 4 A padding are now block.vacuum_offset and block.cell_padding. Regions
+    torn by the periodic boundary (all ethane and polyethylene fixture blocks) are refused by default.
+- id: EXT-006
+  status: verified
+  implementation: [src/gmd_active_learning/extraction/cooldown.py, src/gmd_active_learning/extraction/dispatch.py]
+  evidence:
+    - tests/extraction/test_extraction_modes.py::test_cooldown_replay_and_prune
+    - tests/extraction/test_phal_live_comparison.py::test_cooldown_sequence_matches_phal
+    - tests/extraction/test_extraction_modes.py::test_block_cooldown_skips_and_state_survives_restart
+    - tests/extraction/test_extraction_switches.py::test_event_region_extractor_satisfies_the_workflow_protocol
+  findings: []
+  notes: >-
+    Implemented in extraction/cooldown.py; the ledger destination was events/cooldown.py. Skip and prune decisions
+    match PHAL. State can be serialised and persisted (block.cooldown_state_path) and survives a restart.
+    release() lets the labeling area free blocks after a failed label; PHAL kept them blocked.
+- id: EXT-007
+  status: verified
+  implementation: [src/gmd_active_learning/extraction/regions.py]
+  evidence:
+    - tests/extraction/test_extraction_modes.py::test_radial_partition_defaults_and_edges
+    - tests/extraction/test_phal_live_comparison.py::test_radial_partition_matches_phal_on_random_distances
+  findings: []
+  notes: Identical index lists and label vectors to PHAL on 200 randomized cases, including boundary == core edge cases.
+- id: EXT-008
+  status: verified
+  implementation: [src/gmd_active_learning/extraction/h_capping.py, src/gmd_active_learning/extraction/electronic.py]
+  evidence:
+    - tests/extraction/test_extraction_phal_parity.py::test_capped_region_matches_phal_or_documents_the_torn_bond_fix
+    - tests/extraction/test_capping_embedding.py::test_cut_ethane_gets_one_cap_along_each_broken_bond
+    - tests/extraction/test_capping_embedding.py::test_capping_disabled_metal_and_oxide_are_recorded_skips
+    - tests/extraction/test_capping_embedding.py::test_allow_core_capping_means_inner_buffer_and_cap_core_atoms_caps_core
+    - tests/extraction/test_capping_embedding.py::test_electronic_state_of_a_capped_radical
+  findings: [F-04, F-17]
+  notes: >-
+    Cap positions, masks, codes and skip reasons match PHAL on every untorn fixture region, including the metal
+    skips. Capping is a separate step applied through ExtractedRegion.with_caps (F-04 fix). Cut bonds are decided
+    with integer image shifts, so in torn regions (guard policy flag) bonds whose partner exists only at another
+    image are capped too; PHAL left them dangling, and the test asserts PHAL's caps are a subset of ours.
+    allow_core_capping keeps PHAL's real meaning (also cap inner-buffer atoms); cap_core_atoms is the new switch
+    that caps core atoms. Partial capping and every dangling bond are recorded. The uncapped-fragment gate is
+    check_labelable. Charge and multiplicity come from resolve_region_electronic_state. H-only relaxation (F-17)
+    is left to labeling.
+- id: EXT-009
+  status: verified
+  implementation: [src/gmd_active_learning/extraction/embedding.py]
+  evidence: [tests/extraction/test_capping_embedding.py::test_embedding_data_and_fail_closed_gate]
+  findings: []
+  notes: >-
+    No charge on a QM atom; the cutoff limits the count; a region not derived from the source is reported
+    unavailable; unsupported methods and periodic regions are reported. The transform comes from the recorded
+    shifts instead of being reverse-engineered. Atoms without a charge are recorded (PHAL dropped them silently).
+    EMBEDDING_CAPABILITIES (qmmm_execution cp2k False) and require_embedding_backend raise
+    CapabilityUnavailableError for an enabled embedding. The labeling area's CP2K writer must call it.
+- id: EXT-010
+  status: verified
+  implementation: [src/gmd_active_learning/extraction/__init__.py]
+  evidence: [tests/extraction/test_extraction_switches.py::test_package_surface]
+  findings: []
+  notes: >-
+    Renames: extract_cluster_region -> extract_cluster, extract_slab_patch -> extract_slab, extract_graph_region ->
+    extract_graph. add_h_caps(region, frame, config) and build_embedding return new regions. Mode dispatch is
+    extract_regions / EventRegionExtractor.
+- id: EXT-011
+  status: in-progress
+  implementation: [src/gmd_active_learning/extraction/dispatch.py]
+  evidence: [tests/extraction/test_extraction_switches.py::test_each_mode_is_selectable]
+  findings: []
+  notes: >-
+    The flow is covered by tests, but examples/02_extract_hotspots.py is outside this area's paths. The example
+    should call extract_regions(frame, [[atom_id]], ExtractionConfig()) on a GMD frame fixture and check that
+    regions exist.
+- id: EXT-012
+  status: migrated
+  implementation: [src/gmd_active_learning/extraction/h_capping.py, src/gmd_active_learning/extraction/embedding.py, docs/extraction_and_datasets.md]
+  evidence:
+    - tests/extraction/test_capping_embedding.py::test_capping_disabled_metal_and_oxide_are_recorded_skips
+    - tests/extraction/test_capping_embedding.py::test_embedding_data_and_fail_closed_gate
+  findings: []
+  notes: >-
+    Issues 1-2 are carried forward as fail-closed gates with tests: check_labelable(uncapped_policy=error) and
+    require_embedding_backend. They are documented in docs/extraction_and_datasets.md; docs/known-issues.md is not
+    in this area's paths. Wiring both gates into the CP2K input writer and the GMD_SGT species-order requirement
+    (issue 3) belong to the labeling and SGT areas.
+- id: TRN-001
+  status: verified
+  implementation: [src/gmd_active_learning/datasets/masks.py]
+  evidence:
+    - tests/datasets/test_samples_and_masks.py::test_region_codes_and_label_map_are_phal_byte_identical
+    - tests/extraction/test_extraction_phal_parity.py::test_phal_capped_datasets_have_the_same_masks_and_codes
+  findings: []
+  notes: >-
+    REGION_CODE_MAP and the region_label_map JSON are byte-identical to PHAL and checked against contracts
+    REGION_CODES at import. PHAL-written extxyz region codes are decoded and compared. The canonical role store is
+    the contract's RegionRole, so the lossy label_core -> core mapping no longer matters (the mode is region.mode).
+- id: TRN-002
+  status: verified
+  implementation: [src/gmd_active_learning/datasets/masks.py, src/gmd_active_learning/extraction/_placement.py]
+  evidence:
+    - tests/extraction/test_extraction_phal_parity.py::test_capped_region_matches_phal_or_documents_the_torn_bond_fix
+    - tests/extraction/test_extraction_phal_parity.py::test_capped_block_regions_write_a_dataset
+    - tests/datasets/test_samples_and_masks.py::test_force_weights_follow_roles_with_a_single_inner_buffer_default
+  findings: [F-04, F-18]
+  notes: >-
+    Masks match PHAL build_atom_mask exactly for cluster, graph, slab and block, with and without caps. The mask is
+    the region's force_weights, a step function of roles (extraction.force_weights), so it cannot disagree with the
+    roles; block regions with caps have n_atoms labels. Single inner-buffer default 0.3 (F-18). PHAL's mutating
+    generate_atom_mask is replaced by the pure reweight().
+- id: TRN-003
+  status: migrated
+  implementation: [tests/reference/masked_force_mse.py]
+  evidence:
+    - tests/reference/test_masked_force_loss.py::test_masked_force_mse_reduces_to_plain_mse_and_ignores_masked_atoms
+    - tests/datasets/test_gmd_sgt_compat.py::test_gmd_sgt_weighted_loss_matches_numpy_oracle
+  findings: [F-03]
+  notes: >-
+    The masked loss itself is implemented in GMD_SGT (another area). The NumPy oracle (PHAL masked_force_mse plus
+    GMD_SGT's component-normalised weighted_force_loss) is here. GMD_SGT EnergyForceLoss._weighted on a batch
+    collated from our exported file equals the oracle (rtol 1e-6) for rmse, mae and mse, with zero gradient on
+    zero-weight atoms. Status stays migrated until GMD_SGT's own trainer test is recorded by that area.
+- id: TRN-004
+  status: verified
+  implementation: [src/gmd_active_learning/datasets/sgt_export.py, src/gmd_active_learning/datasets/extxyz_io.py, src/gmd_active_learning/datasets/npz_io.py]
+  evidence:
+    - tests/datasets/test_gmd_sgt_compat.py::test_gmd_sgt_reads_published_versions_with_all_weights
+    - tests/datasets/test_dataset_io_roundtrip.py::test_extxyz_round_trip_is_exact
+  findings: [F-03, F-12]
+  notes: >-
+    Replaced by a GMD_SGT export. GMD_SGT's reader (al-weighted-training, v0.4) reads train/val extxyz and the NPZ
+    with force_weight, energy_weight, stress_weight and split_group equal to the source. region_code, parent_atom_id
+    and image_shift travel as extra columns. Example 05 (Allegro) is not ported.
+- id: TRN-007
+  status: dropped
+  implementation: []
+  evidence: []
+  findings: []
+  notes: >-
+    Pure compatibility re-exports. datasets/ (writer, store) is the only writer API and loss code lives in GMD_SGT
+    and tests/reference. No module imports a training.dataset_writer shim.
+- id: DS-001
+  status: verified
+  implementation: [src/gmd_active_learning/datasets/writer.py, src/gmd_active_learning/datasets/samples.py]
+  evidence:
+    - tests/datasets/test_dataset_io_roundtrip.py::test_per_sample_triple_keeps_phal_keys
+    - tests/datasets/test_samples_and_masks.py::test_cluster_energy_is_written_but_not_trained_by_default
+    - tests/datasets/test_samples_and_masks.py::test_stress_only_for_labeled_periodic_regions
+  findings: [F-04, F-12]
+  notes: >-
+    Same three-file layout and PHAL NPZ/metadata keys, plus force_weight, region_code, image_shift, energy and
+    stress. Explicit energy policy: the region energy is written with energy_weight (non-periodic 0 and periodic 0
+    by default, capped regions 0 unless allow_capped) and is never the parent's (energy_is_parent_energy false).
+    Stress is written only when labeled and periodic, otherwise stress_weight 0. Writes are atomic.
+    Byte-identity with PHAL files is deliberately not kept (new keys, exact float formatting).
+- id: DS-002
+  status: verified
+  implementation: [src/gmd_active_learning/datasets/store.py, src/gmd_active_learning/datasets/split.py, src/gmd_active_learning/retraining/dataset_merger.py]
+  evidence:
+    - tests/datasets/test_dataset_store.py::test_publish_is_versioned_immutable_and_idempotent
+    - tests/datasets/test_dataset_store.py::test_split_keeps_whole_events_together
+    - tests/datasets/test_dataset_store.py::test_child_versions_are_cumulative_and_never_move_groups
+    - tests/datasets/test_dataset_store.py::test_merge_datasets_publishes_through_the_store
+    - tests/datasets/test_dataset_store.py::test_protocol_add_sample_is_idempotent_and_publish_honours_split_groups
+  findings: [F-10, F-13]
+  notes: >-
+    Versioned immutable store (sha256 over files, parent, sample IDs, idempotent republication, deduplication,
+    event-aware deterministic split with inheritance) instead of an overwritten train.extxyz. Masks and region
+    codes are preserved per frame. merge_datasets keeps its name and arguments but publishes through the store
+    and rejects placeholder parents. The legacy active_learning/workflow.py still passes the literal
+    "existing_dataset", so tests/test_workflow.py::test_workflow_dry_run now fails until the lead rewires or
+    retires that workflow.
+- id: IO-001
+  status: verified
+  implementation: [src/gmd_active_learning/datasets/frame_io.py]
+  evidence: [tests/datasets/test_dataset_io_roundtrip.py::test_frame_round_trip_steps_and_external_forces]
+  findings: []
+  notes: >-
+    Implemented as datasets/frame_io.read_frames (ledger destination utils/trajectory_io.py is outside this area).
+    Frame.step is the source MD step or the source-file index, external forces align with source indices under
+    slicing, and load errors raise. LAMMPS dumps raise UnsupportedCombinationError (GMD adapter area).
+- id: IO-002
+  status: in-progress
+  implementation: []
+  evidence: []
+  findings: []
+  notes: >-
+    replace-with-gmd: the GMD trajectory reader belongs to the GMD adapter area (adapters/gmd/trajectory.py). This
+    area only reads extxyz frames (IO-001/003).
+- id: IO-003
+  status: verified
+  implementation: [src/gmd_active_learning/datasets/frame_io.py]
+  evidence: [tests/datasets/test_dataset_io_roundtrip.py::test_frame_round_trip_steps_and_external_forces]
+  findings: []
+  notes: >-
+    write_frames/read_frames round trip is exact (positions, forces, velocities, step, time, energy, atom IDs,
+    cell); floats use their shortest repr instead of ASE's 8 decimals. Lives in datasets/frame_io.py, not
+    utils/structure_io.py.
+- id: IO-004
+  status: in-progress
+  implementation: []
+  evidence: []
+  findings: []
+  notes: >-
+    The DFT input dispatcher belongs to the labeling area (adapters/dft). Nothing is implemented here; the
+    recommendation to port CP2K only stands.
+- id: IO-005
+  status: dropped
+  implementation: []
+  evidence: []
+  findings: []
+  notes: Duplicate wrappers with no callers; CP2K parsing lives in the labeling area's adapter.
+- id: IO-006
+  status: dropped
+  implementation: []
+  evidence: []
+  findings: []
+  notes: Third alias of the dataset writer. datasets.writer.write_dataset_entry and the store cover it; nothing references write_common_dataset.
+- id: IO-007
+  status: dropped
+  implementation: []
+  evidence: []
+  findings: []
+  notes: >-
+    The aggregate package coupled trajectory IO to DFT writers. Frame IO lives in datasets/frame_io.py, which
+    imports no labeling code.
+- id: FIX-001
+  status: in-progress
+  implementation: []
+  evidence: []
+  findings: []
+  notes: >-
+    replace-with-gmd: needs a GMD frame-writer output fixture read by the GMD adapter (adapters area,
+    tests/fixtures/gmd/). The multi-frame PHAL golden fixtures already drive the extraction parity tests.
+- id: FIX-002
+  status: in-progress
+  implementation: [tests/fixtures/datasets/make_tiny_h2o.py, tests/fixtures/datasets/tiny_h2o.extxyz]
+  evidence:
+    - tests/datasets/test_tiny_fixture.py::test_fixture_is_reproducible_from_its_seed
+    - tests/datasets/test_tiny_fixture.py::test_gmd_sgt_reads_the_fixture
+  findings: []
+  notes: >-
+    Dataset part done: a seeded synthetic H2O set (toy harmonic model, not DFT, 8 frames in 4 split groups) in the
+    published layout, regenerable and read by GMD_SGT. Tiny GMD_SGT model, committee and export fixtures are
+    produced later by the workflow lead.
