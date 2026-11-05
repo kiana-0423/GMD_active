@@ -220,9 +220,15 @@ def test_clean_artefacts_produce_no_findings(tmp_path: Path) -> None:
 
 
 def test_repository_fixtures_report_only_their_deliberate_defects() -> None:
-    """GMD_active's fixtures contain two deliberate defects; anything else would be a false positive."""
+    """GMD_active's fixtures contain two deliberate defects; anything else would be a false positive.
 
-    report = audit.audit([PROJECT_ROOT / "tests" / "fixtures"])
+    The fixture areas are listed explicitly so fixtures added later by other areas (which may hold
+    deliberate defects of their own) do not silently change this expectation.
+    """
+
+    fixtures = PROJECT_ROOT / "tests" / "fixtures"
+    areas = ["cp2k", "datasets", "lammps", "phal_reference", "scf", "structures"]
+    report = audit.audit([fixtures / area for area in areas if (fixtures / area).exists()])
 
     found = sorted((Path(f.path).relative_to(PROJECT_ROOT).as_posix(), f.kind, f.severity) for f in report.findings)
     assert found == [
