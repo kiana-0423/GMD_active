@@ -1,0 +1,116 @@
+#!/bin/bash
+# Ported from PHAL (scripts/pbs/validate_md_probe.pbs, containers/scripts/validate_cp2k_ml.py sif_test) at 96263b6; MIT License, see NOTICE.
+#
+# Miyabi-G validation of the CP2K labeling image (containers/Dockerfile.cp2k) as
+# a SIF: version banner and an H2 single point that must print "SCF run
+# converged". The image is linux/arm64, so it runs on the Grace CPU of a
+# Miyabi-G node (Miyabi-C nodes are x86_64); CP2K itself uses no GPU.
+# NOT RUN YET: written without access to Miyabi; no job has been submitted.
+#
+# Submit through tools/hpc/pbs/submit.sh (queue/group from GMD_AL_PBS_QUEUE /
+# GMD_AL_PBS_GROUP), or directly:
+#   qsub -q debug-g -W group_list=<group> \
+#        -v GMD_AL_CP2K_IMAGE=/abs/path/cp2k.sif,GMD_AL_PBS_GROUP=<group> \
+#        tools/hpc/pbs/validate_cp2k_probe.pbs
+# The queue below is only a default; `qsub -q` overrides it. No group is
+# hard-coded: pass it with `-W group_list=`.
+#
+#PBS -q debug-g
+#PBS -l select=1
+#PBS -l walltime=00:20:00
+#PBS -N gmd-al-cp2k-probe
+#PBS -j oe
+
+set -euo pipefail
+cd "${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set; submit with qsub}"
+
+GMD_AL_APPTAINER_MODULE=${GMD_AL_APPTAINER_MODULE:-apptainer/1.3.5}
+module purge
+module load "${GMD_AL_APPTAINER_MODULE}"
+
+: "${GMD_AL_CP2K_IMAGE:?GMD_AL_CP2K_IMAGE is not set}"
+IMAGE=${GMD_AL_CP2K_IMAGE}
+CP2K_RANKS=${GMD_AL_CP2K_RANKS:-2}
+if [[ ! -f "${IMAGE}" ]]; then
+    echo "ERROR: SIF image not found: ${IMAGE}" >&2
+    exit 2
+fi
+# Fix for PHAL F-32: the digest is computed from the image this job runs, never
+# copied from a manifest.
+SIF_SHA256=$(sha256sum "${IMAGE}" | awk '{print $1}')
+
+RUNTIME_HOST_DIR=${GMD_AL_RUNTIME_DIR:-"${PBS_O_WORKDIR}/runtime"}
+LOG_DIR="${RUNTIME_HOST_DIR}/logs/cp2k-probe"
+CONTAINER_LOG_DIR="/runtime/logs/cp2k-probe"
+JOB_TMP_ROOT="${TMPDIR:-/tmp/${USER}/${PBS_JOBID}}"
+export APPTAINER_TMPDIR="${JOB_TMP_ROOT}/gmd-al-cp2k-probe"
+export APPTAINERENV_OMP_NUM_THREADS=1
+mkdir -p "${LOG_DIR}" "${APPTAINER_TMPDIR}"
+trap 'rm -rf "${APPTAINER_TMPDIR}"' EXIT
+
+ENV_LOG="${LOG_DIR}/environment-${PBS_JOBID}.log"
+SUMMARY="${LOG_DIR}/summary-${PBS_JOBID}.json"
+START_TIME=$(date --iso-8601=seconds)
+
+# The CP2K image is Ubuntu-based (no HPC-X); only the OPAL_PREFIX part of
+# PHAL's HPC-X workaround applies: a host OPAL_PREFIX breaks the container's
+# OpenMPI. --cleanenv already drops the PBS variables, so the container's
+# mpirun launches locally on this node.
+HPCX_PREFIX='unset OPAL_PREFIX; exec "$@"'
+
+container_run() {
+    apptainer exec --cleanenv --nv --bind "${RUNTIME_HOST_DIR}:/runtime" \
+        "${IMAGE}" sh -lc "${HPCX_PREFIX}" sh "$@"
+}
+
+json_escape() {
+    printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | tr -d '\n'
+}
+
+STAGES=""
+OVERALL=passed
+# run_stage NAME LOGFILE COMMAND... : never aborts the job, records the status.
+run_stage() {
+    local name=$1 log=$2
+    shift 2
+    echo "=== ${name} ==="
+    set +e
+    "$@" > "${log}" 2>&1
+    local rc=$?
+    set -e
+    cat "${log}"
+    local status=passed
+    if (( rc != 0 )); then
+        status=failed
+        OVERALL=failed
+    fi
+    STAGES="${STAGES}${STAGES:+,}\"${name}\":{\"exit_status\":${rc},\"status\":\"${status}\",\"log\":\"$(json_escape "${log}")\"}"
+}
+
+{
+    echo "job_id=${PBS_JOBID}"
+    echo "hostname=$(hostname)"
+    echo "queue=${PBS_QUEUE:-unknown}"
+    echo "group=${GMD_AL_PBS_GROUP:-unknown}"
+    echo "workdir=${PBS_O_WORKDIR}"
+    echo "image=${IMAGE}"
+    echo "sif_sha256=${SIF_SHA256}"
+    echo "apptainer=$(apptainer version)"
+    echo "start_time=${START_TIME}"
+} | tee "${ENV_LOG}"
+
+run_stage cp2k_h2 "${LOG_DIR}/cp2k-h2-${PBS_JOBID}.json.log" \
+    container_run python3 /opt/gmd_al/containers/scripts/validate_cp2k_stack.py \
+        --mpi-ranks "${CP2K_RANKS}" \
+        --workdir "${CONTAINER_LOG_DIR}/work-${PBS_JOBID}" \
+        --output "${CONTAINER_LOG_DIR}/cp2k-h2-${PBS_JOBID}.json"
+
+END_TIME=$(date --iso-8601=seconds)
+EXIT_STATUS=0
+[[ "${OVERALL}" == passed ]] || EXIT_STATUS=1
+cat > "${SUMMARY}" <<EOF
+{"probe":"cp2k","mpi_ranks":${CP2K_RANKS},"job_id":"$(json_escape "${PBS_JOBID}")","node":"$(json_escape "$(hostname)")","queue":"$(json_escape "${PBS_QUEUE:-unknown}")","group":"$(json_escape "${GMD_AL_PBS_GROUP:-unknown}")","image":"$(json_escape "${IMAGE}")","sif_sha256":"${SIF_SHA256}","apptainer":"$(json_escape "$(apptainer version)")","start_time":"${START_TIME}","end_time":"${END_TIME}","stages":{${STAGES}},"status":"${OVERALL}","exit_status":${EXIT_STATUS}}
+EOF
+echo "summary=${SUMMARY}"
+cat "${SUMMARY}"
+exit "${EXIT_STATUS}"
