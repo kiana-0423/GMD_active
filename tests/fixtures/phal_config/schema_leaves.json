@@ -1,0 +1,1463 @@
+{
+ "source": "PHAL hotspot_al.config_schema at 96263b6 (MIT License, see NOTICE)",
+ "leaves": [
+  {
+   "path": "project.name",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "project.method_name",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "project.description",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "backend.md.engine",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "backend.mlip.engine",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "backend.dft.engine",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "backend.scheduler.engine",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "plugins",
+   "types": [
+    "dict"
+   ],
+   "optional": false
+  },
+  {
+   "path": "lammps.executable",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "lammps.input_template",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "lammps.dump_style",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "lammps.dump_fields",
+   "types": [
+    "list"
+   ],
+   "optional": false
+  },
+  {
+   "path": "lammps.type_map",
+   "types": [
+    "dict"
+   ],
+   "optional": false
+  },
+  {
+   "path": "lammps.timestep_fs",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "lammps.units",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "lammps.atom_style",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "lammps.boundary",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "lammps.thermo_freq",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "lammps.run_steps",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "lammps.full_input_template",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.enabled",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.device",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.model_paths",
+   "types": [
+    "list"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.deployed_model_paths",
+   "types": [
+    "list"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.dataset_dir",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.train_output_dir",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.checkpoint_path",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.train_config_path",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.train_command_template",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.export_command_template",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.lammps_pair_style",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.committee_mode",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro.type_names",
+   "types": [
+    "list",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "allegro_model_input",
+   "types": [
+    "dict"
+   ],
+   "optional": false
+  },
+  {
+   "path": "monitor.light_interval",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "monitor.physics_interval",
+   "types": [
+    "str",
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "monitor.committee_interval",
+   "types": [
+    "str",
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "monitor.force_z_threshold",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "monitor.delta_force_z_threshold",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "monitor.delta_q_threshold",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "monitor.rmin_threshold",
+   "types": [
+    "int",
+    "float",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "monitor.displacement_z_threshold",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "monitor.coordination_smoothing_power",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "monitor.coordination_scale",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "monitor.lj_cutoff",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "monitor.coordination_cutoff",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "online.enabled",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "online.work_dir",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "online.dump_file",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "online.dump_freq",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "online.monitor_freq",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "online.summary_interval",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "online.progress_file",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "online.continue_on_error",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "online.max_errors",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "online.max_walltime",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "online.event_dir",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "online.run_steps",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "logging.level",
+   "types": [
+    "str",
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "logging.file",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "logging.format",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "ood_score.weights",
+   "types": [
+    "dict[str, int|float]"
+   ],
+   "optional": false
+  },
+  {
+   "path": "ood_score.screen_threshold",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "ood_score.physics_threshold",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "ood_score.label_threshold",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "ood_score.lj_lazy_threshold",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "ood_score.min_trigger_atoms",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "ood_score.running_stats.enabled",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "ood_score.running_stats.warmup_frames",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "ood_score.running_stats.min_std",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "buffer.pre_trigger_frames",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "buffer.post_trigger_frames",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "buffer.maxlen",
+   "types": [
+    "int",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "hotspot.threshold",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "hotspot.merge_radius",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.mode",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.mlip_cutoff",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.core_radius",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.buffer_radius",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.extract_radius",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.boundary_thickness",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.max_atoms",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.min_atoms",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.vacuum_padding",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.slab.lx",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.slab.ly",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.slab.z_margin",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.graph.hops",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.graph.radial_shell",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.scheme",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.size",
+   "types": [
+    "list"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.halo",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.merge_adjacent",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.max_merged_blocks",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.cooldown_steps",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.label_region.type",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.label_region.shrink",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.buffer.inner",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.buffer.outer",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.frozen.enabled",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.frozen.thickness",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.max_atoms",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.min_atoms",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "extraction.block.min_atoms_policy",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "embedding.enabled",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "embedding.method",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "embedding.cutoff",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "embedding.charges",
+   "types": [
+    "dict"
+   ],
+   "optional": false
+  },
+  {
+   "path": "embedding.default_charge",
+   "types": [
+    "int",
+    "float",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "h_capping.enabled",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "h_capping.covalent_scale",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "h_capping.allow_core_capping",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "h_capping.optimize_h_only",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "h_capping.disabled_for_metals",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "h_capping.disabled_for_oxides_by_default",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "h_capping.bond_lengths",
+   "types": [
+    "dict[str, int|float]"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.executable",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.submit_mode",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.task_dir",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.labeled_dataset_dir",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.max_retries",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.max_unknown_polls",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.max_walltime_seconds",
+   "types": [
+    "int",
+    "float",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.slurm_directives",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.functional",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.basis",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.potential",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.cutoff",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.rel_cutoff",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.charge",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.multiplicity",
+   "types": [
+    "int",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.spin_policy",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.poisson_solver",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.periodic",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.uncapped_fragment_policy",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.scf_eps",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.max_scf",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.use_ot",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.dispersion",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.h_only_opt.enabled",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.h_only_opt.max_iter",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.single_point.enabled",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.single_point.print_forces",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.scf_recording.enabled",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.scf_recording.output_dir",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k.scf_recording.record_density",
+   "types": [
+    "bool"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.scf_recording.density_strict",
+   "types": [
+    "bool"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.scf_recording.record_trajectory",
+   "types": [
+    "bool"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.scf_recording.trajectory_strict",
+   "types": [
+    "bool"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.ml_scf.enabled",
+   "types": [
+    "bool"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.ml_scf.predictor.type",
+   "types": [
+    "str"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.ml_scf.predictor.model_path",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.ml_scf.predictor.options",
+   "types": [
+    "dict"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.ml_scf.prediction_dir",
+   "types": [
+    "str"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.ml_scf.dataset_dir",
+   "types": [
+    "str"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.ml_scf.electron_tolerance",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.ml_scf.mixing.method",
+   "types": [
+    "str"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.ml_scf.mixing.fallback_method",
+   "types": [
+    "str"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.ml_scf.mixing.history_length",
+   "types": [
+    "int"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k.ml_scf.mixing.alpha",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": true
+  },
+  {
+   "path": "cp2k_ml_scf.executable",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k_ml_scf.model_path",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k_ml_scf.model_digest",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k_ml_scf.runtime_dir",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k_ml_scf.fallback_to_standard_scf",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k_ml_scf.require_final_scf_convergence",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k_ml_scf.controller_protocol",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "cp2k_ml_scf.environment",
+   "types": [
+    "dict[str, str]"
+   ],
+   "optional": false
+  },
+  {
+   "path": "retraining.min_new_samples",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "retraining.interval_hours",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "retraining.dry_run",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "retraining.state_path",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "retraining.export_dir",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "retraining.train_output_dir",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "retraining.checkpoint_path",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "retraining.exported_model_path",
+   "types": [
+    "str",
+    "None"
+   ],
+   "optional": false
+  },
+  {
+   "path": "model_registry.root_dir",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "datasets.labeled_dir",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "datasets.training_dir",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "training_mask.core",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "training_mask.label_core",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "training_mask.inner_buffer",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "training_mask.outer_buffer",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "training_mask.boundary",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "training_mask.frozen_boundary",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "training_mask.h_cap",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "training_mask.energy_weight",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "training_mask.stress_weight",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  },
+  {
+   "path": "candidate_pool.deduplicate",
+   "types": [
+    "bool"
+   ],
+   "optional": false
+  },
+  {
+   "path": "candidate_pool.max_candidates_per_round",
+   "types": [
+    "int"
+   ],
+   "optional": false
+  },
+  {
+   "path": "candidate_pool.fingerprint",
+   "types": [
+    "str"
+   ],
+   "optional": false
+  },
+  {
+   "path": "candidate_pool.diversity_threshold",
+   "types": [
+    "int",
+    "float"
+   ],
+   "optional": false
+  }
+ ],
+ "positive_paths": [
+  "lammps.timestep_fs",
+  "online.dump_freq",
+  "online.monitor_freq",
+  "online.max_errors",
+  "buffer.pre_trigger_frames",
+  "buffer.post_trigger_frames",
+  "monitor.lj_cutoff",
+  "extraction.extract_radius",
+  "extraction.max_atoms",
+  "extraction.min_atoms",
+  "extraction.block.halo",
+  "extraction.block.max_merged_blocks",
+  "extraction.block.buffer.inner",
+  "extraction.block.buffer.outer",
+  "extraction.block.max_atoms",
+  "extraction.block.min_atoms",
+  "cp2k.max_scf",
+  "cp2k.h_only_opt.max_iter",
+  "retraining.min_new_samples",
+  "retraining.interval_hours",
+  "candidate_pool.max_candidates_per_round"
+ ],
+ "choices": {
+  "cp2k.uncapped_fragment_policy": [
+   "error",
+   "warn",
+   "allow"
+  ],
+  "cp2k.ml_scf.mixing.method": [
+   "pulay",
+   "broyden",
+   "ml"
+  ],
+  "cp2k.ml_scf.mixing.fallback_method": [
+   "pulay",
+   "broyden"
+  ]
+ }
+}

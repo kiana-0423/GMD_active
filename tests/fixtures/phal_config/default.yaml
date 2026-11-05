@@ -1,0 +1,301 @@
+project:
+  name: hotspot_active_learning
+  method_name: PHAL
+  description: physics-aware hotspot active learning platform
+
+backend:
+  md:
+    engine: lammps
+  mlip:
+    engine: allegro
+  dft:
+    engine: cp2k
+  scheduler:
+    engine: local
+
+# Free-form, namespaced configuration consumed only by external backend plugins.
+plugins: {}
+
+lammps:
+  executable: lmp
+  input_template: null
+  dump_style: custom
+  dump_fields:
+    - id
+    - type
+    - x
+    - y
+    - z
+    - vx
+    - vy
+    - vz
+    - fx
+    - fy
+    - fz
+  # LAMMPS numeric types carry no element information. This ordering is used both
+  # to write data files and to decode dumps, so the two must never diverge.
+  type_map:
+    1: C
+    2: O
+    3: H
+  timestep_fs: 0.5
+  units: metal
+  atom_style: atomic
+  # Use e.g. "p p m" for slabs; a free surface must not be declared periodic.
+  boundary: p p p
+  thermo_freq: 100
+  run_steps: 0
+  full_input_template: null
+
+allegro:
+  enabled: true
+  device: cpu
+  model_paths:
+    - allegro_000.pth
+    - allegro_001.pth
+    - allegro_002.pth
+    - allegro_003.pth
+  deployed_model_paths: []
+  dataset_dir: null
+  train_output_dir: null
+  checkpoint_path: null
+  train_config_path: null
+  train_command_template: null
+  export_command_template: null
+  lammps_pair_style: allegro
+  committee_mode: offline
+  # Required for real inference. This is the deployed model's training-time
+  # atom-type order; it is not inferred from the separate LAMMPS type order.
+  type_names: null
+
+allegro_model_input: {}
+
+monitor:
+  # Intervals accept positive integers for periodic sampling; "triggered" means
+  # run the next stage only when the previous stage triggers.
+  light_interval: 1
+  physics_interval: triggered
+  committee_interval: triggered
+  force_z_threshold: 4.0
+  delta_force_z_threshold: 4.0
+  delta_q_threshold: 0.5
+  rmin_threshold: null
+  displacement_z_threshold: 4.0
+  coordination_smoothing_power: 6
+  coordination_scale: 1.15
+  lj_cutoff: 6.0
+  # Neighbour cutoff for coordination numbers; keep <= lj_cutoff.
+  coordination_cutoff: 6.0
+
+online:
+  enabled: false
+  work_dir: ./lammps_run
+  dump_file: dump.online.lammpstrj
+  dump_freq: 10
+  monitor_freq: 1
+  summary_interval: 100
+  progress_file: null
+  continue_on_error: false
+  max_errors: 1
+  max_walltime: "24:00:00"
+  event_dir: ./lammps_run/events
+  # MD steps in the generated LAMMPS script; 0 emits no "run" command.
+  run_steps: 0
+
+logging:
+  level: INFO
+  file: null
+  format: text
+
+ood_score:
+  weights:
+    force: 1.0
+    delta_force: 1.5
+    rmin: 1.0
+    delta_q: 1.0
+    lj_residual: 2.0
+    committee: 2.0
+    displacement: 1.0
+    mlip_force_deviation: 2.0
+  screen_threshold: 4.0
+  physics_threshold: 5.0
+  label_threshold: 6.0
+  lj_lazy_threshold: 3.0
+  min_trigger_atoms: 1
+  running_stats:
+    enabled: true
+    warmup_frames: 5
+    min_std: 1.0e-8
+
+buffer:
+  pre_trigger_frames: 10
+  post_trigger_frames: 5
+  maxlen: 32
+
+hotspot:
+  threshold: 6.0
+  merge_radius: 8.0
+
+extraction:
+  mode: cluster
+  mlip_cutoff: 6.0
+  core_radius: 4.0
+  buffer_radius: 4.0
+  extract_radius: 10.0
+  boundary_thickness: 2.0
+  max_atoms: 400
+  min_atoms: 30
+  vacuum_padding: 4.0
+  slab:
+    lx: 16.0
+    ly: 16.0
+    z_margin: 8.0
+  graph:
+    hops: 2
+    # false = region is exactly the bonded subgraph
+    radial_shell: true
+  block:
+    scheme: spatial_grid
+    size: [12.0, 12.0, 12.0]
+    halo: 5.0
+    merge_adjacent: true
+    max_merged_blocks: 4
+    cooldown_steps: 1000
+    label_region:
+      type: block_core
+      shrink: 0.0
+    buffer:
+      inner: 3.0
+      outer: 5.0
+    frozen:
+      enabled: true
+      thickness: 2.0
+    max_atoms: 600
+    min_atoms: 30
+    # warn = log and continue, error = refuse the region, allow = silent
+    min_atoms_policy: warn
+
+# Optional electrostatic embedding data. The built-in CP2K input is pure
+# Quickstep and rejects enabled embedding; use a validated external QM/MM
+# backend if these charges are required.
+embedding:
+  enabled: false
+  method: point_charge
+  cutoff: 12.0
+  charges: {}
+  default_charge: null
+
+h_capping:
+  enabled: true
+  covalent_scale: 1.2
+  allow_core_capping: false
+  optimize_h_only: true
+  disabled_for_metals: true
+  disabled_for_oxides_by_default: true
+  bond_lengths:
+    C: 1.09
+    Si: 1.48
+    O: 0.96
+    N: 1.01
+    S: 1.34
+    P: 1.42
+    B: 1.19
+
+cp2k:
+  executable: cp2k.popt
+  submit_mode: dry_run
+  task_dir: ./cp2k_tasks
+  labeled_dataset_dir: ./labeled_data
+  max_retries: 0
+  # Tolerate transient squeue/qstat outages before declaring a task failed.
+  max_unknown_polls: 5
+  max_walltime_seconds: null
+  slurm_directives: ""
+  functional: PBE
+  basis: DZVP-MOLOPT-SR-GTH
+  potential: GTH-PBE
+  cutoff: 400
+  rel_cutoff: 60
+  charge: 0
+  # Spin multiplicity for extracted regions. Leave null to derive it from the
+  # fragment's electron count (recommended): a region carved out of reactive MD
+  # is frequently a radical, and forcing a singlet onto an odd-electron fragment
+  # produces reference forces that are silently wrong.
+  multiplicity: null
+  # auto   -> correct an impossible multiplicity to the lowest consistent value
+  # strict -> refuse to generate the input instead
+  spin_policy: auto
+  poisson_solver: WAVELET
+  periodic: NONE
+  # error = refuse an isolated metal/oxide fragment whose cut bonds were not
+  # treated; warn/allow are explicit expert overrides.
+  uncapped_fragment_policy: error
+  scf_eps: 1.0e-6
+  max_scf: 100
+  use_ot: true
+  dispersion: false
+  h_only_opt:
+    enabled: true
+    max_iter: 50
+  single_point:
+    enabled: true
+    print_forces: true
+  # Optional instrumentation for future ML-SCF training. Disabled by default so
+  # conventional CP2K execution and artifacts remain unchanged until requested.
+  scf_recording:
+    enabled: false
+    output_dir: /runtime/cp2k/scf
+    # Keep the converged AO density and overlap. Off by default: the printed
+    # matrices are O(nao^2) of text per SCF iteration.
+    record_density: false
+    # Keep the density from *every* SCF iteration, not just the converged one.
+    # This is what a neural mixer trains on -- it needs the path the SCF took.
+    # Requires record_density; costs one nao x nao array per iteration on disk.
+    record_trajectory: false
+
+# Optional execution contract for the externally maintained cp2k-ml-scf fork.
+# Selecting backend.dft.engine=cp2k_ml_scf activates this section; the standard
+# CP2K backend above remains the default and does not load an SCF model.
+cp2k_ml_scf:
+  executable: cp2k.psmp
+  model_path: /runtime/cp2k_ml/models/active/model.pt
+  model_digest: null
+  runtime_dir: /runtime/cp2k_ml
+  fallback_to_standard_scf: true
+  require_final_scf_convergence: true
+  controller_protocol: phal-ml-scf-v2
+  environment: {}
+
+retraining:
+  min_new_samples: 10
+  interval_hours: 24
+  dry_run: true
+  state_path: ./training_data/retrain_state.json
+  export_dir: ./training_data/exports
+  train_output_dir: null
+  checkpoint_path: null
+  exported_model_path: null
+
+model_registry:
+  root_dir: ./model_registry
+
+datasets:
+  labeled_dir: ./labeled_data
+  training_dir: ./training_data
+
+training_mask:
+  core: 1.0
+  label_core: 1.0
+  inner_buffer: 0.3
+  outer_buffer: 0.0
+  boundary: 0.0
+  frozen_boundary: 0.0
+  h_cap: 0.0
+  energy_weight: 0.0
+  stress_weight: 0.0
+
+candidate_pool:
+  deduplicate: true
+  max_candidates_per_round: 50
+  fingerprint: pair_distance_histogram
+  diversity_threshold: 0.1

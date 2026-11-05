@@ -1,0 +1,517 @@
+# GMD_active packaged default configuration: every section with every key at its default.
+# GENERATED from the section models; do not edit by hand. Regenerate with
+#   python -m gmd_active_learning.config --write-default configs/default.yaml
+# Copy it and change what you need; unknown keys and sections are errors. The placeholders
+# workflow.run_id, md.executable (looked up on PATH) and md.initial_structure (relative to this
+# file) must be set for a real run. Section documentation: configs/sections/*.yaml.
+workflow:
+  run_id: default-run
+  max_cycles: 1
+  segment_steps: 1000
+  segments_per_cycle: 1
+  max_pending_tasks: 50
+  backpressure: pause_sampling
+  stop_md_on_monitor_stop: true
+  poll_interval_s: 5.0
+  max_poll_wait_s: 3600.0
+  rollback_on_segment_failure: true
+  save_event_frames: true
+  candidates:
+    enabled: true
+    fingerprint: type_weighted_pair_distance_histogram
+    fingerprint_bins: 16
+    fingerprint_cutoff: 8.0
+    deduplicate: true
+    diversity_threshold: 0.1
+    compare_with_labeled: true
+    max_per_cycle: 20
+    max_per_event: 4
+    max_total: null
+    min_score: 0.0
+    core_atoms_only_for_ranking: false
+  retraining:
+    enabled: true
+    min_new_samples: 10
+    interval_hours: 24.0
+    train_on_first_samples: false
+    wait_for_pending_labels: true
+  promotion:
+    max_force_rmse: 0.5
+    max_energy_rmse_per_atom: null
+    max_relative_regression: 0.05
+    require_validation_samples: 1
+    require_export_validation: true
+    export_max_force_deviation: 0.0001
+    require_engine_smoke_test: true
+md:
+  executable: gmd
+  initial_structure: initial_structure.xyz
+  directives:
+    time_step: 0.5
+    velocity: 300.0
+    velocity_init: random
+    velocity_seed: 1
+  frame_interval: 10
+  control_poll_interval: 1
+  checkpoint_every: 0
+  reader_poll_s: 0.05
+  segment_timeout_s: 86400.0
+  env:
+    OMP_NUM_THREADS: '1'
+  smoke_steps: 5
+mlip:
+  source_path: null
+  device: cpu
+  train: {}
+  finetune_from_active: true
+  seed: 1234
+  committee_size: 0
+  export_filename: model.pt
+  validation_max_structures: 50
+monitor:
+  enabled: true
+  engine: staged
+  neighbors:
+    lj_cutoff: 6.0
+    coordination_cutoff: 6.0
+  metrics:
+    force:
+      enabled: true
+      weight: 1.0
+      z_threshold: 4.0
+    delta_force:
+      enabled: true
+      weight: 1.5
+      z_threshold: 4.0
+    displacement:
+      enabled: true
+      weight: 1.0
+      z_threshold: 4.0
+    rmin:
+      enabled: true
+      weight: 1.0
+      threshold: 0.8
+    delta_q:
+      enabled: true
+      weight: 1.0
+      threshold: 0.5
+      scale: 1.15
+      power: 6.0
+    lj_residual:
+      enabled: true
+      weight: 2.0
+      estimator: linear
+      lazy: true
+      lazy_threshold: 3.0
+      condition_limit: 10000.0
+      sigma_min: 0.2
+      sigma_max: 10.0
+      relative_delta: 1.0e-08
+      nonlinear_max_nfev: 400
+    mlip_force_deviation:
+      enabled: true
+      weight: 2.0
+    committee:
+      enabled: true
+      weight: 2.0
+      min_members: 2
+  running_stats:
+    enabled: true
+    warmup_frames: 5
+    min_std: 1.0e-08
+    warmup_policy: suppress
+    first_frame_deltas: not_evaluated
+  stages:
+    light_interval: 1
+    physics_interval: triggered
+    full_interval: triggered
+    scheduled_full_interval: 1
+    screen_threshold: 4.0
+    physics_threshold: 5.0
+    label_threshold: 6.0
+    min_trigger_atoms: 1
+  actions:
+    save_on_trigger: true
+    checkpoint_score: null
+    stop_score: null
+    stop_min_distance: 0.6
+    stop_max_force: null
+  global_lj:
+    window_size: 20
+    cutoff: 6.0
+    ridge_lambda: 1.0e-06
+    thresholds:
+      lj_residual_candidate: 0.3
+      lj_residual_stop: 0.6
+      max_force_stop: 20.0
+      min_distance_stop: 0.6
+      ensemble_deviation_candidate: 0.15
+      ensemble_deviation_stop: 0.3
+      parameter_jump_ratio: 5.0
+    parameter_bounds:
+      epsilon_min: 1.0e-06
+      epsilon_max: 10.0
+      sigma_min: 0.5
+      sigma_max: 8.0
+    weights:
+      lj_residual: 1.0
+      param_anomaly: 1.0
+      param_jump: 0.5
+      ensemble_deviation: 1.0
+      max_force: 0.5
+      min_distance: 0.5
+      reliability_model: 0.5
+  driver:
+    continue_on_error: false
+    max_errors: 1
+    max_consecutive_timeouts: 10
+    poll_timeout_s: null
+    stop_on_stop_action: true
+    summary_interval: 0
+    progress_file: null
+events:
+  enabled: true
+  pre_trigger_frames: 10
+  post_trigger_frames: 5
+  maxlen: null
+  cooldown_steps: 0
+  retain_recent: 16
+  store:
+    enabled: false
+    directory: null
+    write_extxyz: true
+hotspots:
+  enabled: true
+  merge_radius: 8.0
+extraction:
+  enabled: true
+  mode: cluster
+  extract_radius: null
+  mlip_cutoff: 6.0
+  buffer_radius: 4.0
+  core_radius: 4.0
+  boundary_thickness: 2.0
+  vacuum_padding: 4.0
+  max_atoms: null
+  min_atoms: null
+  max_atoms_policy: trim
+  min_atoms_policy: pad
+  freeze_boundary: true
+  periodic_guard:
+    policy: error
+    pair_cutoff: 3.0
+  force_weights:
+    core: 1.0
+    inner_buffer: 0.3
+    outer_buffer: 0.0
+    boundary: 0.0
+    h_cap: 0.0
+    unassigned: 0.0
+  slab:
+    lx: 16.0
+    ly: 16.0
+    z_margin: 8.0
+    z_vacuum: 6.0
+    multi_period: replicate
+    skewed_policy: error
+    period_tolerance: 1.0e-08
+  graph:
+    hops: 2
+    radial_shell: true
+    covalent_scale: 1.2
+  block:
+    scheme: spatial_grid
+    size: null
+    halo: 5.0
+    buffer:
+      inner: 3.0
+      outer: 5.0
+    frozen:
+      enabled: true
+      thickness: 2.0
+    merge_adjacent: true
+    max_merged_blocks: 4
+    max_atoms: null
+    min_atoms: null
+    min_atoms_policy: warn
+    cooldown_steps: 1000
+    cooldown_state_path: null
+    vacuum_offset: 2.0
+    cell_padding: 4.0
+capping:
+  enabled: true
+  allow_core_capping: false
+  cap_core_atoms: false
+  covalent_scale: 1.2
+  bond_lengths:
+    C: 1.09
+    Si: 1.48
+    O: 0.96
+    N: 1.01
+    S: 1.34
+    P: 1.42
+    B: 1.19
+  disabled_for_metals: true
+  disabled_for_oxides_by_default: true
+  optimize_h_only: false
+  uncapped_policy: error
+  partial_policy: warn
+embedding:
+  enabled: false
+  method: point_charge
+  charges: {}
+  default_charge: null
+  cutoff: 12.0
+  rigid_tolerance: 1.0e-06
+datasets:
+  enabled: true
+  store_root: datasets_store
+  energy:
+    nonperiodic_weight: 0.0
+    periodic_weight: 0.0
+    allow_capped: false
+    write_energy: true
+  stress:
+    enabled: true
+    weight: 1.0
+  split:
+    enabled: true
+    val_fraction: 0.1
+    seed: 20261106
+    group_by: event
+  export:
+    extxyz: true
+    sgt_npz: true
+    split_files: true
+  require_valid_labels: true
+  float_format: shortest
+backends:
+  md:
+    engine: gmd
+    factory: null
+    required_capabilities: []
+  mlip:
+    engine: gmd_sgt
+    factory: null
+    required_capabilities: []
+  dft:
+    engine: cp2k
+    factory: null
+    required_capabilities: []
+  scheduler:
+    engine: local
+    factory: null
+    required_capabilities: []
+  discover_entry_points: true
+  entry_point_group: gmd_active_learning.adapters
+  override_builtins: []
+  check_runtime_on_create: false
+cp2k:
+  enabled: true
+  executable: cp2k.psmp
+  launcher: []
+  data_dir: null
+  environment: {}
+  task_dir: cp2k_tasks
+  resources:
+    nodes: null
+    ntasks: null
+    ntasks_per_node: null
+    cpus_per_task: null
+    walltime: null
+    memory: null
+    partition: null
+    queue: null
+    account: null
+    job_name: null
+    extra_directives: []
+  max_unknown_polls_warning: 5
+  basis_set_file: BASIS_MOLOPT
+  potential_file: GTH_POTENTIALS
+  basis: DZVP-MOLOPT-SR-GTH
+  potential: GTH-PBE
+  kinds: {}
+  functional: PBE
+  cutoff: 400.0
+  rel_cutoff: 60.0
+  eps_default: 1.0e-12
+  max_scf: 100
+  scf_eps: 1.0e-06
+  scf_guess: ATOMIC
+  use_ot: true
+  ot_minimizer: DIIS
+  ot_preconditioner: FULL_SINGLE_INVERSE
+  mixing:
+    method: BROYDEN_MIXING
+    alpha: 0.4
+    nbuffer: null
+  dispersion: false
+  dispersion_parameter_file: dftd3.dat
+  print_level: MEDIUM
+  stress: auto
+  poisson:
+    non_periodic_solver: WAVELET
+    partially_periodic_solver: MT
+    periodic_solver: PERIODIC
+  cluster_padding: 6.0
+  min_vacuum: 2.0
+  multiplicity: null
+  spin_policy: auto
+  uncapped_fragment_policy: error
+  h_only_opt:
+    enabled: true
+    max_iter: 50
+    optimizer: BFGS
+    require_converged: true
+    fixed_atom_tolerance: 0.0001
+  template_path: null
+  extra_sections:
+    global_lines: []
+    force_eval_lines: []
+    dft_lines: []
+  validation:
+    require_scf_convergence: true
+    require_energy: true
+    require_normal_termination: true
+  retry:
+    enabled: true
+    max_retries: 3
+    max_scf_cap: 2000
+    ml_scf_native_fallback: true
+    ladders:
+      scf_not_converged:
+      - max_scf: null
+        max_scf_multiplier: null
+        use_ot: false
+        mixing_method: BROYDEN_MIXING
+        mixing_alpha: null
+        mixing_nbuffer: 4
+        scf_guess: null
+        h_opt_max_iter_multiplier: null
+      - max_scf: null
+        max_scf_multiplier: 3.0
+        use_ot: null
+        mixing_method: null
+        mixing_alpha: null
+        mixing_nbuffer: null
+        scf_guess: null
+        h_opt_max_iter_multiplier: null
+      geo_opt_not_converged:
+      - max_scf: null
+        max_scf_multiplier: null
+        use_ot: null
+        mixing_method: null
+        mixing_alpha: null
+        mixing_nbuffer: null
+        scf_guess: null
+        h_opt_max_iter_multiplier: 2.0
+      walltime:
+      - max_scf: null
+        max_scf_multiplier: null
+        use_ot: null
+        mixing_method: null
+        mixing_alpha: null
+        mixing_nbuffer: null
+        scf_guess: null
+        h_opt_max_iter_multiplier: null
+      execution_failed:
+      - max_scf: null
+        max_scf_multiplier: null
+        use_ot: null
+        mixing_method: null
+        mixing_alpha: null
+        mixing_nbuffer: null
+        scf_guess: null
+        h_opt_max_iter_multiplier: null
+      invalid_result: []
+      cancelled: []
+scheduler:
+  command_timeout_seconds: 60.0
+  shell: /bin/bash
+  local:
+    shell: /bin/sh
+    cancel_grace_seconds: 10.0
+    enforce_walltime: true
+  slurm:
+    sbatch: sbatch
+    squeue: squeue
+    sacct: sacct
+    scancel: scancel
+    sacct_fallback: true
+  pbs:
+    qsub: qsub
+    qstat: qstat
+    qdel: qdel
+    history_query_enabled: true
+    flavor: pbspro
+  default_resources:
+    nodes: null
+    ntasks: null
+    ntasks_per_node: null
+    cpus_per_task: null
+    walltime: null
+    memory: null
+    partition: null
+    queue: null
+    account: null
+    job_name: null
+    extra_directives: []
+scf:
+  recording:
+    enabled: false
+    output_dir: runtime/cp2k/scf
+    record_density: false
+    record_trajectory: false
+    density_strict: false
+    trajectory_strict: false
+    ndigits: 12
+    electron_tolerance: 0.001
+    hermitian_tolerance: 1.0e-08
+  retry:
+    enabled: false
+    order:
+    - default
+    - nbuffer4
+    failure_cost: 120
+    base:
+      mixing_method: PULAY_MIXING
+      alpha: 0.4
+      nbuffer: 8
+      smearing: false
+      added_mos: 0
+      electronic_temperature: 500.0
+      max_scf: 120
+      eps_scf: 1.0e-06
+  dataset:
+    root: runtime/cp2k/scf_dataset
+    split_ratios:
+      train: 0.8
+      validation: 0.1
+      test: 0.1
+  ml_scf:
+    enabled: false
+    experimental: false
+    executable: null
+    environment: {}
+    model_path: null
+    model_digest: null
+    fallback_to_standard_scf: true
+    retry_native_on_failure: true
+    require_final_scf_convergence: true
+    protocol: phal-ml-scf-v2
+    prediction_dir: null
+    electron_tolerance: 0.001
+    guess_alpha: null
+    export_structure_digest: true
+    basis_set: null
+    predictor:
+      type: dummy
+      model_path: null
+      options: {}
+    mixing:
+      method: pulay
+      history_length: 8
+      alpha: 0.4
+  capabilities:
+    executable: null
+    timeout_s: 30.0
