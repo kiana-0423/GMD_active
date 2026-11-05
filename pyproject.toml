@@ -7,7 +7,6 @@ name = "GMD_active_learning"
 version = "0.4.0"
 description = "Persistent active-learning controller for GMD molecular dynamics, GMD_SGT potentials and CP2K labeling (successor to PHAL)."
 readme = "README.md"
-license = { text = "Proprietary; portions derived from PHAL under the MIT License (see NOTICE)" }
 requires-python = ">=3.10"
 dependencies = [
   "numpy>=1.24",
