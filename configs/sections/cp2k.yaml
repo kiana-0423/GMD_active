@@ -1,0 +1,83 @@
+# cp2k section: CP2K labeling (input settings, execution, validation, bounded retry ladder).
+# Model: gmd_active_learning.adapters.dft.cp2k.config.CP2KConfig (extra keys are rejected).
+# Boundary conditions are NOT configured here: PERIODIC NONE/XY/XYZ always follows the region's PBC;
+# `poisson` only chooses the solver per periodicity class. Charge comes from the region.
+# Numeric defaults equal PHAL's default.yaml (cutoff 400/60 Ry, MAX_SCF 100, EPS_SCF 1e-6, OT, PBE,
+# DZVP-MOLOPT-SR-GTH / GTH-PBE, H-only GEO_OPT max_iter 50, uncapped policy error) except
+# executable (cp2k.psmp) and max_retries (3, bounded ladders; PHAL: 0).
+# Paths (task_dir, template_path, data_dir) are relative to the run directory unless absolute.
+cp2k:
+  enabled: true
+  executable: cp2k.psmp
+  launcher: []
+  data_dir: null
+  environment: {}
+  task_dir: cp2k_tasks
+  resources: {}
+  max_unknown_polls_warning: 5
+  basis_set_file: BASIS_MOLOPT
+  potential_file: GTH_POTENTIALS
+  basis: DZVP-MOLOPT-SR-GTH
+  potential: GTH-PBE
+  kinds: {}
+  functional: PBE
+  cutoff: 400.0
+  rel_cutoff: 60.0
+  eps_default: 1.0e-12
+  max_scf: 100
+  scf_eps: 1.0e-06
+  scf_guess: ATOMIC
+  use_ot: true
+  ot_minimizer: DIIS
+  ot_preconditioner: FULL_SINGLE_INVERSE
+  mixing:
+    method: BROYDEN_MIXING
+    alpha: 0.4
+    nbuffer: null
+  dispersion: false
+  dispersion_parameter_file: dftd3.dat
+  print_level: MEDIUM
+  stress: auto
+  poisson:
+    non_periodic_solver: WAVELET
+    partially_periodic_solver: MT
+    periodic_solver: PERIODIC
+  cluster_padding: 6.0
+  min_vacuum: 2.0
+  multiplicity: null
+  spin_policy: auto
+  uncapped_fragment_policy: error
+  h_only_opt:
+    enabled: true
+    max_iter: 50
+    optimizer: BFGS
+    require_converged: true
+    fixed_atom_tolerance: 0.0001
+  template_path: null
+  extra_sections:
+    global_lines: []
+    force_eval_lines: []
+    dft_lines: []
+  validation:
+    require_scf_convergence: true
+    require_energy: true
+    require_normal_termination: true
+  retry:
+    enabled: true
+    max_retries: 3
+    max_scf_cap: 2000
+    ml_scf_native_fallback: true
+    ladders:
+      scf_not_converged:
+      - use_ot: false
+        mixing_method: BROYDEN_MIXING
+        mixing_nbuffer: 4
+      - max_scf_multiplier: 3.0
+      geo_opt_not_converged:
+      - h_opt_max_iter_multiplier: 2.0
+      walltime:
+      - {}
+      execution_failed:
+      - {}
+      invalid_result: []
+      cancelled: []

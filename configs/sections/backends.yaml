@@ -1,0 +1,27 @@
+# backends section: engine per role, plugin discovery and capability checks.
+# Model: gmd_active_learning.adapters.registry.BackendsConfig.
+# Plugins: entry points in group `gmd_active_learning.adapters` named "<role>:<name>", or an explicit
+# `factory: "package.module:callable"` per role. A plugin may replace a built-in only when listed in
+# override_builtins (e.g. ["dft:cp2k"]).
+# md: gmd and mlip: gmd_sgt are registered by their own adapters (workflow/MD/SGT areas).
+backends:
+  md:
+    engine: gmd
+    factory: null
+    required_capabilities: []
+  mlip:
+    engine: gmd_sgt
+    factory: null
+    required_capabilities: []
+  dft:
+    engine: cp2k
+    factory: null
+    required_capabilities: []
+  scheduler:
+    engine: local
+    factory: null
+    required_capabilities: []
+  discover_entry_points: true
+  entry_point_group: gmd_active_learning.adapters
+  override_builtins: []
+  check_runtime_on_create: false

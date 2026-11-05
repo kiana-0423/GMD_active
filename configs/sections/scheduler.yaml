@@ -1,0 +1,25 @@
+# scheduler section: settings of the scheduler adapters. Which scheduler is used is chosen by
+# backends.scheduler.engine. Model: gmd_active_learning.adapters.schedulers.config.SchedulerConfig.
+# Every scheduler CLI call (sbatch/squeue/sacct/scancel/qsub/qstat/qdel) is bounded by
+# command_timeout_seconds. Job resources for CP2K jobs live in cp2k.resources and are merged
+# over default_resources.
+scheduler:
+  command_timeout_seconds: 60.0
+  shell: /bin/bash
+  local:
+    shell: /bin/sh
+    cancel_grace_seconds: 10.0
+    enforce_walltime: true
+  slurm:
+    sbatch: sbatch
+    squeue: squeue
+    sacct: sacct
+    scancel: scancel
+    sacct_fallback: true
+  pbs:
+    qsub: qsub
+    qstat: qstat
+    qdel: qdel
+    history_query_enabled: true
+    flavor: pbspro
+  default_resources: {}
