@@ -533,6 +533,7 @@ class ActiveLearningController:
             checkpoint=checkpoint, export=export, dataset_version=dataset.version, parent_model_id=parent.model_id,
             species=output["species"], cutoff=output["cutoff"], metrics=metrics, train_mode=output["mode"], backend="gmd_sgt",
             metadata={"training_summary": output["summary"], "parent_metrics_on_this_dataset": parent_metrics},
+            extra_files={f"committee_{k + 1}": path for k, path in enumerate(output["summary"].get("committee_checkpoints") or [])},
         )
         report = evaluate_gates(self.config.promotion, metrics=metrics, parent_metrics=parent_metrics, export_check=export_check, engine_smoke=smoke)
         self.store.put_blob(f"{self.run_id}:gate_report", {"model_id": artifact.model_id, **report.to_dict(), "export_check": export_check, "engine_smoke": smoke})

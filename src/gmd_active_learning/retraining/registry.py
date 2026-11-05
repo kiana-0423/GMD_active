@@ -106,7 +106,11 @@ class ModelRegistry:
         train_mode: str,
         backend: str,
         metadata: dict[str, Any] | None = None,
+        extra_files: dict[str, str | Path] | None = None,
     ) -> ModelArtifact:
+        """Copy, hash and record a model. ``extra_files`` (e.g. committee members) are stored and
+        verified exactly like the checkpoint and listed under ``metadata["extra_files"]``."""
+
         checkpoint = Path(checkpoint)
         if not checkpoint.is_file() or checkpoint.stat().st_size == 0:
             raise WorkflowError(f"cannot register missing or empty checkpoint {checkpoint}")
@@ -115,7 +119,12 @@ class ModelRegistry:
         if export_path is not None and (not export_path.is_file() or export_path.stat().st_size == 0):
             raise WorkflowError(f"cannot register missing or empty export {export_path}")
         export_sha = None if export_path is None else file_sha256(export_path)
-        model_id = stable_id("model", checkpoint_sha, export_sha, dataset_version, parent_model_id)
+        extras = {name: Path(path) for name, path in (extra_files or {}).items()}
+        for name, path in extras.items():
+            if not path.is_file() or path.stat().st_size == 0:
+                raise WorkflowError(f"cannot register missing or empty extra file {name}={path}")
+        extra_shas = {name: file_sha256(path) for name, path in sorted(extras.items())}
+        model_id = stable_id("model", checkpoint_sha, export_sha, dataset_version, parent_model_id, extra_shas)
         existing = self.store.model(model_id)
         if existing is not None:
             self.verify(model_id)
@@ -130,6 +139,10 @@ class ModelRegistry:
         if export_path is not None:
             stored_export = staging / f"export{export_path.suffix or '.pt'}"
             shutil.copy2(export_path, stored_export)
+        stored_extras: dict[str, dict[str, str]] = {}
+        for name, path in sorted(extras.items()):
+            shutil.copy2(path, staging / f"extra_{name}{path.suffix}")
+            stored_extras[name] = {"path": str(target / f"extra_{name}{path.suffix}"), "sha256": extra_shas[name]}
         artifact = ModelArtifact(
             model_id=model_id,
             checkpoint_path=str(target / stored_checkpoint.name),
@@ -145,7 +158,8 @@ class ModelRegistry:
             train_mode=train_mode,
             backend=backend,
             created_at=utc_now(),
-            metadata={"source_checkpoint": str(checkpoint), "source_export": None if export_path is None else str(export_path), **(metadata or {})},
+            metadata={"source_checkpoint": str(checkpoint), "source_export": None if export_path is None else str(export_path),
+                      "extra_files": stored_extras, **(metadata or {})},
         )
         write_json_atomic(staging / "record.json", artifact.to_dict())
         for path in staging.iterdir():
@@ -180,6 +194,9 @@ class ModelRegistry:
                 raise WorkflowError(f"model {model_id}: {key} {path} is missing")
             if file_sha256(path) != record[digest]:
                 raise WorkflowError(f"model {model_id}: {key} {path} fails its checksum (artifact modified)")
+        for name, extra in (record.get("metadata", {}).get("extra_files") or {}).items():
+            if not Path(extra["path"]).is_file() or file_sha256(extra["path"]) != extra["sha256"]:
+                raise WorkflowError(f"model {model_id}: extra file {name} is missing or fails its checksum")
 
     def get(self, model_id: str) -> ModelArtifact:
         record = self.store.model(model_id)

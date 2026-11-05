@@ -128,3 +128,16 @@ def test_retrain_trigger_rules() -> None:
     assert evaluate_trigger(config, new_samples=0, pending_tasks=0, last_trained_at=past, manual=True).reason == "no_new_samples"
     assert evaluate_trigger(RetrainTriggerConfig(enabled=False), new_samples=1, pending_tasks=0, last_trained_at=None, manual=True).due
     assert not evaluate_trigger(RetrainTriggerConfig(enabled=False), new_samples=50, pending_tasks=0, last_trained_at=None).due
+
+
+def test_registry_stores_and_verifies_extra_files(tmp_path: Path, store: WorkflowStore) -> None:
+    registry = ModelRegistry(tmp_path / "models", store)
+    member = _artifact(tmp_path, "member1.pt", b"committee-1")
+    artifact = registry.register(checkpoint=_artifact(tmp_path, "c.pt", b"c"), export=None, dataset_version="ds", parent_model_id=None,
+                                 species=[1], cutoff=4.0, metrics={}, train_mode="fresh", backend="gmd_sgt", extra_files={"committee_1": member})
+    stored = Path(artifact.metadata["extra_files"]["committee_1"]["path"])
+    assert stored.read_bytes() == b"committee-1"
+    os.chmod(stored, 0o600)
+    stored.write_bytes(b"x")
+    with pytest.raises(WorkflowError, match="extra file"):
+        registry.verify(artifact.model_id)
