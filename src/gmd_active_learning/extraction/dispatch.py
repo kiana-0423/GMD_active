@@ -8,10 +8,11 @@ else (finding F-05). Here every configured mode is honoured by every caller that
 from __future__ import annotations
 
 import logging
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
+from pathlib import Path
 from typing import Any
 
-from gmd_active_learning.contracts import ExtractedRegion, Frame
+from gmd_active_learning.contracts import EventRecord, ExtractedRegion, Frame
 from gmd_active_learning.core.exceptions import ConfigurationError
 from gmd_active_learning.extraction.block import extract_block_regions
 from gmd_active_learning.extraction.cluster import extract_cluster
@@ -97,4 +98,59 @@ def load_sections(config: dict[str, Any]) -> tuple[ExtractionConfig, CappingConf
     )
 
 
-__all__ = ["extract_and_prepare", "extract_regions", "load_sections", "prepare_region"]
+HotspotGrouper = Callable[[Frame, list[int]], list[list[int]]]
+
+
+class EventRegionExtractor:
+    """Workflow ``RegionExtractor``: event -> prepared regions scored with the event's max score.
+
+    Regions are cut from the event's trigger frame around ``event.hotspot_atom_ids``. ``grouper``
+    splits those IDs into hotspot groups (one region per group in cluster/slab/graph mode); the
+    default keeps them as one group. Block cooldown state is loaded from and saved to
+    ``extraction.block.cooldown_state_path`` when it is set (relative paths resolve against
+    ``state_dir``), so cooldowns survive restarts.
+    """
+
+    def __init__(
+        self,
+        extraction: ExtractionConfig | None = None,
+        capping: CappingConfig | None = None,
+        embedding: EmbeddingConfig | None = None,
+        *,
+        grouper: HotspotGrouper | None = None,
+        state_dir: str | Path | None = None,
+    ) -> None:
+        self.extraction = extraction or ExtractionConfig()
+        self.capping = capping or CappingConfig()
+        self.embedding = embedding or EmbeddingConfig()
+        self.grouper = grouper
+        self.cooldown: BlockCooldownTracker | None = None
+        self.cooldown_path: Path | None = None
+        block = self.extraction.block
+        if self.extraction.mode == "block" and block.cooldown_steps > 0:
+            if block.cooldown_state_path:
+                path = Path(block.cooldown_state_path)
+                self.cooldown_path = path if path.is_absolute() or state_dir is None else Path(state_dir) / path
+                self.cooldown = BlockCooldownTracker.load(self.cooldown_path, block.cooldown_steps)
+            else:
+                self.cooldown = BlockCooldownTracker(block.cooldown_steps)
+
+    def extract(self, event: EventRecord) -> list[tuple[ExtractedRegion, float]]:
+        frame = event.trigger_frame
+        ids = [int(atom_id) for atom_id in event.hotspot_atom_ids]
+        groups = self.grouper(frame, ids) if self.grouper is not None else [ids]
+        regions = extract_and_prepare(
+            frame,
+            groups,
+            extraction=self.extraction,
+            capping=self.capping,
+            embedding=self.embedding,
+            event_id=event.event_id,
+            cooldown=self.cooldown,
+        )
+        if self.cooldown is not None and self.cooldown_path is not None:
+            self.cooldown.save(self.cooldown_path)
+        return [(region, float(event.max_score)) for region in regions]
+
+
+__all__ = ["EventRegionExtractor", "HotspotGrouper", "extract_and_prepare", "extract_regions", "load_sections", "prepare_region"]

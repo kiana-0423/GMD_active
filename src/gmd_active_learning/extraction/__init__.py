@@ -28,7 +28,7 @@ from gmd_active_learning.extraction.config import (
     SlabConfig,
 )
 from gmd_active_learning.extraction.cooldown import BlockCooldownTracker
-from gmd_active_learning.extraction.dispatch import extract_and_prepare, extract_regions, load_sections, prepare_region
+from gmd_active_learning.extraction.dispatch import EventRegionExtractor, extract_and_prepare, extract_regions, load_sections, prepare_region
 from gmd_active_learning.extraction.electronic import resolve_region_electronic_state
 from gmd_active_learning.extraction.embedding import EMBEDDING_CAPABILITIES, build_embedding, require_embedding_backend
 from gmd_active_learning.extraction.graph import extract_graph
@@ -38,6 +38,7 @@ from gmd_active_learning.extraction.slab import extract_slab
 
 __all__ = [
     "EMBEDDING_CAPABILITIES",
+    "EventRegionExtractor",
     "BlockConfig",
     "BlockCooldownTracker",
     "CappingConfig",

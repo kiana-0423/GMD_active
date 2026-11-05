@@ -128,3 +128,8 @@ def test_export_switches(tmp_path) -> None:
     version = publish_samples(store, many_samples(2, 1))
     assert not (Path(version.path) / "sgt.npz").exists() and not (Path(version.path) / "train.extxyz").exists()
     assert "train_file" not in version.metadata and Path(version.metadata["all_file"]).is_file()
+
+
+def test_store_satisfies_the_workflow_protocol(tmp_path) -> None:
+    protocols = pytest.importorskip("gmd_active_learning.workflow.protocols")
+    assert isinstance(VersionedDatasetStore(tmp_path), protocols.DatasetStore)

@@ -74,3 +74,24 @@ def test_package_surface() -> None:
         "assign_atoms_to_spatial_blocks", "merge_adjacent_blocks", "invert_block_mapping",
     ):
         assert callable(getattr(extraction, name))
+
+
+def test_event_region_extractor_satisfies_the_workflow_protocol(tmp_path) -> None:
+    from gmd_active_learning.contracts import EventRecord
+    from gmd_active_learning.extraction import EventRegionExtractor
+
+    frame = frame_of(bulk("Cu", "fcc", a=3.61, cubic=True).repeat(6), step=40)
+    event = EventRecord(event_id="evt-7", run_id="run", trigger_step=40, trigger_steps=[40], pre_frames=[], trigger_frame=frame,
+                        post_frames=[], post_frames_requested=0, complete=True, hotspot_atom_ids=[0], trigger_reasons=["force"], max_score=7.5)
+    try:
+        from gmd_active_learning.workflow.protocols import RegionExtractor
+    except ImportError:  # pragma: no cover - workflow area not present
+        RegionExtractor = None
+    config = ExtractionConfig(mode="block", block={"size": [5.4, 5.4, 5.4], "cooldown_steps": 100, "cooldown_state_path": "cooldown.json"})
+    extractor = EventRegionExtractor(config, state_dir=tmp_path)
+    if RegionExtractor is not None:
+        assert isinstance(extractor, RegionExtractor)
+    regions = extractor.extract(event)
+    assert len(regions) == 1 and regions[0][1] == 7.5 and regions[0][0].event_id == "evt-7"
+    assert regions[0][0].metadata["embedding"]["status"] == "disabled" and "h_capping" in regions[0][0].metadata
+    assert EventRegionExtractor(config, state_dir=tmp_path).extract(event) == []  # cooldown persisted
