@@ -9,6 +9,8 @@ checkpoint and ``gmd-status-v1`` status. Behaviour switches (environment):
 * ``FAKE_GMD_DELAY``: seconds to sleep per step (lets readers observe partial files).
 * ``FAKE_GMD_TRUNCATE_AFTER``: after this many frames, truncate the frame file and rewrite it.
 * ``FAKE_GMD_MARKER``: path of a file touched when the program starts (proves it ran).
+* ``FAKE_GMD_BURST``: ``step:atom:fx`` adds a force burst (eV/A along x) on one atom at one step,
+  only while the model file's sha256 starts with ``FAKE_GMD_BURST_MODEL`` when that is set.
 """
 
 from __future__ import annotations
@@ -48,15 +50,19 @@ def main(xyz: str, run_in: str) -> int:
     delay = float(os.environ.get("FAKE_GMD_DELAY", "0"))
     truncate_after = int(os.environ.get("FAKE_GMD_TRUNCATE_AFTER", "0"))
     written: list[str] = []
+    burst = os.environ.get("FAKE_GMD_BURST", "")
+    burst_step, burst_atom, burst_fx = (int(burst.split(":")[0]), int(burst.split(":")[1]), float(burst.split(":")[2])) if burst else (-1, -1, 0.0)
+    if os.environ.get("FAKE_GMD_BURST_MODEL") and not sha.startswith(os.environ["FAKE_GMD_BURST_MODEL"]):
+        burst_step = -1  # an improved model no longer produces the burst
 
     def frame_text(step: int) -> str:
-        shift = 0.001 * (step - first)
+        shift = 0.001 * step  # continuous across restarts
         out = [str(n), f'Lattice="{box[0]} 0 0 0 {box[1]} 0 0 0 {box[2]}" Properties=id:I:1:species:S:1:pos:R:3:forces:R:3 pbc="T T T" '
                f"step={step} time_fs={0.5 * step} energy={-1.0 - 0.01 * step} format=gmd-frame-v1 run_id={directives.get('run_id', 'none')} "
                f"force_field=ml model_sha256={sha}"]
         for i, (symbol, pos) in enumerate(zip(symbols, start)):
             p = [pos[0] + shift * (i + 1), pos[1], pos[2]]
-            f = [-0.1 * shift * (i + 1), 0.0, 0.0]
+            f = [-0.1 * shift * (i + 1) + (burst_fx if (step == burst_step and i == burst_atom) else 0.0), 0.0, 0.0]
             out.append(f"{i} {symbol} {p[0]:.10f} {p[1]:.10f} {p[2]:.10f} {f[0]:.10f} {f[1]:.10f} {f[2]:.10f}")
         return "\n".join(out) + "\n"
 

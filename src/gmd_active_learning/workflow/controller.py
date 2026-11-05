@@ -131,6 +131,7 @@ class ActiveLearningController:
         self._sleep, self._clock = sleep, clock
         self._stop_requested = False
         self._pending_events: dict[str, EventRecord] = {}
+        self._monitored_through: int | None = None
 
     # ================================================================== public API
     def initialise(self, initial_model: ModelArtifact) -> None:
@@ -237,6 +238,9 @@ class ActiveLearningController:
             previous_model=previous_model,
         )
         self.store.upsert_segment(self.run_id, index, cycle=run.cycle, model_id=model.model_id, status="running", work_dir=str(request.work_dir), start_step=run.last_step)
+        # A restarted segment re-emits the frame of its start step (already monitored at the end of
+        # the previous segment, possibly with the previous model's forces): never monitor it twice.
+        self._monitored_through = run.last_step
 
         result = self.md.completed_segment(request)
         if result is not None:  # finished before a controller crash: replay its frames
@@ -248,6 +252,8 @@ class ActiveLearningController:
         self._finish_segment(index, request, result, model)
 
     def _on_frame(self, frame: Frame, model: ModelArtifact) -> FrameAction:
+        if self._monitored_through is not None and frame.step <= self._monitored_through:
+            return FrameAction.STOP if self._stop_pending() else FrameAction.CONTINUE
         if self.enricher is not None:
             frame = self.enricher.enrich(frame, model)
         result = self.monitor.process(frame)
