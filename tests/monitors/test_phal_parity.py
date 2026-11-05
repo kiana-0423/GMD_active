@@ -34,6 +34,8 @@ CORRECTED_LJ_DEVIATIONS = {
 
 
 def _replay(scenario: Scenario, *, negate_lj: bool) -> tuple[list[StagedEvaluation], list, OnlineMonitorDriver]:
+    """Replay a scenario through the driver; the monitor's LJ estimator is reachable via ``driver.monitor``."""
+
     config = monitor_config_from_phal(scenario.config, legacy_scoring=True)
     estimator = LocalLJEstimator(cutoff=config.neighbors.lj_cutoff)
     monitor = StagedOODMonitor(
@@ -187,3 +189,16 @@ def test_lj_residuals_match_phal_on_negated_forces() -> None:
         assert np.all(reference[~lj.evaluated] == 0.0)
         checked += int(np.sum(lj.evaluated))
     assert checked > 0
+
+
+def test_lj_is_fitted_once_per_escalated_frame_on_the_fixture_f16() -> None:
+    """PHAL fitted LJ 21 times for ethane_box's 13 escalated frames (scratch reproduction with the
+    reference tree: 5 scheduled full frames x 1 + 8 cascaded frames x 2). We fit once per frame that
+    has a suspicious atom."""
+
+    scenario = load_scenario("ethane_box")
+    evaluations, _events, driver = _replay(scenario, negate_lj=True)
+    escalated = [e for e in evaluations if e.result.stage.value in {"physics", "full"}]
+    fitted = [e for e in escalated if e.result.metadata.get("lj_fit_count", 0) > 0]
+    assert len(escalated) == 13
+    assert driver.monitor.lj_estimator.calls == len(fitted) == 12  # frame 0 has no suspicious atom

@@ -1,0 +1,5 @@
+# Hotspot clustering (gmd_active_learning.hotspots.config.HotspotsConfig).
+# Hotspot atoms come from the monitor (monitor.stages.label_threshold); there is no second threshold.
+hotspots:
+  enabled: true
+  merge_radius: 8.0         # A, single-linkage merge distance (minimum image)

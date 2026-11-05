@@ -1,0 +1,103 @@
+# Online monitor (gmd_active_learning.monitors.config.MonitorConfig). Units: Angstrom, eV/A.
+# See docs/monitoring.md for the meaning of every key and the PHAL key mapping.
+monitor:
+  enabled: true
+  engine: staged            # staged (PHAL atom-wise light/physics/full) | global_lj (GMD frame-level LJ window)
+  neighbors:
+    lj_cutoff: 6.0          # A, local LJ neighbourhood
+    coordination_cutoff: 6.0  # A, smooth coordination neighbourhood
+  metrics:
+    force:                  # |F_i|, gated z-score
+      enabled: true
+      weight: 1.0
+      z_threshold: 4.0
+    delta_force:            # |F_i(t) - F_i(t_prev)|, gated z-score
+      enabled: true
+      weight: 1.5
+      z_threshold: 4.0
+    displacement:           # |MIC(r_i(t) - r_i(t_prev))|, gated z-score
+      enabled: true
+      weight: 1.0
+      z_threshold: 4.0
+    rmin:                   # nearest-neighbour distance; score max(0, (threshold - rmin) / threshold)
+      enabled: true
+      weight: 1.0
+      threshold: 0.8        # A; null = measured but not scored (PHAL default)
+    delta_q:                # |q_i(t) - q_i(t_prev)|; score max(z, (|dq| - threshold) / threshold)
+      enabled: true
+      weight: 1.0
+      threshold: 0.5
+      scale: 1.15           # q uses r / (scale * (R_cov,i + R_cov,j))
+      power: 6.0
+    lj_residual:            # local per-atom LJ projection residual (sign-corrected, F-01)
+      enabled: true
+      weight: 2.0
+      estimator: linear     # linear | nonlinear (scipy reference, diagnostics only)
+      lazy: true
+      lazy_threshold: 3.0   # fit atoms whose weighted light score >= this (else the single argmax atom)
+      condition_limit: 10000.0
+      sigma_min: 0.2
+      sigma_max: 10.0
+      relative_delta: 1.0e-08
+      nonlinear_max_nfev: 400
+    mlip_force_deviation:   # |F_MD - F_reference| from the caller's ReferenceForceProvider; z-score
+      enabled: true
+      weight: 2.0
+    committee:              # committee force deviation from Frame.committee_forces; max(raw, z)
+      enabled: true
+      weight: 2.0
+      min_members: 2        # fewer members -> UNAVAILABLE (never zero)
+  running_stats:
+    enabled: true           # false: z-scores replaced by raw |x|
+    warmup_frames: 5
+    min_std: 1.0e-08
+    warmup_policy: suppress   # suppress (z-based parts are 0 during warmup) | raw (PHAL)
+    first_frame_deltas: not_evaluated  # not_evaluated | zero (PHAL)
+  stages:
+    light_interval: 1             # integer k, or triggered/never/always
+    physics_interval: triggered   # triggered = the light stage triggered
+    full_interval: triggered      # triggered = the physics stage triggered (PHAL committee_interval)
+    scheduled_full_interval: 1    # PHAL online.monitor_freq; k > 1 forces a full frame every k frames
+    screen_threshold: 4.0
+    physics_threshold: 5.0
+    label_threshold: 6.0          # hotspot atoms: atom score >= label_threshold
+    min_trigger_atoms: 1
+  actions:                  # precedence stop > checkpoint > save > continue
+    save_on_trigger: true
+    checkpoint_score: null
+    stop_score: null
+    stop_min_distance: 0.6  # A; any rmin below -> STOP (needs metrics.rmin.enabled)
+    stop_max_force: null    # eV/A
+  global_lj:                # only for engine: global_lj
+    window_size: 20
+    cutoff: 6.0
+    ridge_lambda: 1.0e-06
+    thresholds:
+      lj_residual_candidate: 0.3
+      lj_residual_stop: 0.6
+      max_force_stop: 20.0
+      min_distance_stop: 0.6
+      ensemble_deviation_candidate: 0.15
+      ensemble_deviation_stop: 0.3
+      parameter_jump_ratio: 5.0
+    parameter_bounds:
+      epsilon_min: 1.0e-06
+      epsilon_max: 10.0
+      sigma_min: 0.5
+      sigma_max: 8.0
+    weights:
+      lj_residual: 1.0
+      param_anomaly: 1.0
+      param_jump: 0.5
+      ensemble_deviation: 1.0
+      max_force: 0.5
+      min_distance: 0.5
+      reliability_model: 0.5
+  driver:
+    continue_on_error: false
+    max_errors: 1
+    max_consecutive_timeouts: 10
+    poll_timeout_s: null
+    stop_on_stop_action: true
+    summary_interval: 0
+    progress_file: null

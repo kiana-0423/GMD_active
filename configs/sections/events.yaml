@@ -1,0 +1,12 @@
+# Event capture around monitor triggers (gmd_active_learning.events.config.EventsConfig).
+events:
+  enabled: true
+  pre_trigger_frames: 10
+  post_trigger_frames: 5
+  maxlen: null              # rolling history length; null = pre_trigger_frames + 1
+  cooldown_steps: 0         # MD steps after an event's last frame during which triggers open no new event
+  retain_recent: 16         # finished-event summaries kept in memory
+  store:
+    enabled: false
+    directory: null         # required when enabled; <directory>/<event_id>/{event.json,frames.npz,frames.extxyz}
+    write_extxyz: true
