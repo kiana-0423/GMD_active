@@ -298,3 +298,31 @@ def test_inputs_are_byte_identical_to_phal_for_equivalent_settings(monkeypatch, 
         expected = phal_build(phal_region, config=phal_config, run_type=run_type, fixed_atom_indices=fixed, project_name="job")
         got = build_cp2k_input(region, ours, run_type=run_type, project_name="job", fixed_atom_indices=fixed).text
         assert got == expected
+
+
+def test_run_cp2k_with_a_fake_executable_and_history_hook(tmp_path: Path) -> None:
+    import stat
+    import sys
+
+    fake = tmp_path / "cp2k.fake"
+    fake.write_text(
+        f'#!{sys.executable}\nimport sys\nargs = sys.argv[1:]\nopen(args[args.index("-o") + 1], "w").write("PROGRAM ENDED AT\\n")\n'
+        'sys.exit(int(open(args[args.index("-i") + 1]).read().strip() or 0))\n'
+    )
+    fake.chmod(fake.stat().st_mode | stat.S_IXUSR)
+    from gmd_active_learning.adapters.dft.cp2k.command import run_cp2k
+
+    (tmp_path / "job.inp").write_text("0")
+    seen: list[Path] = []
+
+    def hook(output: Path, _input: Path) -> None:
+        seen.append(output)
+        raise RuntimeError("history recorder broke")
+
+    process, output = run_cp2k(tmp_path / "job.inp", CP2KConfig(executable=str(fake)), history_hook=hook)
+    assert process.returncode == 0 and output.read_text() == "PROGRAM ENDED AT\n" and seen == [output]
+    (tmp_path / "bad.inp").write_text("3")
+    with pytest.raises(LabelingError, match="exited with status 3"):
+        run_cp2k(tmp_path / "bad.inp", CP2KConfig(executable=str(fake)))
+    with pytest.raises(LabelingError, match="not found"):
+        run_cp2k(tmp_path / "job.inp", CP2KConfig(executable=str(tmp_path / "missing")))

@@ -210,3 +210,29 @@ def test_failure_classification_table() -> None:
     assert classify_failure(converged, stage="sp", exit_code=0) is FailureClass.INVALID_RESULT
     aborted = parse_cp2k_output(" * [ABORT]\n *  \\___/  Unknown basis set\n PROGRAM ENDED AT\n")
     assert classify_failure(aborted, stage="sp", exit_code=1) is FailureClass.INVALID_RESULT
+
+
+REF = Path(__file__).resolve().parents[3] / "ref" / "lammps_monitor"
+
+
+@pytest.mark.skipif(not (REF / "src" / "hotspot_al").is_dir(), reason="ref/lammps_monitor not present")
+def test_force_parsing_and_completion_match_phal_on_every_fixture(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.syspath_prepend(str(REF / "src"))
+    from hotspot_al.backends.cp2k import CP2KBackend as PhalBackend
+    from hotspot_al.cp2k.cp2k_force_parser import parse_cp2k_forces as phal_forces
+    from hotspot_al.cp2k.cp2k_result import parse_cp2k_result as phal_result
+
+    outputs = [FIXTURES / "toy_forces.out", *sorted(REAL.glob("*/*.out"))]
+    for path in outputs:
+        text = path.read_text()
+        assert output_is_complete(text) == PhalBackend().output_is_complete(text), path
+        ours = parse_cp2k_output_file(path)
+        if ours.forces is None:
+            with pytest.raises(Exception):
+                phal_forces(path)
+            continue
+        np.testing.assert_allclose(ours.forces, phal_forces(path), rtol=1e-12)
+        legacy = phal_result(path)
+        assert legacy.scf_converged == ours.scf_converged and legacy.scf_iterations == ours.scf_steps
+        if path.parent.name.startswith(("h2", "ch3")):
+            assert legacy.energy is None and ours.energy is not None  # F-12, fixed here
