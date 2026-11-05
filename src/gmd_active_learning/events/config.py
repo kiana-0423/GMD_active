@@ -25,13 +25,14 @@ class EventsConfig(BaseModel):
     enabled: bool = True
     pre_trigger_frames: int = Field(10, ge=0)
     post_trigger_frames: int = Field(5, ge=0)
-    maxlen: int | None = Field(None, ge=1, description="rolling history length; null = pre_trigger_frames")
+    maxlen: int | None = Field(None, ge=1, description="rolling history length; null = pre_trigger_frames + 1")
     cooldown_steps: int = Field(0, ge=0, description="MD steps after an event's last frame during which new triggers open no event")
     retain_recent: int = Field(16, ge=0, description="number of finished-event summaries kept in memory (bounded, F-07)")
     store: EventStoreConfig = Field(default_factory=EventStoreConfig)
 
     def history_length(self) -> int:
-        return max(1, self.maxlen if self.maxlen is not None else self.pre_trigger_frames)
+        # +1: a trigger frame pushed before capture is excluded from its own pre-context (PHAL order).
+        return max(1, self.maxlen if self.maxlen is not None else self.pre_trigger_frames + 1)
 
 
 def load_events_config(section: dict[str, Any] | EventsConfig | None) -> EventsConfig:
