@@ -196,7 +196,7 @@ def _run_dataset(args: argparse.Namespace) -> int:
 
         args.root = scf_config(_load_config(getattr(args, "config", None)) or None).dataset.root
     if action == "init":
-        dataset = SCFDataset.create(args.root)
+        dataset = SCFDataset.create(args.root, split_ratios=_split_ratios(args))
         print(f"initialised SCF dataset at {dataset.root}")
         for split in SPLITS:
             print(f"  {split}/")
@@ -226,7 +226,7 @@ def _run_ingest(args: argparse.Namespace) -> int:
 
     config = _load_config(args.config)
     settings = scf_config(config or None)
-    dataset = SCFDataset.create(args.root)
+    dataset = SCFDataset.create(args.root, split_ratios=settings.dataset.split_ratios)
     summary = ingest_scf_root(
         args.scf_root or settings.recording.output_dir,
         dataset,
@@ -457,6 +457,14 @@ def _add_split_argument(parser: argparse.ArgumentParser) -> None:
 
 def _add_json_argument(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
+
+
+def _split_ratios(args: argparse.Namespace) -> dict[str, float]:
+    """``scf.dataset.split_ratios`` from ``--config`` (defaults otherwise)."""
+
+    from gmd_active_learning.adapters.dft.scf.config import scf_config
+
+    return dict(scf_config(_load_config(getattr(args, "config", None)) or None).dataset.split_ratios)
 
 
 def _load_config(path: str | None) -> dict[str, Any]:

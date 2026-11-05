@@ -38,12 +38,17 @@ def test_dataset_root_defaults_to_the_configured_dataset_dir(
 ) -> None:
     # PHAL declared cp2k.ml_scf.dataset_dir and never read it (finding F-23).
     config = tmp_path / "config.yaml"
-    config.write_text(f"scf:\n  dataset:\n    root: {tmp_path / 'configured'}\n", encoding="utf-8")
+    config.write_text(
+        f"scf:\n  dataset:\n    root: {tmp_path / 'configured'}\n"
+        "    split_ratios: {train: 0.5, validation: 0.25, test: 0.25}\n",
+        encoding="utf-8",
+    )
 
     exit_code = main(["scf", "dataset", "init", "--config", str(config)])
 
     assert exit_code == 0
-    assert (tmp_path / "configured" / "metadata.json").is_file()
+    metadata = json.loads((tmp_path / "configured" / "metadata.json").read_text(encoding="utf-8"))
+    assert metadata["split_ratios"] == {"train": 0.5, "validation": 0.25, "test": 0.25}
 
 
 def test_dataset_init_creates_the_layout(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
