@@ -104,7 +104,7 @@ def test_continuous_and_segmented_runs_agree_and_frames_are_complete(models) -> 
     frame = cont_frames[3]
     assert frame.atom_ids.tolist() == list(range(8)) and set(frame.numbers.tolist()) == {18}
     assert frame.pbc == (True, True, True) and np.allclose(np.diag(frame.cell), BOX)
-    assert frame.model_sha256 == m1.export_sha256
+    assert frame.model_sha256 == m1.export_sha256 and frame.model_version == m1.model_id
     reference = backend.calculator(m1.checkpoint_path).compute(frame.positions, frame.numbers, frame.cell, frame.pbc)
     assert np.max(np.abs(np.asarray(reference["forces"]) - frame.forces)) < 1e-4  # float32 TorchScript vs eager
 

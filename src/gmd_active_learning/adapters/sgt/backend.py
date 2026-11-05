@@ -79,6 +79,26 @@ def _graph(atoms: Any, cutoff: float) -> tuple[np.ndarray, np.ndarray]:
 class GMDSGTBackend:
     """Implements ``workflow.protocols.Trainer`` and ``FrameEnricher`` on top of GMD_SGT >= 0.4."""
 
+    name = "gmd_sgt"
+    role = "mlip"
+    capabilities = frozenset({"train", "finetune", "per_atom_force_weights", "mixed_pbc_batches", "event_aware_splits",
+                              "torchscript_export", "export_metadata", "committee"})
+
+    @classmethod
+    def from_config(cls, config: Any) -> GMDSGTBackend:
+        """Registry factory: ``config`` is the full configuration mapping (section ``mlip``)."""
+
+        section = config.get("mlip") if hasattr(config, "get") else None
+        return cls(SGTConfig.model_validate(section or {}))
+
+    def check_runtime(self) -> Any:
+        from gmd_active_learning.adapters.registry import BackendRole, RuntimeStatus
+
+        return RuntimeStatus(self.name, BackendRole.MLIP, True, f"gmd_sgt {self.sgt.__version__}")
+
+    def set_engine_smoke(self, engine_smoke: Any) -> None:
+        self._engine_smoke = engine_smoke
+
     def __init__(self, config: SGTConfig, *, engine_smoke: Any | None = None) -> None:
         self.config = config
         self.sgt = import_gmd_sgt(config)

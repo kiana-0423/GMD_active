@@ -161,6 +161,8 @@ _BUILTIN_PATHS: dict[tuple[BackendRole, str], str] = {
     (BackendRole.SCHEDULER, "local"): "gmd_active_learning.adapters.schedulers.local:LocalScheduler",
     (BackendRole.SCHEDULER, "slurm"): "gmd_active_learning.adapters.schedulers.slurm:SlurmScheduler",
     (BackendRole.SCHEDULER, "pbs"): "gmd_active_learning.adapters.schedulers.pbs:PBSScheduler",
+    (BackendRole.MD, "gmd"): "gmd_active_learning.adapters.gmd.engine:GMDEngine",
+    (BackendRole.MLIP, "gmd_sgt"): "gmd_active_learning.adapters.sgt.backend:GMDSGTBackend",
 }
 
 

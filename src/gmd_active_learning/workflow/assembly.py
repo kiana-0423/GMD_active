@@ -122,8 +122,12 @@ def build_controller(config: LoadedConfig, *, work_dir: str | Path) -> ActiveLea
     workflow = sections["workflow"]
     if not isinstance(workflow, WorkflowConfig):
         raise ConfigurationError("workflow section has the wrong type")
-    md = GMDEngine(sections["md"])  # type: ignore[arg-type]
-    sgt = GMDSGTBackend(sections["mlip"], engine_smoke=md.smoke_test)  # type: ignore[arg-type]
+    from gmd_active_learning.adapters.registry import BackendRole, create_backend
+
+    md = create_backend(config.raw, BackendRole.MD)
+    sgt = create_backend(config.raw, BackendRole.MLIP)
+    if hasattr(sgt, "set_engine_smoke") and hasattr(md, "smoke_test"):
+        sgt.set_engine_smoke(md.smoke_test)
     hotspots = sections.get("hotspots") or HotspotsConfig()
     driver = OnlineMonitorDriver(
         sections.get("monitor") or MonitorConfig(),

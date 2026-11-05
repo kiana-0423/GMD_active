@@ -113,6 +113,23 @@ class FrameTail:
 class GMDEngine:
     """Implements ``workflow.protocols.MDEngine``."""
 
+    name = "gmd"
+    role = "md"
+    capabilities = frozenset({"segmented_runs", "flushed_frames", "cooperative_stop", "checkpoint_request",
+                              "checkpoint_v3", "model_change_at_restart", "torchscript_ml", "stable_atom_ids"})
+
+    @classmethod
+    def from_config(cls, config: Any) -> GMDEngine:
+        """Registry factory: ``config`` is the full configuration mapping (section ``md``)."""
+
+        section = config.get("md") if hasattr(config, "get") else None
+        return cls(GMDConfig.model_validate(section or {}))
+
+    def check_runtime(self) -> Any:
+        from gmd_active_learning.adapters.registry import BackendRole, RuntimeStatus
+
+        return RuntimeStatus(self.name, BackendRole.MD, True, str(self.executable))
+
     def __init__(self, config: GMDConfig) -> None:
         self.config = config
         self.executable = Path(config.executable).expanduser()
@@ -166,6 +183,7 @@ class GMDEngine:
                 finished = process.poll() is not None
                 for frame in tail.read_new():
                     self._check_model(frame, request)
+                    frame.model_version = request.model.model_id  # registry identity of the model that ran
                     action = on_frame(frame)
                     if action is FrameAction.STOP and not stop_sent:
                         (request.work_dir / "STOP").write_text(f"stop requested after step {frame.step}\n")
@@ -222,7 +240,11 @@ class GMDEngine:
     def read_frames(self, result: SegmentResult, request: SegmentRequest) -> Iterable[Frame]:
         if result.frames_path is None or not result.frames_path.is_file():
             return []
-        return parse_frames(result.frames_path.read_text(), run_id=request.run_id)
+        frames = parse_frames(result.frames_path.read_text(), run_id=request.run_id)
+        for frame in frames:
+            self._check_model(frame, request)
+            frame.model_version = request.model.model_id
+        return frames
 
     # ------------------------------------------------------------------ export smoke test
     def smoke_test(self, export: Path, work_dir: Path) -> dict[str, Any]:
