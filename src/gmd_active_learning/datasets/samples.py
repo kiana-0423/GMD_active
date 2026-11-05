@@ -61,6 +61,8 @@ class LabeledSample:
             self.stress = np.asarray(self.stress, dtype=float).reshape(3, 3)
             if not any(self.region.pbc):
                 raise DataContractError(f"sample {self.sample_id}: stress on a non-periodic region")
+            if not np.allclose(self.stress, self.stress.T, rtol=0.0, atol=1e-10 * max(1.0, float(np.abs(self.stress).max()))):
+                raise DataContractError(f"sample {self.sample_id}: stress must be symmetric (extxyz stores Voigt components)")
         if self.energy is not None:
             self.energy = float(self.energy)
             if not np.isfinite(self.energy):
