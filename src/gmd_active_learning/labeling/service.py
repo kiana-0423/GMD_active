@@ -407,14 +407,18 @@ class LabelingService:
             reasons = [f"job ended {state.value} (exit code {job.exit_code}, scheduler state {job.raw_state})"]
         elif state is not ExecutionStatus.COMPLETED:
             reasons = [f"job ended {state.value} (exit code {job.exit_code})", *reasons]
-        failure = classify_failure(
-            output,
-            stage=stage,
-            exit_code=job.exit_code,
-            cancelled=cancelled,
-            walltime_exceeded=walltime,
-            reasons=reasons,
-        )
+        if job.metadata.get("resolved_unknown"):
+            failure = FailureClass.EXECUTION_FAILED
+            reasons = [f"job declared lost by the workflow: {job.metadata['resolved_unknown']}", *reasons]
+        else:
+            failure = classify_failure(
+                output,
+                stage=stage,
+                exit_code=job.exit_code,
+                cancelled=cancelled,
+                walltime_exceeded=walltime,
+                reasons=reasons,
+            )
         attempt.update({"outcome": "failed", "failure_class": failure.value, "reasons": reasons})
         task.failure_reasons.append(f"attempt {attempt['index']} ({stage}): {failure.value}: {'; '.join(reasons)}")
         ml_active = not task.metadata.get("native", True)
