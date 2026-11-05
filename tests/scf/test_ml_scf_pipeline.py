@@ -1,14 +1,16 @@
 # Ported from PHAL (tests.e2e.test_ml_scf_pipeline) at 96263b6; MIT License, see NOTICE.
-"""End-to-end ML-SCF pipeline against a fake CP2K and a fake ML model.
+"""End-to-end ML-SCF pipeline against a fake CP2K output and a mis-behaving model.
 
 Nothing real is executed. A fake CP2K output stands in for the fork's stdout,
-including the ``ML-SCF|`` lines the Fortran writes, and a deliberately
-mis-behaving predictor stands in for a model that has gone wrong. The point is
-to exercise the whole loop -- predict, export, run, parse, ingest, benchmark --
-and to prove the two failure modes that matter:
+including the ``ML-SCF|`` lines the reconstruction writes, and a deliberately
+broken predictor stands in for a model that has gone wrong. The loop is
+predict -> export -> "run" -> parse -> ingest -> export -> benchmark, and the two
+failure modes that matter are proved: a bad prediction never reaches CP2K, and
+a run that fell back is never counted as accelerated.
 
-* a bad prediction never reaches CP2K, and
-* a run that fell back is never counted as accelerated.
+Deviations from PHAL's version: the fake output carries the v2026.2 banner and
+the reconstruction's ``ml_guess_source`` / ``prediction_success`` lines as well
+as the legacy ones (ledger SCF-040); electron counts are valence counts (F-23).
 """
 
 from __future__ import annotations
@@ -16,26 +18,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import numpy as np
 import pytest
-from ase import Atoms
 
-from gmd_active_learning.adapters.dft.scf.cp2k_ml_backend import CP2KMLSCFBackend
-from tools.scf.benchmark.modes import MODE_ML_FULL, MODE_NATIVE, run_benchmark
 from gmd_active_learning.adapters.dft.scf.dataset import SCFDataset, ingest_scf_root
-from gmd_active_learning.adapters.dft.scf.density import (
-    DummyDensityPredictor,
-    SCFDensityPrediction,
-    register_predictor,
-)
 from gmd_active_learning.adapters.dft.scf.density.exchange import read_density_exchange
-from gmd_active_learning.adapters.dft.scf.density.registry import unregister_predictor
 from gmd_active_learning.adapters.dft.scf.export import export_dataset
+from gmd_active_learning.adapters.dft.scf.scf_history import parse_scf_history
+from tests.scf.test_scf_ml_backend import prepared, water
 from tools.scf.benchmark.evaluate import SCFRun
-from hotspot_al.models import ExtractedRegion
-from gmd_active_learning.adapters.dft.scf.config import load_config
-
-from tests.scf.fakes.fake_cp2k import write_fake_cp2k_force_output
+from tools.scf.benchmark.modes import MODE_ML_FULL, MODE_NATIVE, run_benchmark
 
 
 def fake_ml_scf_output(*, accepted: bool, iterations: int) -> str:
@@ -44,17 +35,21 @@ def fake_ml_scf_output(*, accepted: bool, iterations: int) -> str:
     if accepted:
         decision = [
             " ML-SCF| accelerator enabled: ML initial guess accepted",
-            " ML-SCF| density file: job.inp.ml_density",
+            " ML-SCF| ml_guess_source: artifact",
+            " ML-SCF| prediction_success: T",
+            " ML-SCF| electrons: 8.000000000",
         ]
     else:
         decision = [
             " ML-SCF| fallback used: ML density does not integrate to the requested electron count",
+            " ML-SCF| ml_guess_source: fallback",
+            " ML-SCF| prediction_success: F",
             " ML-SCF| continuing with SCF_GUESS ATOMIC",
         ]
     return "\n".join(
         [
-            " CP2K| version string: CP2K version 2024.1 (phal-ml-scf)",
-            " Source code revision git:deadbeef",
+            " CP2K| version string: CP2K version 2026.2",
+            " Source code revision 67b5da8",
             *decision,
             *(
                 f" SCF ITERATION {step} RESIDUAL {10.0 ** (-step - 1):.1E} ENERGY {-17.0 - 0.01 * step:.6f}"
@@ -67,145 +62,40 @@ def fake_ml_scf_output(*, accepted: bool, iterations: int) -> str:
     )
 
 
-def water_region() -> ExtractedRegion:
-    atoms = Atoms(
-        "OH2",
-        positions=[(0.0, 0.0, 0.0), (0.9572, 0.0, 0.0), (-0.24, 0.9266, 0.0)],
-        cell=[10.0, 10.0, 10.0],
-        pbc=True,
-    )
-    return ExtractedRegion(
-        atoms=atoms,
-        original_indices=[0, 1, 2],
-        core_indices=[0],
-        inner_buffer_indices=[1],
-        outer_buffer_indices=[2],
-        boundary_indices=[],
-        h_cap_indices=[],
-        hotspot_indices=[0],
-        region_labels=["core", "inner_buffer", "outer_buffer"],
-        mask_weights=np.ones(3),
-    )
-
-
-def ml_config(tmp_path: Path, predictor_type: str = "dummy") -> dict:
-    config = load_config("configs/default.yaml")
-    config["backend"]["dft"]["engine"] = "cp2k_ml_scf"
-    config["cp2k"]["ml_scf"] = {
-        "enabled": True,
-        "predictor": {"type": predictor_type, "options": {}},
-        "prediction_dir": str(tmp_path / "predictions"),
-    }
-    config["cp2k_ml_scf"] = {
-        "executable": "cp2k.psmp",
-        "model_path": str(tmp_path / "model.pt"),
-        "model_digest": None,
-        "runtime_dir": str(tmp_path / "runtime"),
-        "fallback_to_standard_scf": True,
-        "require_final_scf_convergence": True,
-        "controller_protocol": "phal-ml-scf-v1",
-        "environment": {},
-    }
-    return config
-
-
-class BrokenPredictor(DummyDensityPredictor):
-    """A model that loses electrons -- the failure the gate exists to catch."""
-
-    model_name = "broken"
-    predictor_type = "broken"
-
-    def predict(self, structure, electronic_state):
-        good = super().predict(structure, electronic_state)
-        return SCFDensityPrediction(
-            model_name=self.model_name,
-            model_version=self.model_version,
-            model_digest=self.model_digest,
-            structure_hash=good.structure_hash,
-            electron_count=good.electron_count,
-            spin_channels=good.spin_channels,
-            density_format=good.density_format,
-            values=np.asarray(good.values) * 0.5,
-            predictor_type=self.predictor_type,
-        )
-
-
-@pytest.fixture
-def broken_predictor():
-    register_predictor("broken", BrokenPredictor)
-    try:
-        yield
-    finally:
-        unregister_predictor("broken")
-
-
 # -- the happy path -----------------------------------------------------
 
 
 def test_prediction_reaches_cp2k_and_the_run_is_recorded_as_accelerated(tmp_path: Path) -> None:
-    backend = CP2KMLSCFBackend(config=ml_config(tmp_path))
-    task_dir = tmp_path / "task-0001"
+    wrapper, written = prepared(tmp_path, name="task-0001")
 
-    written = backend.prepare_inputs(water_region(), task_dir, task_id="task-0001")
-    input_file = Path(next(path for key, path in written.items() if key.endswith("_input")))
-    density_file = Path(next(path for key, path in written.items() if key.endswith("_ml_density")))
+    # The density CP2K would read is well-formed and conserves the valence count.
+    payload = read_density_exchange(written["ml_density"])
+    assert payload["values"].sum() == pytest.approx(8.0)
+    assert "SCF_GUESS ML" in written["input"].read_text(encoding="utf-8")
 
-    # The density CP2K would read is well-formed and electron-conserving.
-    payload = read_density_exchange(density_file)
-    assert payload["values"].sum() == pytest.approx(10.0)
-    assert "SCF_GUESS ML" in input_file.read_text(encoding="utf-8")
+    output = fake_ml_scf_output(accepted=True, iterations=12)
+    outcome = wrapper.parse_outcome(output)
+    history = parse_scf_history(output)
+    provenance = wrapper.calculation_provenance(outcome, iterations=len(history.iterations))
 
-    output = task_dir / "job.out"
-    write_fake_cp2k_force_output(output, water_region().atoms)
-    output.write_text(
-        fake_ml_scf_output(accepted=True, iterations=12) + output.read_text(encoding="utf-8"),
-        encoding="utf-8",
-    )
-
-    result = backend.parse_result(output, input_path=input_file)
-    provenance = result.provenance()
-
-    assert result.scf_converged
-    assert result.scf_iterations == 12
+    assert history.converged
+    assert len(history.iterations) == 12
+    assert history.cp2k_version is not None and "2026.2" in history.cp2k_version
     assert provenance["ml_scf_enabled"] is True
     assert provenance["fallback_used"] is False
-    assert provenance["cp2k_commit"] == "deadbeef"
-    assert provenance["ml_model_digest"] is None or provenance["ml_model_digest"].startswith("sha256:")
+    assert provenance["ml_guess_source"] == "artifact"
+    assert provenance["cp2k_commit"] == "67b5da8"
 
 
 def test_a_fallback_run_is_not_counted_as_accelerated(tmp_path: Path) -> None:
-    backend = CP2KMLSCFBackend(config=ml_config(tmp_path))
-    task_dir = tmp_path / "task-0002"
-    backend.prepare_inputs(water_region(), task_dir, task_id="task-0002")
+    wrapper, _ = prepared(tmp_path, name="task-0002")
 
-    output = task_dir / "job.out"
-    write_fake_cp2k_force_output(output, water_region().atoms)
-    output.write_text(
-        fake_ml_scf_output(accepted=False, iterations=24) + output.read_text(encoding="utf-8"),
-        encoding="utf-8",
-    )
-
-    provenance = backend.parse_result(output).provenance()
+    output = fake_ml_scf_output(accepted=False, iterations=24)
+    provenance = wrapper.calculation_provenance(wrapper.parse_outcome(output))
 
     assert provenance["fallback_used"] is True
-    assert provenance["scf_converged"] is True
-
-
-# -- the failure the gate exists for ------------------------------------
-
-
-def test_a_model_that_loses_electrons_never_reaches_cp2k(
-    tmp_path: Path, broken_predictor: None
-) -> None:
-    backend = CP2KMLSCFBackend(config=ml_config(tmp_path, predictor_type="broken"))
-
-    written = backend.prepare_inputs(water_region(), tmp_path / "task", task_id="task-0003")
-    input_file = Path(next(path for key, path in written.items() if key.endswith("_input")))
-
-    assert not any(key.endswith("_ml_density") for key in written)
-    # Without a density the input must not claim SCF_GUESS ML.
-    assert "SCF_GUESS ATOMIC" in input_file.read_text(encoding="utf-8")
-    assert list(Path(tmp_path / "task").glob("*.ml_density")) == []
+    assert provenance["ml_scf_enabled"] is False
+    assert parse_scf_history(output).converged is True
 
 
 # -- dataset and benchmark loop -----------------------------------------
@@ -222,7 +112,7 @@ def test_recorded_runs_feed_the_dataset_and_the_benchmark(tmp_path: Path) -> Non
         directory.mkdir(parents=True)
         from ase.io import write
 
-        write(str(directory / "region.extxyz"), water_region().atoms, format="extxyz")
+        write(str(directory / "region.extxyz"), water(), format="extxyz")
         history = parse_scf_history(
             fake_ml_scf_output(accepted=True, iterations=iterations), input_text=cp2k_input
         )

@@ -194,28 +194,95 @@ class LocalSchedulerBackend(SchedulerBackend):
         job.state = JobState.CANCELLED
 
 
-def resolve_scheduler(name_or_path: str, config: Mapping[str, Any] | None = None) -> SchedulerBackend:
-    """``local`` or a ``module:Class`` path to a :class:`SchedulerBackend`-compatible class.
+class GmdSchedulerBridge(SchedulerBackend):
+    """Drive a ``gmd_active_learning.adapters.schedulers`` backend (local/Slurm/PBS).
 
-    Batch schedulers (Slurm/PBS) are provided by the GMD_active scheduler
-    adapters; pass their class path. An unknown name raises instead of
+    Those take ``submit(work_dir, command, ...)`` and return
+    :class:`~gmd_active_learning.contracts.SchedulerJob` /
+    :class:`~gmd_active_learning.contracts.ExecutionStatus`; the SCF tooling
+    speaks PHAL's ``submit(request) -> BackendJob`` / ``poll -> JobState``.
+    stdout/stderr redirection, which the GMD request does not carry, is done
+    by a ``/bin/sh -c 'exec ... > out 2> err'`` wrapper.
+    """
+
+    def __init__(self, backend: Any) -> None:
+        self.backend = backend
+        self.backend_name = f"gmd:{getattr(backend, 'backend_name', type(backend).__name__)}"
+
+    def submit(self, request: ExecutionRequest) -> BackendJob:
+        import shlex
+
+        command = list(request.command)
+        if request.stdout_path is not None or request.stderr_path is not None:
+            redirect = ""
+            if request.stdout_path is not None:
+                redirect += f" > {shlex.quote(str(request.stdout_path))}"
+            if request.stderr_path is not None:
+                redirect += f" 2> {shlex.quote(str(request.stderr_path))}"
+            command = ["/bin/sh", "-c", f"exec {shlex.join(command)}{redirect}"]
+        job = self.backend.submit(
+            request.work_dir,
+            command,
+            dict(request.resources) or None,
+            environment=dict(request.environment),
+            job_name=str(request.metadata.get("label") or request.metadata.get("system") or "") or None,
+        )
+        return BackendJob(
+            backend=self.backend_name,
+            state=JobState.SUBMITTED,
+            external_id=job.job_id,
+            native_handle=job,
+            metadata=dict(request.metadata),
+        )
+
+    def poll(self, job: BackendJob) -> JobState:
+        status = self.backend.poll(job.native_handle)
+        job.state = from_execution_status(status)
+        exit_code = getattr(job.native_handle, "exit_code", None)
+        if exit_code is not None:
+            job.metadata["returncode"] = exit_code
+        return job.state
+
+    def cancel(self, job: BackendJob) -> None:
+        self.backend.cancel(job.native_handle)
+        job.state = JobState.CANCELLED
+
+
+_GMD_SCHEDULERS = {
+    "slurm": "gmd_active_learning.adapters.schedulers.slurm:SlurmScheduler",
+    "pbs": "gmd_active_learning.adapters.schedulers.pbs:PBSScheduler",
+    "gmd-local": "gmd_active_learning.adapters.schedulers.local:LocalScheduler",
+}
+
+
+def resolve_scheduler(name_or_path: str, config: Mapping[str, Any] | None = None) -> SchedulerBackend:
+    """``local``, ``slurm``, ``pbs``, ``gmd-local`` or a ``module:Class`` path.
+
+    ``slurm``/``pbs``/``gmd-local`` are the GMD_active scheduler adapters,
+    driven through :class:`GmdSchedulerBridge` and configured from the
+    ``scheduler`` section of ``config``. An unknown name raises instead of
     silently running locally.
     """
 
     if name_or_path == "local":
         return LocalSchedulerBackend(config)
-    if ":" not in name_or_path:
+    path = _GMD_SCHEDULERS.get(name_or_path, name_or_path)
+    if ":" not in path:
         raise ConfigurationError(
-            f"unknown scheduler {name_or_path!r}; use 'local' or a 'module:Class' path to a "
-            "scheduler adapter with submit/poll/cancel"
+            f"unknown scheduler {name_or_path!r}; use local, slurm, pbs, gmd-local or a 'module:Class' path"
         )
-    module_name, _, class_name = name_or_path.partition(":")
+    module_name, _, class_name = path.partition(":")
     try:
         cls = getattr(importlib.import_module(module_name), class_name)
     except (ImportError, AttributeError) as exc:
         raise CapabilityUnavailableError(f"scheduler {name_or_path!r} is not importable: {exc}") from exc
     factory = getattr(cls, "from_config", None)
-    return factory(dict(config or {})) if callable(factory) else cls(dict(config or {}))
+    backend = factory(dict(config or {})) if callable(factory) else cls(dict(config or {}))
+    if isinstance(backend, SchedulerBackend):
+        return backend
+    if hasattr(backend, "submit_request"):  # a gmd_active_learning.adapters.schedulers backend
+        return GmdSchedulerBridge(backend)
+    raise ConfigurationError(f"{path} is neither an SCF SchedulerBackend nor a GMD scheduler adapter")
 
 
 def to_execution_status(state: JobState) -> Any:
@@ -237,6 +304,21 @@ def to_execution_status(state: JobState) -> Any:
     return mapping[state]
 
 
+def from_execution_status(status: Any) -> JobState:
+    """Map the contracts' ``ExecutionStatus`` back onto :class:`JobState`."""
+
+    value = getattr(status, "value", status)
+    return {
+        "prepared": JobState.PREPARED,
+        "submitted": JobState.SUBMITTED,
+        "queued": JobState.PENDING,
+        "running": JobState.RUNNING,
+        "completed": JobState.COMPLETED,
+        "failed": JobState.FAILED,
+        "cancelled": JobState.CANCELLED,
+    }.get(str(value), JobState.UNKNOWN)
+
+
 def _open_output(work_dir: Path, path: Path):
     resolved = path if path.is_absolute() else work_dir / path
     resolved.parent.mkdir(parents=True, exist_ok=True)
@@ -247,10 +329,12 @@ __all__ = [
     "BackendJob",
     "BackendRole",
     "ExecutionRequest",
+    "GmdSchedulerBridge",
     "JobState",
     "LocalSchedulerBackend",
     "RuntimeStatus",
     "SchedulerBackend",
+    "from_execution_status",
     "resolve_scheduler",
     "to_execution_status",
 ]

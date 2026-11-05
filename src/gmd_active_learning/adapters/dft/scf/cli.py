@@ -1,9 +1,16 @@
 # Ported from PHAL (hotspot_al.cp2k_ml_scf.cli) at 96263b6; MIT License, see NOTICE.
-"""``phal cp2k-scf`` command implementations.
+"""``scf`` command group (PHAL: ``phal cp2k-scf``).
 
-The commands are deliberately read-mostly: they inspect, validate and export a
-dataset, detect what the installed CP2K can do, and run benchmarks.  Nothing
-here launches a DFT calculation.
+Read-mostly: inspect, validate and export the SCF dataset, probe what a CP2K
+binary can do, and compare recorded benchmark runs. The only command that
+launches CP2K is ``capabilities --validate-native``, which runs one tiny H2
+calculation to *validate* (not merely read from the banner) native SCF and
+AO-matrix printing.
+
+Standalone: ``python -m gmd_active_learning.adapters.dft.scf.cli --help``.
+:func:`add_subparser` registers the group on the main ``gmd-al`` CLI (shared
+file, owned elsewhere). ``benchmark`` needs the source-checkout tooling under
+``tools/scf``.
 """
 
 from __future__ import annotations
@@ -24,11 +31,25 @@ from gmd_active_learning.adapters.dft.scf.dataset import (
 DEFAULT_SCF_ROOT = Path("runtime/cp2k/scf")
 
 
-def add_subparser(subparsers: Any) -> argparse.ArgumentParser:
-    """Register the ``cp2k-scf`` command group on an existing CLI."""
+def build_parser() -> argparse.ArgumentParser:
+    """A standalone parser whose only command group is ``scf``."""
+
+    parser = argparse.ArgumentParser(prog="gmd-scf")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    add_subparser(subparsers)
+    return parser
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    return run(args)
+
+
+def add_subparser(subparsers: Any, *, name: str = "scf") -> argparse.ArgumentParser:
+    """Register the SCF command group on an existing CLI."""
 
     parser = subparsers.add_parser(
-        "cp2k-scf",
+        name,
         help="Inspect the CP2K ML-SCF dataset, capabilities, and benchmarks.",
         description=(
             "Tools for the ML-accelerated CP2K SCF workflow. CP2K remains the "
@@ -50,15 +71,15 @@ def add_subparser(subparsers: Any) -> argparse.ArgumentParser:
     _add_root_argument(ingest_parser)
     ingest_parser.add_argument(
         "--scf-root",
-        default=str(DEFAULT_SCF_ROOT),
-        help=f"Directory holding <task-id>/scf_history.json (default: {DEFAULT_SCF_ROOT}).",
+        default=None,
+        help=f"Directory holding <task-id>/scf_history.json "
+        f"(default: scf.recording.output_dir from --config, else {DEFAULT_SCF_ROOT}).",
     )
     ingest_parser.add_argument(
         "--task-root",
         default=None,
         help="Directory holding CP2K task dirs with region.extxyz (default: --scf-root).",
     )
-    ingest_parser.add_argument("--config", default=None, help="Config file used to resolve charge/spin.")
     ingest_parser.add_argument("--overwrite", action="store_true", help="Replace samples that already exist.")
     _add_json_argument(ingest_parser)
 
@@ -112,6 +133,12 @@ def add_subparser(subparsers: Any) -> argparse.ArgumentParser:
         action="store_true",
         help="Return a non-zero status unless ML-SCF support is detected.",
     )
+    capabilities_parser.add_argument(
+        "--validate-native",
+        metavar="WORK_DIR",
+        default=None,
+        help="Run one tiny H2 calculation in WORK_DIR to validate native SCF and AO-matrix printing.",
+    )
     _add_json_argument(capabilities_parser)
 
     benchmark_parser = groups.add_parser(
@@ -163,6 +190,11 @@ def run(args: argparse.Namespace) -> int:
 
 def _run_dataset(args: argparse.Namespace) -> int:
     action = args.dataset_command
+    if getattr(args, "root", None) is None:
+        # scf.dataset.root (PHAL's cp2k.ml_scf.dataset_dir was declared but never read).
+        from gmd_active_learning.adapters.dft.scf.config import scf_config
+
+        args.root = scf_config(_load_config(getattr(args, "config", None)) or None).dataset.root
     if action == "init":
         dataset = SCFDataset.create(args.root)
         print(f"initialised SCF dataset at {dataset.root}")
@@ -190,10 +222,13 @@ def _run_dataset(args: argparse.Namespace) -> int:
 
 
 def _run_ingest(args: argparse.Namespace) -> int:
+    from gmd_active_learning.adapters.dft.scf.config import scf_config
+
     config = _load_config(args.config)
+    settings = scf_config(config or None)
     dataset = SCFDataset.create(args.root)
     summary = ingest_scf_root(
-        args.scf_root,
+        args.scf_root or settings.recording.output_dir,
         dataset,
         task_root=args.task_root,
         config=config,
@@ -307,7 +342,11 @@ def _run_capabilities(args: argparse.Namespace) -> int:
     from gmd_active_learning.adapters.dft.scf.capabilities import detect_cp2k_capabilities
 
     config = _load_config(args.config)
-    capabilities = detect_cp2k_capabilities(executable=args.executable, config=config)
+    capabilities = detect_cp2k_capabilities(executable=args.executable, config=config or None)
+    if args.validate_native:
+        from gmd_active_learning.adapters.dft.scf.capabilities import run_native_validation
+
+        capabilities = run_native_validation(capabilities, args.validate_native, config=config or None)
 
     if args.json:
         print(json.dumps(capabilities.to_dict(), indent=2))
@@ -320,6 +359,10 @@ def _run_capabilities(args: argparse.Namespace) -> int:
         print(f"ml mixing:    {'yes' if capabilities.ml_mixing_supported else 'no'}")
         print(f"torch (cp2k): {'yes' if capabilities.torch_supported else 'no'}")
         print(f"torch (py):   {'yes' if capabilities.python_torch_available else 'no'}")
+        print(f"contract:     {capabilities.contract_version}")
+        for name, status in sorted(capabilities.features.items()):
+            state = "validated" if status.validated else ("advertised" if status.advertised else "unsupported")
+            print(f"  {name:20s} {state:11s} {status.evidence}")
         for detail in capabilities.details:
             print(f"  {detail}")
 
@@ -329,14 +372,18 @@ def _run_capabilities(args: argparse.Namespace) -> int:
 
 
 def _run_benchmark(args: argparse.Namespace) -> int:
-    from tools.scf.benchmark.modes import (
-        MODE_NATIVE,
-        AcceptanceCriteria,
-        BenchmarkError,
-        load_runs,
-        run_benchmark,
-        write_benchmark_results,
-    )
+    try:
+        from tools.scf.benchmark.modes import (
+            MODE_NATIVE,
+            AcceptanceCriteria,
+            BenchmarkError,
+            load_runs,
+            run_benchmark,
+            write_benchmark_results,
+        )
+    except ImportError as exc:
+        print(f"error: the benchmark needs the tools/scf tooling of a source checkout on sys.path ({exc})")
+        return 2
 
     overrides: dict[str, float] = {}
     if args.energy_tolerance is not None:
@@ -392,9 +439,11 @@ def _run_benchmark(args: argparse.Namespace) -> int:
 def _add_root_argument(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--root",
-        default=str(DEFAULT_DATASET_ROOT),
-        help=f"Dataset root directory (default: {DEFAULT_DATASET_ROOT}).",
+        default=None,
+        help=f"Dataset root directory (default: scf.dataset.root from --config, else {DEFAULT_DATASET_ROOT}).",
     )
+    if not any(action.dest == "config" for action in parser._actions):
+        parser.add_argument("--config", default=None, help="YAML config with an scf section.")
 
 
 def _add_split_argument(parser: argparse.ArgumentParser) -> None:
@@ -426,4 +475,8 @@ def _summarize(reports: Sequence[Any]) -> dict[str, Any]:
     return summary
 
 
-__all__ = ["DEFAULT_SCF_ROOT", "add_subparser", "run"]
+__all__ = ["DEFAULT_SCF_ROOT", "add_subparser", "build_parser", "main", "run"]
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())

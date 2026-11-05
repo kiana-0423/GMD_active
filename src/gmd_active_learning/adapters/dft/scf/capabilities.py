@@ -336,6 +336,35 @@ def detect_cp2k_capabilities(
     )
 
 
+def capabilities_from_banner(
+    banner: str,
+    *,
+    executable: str = "cp2k.psmp",
+    resolved_path: str | None = "cp2k.psmp",
+) -> CP2KCapabilities:
+    """A capability record for a recorded ``--version`` banner (offline analysis and tests).
+
+    Nothing is executed, so nothing is validated; the record says only what the
+    banner advertises.
+    """
+
+    parsed = parse_version_banner(banner)
+    return CP2KCapabilities(
+        executable=executable,
+        resolved_path=resolved_path,
+        version=parsed["version"],
+        git_commit=parsed["git_commit"],
+        ml_scf_supported=parsed["ml_scf_supported"],
+        ml_mixing_supported=parsed["ml_mixing_supported"],
+        torch_supported=parsed["torch_supported"],
+        python_torch_available=importlib.util.find_spec("torch") is not None,
+        flags=tuple(parsed["flags"]),
+        details=("from a recorded banner; nothing was executed",),
+        banner=banner,
+        features=_features(parsed["version"], tuple(parsed["flags"]), available=resolved_path is not None),
+    )
+
+
 def parse_version_banner(text: str) -> dict[str, Any]:
     """Parse a CP2K ``--version`` banner into capability fields (PHAL's keys)."""
 
@@ -424,6 +453,96 @@ def validate_native_features(
     if ao_ok or "AO_MATRICES" in output_text or density is not None:
         validated["ao_matrix_printing"] = ao_ok
     return capabilities.with_validation(validated, evidence)
+
+
+#: The H2 control case of cp2k-ml-scf (tests/inputs/h2.inp, reference: 10 steps,
+#: -1.165933374533096 Ha) with AO-matrix printing added.
+NATIVE_VALIDATION_INPUT = """&GLOBAL
+  PROJECT h2_validation
+  RUN_TYPE ENERGY
+  PRINT_LEVEL MEDIUM
+&END GLOBAL
+&FORCE_EVAL
+  METHOD QUICKSTEP
+  &DFT
+    BASIS_SET_FILE_NAME BASIS_MOLOPT
+    POTENTIAL_FILE_NAME POTENTIAL
+    &SCF
+      EPS_SCF 1.0E-6
+      MAX_SCF 50
+    &END SCF
+    &XC
+      &XC_FUNCTIONAL PBE
+      &END XC_FUNCTIONAL
+    &END XC
+    &PRINT
+      &AO_MATRICES
+        DENSITY .TRUE.
+        OVERLAP .TRUE.
+        NDIGITS 12
+      &END AO_MATRICES
+    &END PRINT
+  &END DFT
+  &SUBSYS
+    &CELL
+      ABC 10.0 10.0 10.0
+    &END CELL
+    &COORD
+      H 5.0 5.0 4.63
+      H 5.0 5.0 5.37
+    &END COORD
+    &KIND H
+      BASIS_SET DZVP-MOLOPT-GTH
+      POTENTIAL GTH-PBE-q1
+    &END KIND
+  &END SUBSYS
+&END FORCE_EVAL
+"""
+
+
+def run_native_validation(
+    capabilities: CP2KCapabilities,
+    work_dir: str | Path,
+    *,
+    config: Any = None,
+    timeout: float = 600.0,
+) -> CP2KCapabilities:
+    """Run the H2 control case with this binary and validate the native features.
+
+    Pinned to ``OMP_NUM_THREADS=1`` (SCF step counts are not thread-deterministic,
+    cp2k-ml-scf RECONSTRUCTION.md 4g). Writes ``h2_validation.inp/.out`` into
+    ``work_dir``. Raises :class:`CapabilityUnavailableError` when the binary is
+    not available; a run that fails leaves the features unvalidated.
+    """
+
+    if not capabilities.available or capabilities.resolved_path is None:
+        raise CapabilityUnavailableError("no working CP2K binary to validate")
+    settings = _settings(config)
+    directory = Path(work_dir)
+    directory.mkdir(parents=True, exist_ok=True)
+    input_path = directory / "h2_validation.inp"
+    output_path = directory / "h2_validation.out"
+    input_path.write_text(NATIVE_VALIDATION_INPUT, encoding="utf-8")
+    environment = {**os.environ, **(dict(settings.ml_scf.environment) if settings else {}), "OMP_NUM_THREADS": "1"}
+    try:
+        completed = subprocess.run(
+            [capabilities.resolved_path, "-i", input_path.name, "-o", output_path.name],
+            cwd=directory,
+            env=environment,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        LOGGER.warning("native validation run failed: %s", exc)
+        return capabilities.with_validation(
+            {"native_scf": False, "ao_matrix_printing": False}, {"native_scf": f"run failed: {exc}"}
+        )
+    text = output_path.read_text(encoding="utf-8", errors="ignore") if output_path.is_file() else ""
+    if completed.returncode != 0:
+        text = text + "\n" + (completed.stderr or "")
+    return validate_native_features(capabilities, text)
 
 
 def _features(version: str | None, flags: Sequence[str], *, available: bool) -> dict[str, FeatureStatus]:
@@ -523,9 +642,11 @@ __all__ = [
     "FEATURES",
     "CP2KCapabilities",
     "FeatureStatus",
+    "capabilities_from_banner",
     "detect_cp2k_capabilities",
     "parse_version_banner",
     "require_feature",
     "require_ml_scf",
+    "run_native_validation",
     "validate_native_features",
 ]

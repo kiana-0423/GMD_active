@@ -8,9 +8,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from ase import Atoms
 
-from gmd_active_learning.adapters.dft.scf.cp2k_ml_backend import CP2KMLSCFBackend
 from tools.scf.benchmark.modes import (
     MODE_ML_FULL,
     MODE_ML_GUESS,
@@ -22,8 +20,6 @@ from tools.scf.benchmark.modes import (
     write_benchmark_results,
 )
 from tools.scf.benchmark.evaluate import SCFRun
-from hotspot_al.models import ExtractedRegion
-from gmd_active_learning.adapters.dft.scf.config import load_config
 
 torch = pytest.importorskip("torch")
 
@@ -133,7 +129,8 @@ def test_a_foreign_mixer_checkpoint_is_refused(tmp_path: Path) -> None:
 
 
 def test_mixer_exports_to_torchscript_and_answers_cp2ks_call(tmp_path: Path) -> None:
-    from gmd_active_learning.adapters.dft.scf.deploy import MIXER_MODEL_ENV, export_mixer, verify_deployed
+    from gmd_active_learning.adapters.dft.scf.deploy import MIXER_MODEL_ENV, verify_deployed
+    from tools.scf.experimental.neural_mixer.export import export_mixer
     from tools.scf.experimental.neural_mixer.model import (
         MixerConfig,
         build_mixer_model,
@@ -162,7 +159,8 @@ def test_exporting_a_mixer_without_the_experimental_opt_in_is_refused(tmp_path: 
     slower -- so nothing else would catch it.
     """
 
-    from gmd_active_learning.adapters.dft.scf.deploy import DeployError, export_mixer
+    from gmd_active_learning.adapters.dft.scf.deploy import DeployError
+    from tools.scf.experimental.neural_mixer.export import export_mixer
     from tools.scf.experimental.neural_mixer.model import (
         MixerConfig,
         build_mixer_model,
@@ -576,7 +574,7 @@ def test_benchmark_results_json_is_written(tmp_path: Path) -> None:
 
 
 def test_the_cli_can_fail_on_a_rejected_mode(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    from hotspot_al.cli import main
+    from gmd_active_learning.adapters.dft.scf.cli import main
 
     runs = [run(MODE_NATIVE, "a", 24), run(MODE_ML_FULL, "a", 8, final_energy=-16.0)]
     runs_path = tmp_path / "runs.json"
@@ -584,7 +582,7 @@ def test_the_cli_can_fail_on_a_rejected_mode(tmp_path: Path, capsys: pytest.Capt
 
     exit_code = main(
         [
-            "cp2k-scf", "benchmark",
+            "scf", "benchmark",
             "--runs", str(runs_path),
             "--results-dir", str(tmp_path / "out"),
             "--require-accepted",
@@ -598,199 +596,4 @@ def test_the_cli_can_fail_on_a_rejected_mode(tmp_path: Path, capsys: pytest.Capt
 
 
 # -- Stage 14: production fallback and provenance -----------------------
-
-
-def water_region() -> ExtractedRegion:
-    atoms = Atoms(
-        "OH2",
-        positions=[(0.0, 0.0, 0.0), (0.9572, 0.0, 0.0), (-0.24, 0.9266, 0.0)],
-        cell=[10.0, 10.0, 10.0],
-        pbc=True,
-    )
-    return ExtractedRegion(
-        atoms=atoms,
-        original_indices=[0, 1, 2],
-        core_indices=[0],
-        inner_buffer_indices=[1],
-        outer_buffer_indices=[2],
-        boundary_indices=[],
-        h_cap_indices=[],
-        hotspot_indices=[0],
-        region_labels=["core", "inner_buffer", "outer_buffer"],
-        mask_weights=np.ones(3),
-    )
-
-
-def ml_config(tmp_path: Path, **ml_scf) -> dict:
-    config = load_config("configs/default.yaml")
-    config["backend"]["dft"]["engine"] = "cp2k_ml_scf"
-    config["cp2k"]["ml_scf"] = {
-        "enabled": True,
-        "predictor": {"type": "dummy", "options": {}},
-        **ml_scf,
-    }
-    config["cp2k_ml_scf"] = {
-        "executable": "cp2k.psmp",
-        "model_path": str(tmp_path / "model.pt"),
-        "model_digest": None,
-        "runtime_dir": str(tmp_path / "runtime"),
-        "fallback_to_standard_scf": True,
-        "require_final_scf_convergence": True,
-        "controller_protocol": "phal-ml-scf-v1",
-        "environment": {},
-    }
-    return config
-
-
-def test_a_missing_model_only_blocks_the_paths_that_need_it(tmp_path: Path) -> None:
-    """The pre-computed guess needs a predictor, not a deployed model file."""
-
-    guess_only = CP2KMLSCFBackend(config=ml_config(tmp_path))
-    with_mixing = CP2KMLSCFBackend(
-        config=ml_config(tmp_path, mixing={"method": "ml", "fallback_method": "pulay"})
-    )
-
-    assert guess_only.degradation_reason() is None
-    assert "neural mixing needs a deployed model" in (with_mixing.degradation_reason() or "")
-
-
-def test_a_digest_mismatch_degrades_the_run(tmp_path: Path) -> None:
-    model = tmp_path / "model.pt"
-    model.write_bytes(b"weights")
-    config = ml_config(tmp_path)
-    config["cp2k_ml_scf"]["model_digest"] = "sha256:notthedigest"
-
-    reason = CP2KMLSCFBackend(config=config).degradation_reason()
-
-    assert reason is not None
-    assert "digest mismatch" in reason
-
-
-def test_a_degraded_run_falls_back_to_standard_cp2k(tmp_path: Path) -> None:
-    config = ml_config(tmp_path, mixing={"method": "ml", "fallback_method": "pulay"})
-    backend = CP2KMLSCFBackend(config=config)
-    written = backend.prepare_inputs(water_region(), tmp_path / "task", task_id="t")
-    input_file = Path(next(path for key, path in written.items() if key.endswith("_input")))
-
-    request = backend.execution_request(input_file, output_file=tmp_path / "task" / "job.out")
-
-    assert request.metadata["scf_mode"] == "native_fallback"
-    assert request.metadata["fallback_used"] is True
-    assert not any(key.startswith("PHAL_ML_SCF") for key in request.environment)
-    native_input = Path(request.metadata["input_file"]).read_text(encoding="utf-8")
-    assert "SCF_GUESS ML" not in native_input
-    assert "METHOD ML" not in native_input
-    assert "SCF_GUESS ATOMIC" in native_input
-
-
-def test_fallback_can_be_disabled_so_a_broken_model_fails_loudly(tmp_path: Path) -> None:
-    config = ml_config(tmp_path, mixing={"method": "ml", "fallback_method": "pulay"})
-    config["cp2k_ml_scf"]["fallback_to_standard_scf"] = False
-    backend = CP2KMLSCFBackend(config=config)
-    written = backend.prepare_inputs(water_region(), tmp_path / "task", task_id="t")
-    input_file = Path(next(path for key, path in written.items() if key.endswith("_input")))
-
-    with pytest.raises((FileNotFoundError, ValueError), match="model"):
-        backend.execution_request(input_file, output_file=tmp_path / "task" / "job.out")
-
-
-def test_scf_mode_reflects_what_will_actually_run(tmp_path: Path) -> None:
-    guess_only = CP2KMLSCFBackend(config=ml_config(tmp_path))
-    disabled = ml_config(tmp_path)
-    disabled["cp2k"]["ml_scf"]["enabled"] = False
-
-    assert guess_only.scf_mode(has_density=True) == MODE_ML_GUESS
-    assert guess_only.scf_mode(has_density=False) == MODE_NATIVE
-
-    model = tmp_path / "model.pt"
-    model.write_bytes(b"weights")
-    full = CP2KMLSCFBackend(
-        config=ml_config(tmp_path, mixing={"method": "ml", "fallback_method": "pulay"})
-    )
-    assert full.scf_mode(has_density=True) == MODE_ML_FULL
-
-
-def test_calculation_provenance_has_the_documented_shape(tmp_path: Path) -> None:
-    backend = CP2KMLSCFBackend(config=ml_config(tmp_path))
-
-    provenance = backend.calculation_provenance(runtime_seconds=12.5)
-
-    for key in (
-        "cp2k_version",
-        "cp2k_commit",
-        "ml_model_digest",
-        "scf_mode",
-        "iterations",
-        "runtime",
-        "fallback_used",
-    ):
-        assert key in provenance, key
-    assert provenance["runtime"] == pytest.approx(12.5)
-
-
-def test_provenance_records_a_degraded_run_as_a_fallback(tmp_path: Path) -> None:
-    backend = CP2KMLSCFBackend(
-        config=ml_config(tmp_path, mixing={"method": "ml", "fallback_method": "pulay"})
-    )
-
-    provenance = backend.calculation_provenance()
-
-    assert provenance["scf_mode"] == "native_fallback"
-    assert provenance["fallback_used"] is True
-    assert provenance["ml_scf_enabled"] is False
-    assert "neural mixing" in provenance["degradation_reason"]
-
-
-def test_a_degraded_parse_is_not_recorded_as_accelerated(tmp_path: Path) -> None:
-    from tests.scf.fakes.fake_cp2k import write_fake_cp2k_force_output
-
-    output = tmp_path / "job.out"
-    write_fake_cp2k_force_output(output, water_region().atoms)
-    output.write_text(
-        " CP2K| version string: CP2K version 2024.1\n SCF run converged in 20 steps\n"
-        + output.read_text(encoding="utf-8"),
-        encoding="utf-8",
-    )
-    backend = CP2KMLSCFBackend(
-        config=ml_config(tmp_path, mixing={"method": "ml", "fallback_method": "pulay"})
-    )
-
-    provenance = backend.parse_result(output).provenance()
-
-    assert provenance["ml_scf_enabled"] is False
-    assert provenance["fallback_used"] is True
-
-
-def test_a_failed_accelerated_task_retries_natively(tmp_path: Path) -> None:
-    from hotspot_al.cp2k.cp2k_task_submitter import CP2KSubmittedJob
-
-    backend = CP2KMLSCFBackend(config=ml_config(tmp_path))
-    work_dir = tmp_path / "task"
-    work_dir.mkdir()
-    input_file = work_dir / "job.inp"
-    input_file.write_text(
-        "&SCF\n  SCF_GUESS ML\n  &MIXING T\n    METHOD ML\n  &END MIXING\n&END SCF\n", encoding="utf-8"
-    )
-
-    from hotspot_al.cp2k.cp2k_task_submitter import CP2KTaskSubmitter
-
-    job = CP2KSubmittedJob(
-        task_id="t",
-        work_dir=work_dir,
-        input_file=input_file,
-        output_file=work_dir / "job.out",
-        mode="local",
-        status="failed",
-    )
-    submitter = CP2KTaskSubmitter.__new__(CP2KTaskSubmitter)
-    submitter.dft_backend = backend
-    submitter.logger = __import__("logging").getLogger("test")
-
-    assert submitter._retry_natively(job) is True
-    assert job.metadata["scf_mode"] == "native_fallback"
-    native = job.input_file.read_text(encoding="utf-8")
-    assert "SCF_GUESS ATOMIC" in native
-    assert "METHOD ML" not in native
-
-    # Only once: a second failure escalates MAX_SCF like any native task.
-    assert submitter._retry_natively(job) is False
+# Rewritten for the composable ML-SCF wrapper in tests/scf/test_scf_ml_backend.py.

@@ -1,5 +1,5 @@
 # Ported from PHAL (tests.scf.test_scf_cli) at 96263b6; MIT License, see NOTICE.
-"""Offline tests for the ``phal cp2k-scf`` command group."""
+"""Offline tests for the ``scf`` command group (PHAL: ``phal cp2k-scf``)."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from hotspot_al.cli import build_parser, main
+from gmd_active_learning.adapters.dft.scf.cli import build_parser, main
 from gmd_active_learning.adapters.dft.scf.dataset import SCFDataset
 
 from tests.scf.test_scf_dataset import make_sample
@@ -24,18 +24,30 @@ def populated_dataset(tmp_path: Path) -> Path:
     return dataset.root
 
 
-def test_doctor_still_works_after_adding_the_group() -> None:
-    # Regression guard: the existing CLI must not change behaviour.
-    parser = build_parser()
+def test_the_group_parses_standalone() -> None:
+    # PHAL's guard was that its global CLI kept its "doctor" command; the main
+    # gmd-al CLI is a shared file, so here the group is checked standalone.
+    args = build_parser().parse_args(["scf", "dataset", "inspect", "--json"])
 
-    args = parser.parse_args(["doctor", "--strict"])
+    assert args.cp2k_scf_command == "dataset"
+    assert args.dataset_command == "inspect"
 
-    assert args.command == "doctor"
-    assert args.strict
+
+def test_dataset_root_defaults_to_the_configured_dataset_dir(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # PHAL declared cp2k.ml_scf.dataset_dir and never read it (finding F-23).
+    config = tmp_path / "config.yaml"
+    config.write_text(f"scf:\n  dataset:\n    root: {tmp_path / 'configured'}\n", encoding="utf-8")
+
+    exit_code = main(["scf", "dataset", "init", "--config", str(config)])
+
+    assert exit_code == 0
+    assert (tmp_path / "configured" / "metadata.json").is_file()
 
 
 def test_dataset_init_creates_the_layout(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    exit_code = main(["cp2k-scf", "dataset", "init", "--root", str(tmp_path / "ds")])
+    exit_code = main(["scf", "dataset", "init", "--root", str(tmp_path / "ds")])
 
     assert exit_code == 0
     assert (tmp_path / "ds" / "metadata.json").is_file()
@@ -47,7 +59,7 @@ def test_dataset_init_creates_the_layout(tmp_path: Path, capsys: pytest.CaptureF
 def test_dataset_validate_passes_on_a_clean_dataset(
     populated_dataset: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    exit_code = main(["cp2k-scf", "dataset", "validate", "--root", str(populated_dataset), "--json"])
+    exit_code = main(["scf", "dataset", "validate", "--root", str(populated_dataset), "--json"])
 
     payload = json.loads(capsys.readouterr().out)
     assert exit_code == 0
@@ -60,7 +72,7 @@ def test_dataset_validate_fails_on_a_corrupt_record(
 ) -> None:
     (populated_dataset / "train" / "broken.json").write_text("{not json", encoding="utf-8")
 
-    exit_code = main(["cp2k-scf", "dataset", "validate", "--root", str(populated_dataset)])
+    exit_code = main(["scf", "dataset", "validate", "--root", str(populated_dataset)])
 
     assert exit_code == 1
     assert "FAIL" in capsys.readouterr().out
@@ -86,8 +98,8 @@ def test_dataset_validate_strict_fails_on_warnings(
         split="train",
     )
 
-    lenient = main(["cp2k-scf", "dataset", "validate", "--root", str(dataset.root)])
-    strict = main(["cp2k-scf", "dataset", "validate", "--root", str(dataset.root), "--strict"])
+    lenient = main(["scf", "dataset", "validate", "--root", str(dataset.root)])
+    strict = main(["scf", "dataset", "validate", "--root", str(dataset.root), "--strict"])
     capsys.readouterr()
 
     assert lenient == 0
@@ -99,14 +111,14 @@ def test_dataset_validate_rejects_a_directory_that_is_not_a_dataset(
 ) -> None:
     (tmp_path / "empty").mkdir()
 
-    exit_code = main(["cp2k-scf", "dataset", "validate", "--root", str(tmp_path / "empty")])
+    exit_code = main(["scf", "dataset", "validate", "--root", str(tmp_path / "empty")])
 
     assert exit_code == 2
     assert "not an SCF dataset" in capsys.readouterr().out
 
 
 def test_dataset_inspect_summarises(populated_dataset: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    exit_code = main(["cp2k-scf", "dataset", "inspect", "--root", str(populated_dataset), "--json"])
+    exit_code = main(["scf", "dataset", "inspect", "--root", str(populated_dataset), "--json"])
 
     payload = json.loads(capsys.readouterr().out)
     assert exit_code == 0
@@ -116,7 +128,7 @@ def test_dataset_inspect_summarises(populated_dataset: Path, capsys: pytest.Capt
 
 
 def test_dataset_inspect_human_output(populated_dataset: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    exit_code = main(["cp2k-scf", "dataset", "inspect", "--root", str(populated_dataset)])
+    exit_code = main(["scf", "dataset", "inspect", "--root", str(populated_dataset)])
 
     output = capsys.readouterr().out
     assert exit_code == 0
@@ -128,7 +140,7 @@ def test_dataset_inspect_can_restrict_to_one_split(
     populated_dataset: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     exit_code = main(
-        ["cp2k-scf", "dataset", "inspect", "--root", str(populated_dataset), "--split", "validation", "--json"]
+        ["scf", "dataset", "inspect", "--root", str(populated_dataset), "--split", "validation", "--json"]
     )
 
     payload = json.loads(capsys.readouterr().out)
@@ -142,7 +154,7 @@ def test_dataset_export_writes_artifacts(
     output = tmp_path / "export"
 
     exit_code = main(
-        ["cp2k-scf", "dataset", "export", "--root", str(populated_dataset), "--output", str(output), "--json"]
+        ["scf", "dataset", "export", "--root", str(populated_dataset), "--output", str(output), "--json"]
     )
 
     payload = json.loads(capsys.readouterr().out)
@@ -160,7 +172,7 @@ def test_dataset_export_can_skip_features(
 
     exit_code = main(
         [
-            "cp2k-scf", "dataset", "export",
+            "scf", "dataset", "export",
             "--root", str(populated_dataset),
             "--output", str(output),
             "--splits", "train",
@@ -187,7 +199,7 @@ def test_dataset_ingest_reports_what_it_skipped(
 
     exit_code = main(
         [
-            "cp2k-scf", "dataset", "ingest",
+            "scf", "dataset", "ingest",
             "--root", str(tmp_path / "ds"),
             "--scf-root", str(scf_root),
             "--json",
@@ -202,7 +214,7 @@ def test_dataset_ingest_reports_what_it_skipped(
 
 def test_capabilities_reports_a_missing_executable(capsys: pytest.CaptureFixture[str]) -> None:
     exit_code = main(
-        ["cp2k-scf", "capabilities", "--executable", "definitely-not-a-real-cp2k-binary", "--json"]
+        ["scf", "capabilities", "--executable", "definitely-not-a-real-cp2k-binary", "--json"]
     )
 
     payload = json.loads(capsys.readouterr().out)
@@ -223,7 +235,7 @@ def test_benchmark_prints_the_report(tmp_path: Path, capsys: pytest.CaptureFixtu
     runs_path.write_text(json.dumps([run.to_dict() for run in runs]), encoding="utf-8")
     report_path = tmp_path / "report.json"
 
-    exit_code = main(["cp2k-scf", "benchmark", "--runs", str(runs_path), "--output", str(report_path)])
+    exit_code = main(["scf", "benchmark", "--runs", str(runs_path), "--output", str(report_path)])
     capsys.readouterr()
 
     assert exit_code == 0
@@ -236,7 +248,7 @@ def test_benchmark_reports_a_bad_runs_file(tmp_path: Path, capsys: pytest.Captur
     runs_path = tmp_path / "runs.json"
     runs_path.write_text("{not json", encoding="utf-8")
 
-    exit_code = main(["cp2k-scf", "benchmark", "--runs", str(runs_path)])
+    exit_code = main(["scf", "benchmark", "--runs", str(runs_path)])
 
     assert exit_code == 1
     assert "invalid JSON" in capsys.readouterr().out

@@ -1,0 +1,61 @@
+# SCF subsystem (gmd_active_learning.adapters.dft.scf.config.ScfConfig).
+# Every feature is OFF by default. Nothing in the default labeling path depends on
+# this section beyond SCF-history parsing; see docs/scf/README.md for the measured
+# status of each feature (no ML-SCF component has shown an acceleration).
+scf:
+  recording:
+    enabled: false                 # write <output_dir>/<task_id>/scf_history.json
+    output_dir: runtime/cp2k/scf
+    record_density: false          # converged AO density + overlap (needs &AO_MATRICES printing)
+    record_trajectory: false       # every SCF iteration's density (needs record_density)
+    density_strict: false          # raise instead of skipping an unrecordable density
+    trajectory_strict: false       # raise instead of skipping an unrecordable trajectory
+    ndigits: 12                    # digits per printed AO matrix element
+    electron_tolerance: 1.0e-3     # relative tolerance on Tr(P S) = N_e per frame
+    hermitian_tolerance: 1.0e-8
+  retry:
+    # Deterministic, model-free retry ladder: PHAL measured default -> nbuffer4
+    # converging 12/12 solids against 9/12 for the default (+4.7% iterations).
+    enabled: false
+    order: [default, nbuffer4]
+    failure_cost: 120              # iterations charged for a failed attempt when evaluating a ladder
+    base:                          # the "default" rung (PHAL's NBUFFER 8; CP2K's own default is 4)
+      mixing_method: PULAY_MIXING
+      alpha: 0.4
+      nbuffer: 8
+      smearing: false
+      added_mos: 0
+      electronic_temperature: 500.0
+      max_scf: 120
+      eps_scf: 1.0e-6
+  dataset:
+    root: runtime/cp2k/scf_dataset
+    split_ratios: {train: 0.8, validation: 0.1, test: 0.1}
+  ml_scf:
+    # Optional ML initial guess through the cp2k-ml-scf build (density-file mode only).
+    enabled: false
+    experimental: false            # required for the torch MLP predictor and neural mixing
+    executable: null               # the modified CP2K; null -> scf.capabilities.executable
+    environment: {}                # e.g. {LD_LIBRARY_PATH: ...}; used by the probe AND the run
+    model_path: null               # in-process model (mode B; no current build implements it)
+    model_digest: null
+    fallback_to_standard_scf: true
+    retry_native_on_failure: true  # one native retry after a failed accelerated run
+    require_final_scf_convergence: true
+    protocol: phal-ml-scf-v2
+    prediction_dir: null           # predictions.jsonl provenance log; null disables it
+    electron_tolerance: 1.0e-3
+    guess_alpha: null              # PHAL_ML_SCF_GUESS_ALPHA in [0, 1]; null -> CP2K default 1.0
+    export_structure_digest: true  # PHAL_ML_SCF_STRUCTURE_DIGEST
+    basis_set: null                # written to the exchange file / PHAL_ML_SCF_BASIS
+    predictor:
+      type: dummy                  # dummy | density_gnn | torch (experimental) | module:Class
+      model_path: null
+      options: {}
+    mixing:
+      method: pulay                # ml is a documented negative result with no CP2K consumer
+      history_length: 8
+      alpha: 0.4
+  capabilities:
+    executable: null               # CP2K to probe when nothing more specific is set
+    timeout_s: 30.0
