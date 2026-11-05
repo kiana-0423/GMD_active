@@ -40,6 +40,14 @@ SCHEDULER_STDERR = "scheduler.err"
 _ENV_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _JOB_NAME_SAFE = re.compile(r"[^A-Za-z0-9_.-]+")
 
+class SubmissionRejected(SchedulerError):
+    """The scheduler definitely did not accept the job (non-zero submit status, missing command).
+
+    A plain :class:`SchedulerError` from ``submit`` (e.g. a timeout) leaves the outcome unknown: the job
+    may exist, so callers must reconcile rather than resubmit.
+    """
+
+
 TERMINAL_STATES = frozenset({ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.CANCELLED})
 
 
@@ -303,6 +311,7 @@ def scheduler_job_from_dict(data: Mapping[str, Any]) -> SchedulerJob:
 
 __all__ = [
     "EXIT_CODE_FILE",
+    "SubmissionRejected",
     "JOB_STDERR",
     "JOB_STDOUT",
     "SCHEDULER_STDERR",

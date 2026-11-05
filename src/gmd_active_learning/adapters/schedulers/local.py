@@ -24,6 +24,7 @@ from gmd_active_learning.adapters.registry import BackendRole, RuntimeStatus
 from gmd_active_learning.adapters.schedulers.base import (
     EXIT_CODE_FILE,
     SchedulerBackend,
+    SubmissionRejected,
     ensure_fresh_work_dir,
     read_exit_code,
     render_job_body,
@@ -93,7 +94,7 @@ class LocalScheduler(SchedulerBackend):
                 close_fds=True,
             )
         except OSError as exc:
-            raise SchedulerError(f"could not start local job in {work_dir}: {exc}") from exc
+            raise SubmissionRejected(f"could not start local job in {work_dir}: {exc}") from exc
         job_id = str(process.pid)
         self._processes[job_id] = process
         record = {

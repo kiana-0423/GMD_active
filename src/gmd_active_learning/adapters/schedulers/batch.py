@@ -24,6 +24,7 @@ from gmd_active_learning.adapters.schedulers.base import (
     ensure_fresh_work_dir,
     render_job_body,
     run_scheduler_command,
+    SubmissionRejected,
     sanitize_job_name,
 )
 from gmd_active_learning.adapters.schedulers.config import SchedulerResources
@@ -113,10 +114,12 @@ class BatchScheduler(SchedulerBackend):
             self.render_script(work_dir, command, resolved, environment=environment, job_name=job_name),
             encoding="utf-8",
         )
+        if shutil.which(self.submit_command) is None:
+            raise SubmissionRejected(f"scheduler command not found: {self.submit_command!r}")
         result = run_scheduler_command([self.submit_command, script.name], timeout=self.timeout, cwd=work_dir)
         if result.returncode != 0:
             detail = (result.stderr or result.stdout).strip() or "no output"
-            raise SchedulerError(f"{self.submit_command} failed with exit status {result.returncode}: {detail}")
+            raise SubmissionRejected(f"{self.submit_command} failed with exit status {result.returncode}: {detail}")
         job_id = self.parse_job_id(result.stdout)
         if not job_id:
             detail = result.stderr.strip() or "no output"
