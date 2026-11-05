@@ -159,6 +159,7 @@ def main() -> int:
     report = summarize(controller.store, "water-cycle")
     (work / "report.json").write_text(json.dumps(report, indent=1, default=str))
     print(json.dumps({"final_stage": final, **{k: report[k] for k in ("cycle", "events", "samples", "candidates", "tasks", "promotions", "segments")}}, indent=1, default=str))
+    print(f"report written to {work / 'report.json'}")
     return 0 if final == "done" else 1
 
 
