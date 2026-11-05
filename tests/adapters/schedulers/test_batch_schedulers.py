@@ -268,3 +268,11 @@ def test_torque_flavor_renders_nodes_ppn(fake_scheduler, tmp_path: Path) -> None
     job = _pbs(pbs={"flavor": "torque"}).submit(tmp_path / "w", ["true"], SchedulerResources(nodes=2, ntasks_per_node=4, memory="2G"))
     lines = fake_scheduler.submitted_script(job.job_id).splitlines()
     assert "#PBS -l nodes=2:ppn=4" in lines and "#PBS -l mem=2gb" in lines
+
+
+def test_slurm_sacct_fallback_can_be_disabled(fake_scheduler, tmp_path: Path) -> None:
+    scheduler = _slurm(slurm={"sacct_fallback": False})
+    job = scheduler.submit(tmp_path / "w", ["true"])
+    fake_scheduler.set_history(job.job_id, "COMPLETED|0:0")
+    assert scheduler.poll(job) is ExecutionStatus.UNKNOWN
+    assert fake_scheduler.calls("sacct") == []
