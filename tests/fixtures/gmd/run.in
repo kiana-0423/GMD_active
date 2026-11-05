@@ -1,0 +1,15 @@
+run 6
+force_field ml
+model_path model.pt
+run_id fixture-run
+frame_file frames.extxyz
+frame_interval 2
+control_poll_interval 1
+stop_file STOP
+checkpoint_request_file CHECKPOINT
+status_file status.json
+checkpoint_file segment.gmdchk
+time_step 0.25
+velocity 50.0
+velocity_init random
+velocity_seed 7

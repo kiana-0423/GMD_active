@@ -33,6 +33,8 @@ class EventRecord:
     truncation_reason: str | None = None
     model_version: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+    #: pre-trigger frames the buffer was configured to keep (fewer are present early in a run)
+    pre_frames_requested: int | None = None
 
     @property
     def frames(self) -> list[Frame]:
@@ -49,6 +51,7 @@ class EventRecord:
             "pre_frame_steps": [frame.step for frame in self.pre_frames],
             "post_frame_steps": [frame.step for frame in self.post_frames],
             "post_frames_requested": self.post_frames_requested,
+            "pre_frames_requested": self.pre_frames_requested,
             "complete": self.complete,
             "truncation_reason": self.truncation_reason,
             "hotspot_atom_ids": list(map(int, self.hotspot_atom_ids)),

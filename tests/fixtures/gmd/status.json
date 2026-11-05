@@ -1,0 +1,19 @@
+{
+ "checkpoint": "segment.gmdchk",
+ "checkpoint_version": 3,
+ "force_field_kind": "ml",
+ "force_field_sha256": "57782ad781eedbc7e611b5afbac5b0fc2802122d0fd76cc057d6228c3e110bac",
+ "format_version": "gmd-status-v1",
+ "frame_file": "frames.extxyz",
+ "frame_format": "gmd-frame-v1",
+ "frames_written": 4,
+ "message": null,
+ "model_changed_from": null,
+ "model_sha256": "57782ad781eedbc7e611b5afbac5b0fc2802122d0fd76cc057d6228c3e110bac",
+ "run_id": "fixture-run",
+ "start_step": 0,
+ "state": "completed",
+ "step": 6,
+ "stop_reason": null,
+ "time_fs": 1.5
+}

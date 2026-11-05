@@ -1,0 +1,14 @@
+{
+ "command": "PYTHONPATH=src python tools/fixtures/make_gmd_frame_fixture.py",
+ "description": "Frames and status written by the real patched GMD (TorchScript build) through the GMD adapter.",
+ "files": {
+  "frames.extxyz": "385f85aac2e91b133bfcadd5ec4a1a0a8fb5eb2c543d8e7c7ee0388fb4b88d15",
+  "run.in": "83c9821c4524bd4167a831f722ca5f751661a7905c9ec72056c4c9dbfae2c4bb",
+  "status.json": "2204fe03f4248bbc8aa5d0f8ba6b5e2d2a451b78a8cb7434b65a3680d8e2e121",
+  "water2.xyz": "633205ca47dbafc5ae6182414c2b08bf79a625610939d16a4f4a807c53ef49aa"
+ },
+ "gmd_binary": "GMD built with -DGMD_ENABLE_TORCH=ON (frame_file/status_file directives, checkpoint v3)",
+ "gmd_commit": "54ac558",
+ "model_export": "tests/fixtures/sgt/member_11/model.pt",
+ "model_export_sha256": "57782ad781eedbc7e611b5afbac5b0fc2802122d0fd76cc057d6228c3e110bac"
+}

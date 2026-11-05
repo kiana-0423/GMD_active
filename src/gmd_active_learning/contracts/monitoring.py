@@ -102,6 +102,19 @@ class MonitorResult:
     trigger_reasons: list[str]
     action: FrameAction = FrameAction.CONTINUE
     metadata: dict[str, Any] = field(default_factory=dict)
+    #: per-metric per-atom SCORES (normalised, e.g. z-scores) that were combined into ``atom_scores``;
+    #: a metric absent here was not scored (its raw values and status stay in ``metrics``)
+    metric_scores: dict[str, np.ndarray] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        self.atom_scores = np.asarray(self.atom_scores, dtype=float)
+        scores = {}
+        for name, values in dict(self.metric_scores).items():
+            array = np.asarray(values, dtype=float)
+            if array.shape != self.atom_scores.shape:
+                raise DataContractError(f"metric score {name!r} has shape {array.shape}, atom_scores {self.atom_scores.shape}")
+            scores[str(name)] = array
+        self.metric_scores = scores
 
     def evaluated_metrics(self) -> list[str]:
         return sorted(name for name, metric in self.metrics.items() if metric.status is MetricStatus.MEASURED)
@@ -118,5 +131,6 @@ class MonitorResult:
             "action": self.action.value,
             "atom_scores": np.asarray(self.atom_scores, dtype=float).tolist(),
             "metrics": {name: metric.to_dict() for name, metric in self.metrics.items()},
+            "metric_scores": {name: [None if not np.isfinite(v) else float(v) for v in values] for name, values in self.metric_scores.items()},
             "metadata": self.metadata,
         }

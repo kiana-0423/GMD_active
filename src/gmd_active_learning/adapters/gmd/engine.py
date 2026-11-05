@@ -1,6 +1,6 @@
 """GMD molecular-dynamics adapter (segmented runs, flushed-frame monitoring, cooperative control).
 
-Replaces PHAL's LAMMPS controller/runner/input writer (ledger MD-001, MD-003, MD-004, BE-009).
+Replaces PHAL's LAMMPS controller/runner/input writer (ledger MD-001, MD-003, MD-004, MD-005, BE-009).
 Requires a GMD build with the controller-integration directives (checkpoint v3, ``frame_file``,
 ``stop_file``, ``checkpoint_request_file``, ``status_file``, ``model_change``) and, for ML runs,
 ``GMD_ENABLE_TORCH=ON``.
@@ -10,6 +10,11 @@ Monitoring cadence and stop latency: frames are read as soon as GMD flushes them
 it at its next ``control_poll_interval`` boundary. The stop therefore takes effect up to
 ``control_poll_interval`` steps plus the reader's polling delay after the triggering frame. This is
 cooperative control, not instantaneous per-step control.
+
+GMD's TorchScript (ML) force path is serial: GMD itself is never launched with ``--np``, and a
+configured ``launcher`` (e.g. ``["taskset", "-c", "0"]`` or ``["srun", "-n", "1"]``) must not ask for
+more than one MPI rank. The model's species are checked against the initial structure before GMD
+is started (GMD silently maps unknown elements to Z=0, which a GMD_SGT model treats as padding).
 """
 
 from __future__ import annotations
@@ -17,6 +22,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import shutil
 import subprocess
 import time
 from pathlib import Path
@@ -24,7 +30,8 @@ from typing import Any, Iterable, Iterator
 
 import numpy as np
 from ase.io import read
-from pydantic import BaseModel, ConfigDict, Field
+from ase.data import atomic_numbers
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from gmd_active_learning.contracts import Frame, FrameAction
 from gmd_active_learning.core.exceptions import (
@@ -56,6 +63,27 @@ class GMDConfig(BaseModel):
     segment_timeout_s: float = Field(86400.0, gt=0.0)
     env: dict[str, str] = Field(default_factory=lambda: {"OMP_NUM_THREADS": "1"})
     smoke_steps: int = Field(5, ge=1)
+    launcher: list[str] = Field(default_factory=list, description="argv prefix, e.g. [taskset, -c, '0'] or [srun, -n, '1']; ML runs are serial")
+    check_species: bool = Field(True, description="refuse to launch when the initial structure has species the model does not know")
+
+    @field_validator("directives")
+    @classmethod
+    def _positive_time_step(cls, value: dict[str, Any]) -> dict[str, Any]:
+        if "time_step" in value and not (isinstance(value["time_step"], (int, float)) and not isinstance(value["time_step"], bool) and value["time_step"] > 0):
+            raise ValueError(f"md.directives.time_step must be a positive number of fs, got {value['time_step']!r}")
+        return value
+
+    @field_validator("launcher")
+    @classmethod
+    def _serial_launcher(cls, value: list[str]) -> list[str]:
+        rank_flags = {"-n", "-np", "--np", "--ntasks", "-N", "--nodes"}
+        for flag, count in zip(value, value[1:]):
+            if flag in rank_flags and count.isdigit() and int(count) > 1:
+                raise ValueError(f"md.launcher requests {count} ranks ({flag} {count}); GMD's TorchScript force path is serial-only")
+        for item in value:
+            if item.startswith(("--ntasks=", "--np=", "-np=")) and item.split("=", 1)[1].isdigit() and int(item.split("=", 1)[1]) > 1:
+                raise ValueError(f"md.launcher requests {item}; GMD's TorchScript force path is serial-only")
+        return value
 
 
 RESERVED = {"run", "force_field", "model_path", "frame_file", "frame_interval", "stop_file", "checkpoint_request_file",
@@ -76,16 +104,29 @@ def parse_frames(text: str, *, run_id: str) -> list[Frame]:
 
 
 class FrameTail:
-    """Incremental reader of a GMD frame file that only returns complete frames."""
+    """Incremental reader of a GMD frame file that returns every complete frame exactly once.
+
+    Only bytes appended since the previous call are read; a partially written frame stays buffered
+    until it is complete. If the file shrinks (truncated or rewritten) the reader resynchronises
+    from the start and skips frames whose step was already delivered (PHAL's LAMMPS dump tail reset
+    the offset but could deliver a frame twice).
+    """
 
     def __init__(self, path: Path, run_id: str) -> None:
-        self.path, self.run_id = path, run_id
+        self.path, self.run_id = Path(path), run_id
         self._offset = 0
         self._buffer = ""
+        self.last_step: int | None = None
+        self.resyncs = 0
 
     def read_new(self) -> list[Frame]:
         if not self.path.exists():
             return []
+        size = self.path.stat().st_size
+        if size < self._offset:
+            LOGGER.warning("GMD frame file %s shrank (%d < %d bytes); resynchronising", self.path, size, self._offset)
+            self._offset, self._buffer = 0, ""
+            self.resyncs += 1
         with self.path.open("r", encoding="utf-8") as handle:
             handle.seek(self._offset)
             chunk = handle.read()
@@ -99,7 +140,10 @@ class FrameTail:
                 cursor += 1
                 complete_end = cursor
                 continue
-            n_atoms = int(header)
+            try:
+                n_atoms = int(header)
+            except ValueError as exc:
+                raise AdapterError(f"{self.path}: expected an atom count, got {header[:40]!r}") from exc
             frame_end = cursor + 2 + n_atoms
             if frame_end > len(lines) - 1:
                 break
@@ -107,7 +151,43 @@ class FrameTail:
             complete_end = cursor
         text = "\n".join(lines[:complete_end]) + ("\n" if complete_end else "")
         self._buffer = "\n".join(lines[complete_end:])
-        return parse_frames(text, run_id=self.run_id)
+        frames = []
+        for frame in parse_frames(text, run_id=self.run_id):
+            if self.last_step is not None and frame.step <= self.last_step:
+                continue  # already delivered (resync after truncation)
+            self.last_step = frame.step
+            frames.append(frame)
+        return frames
+
+
+def structure_species(path: str | Path) -> list[int]:
+    """Atomic numbers of a GMD xyz input (``N``, comment/box line, ``Symbol x y z`` lines)."""
+
+    lines = Path(path).expanduser().read_text().splitlines()
+    try:
+        n_atoms = int(lines[0].split()[0])
+    except (IndexError, ValueError) as exc:
+        raise ConfigurationError(f"{path}: not a GMD xyz file (first line must be the atom count)") from exc
+    numbers = []
+    for line in lines[2 : 2 + n_atoms]:
+        symbol = line.split()[0] if line.split() else ""
+        if symbol not in atomic_numbers or atomic_numbers[symbol] == 0:
+            raise ConfigurationError(f"{path}: unknown element {symbol!r} (GMD would silently use Z=0)")
+        numbers.append(atomic_numbers[symbol])
+    if len(numbers) != n_atoms:
+        raise ConfigurationError(f"{path}: declares {n_atoms} atoms but lists {len(numbers)}")
+    return numbers
+
+
+def check_model_species(structure: str | Path, model_species: Iterable[int], *, model: str = "model") -> None:
+    """Reject a run whose structure contains elements the model was not trained on."""
+
+    known = {int(z) for z in model_species}
+    if not known:
+        raise UnsupportedCombinationError(f"{model} declares no species; cannot check it against {structure}")
+    missing = sorted(set(structure_species(structure)) - known)
+    if missing:
+        raise UnsupportedCombinationError(f"{structure} contains species {missing} that {model} (species {sorted(known)}) does not know")
 
 
 class GMDEngine:
@@ -132,7 +212,10 @@ class GMDEngine:
 
     def __init__(self, config: GMDConfig) -> None:
         self.config = config
-        self.executable = Path(config.executable).expanduser()
+        executable = config.executable
+        if os.sep not in executable and not Path(executable).is_file():
+            executable = shutil.which(executable) or executable  # bare name: PATH lookup
+        self.executable = Path(executable).expanduser()
         if not self.executable.is_file() or not os.access(self.executable, os.X_OK):
             raise CapabilityUnavailableError(f"GMD executable not found or not executable: {self.executable}")
         overlap = RESERVED & set(config.directives)
@@ -140,11 +223,24 @@ class GMDEngine:
             raise ConfigurationError(f"md.directives may not set controller-owned directives {sorted(overlap)}")
 
     # ------------------------------------------------------------------ inputs
+    def command(self, xyz: str | Path, run_in: str | Path) -> list[str]:
+        """argv for one GMD run: ``[*launcher, gmd, input.xyz, run.in]`` (never ``--np``: ML is serial)."""
+
+        return [*self.config.launcher, str(self.executable), str(xyz), str(run_in)]
+
+    def prepare(self, request: SegmentRequest) -> list[str]:
+        """Write the segment inputs and return the argv without executing it (PHAL's dry run)."""
+
+        xyz, run_in = self._write_inputs(request)
+        return self.command(xyz, run_in)
+
     def _write_inputs(self, request: SegmentRequest) -> tuple[Path, Path]:
         work = request.work_dir
-        work.mkdir(parents=True, exist_ok=True)
         if request.model.export_path is None:
             raise UnsupportedCombinationError(f"model {request.model.model_id} has no exported TorchScript artifact for GMD")
+        if self.config.check_species and not request.metadata.get("skip_species_check"):
+            check_model_species(self.config.initial_structure, request.model.species, model=f"model {request.model.model_id}")
+        work.mkdir(parents=True, exist_ok=True)
         xyz = work / "in.xyz"
         xyz.write_text(Path(self.config.initial_structure).expanduser().read_text())
         lines = [f"run {request.n_steps}", "force_field ml", f"model_path {request.model.export_path}",
@@ -173,7 +269,12 @@ class GMDEngine:
         env = {**os.environ, **self.config.env}
         stdout = (request.work_dir / "gmd.stdout").open("w")
         stderr = (request.work_dir / "gmd.stderr").open("w")
-        process = subprocess.Popen([str(self.executable), str(xyz), str(run_in)], cwd=request.work_dir, stdout=stdout, stderr=stderr, env=env)
+        try:
+            process = subprocess.Popen(self.command(xyz, run_in), cwd=request.work_dir, stdout=stdout, stderr=stderr, env=env)
+        except OSError as exc:
+            stdout.close()
+            stderr.close()
+            raise AdapterError(f"cannot launch GMD ({self.command(xyz, run_in)}): {exc}") from exc
         tail = FrameTail(request.work_dir / "frames.extxyz", request.run_id)
         deadline = time.monotonic() + self.config.segment_timeout_s
         decisions: list[dict[str, Any]] = []
@@ -254,7 +355,9 @@ class GMDEngine:
         from gmd_active_learning.contracts.ids import file_sha256
 
         model = ModelArtifact("smoke", str(export), "", str(export), file_sha256(export), None, None, (), None, dict(UNITS), {}, "smoke", "gmd_sgt", "")
-        request = SegmentRequest("smoke", 0, Path(work_dir), model, self.config.smoke_steps, None, None)
+        # The export's species are unknown here (no GMD_SGT import in the MD adapter); the registry
+        # checks them when the model is registered, and running it is the point of the smoke test.
+        request = SegmentRequest("smoke", 0, Path(work_dir), model, self.config.smoke_steps, None, None, {"skip_species_check": True})
         frames: list[Frame] = []
         try:
             result = self.run_segment(request, lambda frame: frames.append(frame) or FrameAction.CONTINUE)
@@ -264,6 +367,91 @@ class GMDEngine:
         energies = [frame.energy for frame in frames if frame.energy is not None]
         passed = result.status == "completed" and bool(frames) and finite and all(np.isfinite(energies))
         return {"passed": passed, "status": result.status, "frames": len(frames), "detail": {k: v for k, v in result.detail.items() if k != "status"}}
+
+
+class GMDFrameSource:
+    """Pull-style ``FrameSource`` over one running GMD segment (``next_frame(timeout)``).
+
+    Returns each complete frame exactly once, ``POLL_TIMEOUT`` when no new frame arrived within
+    ``timeout`` (distinct from end of stream), and ``None`` once GMD has exited and every frame has
+    been delivered; a non-zero exit raises :class:`AdapterError` instead. ``request_stop`` asks GMD
+    to stop at its next control boundary; ``close`` terminates a still-running process and closes
+    the log handles. ``OnlineMonitorDriver.run`` consumes it unchanged.
+    """
+
+    def __init__(self, engine: GMDEngine, request: SegmentRequest) -> None:
+        self.engine, self.request = engine, request
+        self.process: subprocess.Popen[bytes] | None = None
+        self.tail = FrameTail(request.work_dir / "frames.extxyz", request.run_id)
+        self._pending: list[Frame] = []
+        self._logs: list[Any] = []
+
+    def start(self) -> GMDFrameSource:
+        xyz, run_in = self.engine._write_inputs(self.request)  # noqa: SLF001 - same adapter
+        for stale in ("STOP", "CHECKPOINT", "status.json", "frames.extxyz"):
+            (self.request.work_dir / stale).unlink(missing_ok=True)
+        self._logs = [(self.request.work_dir / "gmd.stdout").open("w"), (self.request.work_dir / "gmd.stderr").open("w")]
+        env = {**os.environ, **self.engine.config.env}
+        self.process = subprocess.Popen(self.engine.command(xyz, run_in), cwd=self.request.work_dir, stdout=self._logs[0], stderr=self._logs[1], env=env)
+        return self
+
+    def __enter__(self) -> GMDFrameSource:
+        return self if self.process is not None else self.start()
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()
+
+    def _take(self) -> Frame:
+        frame = self._pending.pop(0)
+        GMDEngine._check_model(frame, self.request)  # noqa: SLF001
+        frame.model_version = self.request.model.model_id
+        return frame
+
+    def next_frame(self, timeout: float | None = None) -> Any:
+        from gmd_active_learning.monitors.online import POLL_TIMEOUT
+
+        if self.process is None:
+            self.start()
+        assert self.process is not None
+        deadline = None if timeout is None else time.monotonic() + timeout
+        while True:
+            if self._pending:
+                return self._take()
+            exited = self.process.poll() is not None
+            self._pending.extend(self.tail.read_new())
+            if self._pending:
+                return self._take()
+            if exited:
+                self._close_logs()
+                if self.process.returncode != 0:
+                    stderr = (self.request.work_dir / "gmd.stderr").read_text()[-2000:]
+                    raise AdapterError(f"GMD exited with code {self.process.returncode}: {stderr}")
+                return None
+            if deadline is not None and time.monotonic() >= deadline:
+                return POLL_TIMEOUT
+            time.sleep(self.engine.config.reader_poll_s)
+
+    def request_stop(self, reason: str = "stop requested") -> None:
+        (self.request.work_dir / "STOP").write_text(reason + "\n")
+
+    def _close_logs(self) -> None:
+        for handle in self._logs:
+            handle.close()
+        self._logs = []
+
+    def close(self, timeout: float = 30.0) -> None:
+        if self.process is not None and self.process.poll() is None:
+            self.process.terminate()  # GMD handles SIGTERM cooperatively
+            try:
+                self.process.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                self.process.kill()
+                self.process.wait()
+        self._close_logs()
+
+    @property
+    def logs_closed(self) -> bool:
+        return not self._logs
 
 
 def iter_frames(path: Path, run_id: str) -> Iterator[Frame]:
