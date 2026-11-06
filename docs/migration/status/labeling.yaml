@@ -4,12 +4,19 @@
 # the pytest marker `cp2k` and skip only when no CP2K binary is found.
 
 - id: BE-001
-  status: migrated
+  status: replaced
   implementation:
     - src/gmd_active_learning/adapters/registry.py
     - src/gmd_active_learning/adapters/schedulers/base.py
     - src/gmd_active_learning/adapters/dft/cp2k/backend.py
+    - src/gmd_active_learning/workflow/protocols.py
+    - src/gmd_active_learning/labeling/job_states.py
   evidence:
+    - tests/labeling/test_job_state_mapping.py::test_every_phal_job_state_round_trips
+    - tests/labeling/test_job_state_mapping.py::test_only_pending_and_timeout_are_spelled_differently
+    - tests/labeling/test_job_state_mapping.py::test_walltime_failures_from_any_scheduler_report_timeout
+    - tests/labeling/test_job_state_mapping.py::test_execution_request_from_command_stringifies_like_phal
+    - tests/labeling/test_job_state_mapping.py::test_phal_job_states_are_phal_enum_values
     - tests/workflow/test_backend_contracts.py::test_md_protocol_is_satisfied_only_by_complete_implementations
     - tests/adapters/test_registry.py::test_role_mismatch_raises_type_error
     - tests/adapters/test_registry.py::test_capability_checks
@@ -17,16 +24,17 @@
     - tests/adapters/dft/test_cp2k_input.py::test_execution_request_paths_are_work_dir_relative
   findings: []
   notes: >-
-    BackendRole and RuntimeStatus are ported, together with a structural Backend protocol (name, role,
-    capabilities, check_runtime) and an ExecutionRequest. They live in adapters/registry.py and
-    adapters/schedulers/base.py, not in contracts/backends.py, which is a shared file outside this area.
-    JobState is replaced by contracts.ExecutionStatus. TIMEOUT becomes FAILED with raw_state TIMEOUT and
-    walltime_exceeded; PENDING becomes QUEUED. Persisted values therefore differ deliberately from PHAL.
-    The scheduler contract is now submit(work_dir, command, resources) with typed resources, plus poll,
-    cancel and reconcile. The DFT contract is CP2KBackend; its parse and validate steps fill the gap
-    PHAL left in DFTBackend. MLIP/MD ABCs (GMD/GMD_SGT streaming ports) belong to the workflow lead and
-    are not defined here.
-    MD/MLIP part (lead): structural runtime-checkable protocols in workflow/protocols.py (MDEngine, FrameEnricher, Trainer); an incomplete implementation does not satisfy them. JobState values changed deliberately, so this stays migrated.
+    Replaced, not ported 1:1. BackendRole and RuntimeStatus are ported. A structural Backend protocol
+    (name, role, capabilities, check_runtime) replaces the ABCs, and an incomplete implementation does
+    not satisfy it. The MD/MLIP/Trainer protocols live in workflow/protocols.py. The scheduler contract is
+    submit/poll/cancel/reconcile with typed resources; CP2KBackend's parse and validate steps fill PHAL's
+    DFTBackend gap. ExecutionRequest.from_command stringifies command parts and turns work_dir into a Path
+    exactly as PHAL did. The stdout/stderr paths and free-form resources moved to the scheduler and typed
+    SchedulerResources. JobState is replaced by contracts.ExecutionStatus. Seven of PHAL's nine values
+    are spelled identically. pending became queued. timeout became failed with raw_state TIMEOUT and
+    walltime_exceeded, so a walltime kill gets its own retry policy. labeling.job_states translates both
+    ways, and every PHAL value round-trips. PHAL never persisted job states (its jobs dict lived in
+    memory, see LAB-007), so no PHAL-era files need migrating.
 - id: BE-002
   status: verified
   implementation: [src/gmd_active_learning/adapters/registry.py]
@@ -285,56 +293,70 @@
     rule: no implicit dry-run). Callers that want inputs only use write_cp2k_inputs. A failing history
     hook only logs. A missing binary, a timeout or a non-zero exit raises LabelingError.
 - id: LAB-007
-  status: migrated
-  implementation: [src/gmd_active_learning/labeling/service.py, src/gmd_active_learning/labeling/task_store.py]
+  status: replaced
+  implementation:
+    - src/gmd_active_learning/labeling/service.py
+    - src/gmd_active_learning/labeling/task_store.py
+    - src/gmd_active_learning/adapters/dft/cp2k/backend.py
   evidence:
-    - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
-    - tests/workflow/test_scheduling.py::test_restart_mid_queue_resubmits_nothing_already_submitted
-    - tests/integration/test_closed_loop_real.py::test_real_closed_loop_promotes_and_resumes_md_with_the_new_model
+    - tests/adapters/dft/test_cp2k_phal_input_parity.py::test_cp2k_dispatch_writes_phal_files_byte_identically
     - tests/labeling/test_labeling_service.py::test_prepare_is_idempotent_and_ids_depend_on_region_and_settings
     - tests/labeling/test_labeling_service.py::test_submit_is_idempotent
     - tests/labeling/test_labeling_service.py::test_ambiguous_submission_failure_marks_unknown_and_never_duplicates
     - tests/labeling/test_labeling_service.py::test_rejected_submission_leaves_task_resubmittable
     - tests/labeling/test_labeling_service.py::test_enabled_embedding_is_refused_before_a_task_exists
+    - tests/labeling/test_labeling_service.py::test_capped_region_runs_cap_relaxation_then_single_point
+    - tests/extraction/test_extraction_modes.py::test_block_cooldown_skips_and_state_survives_restart
+    - tests/workflow/test_scheduling.py::test_restart_mid_queue_resubmits_nothing_already_submitted
+    - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
+    - tests/integration/test_closed_loop_real.py::test_real_closed_loop_promotes_and_resumes_md_with_the_new_model
     - tests/adapters/dft/test_cp2k_real.py::test_restart_safe_idempotent_labeling
   findings: [F-05, F-17, F-24]
   notes: >-
-    The submitter is redesigned as LabelingService: prepare(region), submit(task), poll(task) and
-    collect(task), with task.json written atomically and holding the job id, state, attempts and
-    failure reasons under a file lock. task_id = stable_id(region_id, region fingerprint, settings
-    hash), so preparing twice gives the same directory and job and a completed task is never
-    resubmitted. An interrupted or timed-out submission becomes UNKNOWN and is never duplicated.
-    Extraction, capping and embedding happen upstream: any extraction mode is labeled as given, which
-    fixes F-05 for this layer. The scheduler comes from backends.scheduler.engine; cp2k.submit_mode is
-    removed and there is no dry-run.
-    Not provable here: task-tree parity with PHAL's dry-run tree, and block-cooldown "skipped" (both
-    belong to the workflow).
-    Workflow integration (lead): the controller submits one task per selected region through this service, a restart mid-queue resubmits nothing, and re-running a finished real closed loop creates no new task directories. Still not shown: PHAL dry-run task-tree parity.
+    Replaced by LabelingService (prepare/submit/poll/collect) with an atomic, file-locked task.json that
+    holds the job id, state, attempts and failure reasons. task_id = stable_id(region_id, region
+    fingerprint, settings hash). PHAL's dry-run task tree cannot be reproduced, by design: there is no
+    dry-run mode (the brief forbids implicit dry runs; cp2k.submit_mode is removed). PHAL's task.json held
+    metadata only. The parts of the acceptance that carry over are shown. The CP2K files a task gets
+    (<id>_hopt.inp when capped, <id>_sp.inp) are byte-identical to PHAL's for fixture regions, through the
+    same CP2KBackend.prepare_inputs the service calls. The region is stored as region.json instead of
+    region.extxyz. Block cooldown gives no region, hence no task, and never a failure (the workflow's
+    "skipped"). One job per region is submitted through the scheduler. Re-preparing or re-submitting a
+    known task, including a completed one, is a no-op, also across controller restarts. An ambiguous
+    submission becomes UNKNOWN and is never duplicated. Extraction, capping and embedding happen upstream,
+    so every extraction mode is labeled as given (F-05 fixed for this layer). The H-cap GEO_OPT is now run
+    before the single point (F-17).
 - id: LAB-008
-  status: migrated
-  implementation: [src/gmd_active_learning/labeling/service.py]
+  status: replaced
+  implementation:
+    - src/gmd_active_learning/labeling/service.py
+    - src/gmd_active_learning/datasets/writer.py
   evidence:
-    - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
-    - tests/integration/test_closed_loop_real.py::test_real_closed_loop_promotes_and_resumes_md_with_the_new_model
+    - tests/datasets/test_phal_dataset_entry_parity.py::test_dataset_entry_contains_phal_fields
+    - tests/datasets/test_dataset_io_roundtrip.py::test_per_sample_triple_keeps_phal_keys
     - tests/labeling/test_labeling_service.py::test_single_point_label_is_valid_and_converted
     - tests/labeling/test_labeling_service.py::test_completed_but_invalid_output_is_invalid_not_failed
     - tests/labeling/test_labeling_service.py::test_unknown_state_never_resubmits
     - tests/labeling/test_labeling_service.py::test_a_restarted_controller_resumes_from_task_json
+    - tests/labeling/test_job_state_mapping.py::test_every_phal_job_state_round_trips
     - tests/adapters/dft/test_cp2k_real.py::test_unconverged_run_is_invalid_with_reason
+    - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
+    - tests/integration/test_closed_loop_real.py::test_real_closed_loop_promotes_and_resumes_md_with_the_new_model
   findings: [F-24, F-25, F-27]
   notes: >-
-    poll() refreshes the scheduler state. On UNKNOWN it calls scheduler.reconcile; if the state is
-    still unknown it counts unknown_polls and warns after cp2k.max_unknown_polls_warning, but never
-    fails or resubmits. This removes PHAL's race of reading a still-growing output while UNKNOWN; a
-    resolve_unknown(task, reason) decision belongs to the workflow. On a terminal state, poll validates
-    with the F-27 rule plus the atom count. ExecutionStatus and ValidationStatus are kept separate: a
-    run that exits 0 but produces invalid output is COMPLETED/INVALID. collect() returns a LabelResult
-    with energy, forces and stress in GMD units, the positions actually labeled (relaxed caps) and
-    provenance. A restarted controller resumes the persisted job ids. A non-converged output never
-    yields a VALID result.
-    Not done here: writing the dataset entry (extxyz/npz/metadata) is the datasets area's job, so
-    file-for-file parity with PHAL's dataset files is not shown in this area.
-    Workflow integration (lead): with the scripted fake CP2K and with real CP2K 2026.2 the controller polls each job to COMPLETED, validates, collects and ingests it into the versioned dataset store, and the real closed loop resumes after restart without new jobs. Still not shown: file-for-file parity of dataset files with PHAL.
+    Replaced by LabelingService.poll/collect plus datasets.write_dataset_entry. Dataset files: for 28
+    golden capped regions (3 scenarios, cluster/graph/slab), GMD's <task>.extxyz/_labels.npz/_metadata.json
+    contain every field PHAL's write_dataset_entry wrote, with PHAL's values. That covers the forces,
+    mask, original_indices (caps -1) and per-role index arrays; region_labels/atom_role, force_weight,
+    energy_weight 0, core_atom_indices and masked_atom_indices; and the positions, symbols, region_code
+    and force weights in the extxyz. 6 torn-bond regions skip with GMD's documented capping fix.
+    Deliberate differences: the extxyz key is force_weight (GMD_SGT), not mask_weights. GMD adds arrays
+    (force_weight, region_code, image_shift, energy, stress), energy and stress weights, and provenance.
+    The mask comes from the region roles (F-04). Status sequence: ExecutionStatus and ValidationStatus
+    are kept separate. Exit 0 with invalid output is COMPLETED/INVALID, and a non-converged output never
+    yields a VALID result (F-27). UNKNOWN reconciles and never fails or resubmits, which removes PHAL's
+    race with a still-growing output (F-25). PHAL's JobState values map losslessly
+    (labeling.job_states). A restarted controller resumes the persisted job ids.
 - id: LAB-009
   status: verified
   implementation:
