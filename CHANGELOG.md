@@ -4,6 +4,80 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Unreleased]
+
+---
+
+## [v0.4.0] - 2026-11-06
+
+GMD_active becomes the complete successor to PHAL (`hotspot_al`, commit 96263b6): GMD replaces
+LAMMPS, GMD_SGT replaces Allegro/NequIP, CP2K remains the labeling engine. Every PHAL capability
+is tracked in `docs/migration/feature_ledger.yaml`; defects are listed in
+`docs/migration/findings.md` with the evidence of their fixes.
+
+### Added
+
+- **Persistent closed loop** (`workflow/`): SQLite-backed state machine (sampling, extraction,
+  selection, submission, polling, ingestion, training decision, publication, training,
+  evaluation, promotion) with write-ahead intents, crash reconciliation, bounded labeling queue,
+  promotion gates and rollback; composition root `workflow/assembly.py`; `gmd-al` CLI
+  (`validate-config`, `doctor`, `convert-phal-config`, `init`, `run`, `status`, `stop`, `retrain`,
+  `rollback`, `resolve-unknown`).
+- **Central configuration** (`config.py`): one strict pydantic model per section, generated
+  `configs/default.yaml` and `docs/config-reference.md`, PHAL config converter.
+- **Adapters**: GMD (segmented runs, flushed frames, cooperative stop/checkpoint, model change at
+  restart), GMD_SGT (weighted training, fine-tuning, committee, export validation), CP2K (inputs
+  from region PBC, cap-only GEO_OPT, validation, bounded retry ladders), local/Slurm/PBS
+  schedulers, backend registry with plugins.
+- **Domain ports from PHAL**: staged atom-wise OOD monitor, events, hotspots, cluster/slab/graph/
+  block extraction with image shifts and H capping, embedding data, candidate selection,
+  versioned datasets with GMD_SGT per-atom force weights, model registry.
+- **Experimental CP2K ML-SCF tooling** (`adapters/dft/scf/`, `tools/scf/`), torch-optional.
+- **Legacy import**: `gmd_active_learning.importers` converts LAMMPS custom dumps into `Frame`s.
+- **Operations**: artifact audit (`tools/audit/`, now also registry checksums, dataset tree
+  hashes and task integrity), GMD_SGT runtime smoke and tiny H2O chain (`tools/smoke/`), monitor
+  benchmark with regression gate (`tools/benchmarks/`), runtime tree and config overlays
+  (`tools/runtime/`, `containers/config/`), offline test runner (`tools/test/`), CI on Python
+  3.10-3.12 and pre-commit hooks.
+- **Containers and HPC** (not built or run yet): `containers/Dockerfile.{gmd,sgt-train,cp2k,cp2k-ml}`,
+  `build.sh` with `--dry-run` and floating-ref rejection, exact pins in `versions.yaml`,
+  validators, PBS validation jobs that hash the SIF at job time (`tools/hpc/pbs/`).
+- **Examples** `examples/01`-`06` (PHAL's examples on GMD frames, CP2K labels and GMD_SGT datasets)
+  and `examples/real_cycle/` (real GMD + GMD_SGT + CP2K cycle with recorded evidence).
+- **Documentation**: architecture, topic guides, ADRs 004-007, known issues, operations, runtime
+  data contract, container docs, contributing guide, mkdocs configuration, archived PHAL
+  milestone-3 release baseline (`docs/migration/phal_release_baseline/`).
+- **Architecture tests**: executable layering guard and a recursive import smoke test.
+- `utils.yaml.merge_dicts`/`merge_yaml_files`/`dump_yaml`; `utils.logging.configure_logging` with
+  text/JSON output, file handler and `GMD_AL_LOG_{LEVEL,FILE,FORMAT}` overrides; PHAL exception
+  classes (`BackendError`, `InferenceError`, `MDRuntimeError`, `DFTRuntimeError`,
+  `CP2KRuntimeError`, `DataError`, `CooldownSkip`).
+
+### Fixed (PHAL and former GMD_active defects)
+
+- LJ force-basis sign (F-01) and unscaled ridge penalty (F-33); minimum image for skewed,
+  partially periodic cells (F-34); WAVELET on non-cubic cells (F-35).
+- Missing committee no longer scored as perfect agreement (F-06); truncated events flagged
+  (F-07); deterministic event, region, task, sample, dataset and model IDs (F-15, F-24).
+- Capped block regions write datasets (F-04); labeling uses the configured extraction mode
+  (F-05); image shifts recorded and torn regions refused (F-09); H-only cap relaxation runs
+  (F-17); NaN fingerprints (F-30); retry compounding and missing native fallback (F-25).
+- Placeholder workflow, adapters, merger and CLI of GMD_active 0.2 replaced (F-10).
+
+### Changed
+
+- `configure_logging` now attaches handlers to the `gmd_active_learning` logger instead of calling
+  `logging.basicConfig`; existing calls keep working.
+- README rewritten in English for the current system.
+
+### Removed
+
+- PHAL's empty Milestone-1 container scaffolds and config templates are not carried over
+  (ledger CTR-002, CFG-005).
+
+---
+
+
 ## [v0.2] - 2026-04-21
 
 ### 项目简介
@@ -50,5 +124,3 @@ pytest
 ```
 
 ---
-
-## [Unreleased]

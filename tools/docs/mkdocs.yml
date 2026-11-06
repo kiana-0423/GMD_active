@@ -1,0 +1,75 @@
+# Documentation site (ledger DOC-003). Build from the repository root:
+#   pip install mkdocs mkdocstrings[python]
+#   mkdocs build --strict -f tools/docs/mkdocs.yml
+# The config lives outside docs/ because mkdocs forbids a config file inside its docs_dir.
+site_name: GMD_active
+site_description: Persistent active learning for GMD molecular dynamics, GMD_SGT potentials and CP2K labels.
+docs_dir: ../../docs
+site_dir: ../../build/site
+theme:
+  name: mkdocs
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - Guides:
+      - Monitoring, events and hotspots: monitoring.md
+      - Extraction, capping and datasets: extraction_and_datasets.md
+      - Labeling, schedulers and backends: labeling_and_scheduling.md
+  - Configuration reference: config-reference.md
+  - Operations:
+      - Tools: operations.md
+      - Runtime data contract: runtime-data-contract.md
+      - Performance benchmark: performance.md
+  - Containers and HPC:
+      - Overview: containers/README.md
+      - Architecture: containers/architecture.md
+      - Docker and OCI: containers/docker.md
+      - Apptainer: containers/apptainer.md
+      - Runtime mount: containers/runtime.md
+      - Probe procedure: containers/probe-procedure.md
+  - Known issues: known-issues.md
+  - Decisions:
+      - Index: adr/README.md
+      - "004 Candidate deduplication": adr/004-distance-histogram-dedup.md
+      - "005 Segmented GMD control": adr/005-segmented-gmd-control.md
+      - "006 Persistent SQLite store": adr/006-persistent-sqlite-store.md
+      - "007 Deterministic IDs": adr/007-deterministic-ids.md
+  - CP2K ML-SCF (experimental):
+      - Overview: scf/README.md
+      - Architecture: scf/architecture.md
+      - Capabilities: scf/capabilities.md
+      - Contracts: scf/contracts.md
+      - Negative results: scf/negative_results.md
+      - Adaptive SCF controller: scf/adaptive_scf_controller.md
+      - SCF strategy prediction: scf/scf_strategy_prediction.md
+      - Strategy re-run: scf/strategy_rerun.md
+      - Density representation: scf/density_representation.md
+      - Density guess failure analysis: scf/ml_density_failure_analysis.md
+      - Density guess v2: scf/ml_density_v2.md
+      - ML Pulay objective: scf/ml_pulay_objective.md
+      - Pulay dataset: scf/pulay_dataset.md
+      - Structure provenance: scf/structure_provenance.md
+      - CP2K version history: scf/cp2k_version_history.md
+  - API reference: api.md
+  - Contributing: contributing.md
+  - Migration from PHAL:
+      - Overview: migration/README.md
+      - Findings: migration/findings.md
+      - Feature ledger: migration/feature_ledger.md
+      - Integration gaps: migration/integration_gaps.md
+      - Baseline: migration/baseline.md
+      - Schedule: migration/schedule.md
+      - Real-run evidence: migration/evidence/README.md
+      - PHAL release baseline (historical): migration/phal_release_baseline/README.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [../../src]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true

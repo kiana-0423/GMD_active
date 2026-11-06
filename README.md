@@ -1,158 +1,152 @@
-# GMD_active_learning
+# GMD_active
 
-`GMD_active_learning` 是一个工程化的主动学习控制层，用来连接已有的 `GMD` 分子动力学项目与 `GMD_se3gnn` 机器学习势训练项目。
+GMD_active is the persistent active-learning controller of the GMD system. It watches a running
+**GMD** molecular-dynamics simulation driven by a **GMD_SGT** machine-learned potential, detects
+atoms whose environment the potential has not learned, cuts small regions around them, labels
+those regions with **CP2K**, publishes versioned training data, retrains or fine-tunes the
+potential, and promotes the new model into the running simulation only when explicit gates pass.
 
-## 项目目的
+It is the successor to PHAL (`hotspot_al`, LAMMPS + Allegro + CP2K). PHAL's components were
+ported and their confirmed defects fixed; PHAL's end-to-end loop never closed, so the persistent
+loop is new.
 
-- 负责主动学习流程编排
-- 负责在线可靠性监控和 OOD 预警
-- 负责候选构型保存、筛选和 DFT 标注任务生成
-- 负责调用 `GMD_se3gnn` 进行重训练
-- 负责把新模型通过 adapter 交还给 `GMD`
+> Dynamic active learning is for model development. Production MD should be re-run with a
+> converged, fixed model.
 
-## 与 GMD / GMD_se3gnn 的关系
+## What it does
 
-- `GMD` 只负责 MD 积分、轨迹推进和力场调用
-- `GMD_se3gnn` 只负责模型训练、推理和导出
-- 主动学习判断逻辑全部保留在 `GMD_active_learning`
+| Stage | What happens | Where |
+|---|---|---|
+| Sampling | GMD runs in segments; every flushed frame is monitored while GMD runs; STOP/CHECKPOINT decisions go back to GMD cooperatively | `adapters/gmd`, `monitors`, `events` |
+| Monitoring | atom-wise staged OOD scores: forces, force bursts, displacements, close contacts, coordination change, local LJ residual (sign-corrected), MLIP and committee deviation | `monitors` ([docs](docs/monitoring.md)) |
+| Events and hotspots | pre/post-trigger context, deterministic event IDs, truncation flags, spatial hotspot clusters | `events`, `hotspots` |
+| Extraction | cluster, slab, graph or block regions with stable parent IDs and image shifts, H capping, periodic guard | `extraction` ([docs](docs/extraction_and_datasets.md)) |
+| Selection | pair-distance-histogram diversity, score ranking, budgets, bounded queue | `active_learning` ([ADR 004](docs/adr/004-distance-histogram-dedup.md)) |
+| Labeling | CP2K inputs from the region's PBC, cap-only GEO_OPT then single point, local/Slurm/PBS, validation, bounded retries, crash reconciliation | `labeling`, `adapters/dft/cp2k`, `adapters/schedulers` ([docs](docs/labeling_and_scheduling.md)) |
+| Datasets | immutable, content-addressed versions with event-aware splits and GMD_SGT per-atom force weights | `datasets` |
+| Training and promotion | GMD_SGT train/fine-tune/export, export validation, GMD smoke test, promotion gates, rollback | `adapters/sgt`, `retraining`, `workflow` |
+| Persistence | one SQLite store per run; every stage resumable after a crash | `workflow` ([architecture](docs/architecture.md)) |
 
-这样做可以避免把主动学习策略耦合进 MD 核心或训练核心，保证模块边界清晰、可替换、可测试。
+## Install
 
-## 为什么主动学习逻辑放在这里
-
-主动学习涉及监控、风险聚合、候选管理、外部标注、数据合并和重新训练，这些都属于跨系统编排逻辑，而不是 MD 求解逻辑或 MLIP 训练逻辑。单独拆出控制层后：
-
-- `GMD` 与 `GMD_se3gnn` 可保持稳定
-- 决策规则可以独立演化
-- 可以切换不同监控器、标注器和训练适配器
-
-## LJ 投影预警原理
-
-本项目提供了 `LJ projection` 监控器：将当前结构中的 MLIP 原子力投影到元素对独立的 Lennard-Jones 参数空间，拟合 `A/B` 参数，并用以下量作为预警信号：
-
-- LJ 拟合相对残差
-- 拟合得到的参数是否非物理
-- 参数是否越界
-- 参数是否相对历史窗口发生剧烈跳变
-
-需要强调：
-
-- LJ 拟合残差高，不一定说明 MLIP 一定错误
-- 它也可能说明当前相互作用超出了 LJ 的表达能力
-- 本模块不使用 LJ 替代 MLIP
-- LJ 只作为 OOD 检测和主动学习触发器
-
-## 生产使用说明
-
-动态主动学习流程仅用于模型开发。最终正式 MD 生产计算应使用收敛后的固定 MLIP 模型重新运行，而不是边跑边改模型。
-
-## 安装
+Python 3.10–3.12. From the repository root:
 
 ```bash
-cd GMD_active_learning
-pip install -e ".[dev]"
+pip install -e ".[dev]"          # numpy, scipy, ase, pyyaml, pydantic, torch, tqdm (+ pytest)
 ```
 
-## 最小示例
+The external programs are separate projects:
+
+| Program | Needed for | Notes |
+|---|---|---|
+| GMD | MD | build with `-DGMD_ENABLE_TORCH=ON` (TorchScript force field); the ML path is serial |
+| GMD_SGT >= 0.4 | training, export, inference | `pip install` it, or point `mlip.source_path` at a checkout |
+| CP2K (tested with 2026.2) | labels | `cp2k.psmp`; `cp2k.data_dir` if the basis/potential files are not found |
+
+`gmd-al doctor --config run.yaml` checks all of them and prints `[OK]`/`[MISS]` per check.
+
+## Quick start
 
 ```bash
-gmd-al monitor-example
-python examples/minimal_lj_monitor_example.py
-python examples/minimal_active_learning_loop.py
+gmd-al validate-config --config configs/example_run.yaml
+gmd-al doctor          --config configs/example_run.yaml
+gmd-al init   --config configs/example_run.yaml --work-dir runs/water \
+              --checkpoint ckpt_best.pt --export model.pt [--committee member2.pt]
+gmd-al run    --config configs/example_run.yaml --work-dir runs/water    # resumes after interruption
+gmd-al status --work-dir runs/water
+gmd-al stop | retrain  --config configs/example_run.yaml --work-dir runs/water
+gmd-al rollback        --config configs/example_run.yaml --work-dir runs/water --reason "..."
+gmd-al resolve-unknown --config configs/example_run.yaml --work-dir runs/water --task TASK_ID --reason "..."
+gmd-al convert-phal-config --help                                         # migrate a PHAL YAML
 ```
 
-## 配置说明
+`configs/example_run.yaml` is a working example; `configs/default.yaml` lists every key at its
+default; [docs/config-reference.md](docs/config-reference.md) documents every key (generated from
+the models). Unknown keys are errors.
 
-- `configs/active_learning.yaml`: 总流程、目录、dry-run 开关
-- `configs/monitor.yaml`: 监控器开关、阈值、LJ 拟合参数和风险权重
-- `configs/dft_labeling.yaml`: DFT 标注任务模板与作业脚本配置
-- `configs/retraining.yaml`: `GMD_se3gnn` 调用方式与导出命令
+### A real closed cycle
 
-所有阈值、目录和权重都通过 YAML 配置控制，可按模块启停。
-
-## 测试
+`examples/real_cycle/run_real_cycle.py` runs the whole loop with the real programs on four water
+molecules: GMD with a tiny GMD_SGT committee, monitoring, extraction, CP2K labels, dataset
+publication, fine-tuning, export validation, a GMD smoke test, gated promotion and a resumed GMD
+segment with the promoted model.
 
 ```bash
-pytest
+python examples/real_cycle/run_real_cycle.py --work-dir /tmp/gmd_al_cycle \
+    --gmd ../GMD/build-torch/gmd --gmd-sgt ../GMD_SGT --cp2k-data /path/to/cp2k/data
 ```
 
-## 接入 GMD
+It takes a few minutes. Recorded evidence, including an interrupted-and-resumed run, is in
+[docs/migration/evidence/](docs/migration/evidence/README.md). It is a smoke-scale demonstration,
+not a scientific validation.
 
-- 优先实现 `adapters/gmd_adapter.py` 中的 Python API 对接
-- 如果没有 API，可通过 subprocess 调用外部命令
-- 在线监控通过 `monitor_callback` 注入，不修改 `GMD` 核心代码
+### Smaller examples
 
-示例配置：
+`examples/01`–`06` are PHAL's examples ported to GMD_active and run on bundled data
+(`examples/data`) without external programs:
 
-```yaml
-# configs/active_learning.yaml
-max_iterations: 10
-max_candidates_per_iteration: 50
-candidate_dir: active_learning_candidates
-labeled_data_dir: labeled_data
-model_registry_dir: models
-workflow_state_path: workflow_state.json
-dry_run: false
-md:
-  n_steps: 5000
-  model_version: model_v000
-  config: configs/gmd.yaml
-  command_template: "python /path/to/GMD/run_md.py --model {model} --config {config}"
+| Example | Shows |
+|---|---|
+| `01_monitor_trajectory.py` | monitor GMD frames or a legacy LAMMPS dump |
+| `02_extract_hotspots.py` | hotspot clustering, extraction and capping |
+| `03_generate_cp2k_inputs.py` | CP2K inputs through the labeling gates |
+| `04_parse_cp2k_forces.py` | parse and validate a real CP2K 2026.2 output |
+| `05_write_sgt_dataset.py` | a labeled region published as a versioned GMD_SGT dataset |
+| `06_online_monitor.py` | replay GMD frames, or monitor a live GMD run (`--live`) |
+
+## Components
+
+```
+src/gmd_active_learning/
+  contracts/        typed records shared by every layer (Frame, MonitorResult, EventRecord, ExtractedRegion, LabelTask, ...)
+  monitors/ events/ hotspots/ extraction/ active_learning/ datasets/ retraining/    backend-neutral domain code
+  workflow/         persistent controller, protocols, SQLite store, composition root (assembly.py)
+  labeling/         persistent CP2K labeling service
+  adapters/         gmd/, sgt/, dft/cp2k/, dft/scf/ (experimental ML-SCF), schedulers/, registry.py
+  importers/        legacy LAMMPS dump import (re-monitor historical PHAL trajectories)
+  config.py cli.py  central configuration and the gmd-al CLI
+containers/         GMD, GMD_SGT and CP2K images, build.sh, versions.yaml, validators
+tools/              audit, benchmarks, smoke checks, runtime tree, HPC (PBS) jobs, SCF tooling, docs generators, migration
+docs/               architecture, topic guides, ADRs, containers, known issues, migration record
 ```
 
-其中 `command_template` 由 `GMDAdapter` 消费，至少应支持：
+Layering is enforced by `tests/architecture/test_layering.py`: domain code never imports an
+adapter, a backend or the composition root. More in [docs/architecture.md](docs/architecture.md);
+operations tools in [docs/operations.md](docs/operations.md).
 
-- `{model}`: 当前已导出模型路径或模型版本路径
-- `{config}`: `GMD` 运行配置文件路径
+## Tests
 
-`GMD` 侧应返回或回调给控制层的单帧信息至少包括：
-
-- `step`
-- `positions`
-- `symbols`
-- `forces`
-
-建议同时提供：
-
-- `cell`
-- `pbc`
-- `energy`
-- `ensemble_forces`
-
-## 接入 GMD_se3gnn
-
-- 使用 `adapters/gmd_se3gnn_adapter.py`
-- 支持 Python API 调用和 subprocess 调用
-- 训练、导出、推理接口都通过 adapter 暴露
-
-示例配置：
-
-```yaml
-# configs/retraining.yaml
-trainer_type: gmd_se3gnn
-call_mode: subprocess
-train_command: "python /path/to/GMD_se3gnn/train.py --config {config} --data {data} --output {output}"
-export_command: "python /path/to/GMD_se3gnn/export.py --model {model} --output {output}"
+```bash
+bash tools/test/run_all_offline.sh                       # offline suite (CI: Python 3.10-3.12)
+GMD_EXECUTABLE=... GMD_SGT_PATH=... CP2K_EXECUTABLE=... GMD_AL_RUN_INTEGRATION=1 bash tools/test/run_all_offline.sh
 ```
 
-占位符含义：
+See [tests/README.md](tests/README.md) for suites, markers and the variables the integration tests
+read.
 
-- `{config}`: 训练配置路径
-- `{data}`: 当前轮合并后的训练数据路径
-- `{output}`: 训练或导出输出目录
-- `{model}`: 训练好的模型路径
+## Limitations
 
-联用时的最小步骤：
+- **Containers and HPC are unvalidated.** The Dockerfiles, `build.sh`, validators and PBS
+  templates are tested statically and on the host; no image has been built and no PBS job
+  submitted ([docs/containers/README.md](docs/containers/README.md)).
+- **Real-program evidence is smoke-scale**: a tiny model on four water molecules, CPU, macOS arm64.
+- **Uncapped metal/oxide fragments and QM/MM embedding are refused**, pending a scientific
+  decision ([known issues](docs/known-issues.md) 1 and 2).
+- **ML-SCF is experimental** and has shown no acceleration benefit (F-21).
+- Monitoring statistics are pooled over species and never decay; the local LJ residual detects
+  non-LJ-like force directions, not wrong pair strengths ([monitoring](docs/monitoring.md)).
+- One controller per work directory.
 
-1. 在 `configs/active_learning.yaml` 中设置 `dry_run: false`，并填写 `md.command_template` 与 `md.config`。
-2. 在 `configs/retraining.yaml` 中填写 `train_command` 和 `export_command`。
-3. 确保 `GMD` 运行结束后，adapter 能返回包含 `forces` 的 `MDFrame`。
-4. 如果要启用 ensemble 监督，还需要让 `MDFrame.ensemble_forces` 返回形状为 `(M, N, 3)` 的数组。
-5. 运行 `gmd-al run` 启动完整流程。
+Full list: [docs/known-issues.md](docs/known-issues.md). The migration from PHAL (feature ledger,
+findings, evidence) is in [docs/migration/](docs/migration/README.md).
 
-## 当前限制
+## Contributing
 
-- PBC 目前实现的是最小镜像近似
-- DFT 标注器当前只生成输入文件与作业脚本，不真正提交作业
-- `GMD` / `GMD_se3gnn` 适配器当前提供可扩展骨架和 dry-run 行为
-- 候选去重默认使用 pair distance histogram，后续可扩展到 SOAP / ACSF
+See [docs/contributing.md](docs/contributing.md) and `AGENTS.md`.
+
+## Attribution
+
+GMD_active contains code and data ported from PHAL (`hotspot_al`,
+https://github.com/kiana-0423/lammps_monitor, commit 96263b6), MIT License; see [NOTICE](NOTICE).
+Ported files carry a "Ported from PHAL" header. GMD, GMD_SGT and CP2K are separate projects with
+their own licenses.
