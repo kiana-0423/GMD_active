@@ -28,12 +28,15 @@ class OtherEngineSettings(BaseModel):
 
     functional: str = "PBE"
     basis: str
+    #: total charge; ``None`` uses the region's own charge (set by extraction, 0 by default)
+    charge: int | None = None
     multiplicity: int | None = None
     spin_policy: str = "auto"
 
 
 def _state(region: ExtractedRegion, settings: OtherEngineSettings):  # noqa: ANN202
-    metadata = {"charge": region.charge, **({"multiplicity": region.multiplicity} if region.multiplicity else {})}
+    charge = region.charge if settings.charge is None else settings.charge
+    metadata = {"charge": charge, **({"multiplicity": region.multiplicity} if region.multiplicity else {})}
     return resolve_electronic_state(
         region.to_atoms(),
         {"multiplicity": settings.multiplicity, "spin_policy": settings.spin_policy},

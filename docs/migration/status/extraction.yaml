@@ -293,13 +293,33 @@
     cell); floats use their shortest repr instead of ASE's 8 decimals. Lives in datasets/frame_io.py, not
     utils/structure_io.py.
 - id: IO-004
-  status: in-progress
-  implementation: []
-  evidence: []
+  status: verified
+  implementation:
+    - src/gmd_active_learning/adapters/dft/cp2k/backend.py
+    - src/gmd_active_learning/adapters/dft/cp2k/input.py
+    - src/gmd_active_learning/adapters/registry.py
+  evidence:
+    - tests/adapters/dft/test_cp2k_phal_input_parity.py::test_cp2k_dispatch_writes_phal_files_byte_identically
+    - tests/adapters/dft/test_cp2k_phal_input_parity.py::test_cp2k_inputs_are_byte_identical_to_phal
+    - tests/adapters/dft/test_cp2k_phal_input_parity.py::test_capture_covers_every_case_and_run_type
+    - tests/adapters/dft/test_cp2k_phal_input_parity.py::test_unknown_dft_engine_raises
+    - tests/adapters/dft/test_cp2k_phal_input_parity.py::test_capture_is_what_phal_writes_today
+    - tests/adapters/test_registry.py::test_unknown_backend_lists_registered_engines
   findings: []
   notes: >-
-    The DFT input dispatcher belongs to the labeling area (adapters/dft). Nothing is implemented here; the
-    recommendation to port CP2K only stands.
+    CP2K only, as recommended. The dispatcher is the backend registry (backends.dft.engine) plus
+    CP2KBackend.prepare_inputs, which the labeling service calls. The test compares it with PHAL's
+    write_cp2k_inputs on 4 fixture regions, using the inputs frozen in
+    tests/adapters/dft/phal_cp2k_inputs.json (captured from PHAL 96263b6, and re-checked against ref/
+    while it exists). The regions are capped CH3 (isolated), CH3 radical, periodic H2, and the golden
+    ethane evt-80 cluster region extracted by GMD and H-capped with PHAL's settings. The same file set
+    (<job>_hopt.inp when capped, <job>_sp.inp) is written byte-identically, and so is every
+    ENERGY_FORCE/GEO_OPT text. The equivalent settings are PHAL load_config() defaults and
+    CP2KConfig(stress="never"). PHAL's periodic and poisson_solver follow the region class, and isolated
+    regions get GMD's padded cubic cell. An unknown engine (e.g. gaussian) raises ConfigurationError
+    listing the registered engines. Deliberate differences: no <job>.xyz copy is written (the task
+    directory holds region.json). Gaussian and ORCA are not dispatch engines: they have no
+    runner/parser (LAB-010, optional writers).
 - id: IO-005
   status: dropped
   implementation: []

@@ -369,18 +369,27 @@
     - Walltime parsing accepts [[D-]HH:]MM:SS or seconds. The walltime is enforced by the scheduler
       (local enforces it itself), not by monotonic time in the controller.
 - id: LAB-010
-  status: migrated
+  status: verified
   implementation: [src/gmd_active_learning/labeling/other_engines.py]
   evidence:
+    - tests/labeling/test_other_engines.py::test_gaussian_and_orca_text_is_identical_to_phal
+    - tests/labeling/test_other_engines.py::test_functional_basis_and_charge_reach_the_text
+    - tests/labeling/test_other_engines.py::test_gaussian_h_only_text_differs_from_phal_only_by_the_freeze_fix
+    - tests/labeling/test_other_engines.py::test_phal_engine_capture_is_current
     - tests/labeling/test_other_engines.py::test_gaussian_and_orca_inputs
     - tests/labeling/test_other_engines.py::test_gaussian_h_only_optimisation_freezes_non_cap_atoms
   findings: []
   notes: >-
-    Ported as optional, UNVALIDATED tooling (VALIDATED = False) under labeling/, because tools/ is
-    outside this area. Functional and basis are explicit settings in OtherEngineSettings; basis has no
-    default, since PHAL's 'DZVP' is not a Gaussian keyword. The Gaussian H-only optimisation now
-    freezes non-cap atoms with freeze codes. The text therefore differs from PHAL deliberately.
-    Nothing runs or parses these engines.
+    Ported as optional, UNVALIDATED tooling (VALIDATED = False) under labeling/, because tools/ is outside
+    this area. For 3 fixture regions (CH3 radical, capped CH3 at charge +1, H2), the .gjf force input and
+    the ORCA .inp text are identical to PHAL 96263b6. The comparison uses the text frozen in
+    tests/labeling/phal_other_engine_inputs.json, re-checked against ref/ while it exists.
+    OtherEngineSettings is a strict pydantic model (extra keys rejected). Its functional, basis and charge
+    reach the text: route/header, "charge multiplicity", and U/UKS for open shells. charge None uses the
+    region's charge. PHAL read an unschema'd 'dft' section, so with load_config the defaults always
+    applied. basis has no default, since PHAL's 'DZVP' is not a Gaussian keyword. Deliberate deviation:
+    the Gaussian H-only optimisation freezes non-cap atoms. Its text differs from PHAL's only in the route
+    ("opt" instead of "opt=modredundant") and the freeze column. Nothing runs or parses these engines.
 - id: LAB-011
   status: in-progress
   implementation: []
