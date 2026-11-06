@@ -2,7 +2,7 @@
 # Every grid, threshold and budget of the pilot is here. Thresholds under `fidelity` are pre-registered:
 # they are frozen at the first `fidelity-prepare` and must not be changed afterwards.
 # Generated artifacts go to ../alkane_artifacts/pilot (relative to the GMD_active root), outside git.
-name: pilot
+name: pilot_c32
 description: >-
   C16H34 and C32H66, 24 parents (6 base conformations x {normal, torsion, bend, contact}),
   PBE-D3(BJ)/DZVP-MOLOPT-SR-GTH/GTH-PBE, 400 Ry, isolated cubic WAVELET box.

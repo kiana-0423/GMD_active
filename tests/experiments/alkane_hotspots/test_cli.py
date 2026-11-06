@@ -73,7 +73,7 @@ def test_pilot_generate_is_deterministic(tmp_path: Path, capsys: pytest.CaptureF
     parents = [json.loads(line) for line in (tmp_path / "a" / "parents.jsonl").read_text().splitlines()]
     assert len(parents) == 16 and {p["chain_length"] for p in parents} == {16}
     calibration = {p["chain_length"] for p in parents if p["split"] == "calibration"}
-    assert calibration == {16, 32}
+    assert calibration == {16}
 
 
 @pytest.mark.cp2k
