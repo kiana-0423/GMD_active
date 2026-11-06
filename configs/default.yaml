@@ -21,9 +21,12 @@ workflow:
     fingerprint: type_weighted_pair_distance_histogram
     fingerprint_bins: 16
     fingerprint_cutoff: 8.0
+    pair_distances: minimum_image
+    histogram_normalisation: density
     deduplicate: true
     diversity_threshold: 0.1
     compare_with_labeled: true
+    tie_break: insertion
     max_per_cycle: 20
     max_per_event: 4
     max_total: null
@@ -59,6 +62,8 @@ md:
   env:
     OMP_NUM_THREADS: '1'
   smoke_steps: 5
+  launcher: []
+  check_species: true
 mlip:
   source_path: null
   device: cpu

@@ -108,7 +108,6 @@ def test_ml_scf_rules(tmp_path: Path, path: str, value: Any) -> None:
 
 # PHAL positive-range paths whose GMD target accepts 0 on purpose (reason).
 ZERO_ALLOWED = {
-    "md.directives.time_step": "free-form GMD directive passed through to run.in; GMD validates it at launch",
     "events.pre_trigger_frames": "0 frames of context before the trigger is a valid capture policy",
     "events.post_trigger_frames": "0 closes the event at the trigger frame",
     "extraction.extract_radius": "0 extracts the hotspot atoms only; null means mlip_cutoff + buffer_radius",
@@ -129,8 +128,6 @@ def test_phal_positive_ranges(tmp_path: Path, phal_path: str) -> None:
         if target in ZERO_ALLOWED:
             _build(raw, tmp_path)
             raw = set_path(gmd_default(), target, -1)
-            if target == "md.directives.time_step":
-                continue
         with pytest.raises(ConfigurationError, match=target.replace(".", r"\.")):
             _build(raw, tmp_path)
 
