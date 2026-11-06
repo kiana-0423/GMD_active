@@ -143,9 +143,11 @@ def test_slurm_unknown_when_neither_query_knows_the_job(fake_scheduler, tmp_path
 
 
 def test_slurm_query_timeout_gives_unknown_not_an_exception(fake_scheduler, tmp_path: Path) -> None:
-    scheduler = _slurm(command_timeout_seconds=0.5)
-    job = scheduler.submit(tmp_path / "w", ["true"])
+    # Submit with the default timeout: under a loaded machine a 0.5 s budget could also expire during
+    # the (fake) sbatch call, which made this test flaky. Only the hanging queries get the short budget.
+    job = _slurm().submit(tmp_path / "w", ["true"])
     fake_scheduler.behave(squeue="hang", sacct="hang")
+    scheduler = _slurm(command_timeout_seconds=0.5)
     assert scheduler.poll(job) is ExecutionStatus.UNKNOWN
     assert "timed out" in job.metadata["poll_error"]
 
