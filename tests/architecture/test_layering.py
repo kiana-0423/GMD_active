@@ -23,13 +23,17 @@ targets are checked as imports; every package must be classified.
 
 from __future__ import annotations
 
+import importlib.util
+
 import ast
 from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
 
-SRC = Path(__file__).resolve().parents[2] / "src"
+# The package is located through the import system, so these checks also run on an installed
+# wheel (clean-install gate), not only on a source checkout.
+SRC = Path(importlib.util.find_spec("gmd_active_learning").origin).resolve().parents[1]  # src/ or site-packages
 PACKAGE = "gmd_active_learning"
 PACKAGE_ROOT = SRC / PACKAGE
 

@@ -11,6 +11,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+IN_GIT_CHECKOUT = (ROOT / ".git").exists()
+needs_git = pytest.mark.skipif(not IN_GIT_CHECKOUT, reason="not a git checkout (e.g. the clean-install export)")
 
 
 def test_pyproject_metadata_extras_and_entry_point() -> None:
@@ -23,6 +25,7 @@ def test_pyproject_metadata_extras_and_entry_point() -> None:
 
 
 @pytest.mark.slow
+@needs_git
 def test_wheel_builds_from_the_committed_tree_without_the_reference(tmp_path: Path) -> None:
     export = tmp_path / "export"
     export.mkdir()
@@ -41,6 +44,7 @@ def _ignored(path: str) -> bool:
     return subprocess.run(["git", "-C", str(ROOT), "check-ignore", "-q", path]).returncode == 0
 
 
+@needs_git
 def test_runtime_outputs_are_ignored_but_fixtures_and_sources_are_not() -> None:
     for path in ("runtime/x", "runs/a/state", "image.sif", "job.o12345", "slurm-77.out", "benchmark.json", "cp2k_jobs/t/in.inp",
                  "src/gmd_active_learning/__pycache__/x.pyc", "ref/lammps_monitor/README.md"):

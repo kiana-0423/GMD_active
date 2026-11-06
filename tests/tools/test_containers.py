@@ -965,7 +965,9 @@ def test_gmd_static_check_fails_for_a_missing_binary(tmp_path: Path) -> None:
     completed = subprocess.run(
         [sys.executable, str(SCRIPTS / "validate_gmd_stack.py"), "--mode", "static",
          "--gmd", str(tmp_path / "nope" / "gmd"), "--probe-dir", str(tmp_path)],
-        capture_output=True, text=True, check=False, env=clean_env(PYTHONDONTWRITEBYTECODE="1"))
+        capture_output=True, text=True, check=False,
+        # GMD_EXECUTABLE would override --gmd with a real binary and defeat the missing-binary case.
+        env={key: value for key, value in clean_env(PYTHONDONTWRITEBYTECODE="1").items() if key != "GMD_EXECUTABLE"})
     payload = json.loads(completed.stdout)
     assert completed.returncode == 1
     assert payload["overall_status"] == "FAIL"

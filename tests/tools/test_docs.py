@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import importlib.util
+
 import importlib
 import re
 import shutil
@@ -100,7 +102,7 @@ def test_architecture_names_existing_modules_and_protocols() -> None:
     for stage in Stage:
         assert stage.name in text, stage
     for path in re.findall(r"`((?:adapters|workflow|monitors|labeling|extraction|datasets|retraining|importers)/[\w/]+\.py)`", text):
-        assert (ROOT / "src" / "gmd_active_learning" / path).is_file(), path
+        assert (Path(importlib.util.find_spec("gmd_active_learning").origin).parent / path).is_file(), path
 
 
 def test_known_issues_cover_phal_issues_and_new_findings() -> None:

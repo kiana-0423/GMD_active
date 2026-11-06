@@ -23,7 +23,9 @@ import pytest
 
 import gmd_active_learning
 
-SRC = Path(__file__).resolve().parents[2] / "src"
+# The package is located through the import system, so these checks also run on an installed
+# wheel (clean-install gate), not only on a source checkout.
+SRC = Path(importlib.util.find_spec("gmd_active_learning").origin).resolve().parents[1]  # src/ or site-packages
 
 # Modules that import torch at module level by design (optional reliability classifier).
 TORCH_REQUIRED = frozenset(

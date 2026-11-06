@@ -38,7 +38,9 @@ def test_every_scf_feature_is_off_by_default() -> None:
 
 
 def test_the_shipped_section_file_is_the_model_default() -> None:
-    payload = yaml.safe_load(default_section_path().read_text(encoding="utf-8"))
+    # default_section_path() resolves inside a source checkout; an installed wheel has no configs/.
+    section = default_section_path() if default_section_path().is_file() else REPO / "configs" / "sections" / "scf.yaml"
+    payload = yaml.safe_load(section.read_text(encoding="utf-8"))
 
     assert set(payload) == {"scf"}
     assert ScfConfig.model_validate(payload["scf"]) == ScfConfig()
