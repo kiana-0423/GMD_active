@@ -161,3 +161,23 @@ def test_cli_chain_with_real_gmd_sgt(tmp_path: Path) -> None:
     assert {"ground_truth", "arms", "evaluation", "figures"} <= set(report["executed"])
     progress = json.loads((loaded.output_dir / "arms" / "committee_local" / "rep0" / "progress.json").read_text())
     assert progress["rounds"][0]["model"]["key"] == gt["model"]["key"]  # ground truth analysed the arms' round-0 model
+
+
+def test_trained_checkpoint_receptive_field_is_a_separate_executed_section(tmp_path: Path) -> None:
+    registered = {}
+    register_cli(lambda name, help, add, handler: registered.setdefault(name, (add, handler)))
+    parser = argparse.ArgumentParser()
+    registered["receptive-field"][0](parser)
+    assert parser.parse_args(["--checkpoint", "model_study/models/m/train/member_0/best.pt"]).checkpoint.endswith("best.pt")
+    assert parser.parse_args([]).checkpoint is None
+    root = tmp_path / "art"
+    make_parents(root)
+    loaded = load_beta_config(_study(tmp_path, root))
+    assert {"receptive_field", "receptive_field_checkpoint"} <= set(build_report(loaded)["planned_not_executed"])
+    result = {"nominal": {"force_receptive_field_local_A": 16.0}, "measured": {"delete": 3.1}, "model": {"source": "checkpoint"},
+              "interpretation": "trained"}
+    write_json_atomic(loaded.output_dir / "receptive_field_checkpoint.json", result)
+    report = build_report(loaded)
+    assert report["executed"]["receptive_field_checkpoint"]["model_source"] == "checkpoint"
+    assert "receptive_field" in report["planned_not_executed"]  # the random-init measurement is still separate
+    assert "### Receptive field, trained checkpoint" in render_markdown(report)

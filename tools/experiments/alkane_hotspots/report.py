@@ -43,6 +43,7 @@ LOGGER = logging.getLogger(__name__)
 
 FILES = {
     "receptive_field": "receptive_field.json",
+    "receptive_field_checkpoint": "receptive_field_checkpoint.json",
     "ground_truth": "ground_truth.json",
     "regions": "ground_truth_regions.json",
     "per_atom": "ground_truth_per_atom.json",
@@ -114,13 +115,13 @@ def build_report(loaded: LoadedConfig) -> dict[str, Any]:
     executed: dict[str, Any] = {}
     planned: dict[str, Any] = {}
 
-    rf = _load(out / FILES["receptive_field"])
-    if rf is not None:
-        executed["receptive_field"] = {"artifact": _artifact(out / FILES["receptive_field"]), "nominal": rf.get("nominal"),
-                                       "measured": rf.get("measured"), "model_source": (rf.get("model") or {}).get("source"),
-                                       "interpretation": rf.get("interpretation")}
-    elif beta.receptive_field.enabled:
-        planned["receptive_field"] = {"reason": "no receptive_field.json"}
+    for key in ("receptive_field", "receptive_field_checkpoint"):
+        rf = _load(out / FILES[key])
+        if rf is not None:
+            executed[key] = {"artifact": _artifact(out / FILES[key]), "nominal": rf.get("nominal"), "measured": rf.get("measured"),
+                             "model_source": (rf.get("model") or {}).get("source"), "interpretation": rf.get("interpretation")}
+        elif beta.receptive_field.enabled:
+            planned[key] = {"reason": f"no {FILES[key]}" + (" (receptive-field --checkpoint <trained model>)" if key.endswith("checkpoint") else "")}
 
     gt = _load(out / FILES["ground_truth"])
     if gt is not None and gt.get("status") == "executed":
@@ -201,10 +202,11 @@ def render_markdown(report: Mapping[str, Any]) -> str:
     executed = report["executed"]
     if not executed:
         lines.append("Nothing executed yet.")
-    if "receptive_field" in executed:
-        rf = executed["receptive_field"]
-        lines += ["### Receptive field", "", f"- artifact: `{rf['artifact']['path']}`", f"- model source: {rf['model_source']}",
-                  f"- nominal: {json.dumps(rf['nominal'])}", f"- measured: {json.dumps(rf['measured'])}", f"- {rf['interpretation']}", ""]
+    for key, title in (("receptive_field", "Receptive field"), ("receptive_field_checkpoint", "Receptive field, trained checkpoint")):
+        if key in executed:
+            rf = executed[key]
+            lines += [f"### {title}", "", f"- artifact: `{rf['artifact']['path']}`", f"- model source: {rf['model_source']}",
+                      f"- nominal: {json.dumps(rf['nominal'])}", f"- measured: {json.dumps(rf['measured'])}", f"- {rf['interpretation']}", ""]
     if "ground_truth" in executed:
         gt = executed["ground_truth"]
         lines += ["### Hotspot ground truth", "", f"- artifact: `{gt['artifact']['path']}`",
@@ -267,12 +269,17 @@ def cmd_receptive_field(loaded: LoadedConfig, args: argparse.Namespace) -> Path:
         raise SystemExit(f"receptive-field: no parent matches {selector.model_dump()}")
     record = matches[selector.index]
     frame = parent_frame(record, *loaded.bases())
+    output = FILES["receptive_field"]
+    if getattr(args, "checkpoint", None):
+        # a trained model: same structure and measurements, separate output next to the random-init result
+        cfg = cfg.model_copy(update={"model_source": "checkpoint", "checkpoint": str(args.checkpoint)})
+        output = FILES["receptive_field_checkpoint"]
     checkpoint = None if cfg.checkpoint is None else loaded.artifacts_root / cfg.checkpoint
     model, model_config, provenance = build_model(beta.training.model, cfg, checkpoint=checkpoint)
     result = run_receptive_field(model, model_config, frame.numbers, frame.positions, cfg, provenance=provenance,
                                  structure={"parent_id": record["parent_id"], "family": record.get("family"), "chain_length": record.get("chain_length")})
     result["config_hash"] = loaded.config_hash
-    return write_json_atomic(loaded.output_dir / FILES["receptive_field"], result)
+    return write_json_atomic(loaded.output_dir / output, result)
 
 
 def initial_model(loaded: LoadedConfig, context: Any) -> Any:
@@ -347,12 +354,15 @@ def render_figures(loaded: LoadedConfig) -> dict[str, dict[str, Any]]:
 
     def emit(name: str, fig: Any, sources: list[Path]) -> None:
         missing = fg.missing_reasons(fig)
-        if smoke and name not in ("receptive_field",):
+        if smoke and name not in ("receptive_field", "receptive_field_checkpoint"):
             fg.stamp(fig, "SMOKE-ONLY CP2K settings present: pipeline check, not a result")
         index[name] = {"paths": fg.save(fig, fig_dir, name, fmt, dpi), "missing": missing, "has_data": not missing,
                        "sources": [_artifact(p) for p in sources if p.is_file()]}
 
     emit("receptive_field", fg.fig_receptive_field(_load(out / FILES["receptive_field"])), [out / FILES["receptive_field"]])
+    if (out / FILES["receptive_field_checkpoint"]).is_file():
+        emit("receptive_field_checkpoint", fg.fig_receptive_field(_load(out / FILES["receptive_field_checkpoint"])),
+             [out / FILES["receptive_field_checkpoint"]])
     per_atom = _load(out / FILES["per_atom"])
     signal = next(iter(beta.ground_truth.monitor_variants), "committee")
     emit("hotspots", fg.fig_hotspots(per_atom, signal=signal), [out / FILES["per_atom"]])
@@ -423,6 +433,10 @@ def _add_arguments(name: str) -> Any:
     def add(parser: argparse.ArgumentParser) -> None:
         parser.add_argument("--study", default=None,
                             help="model-study YAML (configs/demos/alkane_hotspots/arms_<profile>.yaml); default: the model_side section of --config")
+        if name == "receptive-field":
+            parser.add_argument("--checkpoint", default=None,
+                                help="trained GMD_SGT checkpoint (relative to the artifacts root, or absolute); "
+                                     "writes receptive_field_checkpoint.json instead of receptive_field.json")
         if name == "ground-truth":
             parser.add_argument("--checkpoints", nargs="*", default=None, help="primary + committee checkpoints (default: round-0 model)")
         if name == "arms-run":
