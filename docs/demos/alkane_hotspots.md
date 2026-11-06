@@ -556,40 +556,111 @@ each figure's sources (with sha256) and whether every panel had data:
 A panel without data says "NOT EXECUTED / no data" and why. When any label record is smoke-only, every
 data figure carries a red "SMOKE-ONLY" stamp.
 
-## Results (executed)
+## Pilot model study: results
 
-`report` writes `report.json` and `report.md`. They separate *executed* sections, each with its
-artifact path, sha256, config hash, label counts, measured costs and the numbers read from it, from
-*planned / not executed* sections. Published copies are in `results/model_study_{smoke,pilot}/`.
+`report` writes `report.json` and `report.md`. Each executed section carries its artifact path,
+sha256, config hash, label counts, measured costs and the numbers read from it. Planned or
+unexecuted parts are listed separately. Published copies are in
+`results/model_study_{smoke,pilot,pilot_v2}/`. All numbers below were measured. The pilot is small:
+4 parents per split, 2 repetitions, and a trainer that is not bitwise reproducible (see below). No
+difference between arms is claimed from it.
 
-Executed on 2026-11-07:
+### Executed: pilot v1 (`arms_pilot.yaml`, 2026-11-07), pre-registered settings
 
-- **Receptive field, pilot architecture, real pilot structure, random init (no DFT).** The model is a
-  local GMD_SGT with n_blocks = 2 and r_c = 4 A, measured on C32-b00-normal0 (98 atoms, core = the
-  central carbon). Artifact: `<artifacts_root>/model_study/receptive_field.json`, sha256 `69db758f…`,
-  study config hash `3f2fc68d…`.
-  - The nominal force receptive field is 16 A; the per-atom energy's is 8 A.
-  - Measured: a dependence above round-off reaches at most 8.95 A (delete) and 7.64 A (perturb).
-    Influences of at least 1e-4 eV/A reach 2.75 A, and truncating at R >= 3 A changes the core force
-    by less than 1e-4 eV/A.
-  - These magnitudes belong to a randomly initialised model. They show that the measurement works on
-    the real geometry, not how a trained model behaves; the trained-checkpoint measurement is planned.
-- **Smoke artifacts:** figures and report only. All three smoke labels are smoke-only, and the report
-  says so. No model-study number comes from them.
+Artifacts are in `<artifacts_root>/model_study/`. The study config hash is `6d363dce…`;
+ground_truth.json sha256 `42f8c6c5…`; evaluation.json sha256 `912f06e0…`.
 
-## Planned
+**Receptive field (random init, no DFT).** The model is a local GMD_SGT with n_blocks = 2 and
+r_c = 4 A.
 
-Planned, not executed (no numbers exist):
+- Nominal receptive field: 16 A for forces, 8 A for the per-atom energy.
+- Measured on a 98-atom C32H66 normal structure from the pre-sizing parent set: a dependence above
+  round-off reaches at most 8.95 A (delete) and 7.64 A (perturb). Truncating at R >= 3 A changes the
+  core force by less than 1e-4 eV/A.
 
-- the ground truth on pilot labels;
-- every acquisition arm and ablation (pilot: 2 repetitions x 2 rounds; campaign: 5 x 5);
-- the receptive field of a trained checkpoint;
-- the budget analysis;
-- the closed-loop timeline.
+These are the magnitudes of a random model. The measurement on a trained checkpoint is in pilot v2.
 
-All of them need the pilot full-system labels and a passed fidelity gate (`fidelity/selection.json`).
-The smoke gate failed (see above). If the pilot gate also fails, the local arms A–C cannot run as
-validated arms, and only D and the ground truth remain.
+**Ground truth (validation split: 4 configurations, 64 regions).**
+
+- The initial model was trained on the 4 initial_train structures with the pre-registered training
+  settings (batch_size 4, 150 epochs, patience 30). Its region errors (max |F_model - F_DFT| per
+  region) have a median of 2.39 eV/A and a 99th percentile of 3.36 eV/A.
+- At every reference threshold (0.1, 0.2, 0.4 eV/A), all 64 regions are positive. AP is therefore
+  undefined: with no negatives, any ranking scores 1. The report says so instead of printing 1.0;
+  this was fixed in `ground_truth.py` after the first run printed AP = 1.
+- The staged-monitor signals are unavailable: 1 normal calibration frame is fewer than
+  `warmup_frames` = 3.
+- Localisation: in 3 of 3 perturbed configurations the max-error region contains the perturbation
+  site. No raw signal (committee, LJ, force, r_min, coordination) put its top region on it (0/3
+  each). This is a 3-configuration observation, not a rate.
+
+**Acquisition arms (2 repetitions x 2 rounds x 4 labels; evaluated on final_eval).**
+
+| Arm | Valid labels | Measured DFT (core-s) | Force RMSE, round 0 -> 2 (eV/A) |
+|---|---|---|---|
+| A random_local | 8, 8 | 3393, 3073 | 0.827 -> 0.664; 0.831 -> 0.634 |
+| B committee_local | 8, 8 | 2922, 3738 | 0.827 -> 0.637; 0.831 -> 0.756 |
+| C phal_local | 0, 0 | 0, 0 | not exercised |
+| D phal_full_system | 0, 0 | 0, 0 | not exercised |
+| ablations (4) | 0 | 0 | not exercised |
+
+- **Arms C, D and the ablations were not exercised.** The staged monitor never left warm-up (one
+  calibration configuration), so it never triggered, and the arms recorded zero acquisitions as
+  "complete". `arms-run` now refuses such a variant before any training
+  (`_check_monitor_calibration`, tested).
+- A and B both lower the final_eval RMSE from about 0.83 eV/A, but not monotonically: one A
+  repetition rose to 0.962 after round 1. With 2 repetitions they cannot be told apart.
+- The acquired fragments had 14-31 atoms and cost 1.75 core-h for 15 labels, a mean of about
+  420 core-s each. A full C16 label costs about 2630 core-s.
+
+**Initial-model sizing diagnostic (no DFT)**, `examples/alkane_hotspot_demo/initial_model_diagnostic.py`,
+result in `results/model_study_pilot/initial_model_diagnostic.json`:
+
+- single models, seed 11;
+- evaluated on the validation full labels, which are also the early-stopping set;
+- final_eval is never read.
+
+| Training set | Training settings | Median atom error (C / H), eV/A | Atoms < 0.2 / < 0.4 eV/A |
+|---|---|---|---|
+| initial_train (4) | pilot (batch 4, 150 epochs, patience 30) | 1.11 (2.12 / 0.99) | 4 % / 12 % |
+| initial_train (4) | 1500 epochs, batch 1, patience 300 | 0.85 (0.67 / 0.91) | 2 % / 7 % |
+| + calibration full (8) | same | 0.45 (0.62 / 0.40) | 12 % / 40 % |
+| + calibration fragments of the frozen setting (13) | same | 0.38 (0.50 / 0.34) | 8 % / 54 % |
+
+An earlier run of the same procedure, with the same data, seed and thread count, gave 1.11, 0.68,
+0.64 and 0.54 eV/A. **GMD_SGT CPU training was not bitwise reproducible here.** Single-seed
+differences of about 0.2 eV/A are noise. Both runs agree that the pilot model is step-limited and
+data-limited, and remains far above the 0.1-0.4 eV/A thresholds.
+
+**MD stability (no DFT)**, `examples/alkane_hotspot_demo/md_stability_check.py`:
+
+- the closed loop's GMD setup, 300 K, 0.5 fs, 2000 steps, 2 velocity seeds;
+- the parent bond topology is checked at every 10th step.
+
+| Model | First broken step (seeds 7, 8) | Intact frames |
+|---|---|---|
+| v1 initial model (pilot training) | 20, 20 | 1 % |
+| initial_train, 1500 epochs, batch 1 | none, none | 100 % |
+| + calibration full | none, none | 100 % |
+| + calibration fragments | none, none | 100 % |
+
+The v1 settings stopped training after too few optimiser steps (one step per epoch on 4 structures),
+and the resulting model dissociates C16H34 almost at once. With more steps on the same 4 structures
+the chain stays intact for 1 ps.
+
+### Pilot v2 (`arms_pilot_v2.yaml`), post-hoc and not pre-registered
+
+v2 changes only the two defects above:
+
+- training uses batch_size 1, 1500 epochs, patience 300 and warmup_steps 50;
+- the arms' monitor is calibrated on the normal configurations of initial_train, calibration and
+  validation (3; final_eval is never used).
+
+Ground truth keeps validation out of its calibration, so its staged-monitor signals stay unavailable
+(2 < 3 frames). Labels, parents, the fidelity setting, thresholds, budgets, arms, ablations and seeds
+are unchanged.
+
+Results: see "Executed: pilot v2" below, or "planned" if it has not run yet.
 
 ## Closed-loop execution and recovery
 
@@ -852,17 +923,41 @@ These are two short trajectories per model; no conclusion is drawn.
 The cancellation was also checked by `tests/experiments/alkane_hotspots/test_recovery.py`
 (real CP2K, marked `cp2k`).
 
-### Planned: pilot (not executed, no numbers)
+### Executed: pilot v1 (`closed_loop_pilot.yaml`, 2026-11-07), failed to exercise the loop
 
-`closed_loop_pilot.yaml` runs 2 cycles of 2000 steps each, with at most 2 labels per cycle and at
-most 6 core-hours of CP2K. MD starts from `C16-b01-normal0` (initial_train). The pilot gates are
-`max_force_rmse` 1.0 eV/A and at most 5 % regression on the validation split.
+This was a real run: C16H34 `C16-b01-normal0`, GMD at 300 K and 0.5 fs, labeling `local` with the
+frozen fidelity setting, artifacts under `<artifacts_root>/closed_loop/pilot/`.
 
-The run needs:
+- **Initial model:** the study's pilot training settings, trained on the 4 initial_train
+  structures. Validation force RMSE 0.715 eV/A.
+- **What happened:** one event at step 70. Its triggers were `force_large`, `committee_deviation`
+  and `lj_residual`, with a maximum score of 8.6. The extractor refused it before CP2K: by then the
+  bond topology had changed (5 parent bonds missing, 4 spurious ones).
+- **Segments:** the controller stopped segment 0 at step 204 and segment 1 at step 224, with no
+  further event.
+- **Outcome:** no label, no training, no model change, 0 core-h of DFT; the loop ended at `done`.
+  The refusal itself is correct behaviour: a dissociated chain is not an alkane configuration, and
+  labeling it would put non-alkane data into the set.
+- **Frozen evaluation:** initial and final are the same model. In the first version of frozen-eval
+  the reported chain statistics (end-to-end minimum 0.46 A, radius of gyration 2.5 A) were averages
+  over a broken molecule. frozen-eval now checks the topology of every frame and reports chain
+  observables over intact frames only.
+- **Recovery demo:** failed explicitly (`the recovery run exited before any CP2K submission; nothing
+  to interrupt`), because the same model produced no labelable event.
+- **Cause:** the MD stability check above. The v1 initial model breaks the chain at step 20 with
+  both seeds; a model trained with enough optimiser steps on the same data keeps it intact for 1 ps.
 
-- valid full labels of the initial_train and validation splits;
-- no other CP2K process running (`exclusive_cp2k`);
-- alpha's fidelity decision. If no `selection.json` exists, the loop uses full-system labels, about
-  1 core-hour per C16 label.
+The smoke run's mechanics (adoption after SIGKILL, gate rejection and rollback, cancellation,
+energy jumps at model changes) remain the only executed demonstration of those paths on real
+programs.
 
-Commands, in order: `closed-loop-run`, `frozen-eval`, `recovery-demo` (see the top of this section).
+### Pilot v2 (`closed_loop_pilot_v2.yaml`), post-hoc
+
+Identical to v1 except for three things:
+
+- the study is `arms_pilot_v2.yaml`, which gives the initial model enough optimiser steps;
+- the output directory is `closed_loop_v2`;
+- the run id is new.
+
+It runs after the C32 transfer has released CP2K (`exclusive_cp2k`). Results: "Executed: pilot v2"
+below, or "not executed" if absent.

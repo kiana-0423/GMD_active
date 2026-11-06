@@ -1,0 +1,75 @@
+{
+  "description": "MD stability check: does a model keep the alkane's bond topology in short GMD runs? (no CP2K)",
+  "closed_loop_config": "configs/demos/alkane_hotspots/closed_loop_pilot.yaml",
+  "steps": 2000,
+  "time_step_fs": 0.5,
+  "temperature_K": 300.0,
+  "covalent_scale": 1.3,
+  "parent_id": "C16-b01-normal0",
+  "runs": {
+    "v1_initial|seed7": {
+      "model": "closed_loop/pilot/initial_model/export/model.pt",
+      "seed": 7,
+      "status": "completed",
+      "n_frames": 201,
+      "first_broken_step": 20,
+      "intact_fraction": 0.00995024875621886
+    },
+    "v1_initial|seed8": {
+      "model": "closed_loop/pilot/initial_model/export/model.pt",
+      "seed": 8,
+      "status": "completed",
+      "n_frames": 201,
+      "first_broken_step": 20,
+      "intact_fraction": 0.00995024875621886
+    },
+    "itrain_more_steps|seed7": {
+      "model": "diagnostics/initial_model/initial_train__more_steps/train/member_0/ckpt_best.pt",
+      "seed": 7,
+      "status": "completed",
+      "n_frames": 201,
+      "first_broken_step": null,
+      "intact_fraction": 1.0
+    },
+    "itrain_more_steps|seed8": {
+      "model": "diagnostics/initial_model/initial_train__more_steps/train/member_0/ckpt_best.pt",
+      "seed": 8,
+      "status": "completed",
+      "n_frames": 201,
+      "first_broken_step": null,
+      "intact_fraction": 1.0
+    },
+    "itrain_calib_more_steps|seed7": {
+      "model": "diagnostics/initial_model/initial_train+calibration_full__more_steps/train/member_0/ckpt_best.pt",
+      "seed": 7,
+      "status": "completed",
+      "n_frames": 201,
+      "first_broken_step": null,
+      "intact_fraction": 1.0
+    },
+    "itrain_calib_more_steps|seed8": {
+      "model": "diagnostics/initial_model/initial_train+calibration_full__more_steps/train/member_0/ckpt_best.pt",
+      "seed": 8,
+      "status": "completed",
+      "n_frames": 201,
+      "first_broken_step": null,
+      "intact_fraction": 1.0
+    },
+    "itrain_calib_frag_more_steps|seed7": {
+      "model": "diagnostics/initial_model/initial_train+calibration_full+fragments__more_steps/train/member_0/ckpt_best.pt",
+      "seed": 7,
+      "status": "completed",
+      "n_frames": 201,
+      "first_broken_step": null,
+      "intact_fraction": 1.0
+    },
+    "itrain_calib_frag_more_steps|seed8": {
+      "model": "diagnostics/initial_model/initial_train+calibration_full+fragments__more_steps/train/member_0/ckpt_best.pt",
+      "seed": 8,
+      "status": "completed",
+      "n_frames": 201,
+      "first_broken_step": null,
+      "intact_fraction": 1.0
+    }
+  }
+}
