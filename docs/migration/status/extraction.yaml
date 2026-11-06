@@ -140,17 +140,38 @@
     should call extract_regions(frame, [[atom_id]], ExtractionConfig()) on a GMD frame fixture and check that
     regions exist.
 - id: EXT-012
-  status: migrated
-  implementation: [src/gmd_active_learning/extraction/h_capping.py, src/gmd_active_learning/extraction/embedding.py, docs/extraction_and_datasets.md]
+  status: verified
+  implementation:
+    - src/gmd_active_learning/extraction/h_capping.py
+    - src/gmd_active_learning/extraction/embedding.py
+    - src/gmd_active_learning/adapters/dft/cp2k/input.py
+    - src/gmd_active_learning/adapters/sgt/backend.py
+    - docs/known-issues.md
   evidence:
+    - tests/adapters/dft/test_known_issue_gates.py::test_uncapped_isolated_metal_or_oxide_is_rejected_by_default
+    - tests/adapters/dft/test_known_issue_gates.py::test_enabled_embedding_is_rejected_by_the_cp2k_writer
+    - tests/adapters/dft/test_known_issue_gates.py::test_capped_organic_fragment_passes_the_uncapped_gate
+    - tests/adapters/dft/test_cp2k_input.py::test_uncapped_isolated_fragment_gate
+    - tests/adapters/dft/test_cp2k_input.py::test_point_charge_embedding_is_refused
     - tests/extraction/test_capping_embedding.py::test_capping_disabled_metal_and_oxide_are_recorded_skips
     - tests/extraction/test_capping_embedding.py::test_embedding_data_and_fail_closed_gate
+    - tests/adapters/sgt/test_sgt_inference.py::test_species_map_errors
+    - tests/adapters/sgt/test_sgt_inference.py::test_species_map_accepts_subsets_and_sequences
+    - tests/adapters/sgt/test_sgt_inference.py::test_unknown_species_is_rejected_before_evaluation
+    - tests/adapters/gmd/test_engine.py::test_species_are_checked_before_launch
   findings: []
   notes: >-
-    Issues 1-2 are carried forward as fail-closed gates with tests: check_labelable(uncapped_policy=error) and
-    require_embedding_backend. They are documented in docs/extraction_and_datasets.md; docs/known-issues.md is not
-    in this area's paths. Wiring both gates into the CP2K input writer and the GMD_SGT species-order requirement
-    (issue 3) belong to the labeling and SGT areas.
+    Every carried-forward issue has a fail-closed test. (1) Uncapped metal or oxide: with default configs, a
+    Cu or Si-O cluster from extract_and_prepare is tagged h_capping_skipped (metal_system or oxide_system).
+    The built-in CP2K writer (build_cp2k_input, write_cp2k_inputs, CP2KBackend.prepare_inputs) refuses it
+    with UnsupportedCombinationError and leaves no .inp behind, because cp2k.uncapped_fragment_policy defaults
+    to error. Only an explicit allow or warn lets it through. A capped organic fragment passes. (2) Embedding:
+    a region embedded with point charges (embedding.enabled) is refused by the CP2K writer, and so is the
+    embedding switch alone; disabled embedding writes a pure-QM input. (3) Allegro type order is re-expressed
+    for GMD_SGT. The model must declare its species, otherwise inference and the GMD launch refuse. Engine
+    type maps must be explicit, contiguous, unique and known to the model (validate_species_map), and unknown
+    species are rejected before evaluation. Issues 4-6 (CP2K Pulay abort, Pulay export tolerance, fork-side
+    SCF_GUESS ML) are SCF-area records.
 - id: TRN-001
   status: verified
   implementation: [src/gmd_active_learning/datasets/masks.py]
