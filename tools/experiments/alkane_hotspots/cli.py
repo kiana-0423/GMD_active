@@ -29,7 +29,8 @@ from tools.experiments.alkane_hotspots.config import SPLITS, LoadedConfig, load_
 
 LOGGER = logging.getLogger(__name__)
 PACKAGE = "tools.experiments.alkane_hotspots"
-EXTENSION_MODULES: tuple[str, ...] = ("receptive_field", "ground_truth", "arms", "training", "evaluation", "figures", "report")
+EXTENSION_MODULES: tuple[str, ...] = ("receptive_field", "ground_truth", "arms", "training", "evaluation", "figures", "report",
+                                         "closed_loop", "recovery")
 
 Handler = Callable[[argparse.Namespace, LoadedConfig], int]
 

@@ -1,0 +1,101 @@
+# Alkane hotspot demonstration, part gamma: closed loop + recovery, SMOKE (mechanics only, not a scientific result).
+# Real GMD (Torch build), real GMD_SGT, real CP2K at alpha's smoke-only settings (C8H18, 200 Ry). Every bound is here.
+#   python -m tools.experiments.alkane_hotspots closed-loop-run --config configs/demos/alkane_hotspots/smoke.yaml \
+#       --closed-loop configs/demos/alkane_hotspots/closed_loop_smoke.yaml
+# Artifacts: <artifacts_root of smoke.yaml>/closed_loop/smoke (outside git).
+name: smoke
+description: Closed-loop and recovery mechanics on C8H18 with smoke-only CP2K settings and a 5-epoch model.
+base_config: smoke.yaml
+study: arms_smoke.yaml            # monitor + training (architecture, force weights, energy policy)
+output_subdir: closed_loop
+exclusive_cp2k: false             # smoke-only jobs (2 threads, seconds) may run next to other CP2K work
+
+md:
+  executable: ../GMD/build-torch/gmd          # relative to the GMD_active root
+  parent: {parent_id: C8-b00-normal0}
+  allowed_splits: [calibration]                # the smoke config has only a calibration split
+  directives: {time_step: 0.5, velocity: 300.0, velocity_init: random, velocity_seed: 7, thermostat: nose_hoover,
+               thermostat_tau: 100.0, remove_com_velocity: "true"}
+  frame_interval: 5
+  control_poll_interval: 1
+  segment_timeout_s: 900.0
+  env: {OMP_NUM_THREADS: "1"}
+  smoke_steps: 5
+
+md_box:
+  margin: 4.0                     # A beyond the force receptive field 2 x n_blocks x local_cutoff (16 A for this model)
+  stretch_allowance: 1.0
+  box_length: null
+  frame_check: true
+
+loop:
+  run_id: alkane-cl-smoke
+  cycles: 2
+  segment_steps: 100
+  segments_per_cycle: 1
+  labels_per_cycle: 1
+  max_per_event: 1
+  diversity_threshold: 0.0
+  min_score: null
+  min_new_samples: 1
+  max_pending_tasks: 4
+  poll_interval_s: 2.0
+  max_poll_wait_s: 600.0
+
+budget:
+  max_cpu_core_hours: 0.5         # measured CP2K CPU core-hours of the closed loop (smoke labels take ~1 core-minute)
+
+labeling:
+  mode: auto                      # local only with a passed fidelity gate; the smoke gate failed -> full-system labels
+
+label_geometry:                   # an event geometry is labeled only if it is still the intact alkane
+  require_parent_topology: true
+  covalent_scale: 1.2
+  min_distance: 0.7
+
+initial_model:                    # smoke only: explicit parents (the smoke config has no initial_train/validation split)
+  train_parents: [C8-b00-normal0]
+  validation_parents: [C8-b00-torsion0]
+  seed: 11
+  train_overrides: {n_epochs: 200}   # the study's 5 smoke epochs give a model whose MD collapses within 100 steps
+
+finetune:
+  train: {n_epochs: 50}
+  seed: 101
+
+promotion:                        # smoke: mechanics gates (export + GMD smoke); the force limits are deliberately loose
+  max_force_rmse: 10.0
+  max_relative_regression: 10.0
+  require_validation_samples: 1
+  require_export_validation: true
+  export_max_force_deviation: 1.0e-4
+  require_engine_smoke_test: true
+
+monitor_overrides:                # smoke: every stage evaluated and low thresholds so that a 100-step segment yields an event
+  stages: {physics_interval: always, full_interval: always, screen_threshold: 0.5, physics_threshold: 0.5, label_threshold: 0.5}
+events: {pre_trigger_frames: 1, post_trigger_frames: 1, cooldown_steps: 50}
+hotspots: {merge_radius: 3.0}
+
+frozen_eval:
+  seeds: [1, 2]
+  steps: 200
+  frame_interval: 5
+  discard_steps: 50
+  dihedral_bins: 36
+  gauche_window_deg: 120.0
+
+recovery:
+  run_id: alkane-recovery-smoke
+  cycles: 1
+  labels_per_cycle: 1
+  promotion: null                 # the loop's (loose) gates: the cycle's model is promoted unless export/smoke fail
+  strict_promotion:               # audited afterwards on the promoted model's real validation metrics
+    max_force_rmse: 0.05
+    max_relative_regression: 0.0
+    require_export_validation: true
+    require_engine_smoke_test: true
+  kill_after: submitted
+  kill_timeout_s: 1800.0
+  restart_steps: 50
+  cancellation_check: true
+  cancellation_wait_s: 120.0

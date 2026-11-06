@@ -515,3 +515,279 @@ Planned, not executed (no numbers exist):
 All of them need the pilot full-system labels and a passed fidelity gate (`fidelity/selection.json`).
 The smoke gate failed (see above). If the pilot gate also fails, the local arms A–C cannot run as
 validated arms, and only D and the ground truth remain.
+
+## Closed-loop execution and recovery
+
+Part gamma runs the real closed loop on GMD_active's persistent controller and demonstrates its
+recovery. Code: `closed_loop.py`, `recovery.py`, `md_box.py`. Configurations:
+`configs/demos/alkane_hotspots/closed_loop_{smoke,pilot}.yaml`. Entry script:
+`examples/alkane_hotspot_demo/closed_loop.py`. Outputs go to
+`<artifacts_root>/closed_loop/<name>/` (outside git).
+
+```bash
+CFG=configs/demos/alkane_hotspots/pilot.yaml; CL=configs/demos/alkane_hotspots/closed_loop_pilot.yaml
+python -m tools.experiments.alkane_hotspots closed-loop-run --config $CFG --closed-loop $CL [--max-wall-s N]   # resumable
+python -m tools.experiments.alkane_hotspots frozen-eval     --config $CFG --closed-loop $CL
+python -m tools.experiments.alkane_hotspots recovery-demo   --config $CFG --closed-loop $CL
+```
+
+`--config` must be the closed-loop YAML's `base_config`; otherwise the command refuses to run.
+
+### What runs, and what is reused
+
+Nothing of the loop is re-implemented. `workflow.assembly.build_controller` builds the controller
+with GMD_active's components:
+
+- the GMD adapter;
+- the GMD_SGT adapter (training, fine-tuning, export, export validation, committee enrichment);
+- `LabelingService` (CP2K and the local scheduler);
+- `VersionedDatasetStore`;
+- `ModelRegistry`, the promotion gates and rollback.
+
+The controller runs every stage: GMD sampling, monitoring, events, extraction, selection, CP2K
+submission, polling and validation, ingestion, dataset publication, fine-tuning, export validation,
+GMD smoke test, gated promotion, and a GMD checkpoint restart with the new model
+(`model_change allow`).
+
+The alkane-specific parts are attached by composition, each implementing a `workflow.protocols`
+interface around the existing component:
+
+| Component | Protocol | Role |
+|---|---|---|
+| `AlkaneRegionExtractor` | `RegionExtractor` | Unwraps the event's trigger frame along its bonds into an isolated molecule. Full mode labels the whole chain. Local mode cuts alpha's fragment (`fidelity.build_fragment`) with the frozen gate setting around each hotspot group. |
+| `BudgetedLabeler` | `Labeler` | Refuses a new CP2K job beyond the CPU-hour budget or the atom limits, and records every decision in `budget_ledger.json`. |
+| `HeldOutValidationStore` | `DatasetStore` | Training data is the cumulative versioned store. Validation data is always the fixed, checksum-verified `validation` split. |
+| `RecordingTrainer` | `Trainer` | Records every evaluation, export check and smoke test, so each gate decision can be re-derived. |
+| `md_box.ImageGuard` | `FrameEnricher` | Checks every monitored frame for interaction between periodic images. |
+
+The CP2K settings hash of the closed loop must equal alpha's, or the command refuses to run.
+
+### MD box
+
+GMD needs a fully periodic orthorhombic box. The reference calculations stay isolated: CP2K uses
+`PERIODIC NONE` with the WAVELET solver, and this is unchanged. Only the MD runs in a periodic box.
+
+The box is cubic, with edge `L >= D + R_force + margin + stretch_allowance`:
+
+- `D` is the chain diameter;
+- `R_force = 2 x n_blocks x local_cutoff` is the force receptive field (16 A for the demo model; see
+  "Model receptive field").
+
+For any rigid rotation or translation of the chain, every atom of another image is therefore at
+least `L - D >= R_force + margin` away. Within the model, images cannot interact.
+
+This is checked twice:
+
+- when the box is built, from the rotation-invariant bound and the exact minimum image distance;
+- on every monitored MD frame, and on every frame of the frozen-model runs, by `ImageGuard`. The
+  molecule is unwrapped along its bonds, and the exact minimum distance to any atom of another image
+  must exceed `R_force`.
+
+A violation raises `ImageInteractionError`. A model with a global long-range term is refused.
+
+The box, the receptive field, the margin and the measured minimum over the trajectory are written
+to the run manifest, `md_box/box.json`, `run/image_check.json` and the run report.
+
+### Labeling mode
+
+`labeling.mode: auto` labels local fragments only when alpha's fidelity gate has passed and frozen
+a setting (`fidelity/selection.json`). The fragment is alpha's `build_fragment` with that setting, on
+a site shaped like the gate's sites: carbons k-1..k+2 and their H, where k is the hotspot group's
+top-scoring carbon.
+
+If the gate failed (`failure.json`) or is undecided, full-system labels are used. `mode: local`
+without a passed gate is refused. Unvalidated local labels are never produced.
+
+Before any CP2K job, the event geometry must still be the intact alkane (`label_geometry`): the bond
+graph from `infer_bonds` must equal the parent's, and no interatomic distance may be below 0.7 A.
+Otherwise the event is recorded as `extraction_failed`, with its reasons in
+`rejected_events.jsonl`.
+
+### Initial model, validation and gates
+
+- **Initial model.** GMD_SGT is trained from scratch on the full DFT labels of `initial_train`. It
+  uses beta's training section (architecture, force weights, energy policy), the committee from
+  `training.sgt.committee_size`, and the validation split for early stopping.
+- **Fine-tuning.** Each cycle starts from the active model (`finetune.train`). GMD_SGT's adapter
+  initialises every committee member from the active primary checkpoint, with seeds `seed+k`.
+- **Promotion gates.** The YAML `promotion` gates are evaluated on the validation split: the force
+  RMSE limit, no regression beyond `max_relative_regression` against the active model on the same
+  validation data, export versus checkpoint, and the GMD smoke test.
+- **The initial model's gates** are recorded but not enforced, because there is no parent. Its export
+  check and smoke test must pass.
+- **final_eval** is never read by the loop.
+
+### Bounds
+
+| Bound | Key |
+|---|---|
+| Cycles | `loop.cycles` |
+| MD steps per segment | `loop.segment_steps` |
+| Labels per cycle | `loop.labels_per_cycle` (`workflow.candidates.max_per_cycle`) |
+| Labels per event | `loop.max_per_event` |
+| Measured CP2K CPU core-hours | `budget.max_cpu_core_hours` |
+| Atoms per job | alpha's `budgets.max_atoms_*`, or `budget.max_atoms_*` |
+
+The CPU check before each job adds three terms: the measured cost of the finished closed-loop tasks
+(`cost.measured_cost`), the estimates for running ones, and the estimate for the new job. The
+estimate is the measured mean of alpha's labels of the same kind. Training CPU is not part of this
+budget.
+
+With `exclusive_cp2k: true` (the pilot), a command that may launch CP2K refuses to start while a CP2K
+process outside its own output directory is running.
+
+### Bookkeeping
+
+- **Model changes.** At every model change, the report records the potential-energy jump
+  `E_new - E_old` (`model_changes`). `E_old` comes from the old segment's last frame and `E_new` from
+  the restarted segment's first frame: the same MD step and coordinates, recomputed by GMD with the
+  new model. Both exports are also re-evaluated on that configuration (`reevaluated`). The record is
+  labelled `model_change`, not integration drift. When the coordinates differ, no jump is claimed.
+- **Provenance.** Every promoted model has a chain in `provenance`: model -> dataset version ->
+  samples -> CP2K tasks and job ids -> regions -> events (trigger step, frame steps, frames path) ->
+  parent MD frames -> the generated parent structure. Initial samples resolve to their alpha label
+  and parent. Unresolved samples are listed, never dropped.
+- **Report.** `closed_loop_report.json` holds:
+  - the controller's `summarize`, the transitions, events and rejected events;
+  - the measured cost of every label task, and the budget ledger;
+  - the trainings and the re-derived gate reports;
+  - the model changes and the provenance;
+  - the initial model's validation metrics.
+
+  `timeline.json` is the input of beta's closed-loop timeline figure (`figures.timeline_report`).
+
+### Frozen-model evaluation
+
+`frozen-eval` runs fresh GMD trajectories with the frozen initial and final models. Both use the same
+seeds, the same start structure in the same box, and the same steps.
+
+It reports, after `discard_steps`:
+
+- the end-to-end C1-Cn distance;
+- the radius of gyration of the carbons;
+- the C-C-C-C dihedral histogram and gauche fraction (|phi| < 120 deg).
+
+Results are given per seed and pooled. This is a pilot-scale comparison of two trajectories per
+seed; it supports no claim beyond them, and in particular none about the accuracy of either model.
+
+### Recovery demonstration
+
+`recovery-demo` uses its own run (`recovery.run_id`, directory `recovery/`) and is bounded by
+`recovery.*`:
+
+1. **Interrupt.** The recovery run starts in a subprocess. It is SIGKILLed as soon as the
+   controller has recorded a submitted CP2K job (`recovery/interruption.json`), and the report
+   records whether that job's process group is still alive.
+2. **Resume.** The run resumes in-process. The verification passes only if:
+   - each task submitted before the kill keeps one initial attempt with the same job id (it was
+     adopted, not resubmitted);
+   - no task directory disappeared;
+   - there is at most one sample per task, and no duplicate label files, dataset versions or job ids.
+3. **Strict gate audit.** The run's promoted model is audited with `recovery.strict_promotion`,
+   using `evaluate_gates` on its recorded validation metrics, export check and smoke test. If it
+   fails, `ModelRegistry.rollback` restores the previous model (the failed one becomes `rejected`).
+   GMD then restarts from the run's last checkpoint with the restored model, and the energy jump at
+   that boundary is recorded.
+
+   The recovery run's own gates (`recovery.promotion`) are deliberately loose in both YAMLs, so a
+   model is promoted and can be audited. The strict gate is the quality gate in this demonstration.
+4. **Cancellation.** A real CP2K job is submitted. Once `cp2k.psmp` is running, a new
+   `LabelingService` instance cancels it. This is the situation after a controller restart: the new
+   instance has no in-memory process handle.
+
+### Cancellation: findings and operational guidance
+
+Killing the controller leaves locally scheduled CP2K jobs running, by design. The local scheduler
+starts each job in its own session and persists the pid, process group and start time
+(`.gmd_local_job.json`), so a restarted controller can adopt the job.
+
+`LabelingService.cancel` and `LocalScheduler.cancel` terminate a running job, including from a fresh
+instance. They send SIGTERM to the job's process group, then SIGKILL after the grace period. They
+write `.gmd_cancelled` and record the attempt as `cancelled` (failure class `cancelled`, "cancelled
+jobs are never retried automatically"). The task is finalised, and a later poll does not resubmit.
+
+One defect was found and fixed in GMD_active (`workflow.assembly.ServiceLabeler`, commit 65c90e5).
+The workflow bridge reported a cancelled task as COMPLETED. The controller would then have collected
+it and recorded it as an *invalid label* instead of a cancelled job. CANCELLED is now kept, and the
+controller records the task as failed with "execution cancelled".
+
+Operational guidance:
+
+- **To stop the workflow without stopping CP2K**, kill or stop the controller (`gmd-al stop` or a
+  signal). Running jobs finish and are adopted at the next start.
+- **To stop CP2K work too**, cancel the tasks explicitly with `LabelingService.cancel(task_id)`,
+  using the run's CP2K configuration. Any process may do this.
+- **Never kill `cp2k.psmp` by hand** while a controller may adopt it. The job then has no exit code,
+  the scheduler reports it VANISHED, and the service's retry ladder may resubmit it.
+- **MPI launchers.** Cancellation was verified with the configured single-rank launch (`launcher:
+  []`). With an MPI launcher, ranks that leave the job's process group are not covered by this check.
+
+### Executed: smoke, 2026-11-07 (mechanics only, not a scientific result)
+
+Setup:
+
+- `closed_loop_smoke.yaml` on C8H18, with CP2K at alpha's smoke-only settings (200 Ry).
+- The initial model has one training structure and one validation structure from the same base.
+- The gates are deliberately loose, and the monitor thresholds are lowered so that 100-step
+  segments produce events.
+- Artifacts are under `<artifacts_root>/closed_loop/smoke/`, with `closed_loop_report.json`,
+  `frozen_eval/frozen_eval.json` and `recovery/recovery_report.json`.
+
+None of the numbers below says anything about model quality.
+
+**Closed loop.** Two cycles reached `done`.
+
+- **Labeling mode:** full system, because the smoke fidelity gate failed.
+- **Box:** 32 A cubic, chain diameter 10.6 A, force receptive field 16 A plus a 4 A margin. The
+  minimum image distance over the 41 monitored frames was 21.1 A.
+- **Events:** 4 events. One was refused before CP2K because a C-H bond exceeded 1.2 x the covalent
+  sum.
+- **Labels:** 2 CP2K labels, 32.5 s and 57.8 s wall at 2 threads, 0.050 core-h in total. Both were
+  valid on the first attempt and ingested.
+- **Models:** 2 fine-tuned models, both promoted. Validation force RMSE went 0.519 -> 0.494 -> 0.487
+  eV/A, each on one validation structure.
+- **Model change:** at step 100 the energy jump was +1.169 eV, recorded with GMD's restart frame
+  and the re-evaluation at the same coordinates.
+- **Provenance:** every promoted model's chain resolves to the initial full-DFT label or to
+  event, frame and parent structure.
+
+**Frozen evaluation.** Initial versus final model, 2 seeds x 200 steps, 62 frames each, after
+discarding 50 steps:
+
+| Model | End-to-end distance (A) | Radius of gyration (A) | Gauche fraction |
+|---|---|---|---|
+| Initial | 9.28 ± 0.49 | 3.08 | 0.013 |
+| Final | 9.13 ± 0.31 | 3.05 | 0.016 |
+
+These are two short trajectories per model; no conclusion is drawn.
+
+**Recovery.**
+
+- **Interrupt and resume:** the controller was SIGKILLed 4 s after its first CP2K submission, and
+  the CP2K job was still alive. On resume, the job was adopted: the same job id, one initial attempt,
+  no new task directory, one sample, one label file. The verification passed.
+- **Strict gate audit:** the promoted model failed `force_rmse` (0.494 > 0.05 eV/A) and was rolled
+  back.
+- **GMD restarts:** both restarts had `model_changed_from` set by GMD. The energy jump was +1.168 eV
+  at the promotion boundary (step 100) and +0.831 eV at the rollback boundary (step 150).
+- **Cancellation:** `cp2k.psmp` was running (41 kB of output) when a new service instance cancelled
+  it. The cancellation took 0.11 s, no live process remained in the job's process group, and the
+  task records `cancelled` without a retry.
+
+The cancellation was also checked by `tests/experiments/alkane_hotspots/test_recovery.py`
+(real CP2K, marked `cp2k`).
+
+### Planned: pilot (not executed, no numbers)
+
+`closed_loop_pilot.yaml` runs 2 cycles of 2000 steps each, with at most 2 labels per cycle and at
+most 6 core-hours of CP2K. MD starts from `C16-b01-normal0` (initial_train). The pilot gates are
+`max_force_rmse` 1.0 eV/A and at most 5 % regression on the validation split.
+
+The run needs:
+
+- valid full labels of the initial_train and validation splits;
+- no other CP2K process running (`exclusive_cp2k`);
+- alpha's fidelity decision. If no `selection.json` exists, the loop uses full-system labels, about
+  1 core-hour per C16 label.
+
+Commands, in order: `closed-loop-run`, `frozen-eval`, `recovery-demo` (see the top of this section).
