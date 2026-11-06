@@ -13,6 +13,7 @@ extraction:
   min_atoms: null
   max_atoms_policy: trim
   min_atoms_policy: pad
+  terminal_atoms: as_selected
   freeze_boundary: true
   periodic_guard:
     policy: error

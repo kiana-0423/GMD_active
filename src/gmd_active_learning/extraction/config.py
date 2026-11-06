@@ -134,6 +134,11 @@ class ExtractionConfig(BaseModel):
     min_atoms: int | None = Field(None, ge=0)
     max_atoms_policy: Literal["trim", "error"] = "trim"
     min_atoms_policy: Literal["pad", "error", "allow"] = "pad"
+    #: ``as_selected`` (default, PHAL behaviour) keeps the radial/graph selection as is.
+    #: ``follow_partner``: a terminal atom (exactly one covalent bond, e.g. H) is in the region if and
+    #: only if its bonded partner is, so molecular fragments never contain a lone H whose carbon was
+    #: cut away and never lose the H of an included carbon. Bonds use ``graph.covalent_scale``.
+    terminal_atoms: Literal["as_selected", "follow_partner"] = "as_selected"
     freeze_boundary: bool = True
     periodic_guard: PeriodicGuardConfig = Field(default_factory=PeriodicGuardConfig)
     force_weights: RoleWeights = Field(default_factory=RoleWeights)
@@ -146,6 +151,15 @@ class ExtractionConfig(BaseModel):
         if self.extract_radius is not None:
             return float(self.extract_radius)
         return float(self.mlip_cutoff + self.buffer_radius)
+
+    def identity_payload(self, exclude: set[str]) -> dict[str, Any]:
+        """Configuration payload hashed into region IDs; a default ``terminal_atoms`` is left out so
+        region IDs of existing configurations do not change."""
+
+        payload = self.model_dump(mode="json", exclude=exclude)
+        if payload.get("terminal_atoms") == "as_selected":
+            payload.pop("terminal_atoms")
+        return payload
 
     @model_validator(mode="after")
     def _block_needs_size(self) -> ExtractionConfig:

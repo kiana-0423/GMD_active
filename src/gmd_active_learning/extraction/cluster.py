@@ -21,6 +21,7 @@ from gmd_active_learning.extraction._placement import (
 )
 from gmd_active_learning.extraction.config import ExtractionConfig
 from gmd_active_learning.extraction.regions import radial_roles
+from gmd_active_learning.utils.bonds import bonded_neighbors
 from gmd_active_learning.utils.geometry import distances_to_group, hotspot_center, padded_cluster_cell
 
 LOGGER = logging.getLogger(__name__)
@@ -95,7 +96,44 @@ def select_radial(
         record["trimmed_atom_ids"] = frame.atom_ids[removed].tolist()
         LOGGER.warning("trimmed %d atoms to extraction.max_atoms=%d (recorded in metadata)", len(removed), max_atoms)
         selected = kept
+    if config.terminal_atoms == "follow_partner":
+        selected = _terminal_atoms_follow_partner(frame, selected, config, protected or [], record)
     return RadialSelection(indices=selected, distances=distances, center=center, extract_radius=extract_radius, record=record)
+
+
+def _terminal_atoms_follow_partner(
+    frame: Frame, selected: list[int], config: ExtractionConfig, protected: list[int], record: dict[str, Any]
+) -> list[int]:
+    """``extraction.terminal_atoms = follow_partner``: a terminal atom is selected iff its partner is.
+
+    Runs after padding/trimming, so the result can exceed ``max_atoms`` by the added terminal atoms
+    (recorded). A protected (hotspot) terminal atom whose partner is not selected raises.
+    """
+
+    adjacency = bonded_neighbors(
+        frame.positions,
+        frame.numbers,
+        cell=frame.cell,
+        pbc=frame.pbc if frame.cell is not None else False,
+        scale=float(config.graph.covalent_scale),
+    )
+    chosen = set(int(index) for index in selected)
+    terminal = {index: partners[0] for index, partners in adjacency.items() if len(partners) == 1}
+    removed = sorted(index for index in chosen if index in terminal and terminal[index] not in chosen)
+    lost = sorted(set(removed) & set(int(index) for index in protected))
+    if lost:
+        raise ExtractionError(
+            f"terminal_atoms=follow_partner: hotspot atoms {frame.atom_ids[lost].tolist()} are terminal atoms whose "
+            "bonded partner is outside the selection; enlarge the region"
+        )
+    added = sorted(index for index, partner in terminal.items() if partner in chosen and index not in chosen)
+    result = sorted((chosen - set(removed)) | set(added))
+    record["terminal_atoms"] = {
+        "policy": "follow_partner",
+        "added_atom_ids": frame.atom_ids[added].tolist(),
+        "removed_atom_ids": frame.atom_ids[removed].tolist(),
+    }
+    return result
 
 
 def cluster_from_selection(
@@ -195,7 +233,7 @@ def extract_cluster(
         hotspot_atom_ids=hotspot_ids,
         event_id=event_id,
         metadata={},
-        config_payload=config.model_dump(mode="json", exclude={"slab", "graph", "block", "mode"}),
+        config_payload=config.identity_payload({"slab", "graph", "block", "mode"}),
     )
 
 

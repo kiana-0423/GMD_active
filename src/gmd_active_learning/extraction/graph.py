@@ -78,7 +78,7 @@ def extract_graph(
             "graph_atom_ids": frame.atom_ids[graph_atoms].tolist(),
             "n_graph_atoms": len(graph_atoms),
         },
-        config_payload=config.model_dump(mode="json", exclude={"slab", "block", "mode"}),
+        config_payload=config.identity_payload({"slab", "block", "mode"}),
     )
 
 

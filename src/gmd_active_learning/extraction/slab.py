@@ -207,7 +207,7 @@ def extract_slab(
         config=config,
         event_id=event_id,
         metadata=metadata,
-        config_payload=config.model_dump(mode="json", exclude={"graph", "block", "mode"}),
+        config_payload=config.identity_payload({"graph", "block", "mode"}),
     )
 
 

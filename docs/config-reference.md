@@ -243,6 +243,7 @@ Rolling pre/post-trigger capture (PHAL ``buffer`` section) plus cooldown and bou
 | `extraction.min_atoms` | int \| null | `null` | >= 0 |  |
 | `extraction.max_atoms_policy` | "trim" \| "error" | `"trim"` |  |  |
 | `extraction.min_atoms_policy` | "pad" \| "error" \| "allow" | `"pad"` |  |  |
+| `extraction.terminal_atoms` | "as_selected" \| "follow_partner" | `"as_selected"` |  |  |
 | `extraction.freeze_boundary` | bool | `true` |  |  |
 | `extraction.periodic_guard` | section `PeriodicGuardConfig` | | | Detect regions that cannot be represented once in a non-periodic box (finding F-09). |
 | `extraction.periodic_guard.policy` | "error" \| "flag" \| "allow" | `"error"` |  |  |

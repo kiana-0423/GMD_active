@@ -95,6 +95,17 @@ The mask actually written to datasets used 0.3, so 0.3 is now the single default
   - `BlockCooldownTracker` state can be serialised (`to_dict`, `from_dict`, `save`, `load`). It is
     persisted through `block.cooldown_state_path`, and `release()` frees blocks after a failed label.
 
+### Terminal atoms (`extraction.terminal_atoms`)
+
+`as_selected` (default) keeps the cluster/graph selection unchanged. `follow_partner` makes every
+terminal atom (exactly one covalent bond, e.g. H; bonds from `graph.covalent_scale`) part of the region
+if and only if its bonded partner is: a lone H whose carbon was cut away is dropped, and the H atoms of
+an included carbon are added. This keeps molecular fragments free of isolated H atoms, so only
+heavy-atom bonds are cut and capped. Added and removed atom IDs are recorded in
+`metadata["size_policy"]["terminal_atoms"]`; a hotspot terminal atom whose partner is outside the
+selection raises. The default value is left out of the region-ID payload, so existing region IDs do
+not change.
+
 ### Periodic guard (F-09)
 
 A region is *torn* when two of its atoms lie within `periodic_guard.pair_cutoff` (3 A) of each other
