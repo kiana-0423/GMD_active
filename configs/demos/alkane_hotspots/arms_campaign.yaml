@@ -1,0 +1,129 @@
+# Alkane hotspot demonstration, part beta (model study) for the CAMPAIGN (planned; budgets need the lead's approval): receptive field, hotspot ground truth,
+# acquisition arms A-D + ablations, evaluation, figures, report. Every grid, threshold and budget is here.
+# Run through alpha's CLI:
+#   python -m tools.experiments.alkane_hotspots <command> --config configs/demos/alkane_hotspots/campaign.yaml \
+#       --study configs/demos/alkane_hotspots/arms_campaign.yaml
+# Artifacts: <artifacts_root of pilot.yaml>/model_study (outside git).
+name: campaign
+base_config: campaign.yaml
+inputs: {parents: parents.jsonl, labels: labels.jsonl}
+output_subdir: model_study
+
+# Online monitor used by ground truth and the PHAL arms (GMD_active MonitorConfig; unspecified keys = defaults
+# of configs/sections/monitor.yaml). Temporal metrics are OFF: the configurations are static, and a "previous
+# frame" would hand the perturbation site to displacement/delta metrics (leakage).
+monitor:
+  metrics:
+    delta_force: {enabled: false}
+    displacement: {enabled: false}
+    delta_q: {enabled: false}
+    mlip_force_deviation: {enabled: false}   # no separate reference model in this study
+  running_stats: {warmup_frames: 3}
+
+training:
+  sgt: {source_path: ../GMD_SGT, device: cpu, committee_size: 2}   # primary + 2 members (seeds s, s+1, s+2)
+  model:                     # GMD_SGT UnifiedEquivariantMLIP; local only: a global long-range term would make
+    n_species: 10            # fragment and full-system model forces differ by construction (see receptive-field)
+    n_blocks: 2
+    scalar_dim: 32
+    irreps: "32x0e + 8x1o"
+    l_max: 1
+    n_basis: 8
+    local_cutoff: 4.0
+    lr_cutoff: 4.0
+    long_range_type: none
+    n_heads: 1
+    avg_neighbors: 12.0
+  train:                     # identical for every arm (training budget)
+    n_epochs: 300
+    batch_size: 4
+    lr: 2.0e-3
+    lr_min: 2.0e-5
+    warmup_steps: 20
+    patience: 30
+    w_energy: 0.1
+    w_force: 1.0
+    energy_loss: mae
+    force_loss: rmse
+    val_fraction: 0.0
+    test_fraction: 0.0
+  force_weights: {core: 1.0, inner_buffer: 0.3, outer_buffer: 0.0, boundary: 0.0, h_cap: 0.0, unassigned: 0.0}
+  full_system_force_weight: 1.0
+  energy: {full_system_weight: 1.0, uncapped_fragment_weight: 0.0}   # capped fragments: always 0 (not configurable)
+  initial_splits: [initial_train]
+  validation_splits: [validation]
+  mode: scratch
+
+receptive_field:
+  model_source: random_init          # the demo architecture; set checkpoint + model_source: checkpoint for a trained model
+  random_init: {seed: 0, reinit_zero_weights_std: 0.5}
+  structure: {split: calibration, family: normal, index: 1}   # file order: C16-b02-normal0, C32-b00-normal0
+  core_atoms: central_carbon
+  measurements: [perturb, delete, truncate]
+  displacement: 0.05                 # A
+  tolerance: 1.0e-4                  # eV/A
+  truncation_radii: [3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 16.0, 20.0, 30.0]
+  bond_scale: 1.2
+
+ground_truth:
+  splits: [validation]
+  region: {centers: heavy_atoms, radius_bonds: 1, include_hydrogens: true, bond_scale: 1.2, aggregate: max, score_aggregate: max}
+  reference_thresholds: [0.1, 0.2, 0.4]    # eV/A on the region's max |F_model - F_DFT|
+  signals:
+    committee: {threshold: 0.1}             # eV/A
+    lj_residual: {threshold: 0.5}           # dimensionless residual
+    force: {threshold: null}
+    rmin: {threshold: null}
+    coordination: {threshold: null}
+    phal_staged: {threshold: 6.0}           # = monitor label_threshold
+    phal_staged_no_lj: {threshold: 6.0}
+    committee_monitor: {threshold: 6.0}
+    committee_plus_lj: {threshold: 6.0}
+  comparisons: [[committee_plus_lj, committee_monitor], [phal_staged, phal_staged_no_lj], [phal_staged, committee]]
+  temporal_reference: none
+  calibration: {splits: [calibration], families: [normal], stages_always: true}
+  sweep_points: 25
+  bootstrap: {n: 1000, seed: 20261107, confidence: 0.95}
+
+evaluation:
+  splits: [final_eval]
+  core_radius_bonds: 1
+  bond_scale: 1.2
+  budgets_cpu_core_s: [14400.0, 28800.0, 57600.0, 115200.0]
+  budgets_labels: [8, 16, 32]
+  accuracy_targets: [0.15, 0.10]
+  metric: force_rmse
+
+arms:
+  arms: [random_local, committee_local, phal_local, phal_full_system]
+  ablations:
+    - {name: no_lj, kind: phal_local, lj: false}
+    - {name: no_event_buffering, kind: phal_local, event_buffering: false}
+    - {name: committee_signals_only, kind: phal_local, physical_signals: false}
+    - {name: core_only_weights, kind: phal_local, force_weights: {core: 1.0, inner_buffer: 0.0}}
+  repetitions: 5
+  seeds: [11, 23, 37, 41, 53]
+  n_rounds: 5
+  budget: {labels: 8, cpu_core_s: 28800.0, overshoot: allow}
+  pool:
+    source: gate_selection          # alpha's build_fragment with fidelity/selection.json -> shared label cache
+    splits: [calibration]           # never final_eval; validation is kept for early stopping
+    stride: 2
+  selection: {max_per_cycle: 1000000, max_per_event: 2, min_score: null, diversity_threshold: 0.1}
+  monitor_overrides: {}
+  events: {pre_trigger_frames: 0, post_trigger_frames: 1, cooldown_steps: 0}
+  hotspots: {merge_radius: 3.0}
+  calibration_splits: [calibration]
+  calibration_families: [normal]
+  label_mode: on_demand             # alpha's budgeted LabelRunner (CP2K); recorded = labels.jsonl only
+  missing_label_policy: error
+  fidelity_gate: {required: true, directory: fidelity, allow_unvalidated_overrides: false}
+
+figures:
+  formats: [pdf, svg, png]
+  dpi: 200
+  fidelity_results: fidelity/report_calibration.json
+  timeline_report: null             # closed-loop controller report JSON (workflow.controller.summarize + event_steps)
+
+report:
+  results_dir: docs/demos/alkane_hotspots/results
