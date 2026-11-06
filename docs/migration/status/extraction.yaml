@@ -176,17 +176,25 @@
     roles; block regions with caps have n_atoms labels. Single inner-buffer default 0.3 (F-18). PHAL's mutating
     generate_atom_mask is replaced by the pure reweight().
 - id: TRN-003
-  status: migrated
+  status: replaced
   implementation: [tests/reference/masked_force_mse.py]
   evidence:
-    - tests/reference/test_masked_force_loss.py::test_masked_force_mse_reduces_to_plain_mse_and_ignores_masked_atoms
+    - tests/datasets/test_gmd_sgt_compat.py::test_gmd_sgt_trainer_loss_matches_numpy_oracle_and_masks_gradients
     - tests/datasets/test_gmd_sgt_compat.py::test_gmd_sgt_weighted_loss_matches_numpy_oracle
+    - tests/reference/test_masked_force_loss.py::test_masked_force_mse_reduces_to_plain_mse_and_ignores_masked_atoms
+    - tests/reference/test_masked_force_loss.py::test_weighted_loss_relations
   findings: [F-03]
   notes: >-
-    The masked loss itself is implemented in GMD_SGT (another area). The NumPy oracle (PHAL masked_force_mse plus
-    GMD_SGT's component-normalised weighted_force_loss) is here. GMD_SGT EnergyForceLoss._weighted on a batch
-    collated from our exported file equals the oracle (rtol 1e-6) for rmse, mae and mse, with zero gradient on
-    zero-weight atoms. Status stays migrated until GMD_SGT's own trainer test is recorded by that area.
+    Replaced by GMD_SGT 0.4.0's weighted force loss (gmd_sgt.training.loss.EnergyForceLoss with the per-atom
+    force_weight batch key). PHAL's masked_force_mse was never used in training. The test calls exactly what the
+    GMD_SGT Trainer calls: build_loss(train_cfg)(pred, batch, batch["n_atoms"]). The batch is collated by GMD_SGT
+    from our exported fixture samples, with force_weight 0/1 as exported, and also with graded 0.3 weights. For
+    force_loss rmse, mae and huber the force term and the total (w_energy 0) equal the NumPy oracle
+    (tests/reference/masked_force_mse.py) at rtol 1e-6. 3*rmse^2 equals PHAL's masked_force_mse at rtol 1e-6.
+    Zero-weight atoms get exactly zero, finite gradient even with NaN targets, and every weighted atom gets a
+    nonzero gradient. Deliberate difference: GMD_SGT normalises per force component (3*sum w), while PHAL used
+    the per-atom squared norm. The relation is exact and tested. Runs when GMD_SGT >= 0.4 is importable
+    (sibling checkout or GMD_SGT_PATH) and skips with a reason otherwise.
 - id: TRN-004
   status: verified
   implementation: [src/gmd_active_learning/datasets/sgt_export.py, src/gmd_active_learning/datasets/extxyz_io.py, src/gmd_active_learning/datasets/npz_io.py]
