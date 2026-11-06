@@ -35,12 +35,16 @@ training:
     n_heads: 1
     avg_neighbors: 12.0
   train:                     # identical for every arm (training budget)
-    n_epochs: 300
-    batch_size: 4
+    # Pilot finding (docs/demos/alkane_hotspots.md, "Pilot model study"): with batch_size 4 a 4-structure
+    # set gets one optimiser step per epoch and stopped after ~60-100 steps (median validation atom error
+    # 1.11 eV/A); ~6000 steps on the same data gave 0.68 eV/A. Smaller batches and longer patience keep
+    # the step count from being the limit on small early-round sets.
+    n_epochs: 400
+    batch_size: 2
     lr: 2.0e-3
     lr_min: 2.0e-5
-    warmup_steps: 20
-    patience: 30
+    warmup_steps: 50
+    patience: 80
     w_energy: 0.1
     w_force: 1.0
     energy_loss: mae
@@ -57,7 +61,7 @@ training:
 receptive_field:
   model_source: random_init          # the demo architecture; set checkpoint + model_source: checkpoint for a trained model
   random_init: {seed: 0, reinit_zero_weights_std: 0.5}
-  structure: {split: calibration, family: normal, index: 1}   # file order: C16-b02-normal0, C32-b00-normal0
+  structure: {split: calibration, family: normal, index: 1}   # second calibration normal parent in file order
   core_atoms: central_carbon
   measurements: [perturb, delete, truncate]
   displacement: 0.05                 # A

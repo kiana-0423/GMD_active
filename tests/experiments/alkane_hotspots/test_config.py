@@ -33,10 +33,16 @@ def test_smoke_is_flagged_and_pilot_is_production() -> None:
 
 def test_campaign_long_chains_require_the_flag() -> None:
     data = yaml.safe_load((CONFIGS / "campaign.yaml").read_text())
-    assert max(data["systems"]["chain_lengths"]) > 32 and data["systems"]["allow_long_chains"] is True
-    data["systems"]["allow_long_chains"] = False
+    # stage 1 is C16 + C32 at the pilot's converged cutoff; C64/C128 need a separate opt-in (stage 2)
+    assert data["systems"]["chain_lengths"] == [16, 32] and data["systems"]["allow_long_chains"] is False
+    assert (data["cp2k"]["cutoff"], data["cp2k"]["rel_cutoff"]) == (300.0, 50.0)
+    AlkaneConfig.model_validate(data)
+    data["systems"]["chain_lengths"] = [16, 32, 64, 128]
+    data["generation"]["n_parents"] = 128
     with pytest.raises(ValidationError, match="allow_long_chains"):
         AlkaneConfig.model_validate(data)
+    data["systems"]["allow_long_chains"] = True
+    AlkaneConfig.model_validate(data)
 
 
 def _pilot() -> dict:
