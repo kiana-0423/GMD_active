@@ -1,0 +1,42 @@
+{
+ "basis": {
+  "ao_per_element": {
+   "1": 5,
+   "8": 13
+  },
+  "basis_set": null
+ },
+ "history": [
+  {
+   "density_mae": 0.294103978580459,
+   "density_rmse": 0.37750202994893506,
+   "electron_mae": 0.0,
+   "epoch": 1,
+   "loss": 0.13632438704371452,
+   "split": "train"
+  },
+  {
+   "density_mae": 0.2360695124944428,
+   "density_rmse": 0.30813841448372514,
+   "electron_mae": 0.0,
+   "epoch": 2,
+   "loss": 0.09480330720543861,
+   "split": "train"
+  },
+  {
+   "density_mae": 0.20168025407412382,
+   "density_rmse": 0.26775614807964254,
+   "electron_mae": 1.4901161193847656e-07,
+   "epoch": 3,
+   "loss": 0.07133515551686287,
+   "split": "train"
+  }
+ ],
+ "valence": {
+  "potential_family": null,
+  "valence_per_element": {
+   "1": 1,
+   "8": 6
+  }
+ }
+}

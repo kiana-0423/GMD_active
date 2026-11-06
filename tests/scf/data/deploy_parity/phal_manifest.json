@@ -1,0 +1,22 @@
+{
+  "deploy_version": "phal-scf-deploy-v1",
+  "environment_variable": "PHAL_ML_SCF_GUESS_MODEL",
+  "kind": "density_guess",
+  "metadata": {
+    "ao_per_element": {
+      "1": 5,
+      "8": 13
+    },
+    "basis_set": null,
+    "electron_count_method": "trace_ps",
+    "normalization": "valence_electrons",
+    "note": "CP2K must be built with __PHAL_ML_SCF and linked against libtorch for the in-process guess; otherwise the pre-computed density file path is used. The wrapper takes the AO overlap S as its sixth argument and normalises to Tr(P S) = Ne; it cannot be called without one.",
+    "potential_family": null,
+    "representation": "ao-nonorthogonal",
+    "requires_overlap": true,
+    "valence_per_element": {
+      "1": 1,
+      "8": 6
+    }
+  }
+}

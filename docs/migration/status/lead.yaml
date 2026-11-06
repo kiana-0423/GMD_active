@@ -454,10 +454,13 @@
     - tests/adapters/dft/test_cp2k_real.py::test_unconverged_run_is_invalid_with_reason
   findings: []
   notes: >-
-    Real CP2K 2026.2 labels H2: exit 0, VALID (validation_reasons empty, SCF converged), finite (2, 3)
-    forces equal to the raw output times Hartree/Bohr, energy in range. It is opt-out by the cp2k marker
-    rather than RUN_EXTERNAL. Not verified because the acceptance names the GMD CP2K image on Miyabi,
-    which was not available here.
+    Tested here, against the real CP2K 2026.2 (Homebrew cp2k.psmp, macOS arm64): H2 is labeled with exit
+    0 and VALID (validation_reasons empty, SCF converged), with finite (2, 3) forces equal to the raw
+    output times Hartree/Bohr and the energy in range. An unconverged run is INVALID with a reason. The
+    test is opt-out by the cp2k marker and skips with a reason when no binary is found, rather than being
+    opt-in by RUN_EXTERNAL. Remains for the cluster: the same test inside the GMD CP2K container image on
+    Miyabi (CP2K_BIN pointing at the image's cp2k), which the acceptance names. That image and the
+    cluster are not available here, so status stays migrated.
 - id: TST-005
   status: replaced
   implementation: [tests/integration/test_gmd_real.py, tests/integration/test_gmd_species_real.py]

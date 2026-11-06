@@ -1,0 +1,33 @@
+{
+  "layout_checksum": {
+    "empty_fields.ml_density": 2752657.653599576,
+    "h2_open_shell.ml_density": 3849781.842442668,
+    "h2_valid.ml_density": 2752657.653599576,
+    "h2o_valid.ml_density": 6737822.440527059,
+    "populations.ml_density": 2002027.0,
+    "unknown_basis.ml_density": 2752657.653599576
+  },
+  "status": {
+    "asymmetric.ml_density": "not_hermitian",
+    "bad_nspin.ml_density": "shape",
+    "bad_protocol.ml_density": "protocol",
+    "basis_mismatch.ml_density": "basis_mismatch",
+    "dim_too_large.ml_density": "shape",
+    "dim_too_small.ml_density": "shape",
+    "empty_fields.ml_density": "accept",
+    "h2_open_shell.ml_density": "accept",
+    "h2_valid.ml_density": "accept",
+    "h2o_valid.ml_density": "accept",
+    "missing_header_key.ml_density": "header",
+    "nan_injected.ml_density": "not_finite",
+    "no_overlap.ml_density": "no_overlap",
+    "no_values_marker.ml_density": "header",
+    "not_an_exchange_file.ml_density": "protocol",
+    "nuclear_charge_normalised.ml_density": "electron_count",
+    "populations.ml_density": "accept",
+    "truncated_overlap.ml_density": "shape",
+    "truncated_values.ml_density": "shape",
+    "unknown_basis.ml_density": "accept",
+    "wrong_electron_count.ml_density": "electron_count"
+  }
+}

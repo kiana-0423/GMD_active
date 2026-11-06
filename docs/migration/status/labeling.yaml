@@ -162,6 +162,7 @@
   status: migrated
   implementation: [src/gmd_active_learning/adapters/schedulers/pbs.py]
   evidence:
+    - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_submit_renders_pbs_resources_not_slurm_directives
     - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_live_state
     - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_history_finished_states_check_exit_status
     - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_history_query_can_be_disabled
@@ -170,13 +171,17 @@
     - tests/adapters/schedulers/test_batch_schedulers.py::test_qstat_continuation_lines_are_joined
   findings: [F-26]
   notes: >-
-    The qstat -f and qstat -x -f mappings match PHAL, with one deliberate fix: C and X are checked
-    against Exit_status. C or X with a non-zero status is FAILED, and without a status it is UNKNOWN,
-    left for reconcile; PHAL reported C as COMPLETED regardless. F without an exit status stays
-    FAILED, as in PHAL. Exit status -29 or -11 sets walltime_exceeded. history_query_enabled is
-    settable as scheduler.pbs.history_query_enabled; PHAL's schema rejected a `pbs` section.
-    scheduler.pbs.flavor selects pbspro (-l select) or torque (-l nodes:ppn). Not verified: the live
-    PBS Professional smoke on Miyabi, because PBS is not installed here.
+    Tested here, against fake qsub/qstat/qdel on PATH (tests/adapters/schedulers): PBS script rendering
+    (pbspro -l select, or torque -l nodes:ppn, by scheduler.pbs.flavor); qstat -f live states;
+    qstat -x -f history mapped with Exit_status; continuation lines joined; history query switchable
+    (scheduler.pbs.history_query_enabled); qdel giving CANCELLED even with a signal exit status;
+    walltime exit codes -29/-11 setting walltime_exceeded; reconcile from the exit-code file. The mapping
+    matches PHAL, with one deliberate fix (F-26): C and X are checked against Exit_status. Non-zero is
+    FAILED, missing is UNKNOWN (left for reconcile); PHAL reported C as COMPLETED regardless. F without a
+    status stays FAILED, as in PHAL. Remains for the cluster: the live PBS Professional smoke on Miyabi
+    (submit `true`, then `false`, then qdel a sleep; expect COMPLETED / FAILED / CANCELLED) and the exact
+    qstat -f output format of Miyabi's PBS version. PBS is not installed here (no qsub/qstat), so status
+    stays migrated.
 - id: LAB-001
   status: verified
   implementation:
