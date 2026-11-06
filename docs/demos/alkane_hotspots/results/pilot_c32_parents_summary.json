@@ -1,0 +1,48 @@
+{
+ "config_hash": "657b94711530794b",
+ "n_parents": 2,
+ "n_rejected_candidates": 0,
+ "parents": [
+  {
+   "achieved": 120.0,
+   "contact_distance": null,
+   "family": "torsion",
+   "formula": "C32H66",
+   "location": 20,
+   "magnitude": 120.0,
+   "max_untouched_angle_deviation_deg": 9.2292,
+   "min_nonbonded": {
+    "CC": 2.9075,
+    "CH": 2.5121,
+    "HH": 1.8863
+   },
+   "n_site_atoms": 12,
+   "parent_id": "C32-b00-torsion0",
+   "split": "final_eval",
+   "split_group": "C32-b00",
+   "structure_sha256": "fcb2a07d9ec4e0d54ed5299966163dcb33570c95b78dc38d2b4b6ca077c0e0b7",
+   "units": "deg"
+  },
+  {
+   "achieved": 2.3000000000000305,
+   "contact_distance": 2.3597544183780754,
+   "family": "contact",
+   "formula": "C32H66",
+   "location": 12,
+   "magnitude": 2.3,
+   "max_untouched_angle_deviation_deg": 7.9441,
+   "min_nonbonded": {
+    "CC": 2.9192,
+    "CH": 2.4913,
+    "HH": 1.8748
+   },
+   "n_site_atoms": 6,
+   "parent_id": "C32-b00-contact0",
+   "split": "final_eval",
+   "split_group": "C32-b00",
+   "structure_sha256": "b3918c1b8c8faa396097baecd5db791b53594a75cf9b60caf69e0714d4df2dc1",
+   "units": "angstrom"
+  }
+ ],
+ "rejection_reasons": {}
+}

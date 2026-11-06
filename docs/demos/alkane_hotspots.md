@@ -169,15 +169,22 @@ the pilot. A test checks that no group spans two splits.
 `geometry_checks`, `structure_path`, and `config_hash` (the hash of the generation-relevant config
 sections). The same configuration gives byte-identical `parents.jsonl` and extxyz files (tested).
 
-**Pilot (generated, no DFT).** 24 parents: C16H34 and C32H66, 3 bases per length, one parent per
-family per base. Splits: calibration and final_eval have 2 groups each (one C16 and one C32, 8
-parents each); initial_train and validation have 1 group each. 3 contact candidates were rejected
-for H..H clashes. Summary: [results/pilot_parents_summary.json](alkane_hotspots/results/pilot_parents_summary.json).
+**Pilot (generated and labeled).** 16 C16H34 parents: 4 base conformations, one per split
+(initial_train b01, calibration b03, validation b00, final_eval b02), each with one normal, torsion,
+bend and contact parent. 3 contact candidates were rejected for H..H clashes. Summary:
+[results/pilot_parents_summary.json](alkane_hotspots/results/pilot_parents_summary.json).
 
-**Campaign (planned).** `campaign.yaml` adds C64 and C128, behind `systems.allow_long_chains`.
-An all-trans C128 chain is about 160 A long, so its isolated cubic WAVELET box would be about 170 A
-wide. Full-parent labels of C64/C128 are therefore probably infeasible on one workstation. The
-campaign is to be re-planned from the pilot's measured costs.
+The first pilot generation, with 24 parents (C16 and C32, 3 bases per length), was replaced before
+any DFT. The timing probe showed that a C32 full label costs about 18 times a C16 label.
+
+**C32 transfer (`pilot_c32.yaml`).** Two C32H66 parents of one base: a torsion parent and a contact
+parent, both in final_eval. They test the C16-frozen fragment setting on a longer chain. Summary:
+[results/pilot_c32_parents_summary.json](alkane_hotspots/results/pilot_c32_parents_summary.json).
+
+**Campaign (planned).** `campaign.yaml` is stage 1: C16 + C32, 64 parents. C64 and C128 stay behind
+`systems.allow_long_chains` for a stage-2 file. An all-trans C128 chain is about 160 A long, so its
+isolated cubic WAVELET box would be about 170 A wide. A full-parent label of that size was not
+attempted on this workstation.
 
 ## Electronic-structure settings
 
@@ -186,13 +193,13 @@ use one CP2K configuration and one settings hash. Every label record carries the
 physics settings; the runner refuses a task whose hash differs. A test asserts that a parent and a
 fragment share the same hash and settings.
 
-| Setting | Pilot | Key |
+| Setting | Pilot (and C32 transfer, stage-1 campaign) | Key |
 |---|---|---|
 | Functional | PBE | `cp2k.functional` |
 | Basis / pseudopotential | DZVP-MOLOPT-SR-GTH / GTH-PBE | `cp2k.basis`, `cp2k.potential` |
 | Dispersion | DFT-D3(BJ) | `cp2k.dispersion` |
 | Charge / multiplicity | 0 / 1 (closed-shell RKS; `spin_policy: strict`) | `cp2k.charge`, `cp2k.multiplicity` |
-| Plane-wave cutoff | 400 Ry, REL_CUTOFF 60 Ry | `cp2k.cutoff`, `cp2k.rel_cutoff` |
+| Plane-wave cutoff | 300 Ry, REL_CUTOFF 50 Ry (converged against 400/60 Ry to 0.006 eV/A RMS, `results/timing_probe.json`) | `cp2k.cutoff`, `cp2k.rel_cutoff` |
 | SCF | OT/DIIS, EPS_SCF 1e-6, MAX_SCF 100, bounded retry ladder | `cp2k.eps_scf`, `cp2k.max_scf` |
 | Boundary | isolated (`PERIODIC NONE`), WAVELET Poisson solver, cubic box = extent + 2 x 6 A | `cp2k.poisson_solver`, `cp2k.box_padding` |
 | Cap relaxation | off in the pilot; when on, H-only GEO_OPT with every original atom fixed | `cp2k.h_only_opt` |
@@ -243,8 +250,13 @@ spent and remaining budget, measured timing, and the estimated cost of the remai
     cap-only GEO_OPT and 42.7 s the single point.
 
   These numbers check the pipeline only; they are not pilot costs.
-- *Pilot settings, measured by the lead outside this pipeline:* one full C16H34 single point took
-  801 s wall (44 SCF steps) at 5 OpenMP threads, which is 1.1 core-hours. 5 MPI ranks were not faster.
+- *Timing probe, outside this pipeline* (`results/timing_probe.json`): a full C16H34 single point at
+  400/60 Ry took 801 s wall (44 SCF steps) at 5 OpenMP threads. 5 MPI ranks were not faster, and two
+  concurrent jobs slowed each other down.
+- *C16 pilot, through this pipeline, at 300/50 Ry and 5 threads, serial* (`status`):
+  - 16 full labels: mean 526 s wall, i.e. 2630 core-s; range 173-1017 s;
+  - 43 fragment labels of 14-41 atoms: mean 134 s wall, i.e. 670 core-s;
+  - 19.7 core-h in total; no failed or retried job.
 
 ## Fragment-fidelity gate
 
