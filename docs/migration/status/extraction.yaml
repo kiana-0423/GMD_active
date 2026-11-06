@@ -291,22 +291,3 @@
   notes: >-
     The aggregate package coupled trajectory IO to DFT writers. Frame IO lives in datasets/frame_io.py, which
     imports no labeling code.
-- id: FIX-001
-  status: in-progress
-  implementation: []
-  evidence: []
-  findings: []
-  notes: >-
-    replace-with-gmd: needs a GMD frame-writer output fixture read by the GMD adapter (adapters area,
-    tests/fixtures/gmd/). The multi-frame PHAL golden fixtures already drive the extraction parity tests.
-- id: FIX-002
-  status: in-progress
-  implementation: [tests/fixtures/datasets/make_tiny_h2o.py, tests/fixtures/datasets/tiny_h2o.extxyz]
-  evidence:
-    - tests/datasets/test_tiny_fixture.py::test_fixture_is_reproducible_from_its_seed
-    - tests/datasets/test_tiny_fixture.py::test_gmd_sgt_reads_the_fixture
-  findings: []
-  notes: >-
-    Dataset part done: a seeded synthetic H2O set (toy harmonic model, not DFT, 8 frames in 4 split groups) in the
-    published layout, regenerable and read by GMD_SGT. Tiny GMD_SGT model, committee and export fixtures are
-    produced later by the workflow lead.

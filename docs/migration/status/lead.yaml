@@ -1,0 +1,574 @@
+# Ledger status for the workflow lead: active learning / candidates / scheduling, GMD and GMD_SGT
+# adapters, retraining triggers and registry, central config and CLI, contracts, test harness and
+# fixtures. Real-program evidence: GMD Torch build (../GMD/build-torch/gmd), GMD_SGT 0.4.0
+# (../GMD_SGT), CP2K 2026.2 (cp2k.psmp); those tests skip with a reason when the program is absent.
+
+- id: AL-001
+  status: migrated
+  implementation: [src/gmd_active_learning/extraction/dispatch.py, src/gmd_active_learning/workflow/assembly.py]
+  evidence:
+    - tests/active_learning/test_dispatch_and_surfaces.py::test_event_dispatch_matches_phal_regions
+    - tests/active_learning/test_dispatch_and_surfaces.py::test_unknown_mode_raises_value_error
+    - tests/extraction/test_extraction_phal_parity.py::test_raw_region_matches_phal
+  findings: [F-05]
+  notes: >-
+    Event -> hotspot_grouper (MIC clustering, merge radius) -> extract_regions for every mode
+    (cluster/slab/graph/block). For 4 of 9 golden events, every mode gives PHAL's region count, parent
+    atom order, positions (5e-8 A), event_id and parent step. Not verified: when a merged hotspot spans
+    more atoms than PHAL's region kept (ethane evt-50/110, polyethylene, pt111 evt-30), PHAL centred the
+    region on part of the hotspot while GMD centres it on the whole group, so the atom sets differ. That
+    is an extraction-centre decision for the extraction owner. hotspot_id is a stable id, not PHAL's
+    "<event>_hsNNN". An unknown mode raises pydantic ValidationError, a ValueError.
+- id: AL-002
+  status: verified
+  implementation: [src/gmd_active_learning/active_learning/candidates.py, src/gmd_active_learning/extraction/dispatch.py, src/gmd_active_learning/workflow/controller.py]
+  evidence:
+    - tests/active_learning/test_phal_candidate_parity.py::test_pool_over_golden_regions_matches_phal_for_every_cap
+  findings: [F-05]
+  notes: >-
+    Every region of an event gets the event's max score (PHAL: frame-level max_score), and ties keep
+    insertion order (tie_break: insertion, with insertion order kept in the store by rowid). Over all
+    golden capped regions (3 scenarios x 4 modes x thresholds 0.1/0.5/2.0 x dedup on/off x caps 1..N),
+    the selected ids and their order equal PHAL's CandidatePool algorithm. No per-region scoring variant
+    exists, so the default is PHAL parity. Selection is part of the online loop (PHAL selected offline only).
+- id: AL-003
+  status: verified
+  implementation: [src/gmd_active_learning/active_learning/candidates.py, src/gmd_active_learning/workflow/store.py]
+  evidence:
+    - tests/active_learning/test_phal_candidate_parity.py::test_eviction_scenario_readmits_the_third_candidate
+    - tests/active_learning/test_phal_candidate_parity.py::test_pool_can_disable_deduplication
+    - tests/active_learning/test_phal_candidate_parity.py::test_pool_selects_top_by_score_with_cap
+    - tests/active_learning/test_phal_candidate_parity.py::test_pool_deduplicate_removes_similar
+    - tests/active_learning/test_phal_candidate_parity.py::test_pool_cap_larger_than_pool_keeps_score_order
+    - tests/active_learning/test_phal_candidate_parity.py::test_pool_over_golden_regions_matches_phal_for_every_cap
+    - tests/active_learning/test_candidates.py::test_budgets
+  findings: []
+  notes: >-
+    CandidateSelector recomputes the unique set from scratch on every selection, so the eviction scenario
+    re-admits the third candidate. Additions: a persistent lifecycle (store candidate states pending ->
+    selected -> labeling -> labeled|rejected|invalid|failed with reasons), labeled-history dedup
+    (compare_with_labeled), and per-event/per-cycle/total budgets. PHAL semantics need max_per_event=null,
+    min_score=null and compare_with_labeled=false. A candidate refused by the event budget does not
+    suppress candidates of other events.
+- id: AL-004
+  status: verified
+  implementation: [src/gmd_active_learning/active_learning/candidates.py]
+  evidence:
+    - tests/active_learning/test_phal_candidate_parity.py::test_fingerprints_of_golden_regions_match_phal_formula
+    - tests/active_learning/test_phal_candidate_parity.py::test_nan_case_of_phal_is_finite_and_does_not_block_later_candidates
+    - tests/active_learning/test_phal_candidate_parity.py::test_threshold_boundary_is_kept
+    - tests/active_learning/test_phal_candidate_parity.py::test_phal_mode_aliases_and_unknown_mode
+    - tests/active_learning/test_phal_candidate_parity.py::test_type_weighted_fingerprint_is_intensive_and_blocks_are_comparable
+    - tests/active_learning/test_candidates.py::test_periodic_regions_use_minimum_image_distances
+  findings: [F-30]
+  notes: >-
+    Plain and type-weighted pair-distance histograms (16 bins, 8 A, L2, keep if >= threshold) equal
+    PHAL's formula (scipy pdist + density=True, re-implemented in the test as an oracle) to rtol 1e-12 on
+    every golden raw and capped region. histogram_normalisation defaults to density, so
+    diversity_threshold keeps PHAL's meaning. Deliberate deviations: (1) F-30: where PHAL's density is NaN
+    (no pair inside the cutoff), GMD returns zeros, so the candidate neither vanishes nor blocks later
+    ones. (2) pair_distances defaults to minimum_image, which is identical to PHAL for non-periodic
+    regions (all golden regions are pbc=False). PHAL's plain pdist stays selectable (pair_distances:
+    plain) and is what convert-phal-config sets. The former GMD_active cosine metric is not offered; L2
+    is the single canonical metric. PHAL mode aliases are accepted, and unknown modes raise.
+- id: AL-005
+  status: verified
+  implementation: [src/gmd_active_learning/workflow/controller.py, src/gmd_active_learning/workflow/store.py]
+  evidence:
+    - tests/workflow/test_scheduling.py::test_replayed_queue_gives_identical_task_ids_and_transitions
+    - tests/workflow/test_scheduling.py::test_raising_submitter_fails_only_that_task_and_the_queue_continues
+    - tests/workflow/test_scheduling.py::test_restart_mid_queue_resubmits_nothing_already_submitted
+    - tests/workflow/test_controller.py::test_crash_after_submission_does_not_duplicate_jobs
+    - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
+  findings: [F-24]
+  notes: >-
+    The queue is the persistent workflow store (write-ahead "submitting" intent, then
+    find_submission/submit, then "submitted"). Task ids are deterministic per region and settings, so a
+    replayed run gives identical ids (PHAL's were uuid-suffixed). As in PHAL, a raising submitter marks
+    only that task failed, with the reason in failure_reasons and a failed candidate list, and the queue
+    continues. A controller killed after the 1st, 2nd or 3rd submission resubmits nothing on restart.
+    Status mapping: PHAL queued = candidate "selected", submitted = task "submitted", failed = task
+    "failed". PHAL's "skipped" (block cooldown) happens in extraction, which emits no region. Added: the
+    labeling queue is bounded (max_pending_tasks, backpressure) and tasks are polled to completion.
+- id: AL-006
+  status: verified
+  implementation: [src/gmd_active_learning/workflow/store.py, src/gmd_active_learning/workflow/controller.py]
+  evidence:
+    - tests/workflow/test_scheduling.py::test_round_summary_records_events_candidates_and_selected
+  findings: [F-24]
+  notes: >-
+    New store table rounds(run_id, round_id = workflow cycle, n_events, n_candidates, n_selected,
+    n_rejected, rejected_reasons), written at every selection. summarize()["rounds"] reports it with
+    PHAL's RoundSummary field names.
+- id: AL-007
+  status: verified
+  implementation: [src/gmd_active_learning/active_learning/__init__.py, src/gmd_active_learning/adapters/dft/cp2k/__init__.py]
+  evidence:
+    - tests/active_learning/test_dispatch_and_surfaces.py::test_package_imports_stay_light
+  findings: []
+  notes: >-
+    gmd_active_learning.adapters.dft.cp2k exposes CP2KOutput, parse_cp2k_output_file, parse_cp2k_forces
+    and validation_reasons without importing adapters.dft.scf or torch, checked in a clean subprocess
+    together with the active_learning, workflow, retraining and gmd/registry packages. The lammps
+    package has no counterpart (replaced by adapters/gmd/).
+- id: BE-004
+  status: replaced
+  implementation: [src/gmd_active_learning/adapters/registry.py, src/gmd_active_learning/adapters/__init__.py]
+  evidence:
+    - tests/active_learning/test_dispatch_and_surfaces.py::test_package_imports_stay_light
+    - tests/workflow/test_backend_contracts.py::test_full_builtin_selection_returns_typed_adapters
+    - tests/workflow/test_assembly.py::test_registry_builds_md_and_mlip_backends_and_controller
+    - tests/contracts/test_contract_extensions.py::test_importing_the_package_loads_no_adapter_torch_or_gmd_sgt
+  findings: []
+  notes: >-
+    PHAL's import-time MLIP factory registration (a mutable module global) is replaced by explicit,
+    lazy registry built-ins (md:gmd, mlip:gmd_sgt) resolved by create_backend in the composition root
+    (workflow/assembly.py). Importing adapters or the core packages registers nothing and imports no
+    backend, torch or GMD_SGT. The domain and controller depend only on workflow.protocols.
+- id: BE-005
+  status: replaced
+  implementation: [src/gmd_active_learning/adapters/sgt/backend.py]
+  evidence:
+    - tests/adapters/sgt/test_sgt_inference.py::test_committee_shape_and_distinct_members
+    - tests/adapters/sgt/test_sgt_inference.py::test_non_finite_output_and_model_failures_raise
+    - tests/adapters/sgt/test_sgt_inference.py::test_callers_config_is_never_mutated
+    - tests/adapters/sgt/test_sgt_inference.py::test_unknown_species_is_rejected_before_evaluation
+    - tests/adapters/sgt/test_sgt_backend_real.py::test_train_evaluate_export_validate_and_finetune
+  findings: [F-28]
+  notes: >-
+    GMDSGTBackend replaces RealAllegroBackend. predict and predict_committee return committee forces of
+    shape (n_models, n_atoms, 3). Non-finite forces or energy, wrong shapes and model exceptions raise
+    AdapterError. The model is chosen per call, with no hidden reload state. The caller's SGTConfig is
+    deep-copied, so train(seed=...) never mutates it. Species are checked against the model's declared
+    species before evaluation. There are no placeholder model paths.
+- id: BE-006
+  status: replaced
+  implementation: [src/gmd_active_learning/adapters/sgt/backend.py]
+  evidence:
+    - tests/adapters/sgt/test_sgt_backend_real.py::test_train_evaluate_export_validate_and_finetune
+    - tests/adapters/sgt/test_sgt_backend_real.py::test_dry_run_or_missing_dataset_files_are_refused
+    - tests/adapters/sgt/test_sgt_inference.py::test_generator_is_reproducible
+  findings: [F-28]
+  notes: >-
+    The adapter calls GMD_SGT's Python API (api.train, api.export_model, load_export_metadata); there are
+    no command templates, so template rendering, the placeholder ValueError and dry-run argv have no
+    counterpart. Unlike PHAL, train returns the checkpoint GMD_SGT reports, which must exist alongside a
+    training_summary.json, and export returns the TorchScript path with species metadata verified. A
+    dry-run summary is refused.
+- id: BE-007
+  status: replaced
+  implementation: [src/gmd_active_learning/adapters/sgt/backend.py]
+  evidence:
+    - tests/adapters/sgt/test_sgt_inference.py::test_adapter_equals_gmd_sgt_own_evaluators
+    - tests/adapters/sgt/test_sgt_inference.py::test_fixture_models_report_species_cutoff_and_give_finite_h2o_predictions
+    - tests/adapters/sgt/test_sgt_inference.py::test_non_finite_output_and_model_failures_raise
+    - tests/adapters/sgt/test_sgt_inference.py::test_species_map_errors
+  findings: [F-28]
+  notes: >-
+    On fixture H2O, checkpoint forces equal GMD_SGT's MLIPCalculator and export forces equal the
+    TorchScript module given an explicit neighbour graph with Cartesian image shifts (atol 1e-6). The
+    neighbour graph is what PHAL's input dict lacked. Model failures raise instead of becoming NaN.
+    validate_species_map replaces the type_names / lammps.type_map check. Species come from GMD_SGT
+    metadata.
+- id: BE-009
+  status: replaced
+  implementation: [src/gmd_active_learning/adapters/gmd/engine.py]
+  evidence:
+    - tests/adapters/gmd/test_engine.py::test_run_in_for_a_first_segment_and_a_restart_with_model_change
+    - tests/adapters/gmd/test_gmd_fixture.py::test_completed_segment_and_read_frames_round_trip
+    - tests/adapters/gmd/test_gmd_fixture.py::test_real_gmd_frames_read_into_the_frame_contract
+    - tests/workflow/test_backend_contracts.py::test_md_protocol_is_satisfied_only_by_complete_implementations
+  findings: []
+  notes: >-
+    GMDEngine implements workflow.protocols.MDEngine. prepare(request) writes the segment inputs and
+    returns the launch argv without executing ([*launcher, gmd, in.xyz, run.in], paths in the segment
+    directory). read_frames on the trajectory recorded by the real GMD returns frames whose positions,
+    forces, cell, pbc, ids, species and energy equal GMD's own output, checked against an independent
+    text parser. evaluate_forces has no counterpart: forces come from the frames and from GMDSGTBackend.
+- id: MD-001
+  status: replaced
+  implementation: [src/gmd_active_learning/adapters/gmd/engine.py]
+  evidence:
+    - tests/adapters/gmd/test_engine.py::test_tail_returns_each_frame_exactly_once_across_partial_writes
+    - tests/adapters/gmd/test_engine.py::test_tail_resynchronises_after_truncation_without_duplicates
+    - tests/adapters/gmd/test_engine.py::test_segment_survives_frame_file_truncation
+    - tests/adapters/gmd/test_engine.py::test_segment_delivers_every_frame_once_with_partial_writes
+    - tests/adapters/gmd/test_engine.py::test_non_zero_exit_is_a_failed_segment
+    - tests/adapters/gmd/test_engine.py::test_frame_source_end_of_stream_timeout_and_exit_code
+    - tests/adapters/gmd/test_engine.py::test_frame_source_close_terminates_and_closes_logs
+    - tests/adapters/gmd/test_engine.py::test_online_monitor_driver_runs_unchanged_on_the_gmd_stream
+    - tests/adapters/gmd/test_engine.py::test_stop_action_stops_the_segment_cooperatively
+    - tests/integration/test_gmd_real.py::test_cooperative_stop_and_model_change_at_segment_boundary
+  findings: [F-29]
+  notes: >-
+    Ported test_lammps_controller.py scenarios against a fake GMD with the same CLI and file formats:
+    each frame exactly once across arbitrary partial writes; only appended bytes read; truncation
+    resynchronised without duplicates (PHAL reset the offset and could re-deliver frames); a non-zero
+    exit fails the segment or raises from the frame source; log handles closed on stop. GMDFrameSource
+    (next_frame(timeout)) feeds OnlineMonitorDriver.run unchanged. Control is cooperative (STOP and
+    CHECKPOINT files polled every control_poll_interval steps) instead of SIGSTOP/SIGCONT. Frames are
+    complete when their last atom line is written, so there is no one-interval lag. The controller does
+    not re-monitor the start frame a restarted segment re-emits.
+- id: MD-003
+  status: replaced
+  implementation: [src/gmd_active_learning/adapters/gmd/engine.py]
+  evidence:
+    - tests/adapters/gmd/test_engine.py::test_run_in_for_a_first_segment_and_a_restart_with_model_change
+    - tests/adapters/gmd/test_gmd_fixture.py::test_input_writer_reproduces_the_recorded_run_in
+    - tests/integration/test_gmd_species_real.py::test_species_order_survives_a_real_gmd_run_and_matches_the_recorded_fixture
+  findings: []
+  notes: >-
+    The GMD input writer produces in.xyz (identical to the configured structure, species order kept)
+    and run.in with the run length, ML force field, model path, frame cadence, controller files,
+    checkpoint cadence and integrator directives (time step validated > 0). A restart adds restart_from
+    and velocity_init input, plus model_change allow when the model changed. Write -> real GMD ->
+    read keeps element identities and order (O H H H O H) and reproduces the recorded fixture. The
+    integrator and thermostat come from GMD directives (PHAL's default script did no time integration).
+- id: MD-004
+  status: replaced
+  implementation: [src/gmd_active_learning/adapters/gmd/engine.py]
+  evidence:
+    - tests/adapters/gmd/test_engine.py::test_command_reference_table
+    - tests/adapters/gmd/test_engine.py::test_multi_rank_launcher_is_refused_because_ml_runs_are_serial
+    - tests/adapters/gmd/test_engine.py::test_prepare_returns_argv_without_executing
+    - tests/adapters/gmd/test_engine.py::test_bare_executable_name_is_looked_up_on_path
+  findings: []
+  notes: >-
+    argv = [*md.launcher, gmd, in.xyz, run.in], matching a reference table (no launcher, taskset,
+    srun -n 1, mpiexec -n 1, numactl). GMD's TorchScript path is serial, so a launcher asking for more
+    than one rank (-n/-np/--ntasks > 1) is refused and GMD's --np is never passed. prepare() returns argv
+    without executing. A bare executable name is looked up on PATH.
+- id: MD-005
+  status: replaced
+  implementation: [src/gmd_active_learning/adapters/gmd/engine.py, src/gmd_active_learning/adapters/sgt/backend.py]
+  evidence:
+    - tests/adapters/gmd/test_engine.py::test_species_are_checked_before_launch
+    - tests/adapters/gmd/test_engine.py::test_structure_species_order_and_unknown_elements
+    - tests/adapters/sgt/test_sgt_inference.py::test_species_map_errors
+    - tests/integration/test_gmd_species_real.py::test_a_model_without_the_systems_species_is_refused_before_gmd_starts
+  findings: []
+  notes: >-
+    No pair_style writer exists, because GMD loads the GMD_SGT export directly. The reusable check is
+    ported. Before GMD starts, the initial structure's elements must be a subset of the model's species
+    (check_model_species). Unknown elements, which GMD silently turns into Z=0, are refused.
+    validate_species_map rejects names absent from the model's species, non-contiguous type ids,
+    repeated names and empty maps (the AllegroBackend error cases). Switch: md.check_species.
+- id: TRN-005
+  status: verified
+  implementation: [src/gmd_active_learning/retraining/triggers.py, src/gmd_active_learning/workflow/controller.py]
+  evidence:
+    - tests/workflow/test_trigger_registry_parity.py::test_trigger_table_against_phal
+    - tests/workflow/test_trigger_registry_parity.py::test_dry_run_free_state_advances_only_after_training
+    - tests/workflow/test_store_registry.py::test_retrain_trigger_rules
+  findings: [F-13]
+  notes: >-
+    A 16-row table over (config, manual, new samples, pending labels, last training, clock) compares
+    against PHAL's rule, re-implemented as an oracle. Reasons match except five documented deviations
+    (F-13). (1) The first sample no longer bypasses min_new_samples; train_on_first_samples restores PHAL.
+    (2) Manual with nothing new is refused (no_new_samples). (3) Outstanding labels block training;
+    wait_for_pending_labels=false restores PHAL. (4) enabled=false blocks automatic triggers only.
+    (5) interval_hours=null disables the time trigger. Samples are counted from ingested store rows,
+    not files. There is no dry run: last_trained_at advances only after a real training run. Training
+    goes through the Trainer protocol (GMDSGTBackend).
+- id: TRN-006
+  status: verified
+  implementation: [src/gmd_active_learning/retraining/registry.py, src/gmd_active_learning/workflow/store.py]
+  evidence:
+    - tests/workflow/test_trigger_registry_parity.py::test_register_promote_rollback_round_trip_publishes_the_export
+    - tests/workflow/test_trigger_registry_parity.py::test_reregistering_is_idempotent_and_never_overwrites
+    - tests/workflow/test_trigger_registry_parity.py::test_sha_is_verified_at_promotion_and_rollback
+    - tests/workflow/test_trigger_registry_parity.py::test_concurrent_writers_in_threads_share_one_store
+    - tests/workflow/test_trigger_registry_parity.py::test_concurrent_writer_processes_share_one_store
+    - tests/workflow/test_store_registry.py::test_registry_copies_hashes_and_detects_tampering
+    - tests/integration/test_rollback_real.py::test_rejection_on_real_metrics_and_rollback_with_resumed_md
+  findings: [F-14]
+  notes: >-
+    Register -> gated promote -> rollback round trip. The deployed GMD_SGT export path and its sha256
+    are published through the ModelArtifact contract. Model ids are content-derived, so re-registering
+    the same artifacts is idempotent (the existing record is re-verified and returned) and an existing id
+    can never be overwritten. sha256 is recorded at registration and verified at every promotion and
+    rollback; a tampered export blocks promotion. Concurrent writers (8 threads, 4 processes) share one
+    SQLite store, with private staging directories per writer instead of PHAL's lock file. Promotion
+    history lives in the store. Naming is model ids, not allegro_vNNN.
+- id: CFG-001
+  status: verified
+  implementation: [src/gmd_active_learning/config.py]
+  evidence:
+    - tests/config/test_config_schema.py::test_default_config_passes_validation
+    - tests/config/test_config_schema.py::test_type_errors_name_the_dotted_path
+    - tests/config/test_config_schema.py::test_unknown_nested_key_is_rejected
+    - tests/config/test_config_schema.py::test_unknown_section_and_missing_required_are_rejected
+    - tests/config/test_config_schema.py::test_bad_choices_are_rejected
+    - tests/config/test_config_schema.py::test_ml_scf_rules
+    - tests/config/test_config_schema.py::test_phal_positive_ranges
+  findings: []
+  notes: >-
+    Strict pydantic section models validate the parsed YAML in strict mode: no bool-as-number, no
+    str-as-int, no int-as-bool. Unknown keys and sections are rejected, and errors name the dotted path.
+    PHAL's 21 positive-range paths are checked on their GMD targets. Targets that accept 0 on purpose are
+    listed with reasons (ZERO_ALLOWED). md.directives.time_step is now validated > 0. Deviation: every key
+    has a documented default, so an absent optional key is not an error. extraction.mode and
+    candidates.fingerprint are now validated (PHAL failed at use time).
+- id: CFG-002
+  status: verified
+  implementation: [src/gmd_active_learning/config_phal.py, tests/fixtures/phal_config/schema_leaves.json, tests/fixtures/phal_config/default.yaml]
+  evidence:
+    - tests/config/test_phal_config_conversion.py::test_mapping_table_covers_every_schema_leaf_exactly
+    - tests/config/test_phal_config_conversion.py::test_every_mapped_target_exists_in_the_gmd_configuration
+    - tests/config/test_phal_config_conversion.py::test_phal_default_converts_into_a_valid_config_with_phal_thresholds
+    - tests/config/test_phal_config_conversion.py::test_phal_aliases_engines_and_free_text_fields
+    - tests/config/test_phal_config_conversion.py::test_cli_converts_a_phal_file
+  findings: [F-16, F-26]
+  notes: >-
+    PHAL_KEY_MAP covers all 192 CONFIG_SCHEMA leaves (frozen from ref by make_phal_config_fixture.py),
+    124 of them mapped. The rest are dropped with reasons: LAMMPS/Allegro specifics, dry-run modes,
+    paths owned by --work-dir, never-read keys, and hotspot.threshold (F-16). The labeling area's key
+    mapping for cp2k/scheduler/backends is included. convert_phal_config reuses monitor_config_from_phal,
+    events_config_from_phal and ScfConfig.from_phal. It reports dropped keys that carried content and
+    raises on unknown keys or engines. PHAL's default.yaml converts into a config that passes
+    build_config. CLI: gmd-al convert-phal-config.
+- id: CFG-003
+  status: verified
+  implementation: [configs/default.yaml, src/gmd_active_learning/config.py]
+  evidence:
+    - tests/config/test_default_config.py::test_packaged_default_validates_and_is_generated_from_the_models
+    - tests/config/test_default_config.py::test_phal_numeric_thresholds_are_kept_unless_deliberately_changed
+    - tests/config/test_default_config.py::test_no_absolute_paths_in_the_default
+    - tests/adapters/dft/test_cp2k_config.py::test_phal_numeric_defaults_are_kept
+  findings: []
+  notes: >-
+    configs/default.yaml is default_config_dict(): all 14 sections, with placeholders for
+    workflow.run_id, md.executable (PATH lookup) and md.initial_structure. Regenerate it with
+    `python -m gmd_active_learning.config --write-default configs/default.yaml`. PHAL thresholds (OOD,
+    extraction, CP2K, mask, pool) are equal except 13 deliberate changes listed with reasons in the
+    test, e.g. retries 3 and max_per_cycle 20. There are no absolute /runtime paths. It is not shipped as
+    package data, since pyproject is a shared file.
+- id: CLI-001
+  status: verified
+  implementation: [src/gmd_active_learning/cli.py, src/gmd_active_learning/adapters/registry.py]
+  evidence:
+    - tests/test_cli.py::test_collect_runtime_checks_reports_missing_executables
+    - tests/test_cli.py::test_environment_variables_take_precedence_over_path
+    - tests/test_cli.py::test_configured_executables_win_and_cuda_is_required_for_cuda_training
+    - tests/test_cli.py::test_write_runtime_config_emits_a_loadable_valid_config
+    - tests/test_cli.py::test_doctor_returns_zero_without_strict
+    - tests/test_cli.py::test_doctor_strict_fails_when_a_required_check_is_missing
+    - tests/test_cli.py::test_doctor_strict_passes_when_everything_required_is_available
+    - tests/test_cli.py::test_doctor_writes_config_when_requested
+    - tests/test_cli.py::test_doctor_with_config_reports_backend_runtime_checks_as_json
+  findings: [F-32]
+  notes: >-
+    gmd-al doctor [--config] [--strict] [--write-config [PATH]] [--json] checks, with [OK]/[MISS] rows:
+    the GMD binary (config > $GMD_EXECUTABLE > PATH); CP2K (config > $CP2K_EXECUTABLE >
+    cp2k.psmp/popt/cp2k); GMD_SGT importability with its version gate; torch; and CUDA. With --config it
+    also reports the backends' check_runtime() rows (F-32). It exits 0 unless --strict sees a required
+    MISS. --write-config writes a complete config, validated before it is written. Deviation: CUDA is
+    required only when mlip.device is cuda*.
+- id: CLI-002
+  status: verified
+  implementation: [src/gmd_active_learning/cli.py]
+  evidence:
+    - tests/test_cli.py::test_parser_lists_all_commands
+    - tests/test_cli.py::test_startup_does_not_import_torch_gmd_sgt_or_scf_tooling
+    - tests/test_cli.py::test_scf_subcommand_is_delegated_lazily
+    - tests/test_cli.py::test_a_command_is_required
+  findings: []
+  notes: >-
+    gmd-al keeps validate-config, init, run, status, stop, retrain, rollback, resolve-unknown and
+    train-reliability-model, and gains doctor, convert-phal-config and a lazy scf placeholder that hands
+    the rest of argv to the SCF CLI. --help, doctor --help and scf --help import neither torch, gmd_sgt
+    nor adapters.dft.scf / adapters.sgt (checked in a subprocess).
+- id: CLI-003
+  status: dropped
+  implementation: []
+  evidence:
+    - tests/test_cli.py::test_doctor_returns_zero_without_strict
+    - tests/test_cli.py::test_doctor_strict_fails_when_a_required_check_is_missing
+  findings: []
+  notes: >-
+    scripts/check_runtime.py only loaded PHAL's cli.py by path and called main(). It failed without
+    arguments and still imported the package. The gmd-al console script's doctor command (CLI-001)
+    covers the same checks.
+- id: TST-001
+  status: verified
+  implementation: [tests/fakes/workflow_fakes.py, tests/adapters/gmd/fake_gmd.py, tests/scf/fakes/fake_cp2k.py, tests/scf/fakes/fake_density.py, tests/labeling/conftest.py]
+  evidence:
+    - tests/scf/test_scf_history.py
+    - tests/scf/test_scf_density_recording.py
+    - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
+    - tests/adapters/gmd/test_engine.py::test_segment_delivers_every_frame_once_with_partial_writes
+    - tests/workflow/test_controller.py::test_full_loop_labels_trains_promotes_and_continues_with_new_model
+  findings: []
+  notes: >-
+    fake_cp2k and fake_density are ported under tests/scf/fakes (SCF slice) and keep their parser tests
+    green. fake_allegro is replaced by a fake GMD_SGT committee evaluator (tests/e2e) plus
+    workflow_fakes.FakeTrainer. fake_lammps is replaced by a fake GMD executable (tests/adapters/gmd/
+    fake_gmd.py) with the same CLI, frame and status formats and switches for partial writes,
+    truncation, exit codes and force bursts. A scripted fake CP2K executable lives in
+    tests/labeling/conftest.py and is reused by the e2e tests. Fakes are test-only.
+- id: TST-002
+  status: verified
+  implementation: [tests/e2e/test_offline_pipeline.py]
+  evidence:
+    - tests/e2e/test_offline_pipeline.py::test_gmd_frame_to_gmd_sgt_dataset
+    - tests/extraction/test_extraction_phal_parity.py::test_phal_capped_datasets_have_the_same_masks_and_codes
+  findings: []
+  notes: >-
+    The flow runs on a frame written by the real GMD (FIX-001) with a force burst on atom 3: monitor
+    (hotspot = atom 3), cluster extraction, capping and masks, CP2K input, fake CP2K output, parse, then
+    the GMD_SGT export (all/train/val.extxyz + sgt.npz), read back by GMD_active and by GMD_SGT's own
+    reader. Forces equal PHAL's conversion (Hartree/Bohr -> eV/A, ASE units) to rtol 1e-12, and force
+    weights equal PHAL's default training_mask per role. Mask/code parity with PHAL's own capped
+    datasets is shown on the golden regions by the extraction test.
+- id: TST-003
+  status: verified
+  implementation: [tests/e2e/test_online_pipeline.py]
+  evidence:
+    - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
+  findings: [F-24]
+  notes: >-
+    Fake GMD stream (real adapter and tail), real OnlineMonitorDriver with a fake GMD_SGT committee, one
+    event with event.json and frames.extxyz (pre 2 + trigger + post 2) under the event id, the real
+    EventRegionExtractor, then the real LabelingService with the scripted fake CP2K and the local
+    scheduler. The job is polled to COMPLETED/VALID and collected (PHAL stopped at a prepared dry-run
+    job). After that: ingestion into VersionedDatasetStore, fake training, gated promotion, and a second
+    segment restarted from the checkpoint with the promoted model, every step monitored once.
+- id: TST-004
+  status: migrated
+  implementation: [tests/adapters/dft/test_cp2k_real.py]
+  evidence:
+    - tests/adapters/dft/test_cp2k_real.py::test_h2_molecule_label
+    - tests/adapters/dft/test_cp2k_real.py::test_unconverged_run_is_invalid_with_reason
+  findings: []
+  notes: >-
+    Real CP2K 2026.2 labels H2: exit 0, VALID (validation_reasons empty, SCF converged), finite (2, 3)
+    forces equal to the raw output times Hartree/Bohr, energy in range. It is opt-out by the cp2k marker
+    rather than RUN_EXTERNAL. Not verified because the acceptance names the GMD CP2K image on Miyabi,
+    which was not available here.
+- id: TST-005
+  status: replaced
+  implementation: [tests/integration/test_gmd_real.py, tests/integration/test_gmd_species_real.py]
+  evidence:
+    - tests/integration/test_gmd_real.py::test_continuous_and_segmented_runs_agree_and_frames_are_complete
+    - tests/integration/test_gmd_species_real.py::test_species_order_survives_a_real_gmd_run_and_matches_the_recorded_fixture
+    - tests/adapters/gmd/test_gmd_fixture.py::test_real_gmd_frames_read_into_the_frame_contract
+  findings: []
+  notes: >-
+    A real GMD Torch-build run with a GMD_SGT export produces frames that the adapter parses with
+    forces, stable IDs, species, cell, pbc and energy. The forces equal the eager model's forces, and
+    continuous and segmented runs agree. Skipped with a reason when the binary is absent.
+- id: TST-006
+  status: replaced
+  implementation: [src/gmd_active_learning/adapters/sgt/backend.py]
+  evidence:
+    - tests/integration/test_sgt_inference_real.py::test_exported_model_gives_finite_h2o_forces_through_the_adapter
+    - tests/integration/test_sgt_inference_real.py::test_periodic_water_box_export_matches_checkpoint
+  findings: []
+  notes: >-
+    A real exported GMD_SGT TorchScript model ($GMD_SGT_MODEL_PATH, or the fixture export) is loaded
+    through GMDSGTBackend, not a side script, and gives finite H2O forces with no net force. On a
+    periodic 3-water box, the export matches the checkpoint.
+- id: FIX-001
+  status: replaced
+  implementation: [tests/fixtures/gmd/, tools/fixtures/make_gmd_frame_fixture.py]
+  evidence:
+    - tests/adapters/gmd/test_gmd_fixture.py::test_manifest_hashes_match_the_fixture_files
+    - tests/adapters/gmd/test_gmd_fixture.py::test_real_gmd_frames_read_into_the_frame_contract
+    - tests/e2e/test_offline_pipeline.py::test_gmd_frame_to_gmd_sgt_dataset
+  findings: []
+  notes: >-
+    tests/fixtures/gmd holds frames.extxyz, status.json and run.in written by the real patched GMD
+    (commit recorded in manifest.json) through the adapter: two waters (O H H / H O H), 6 steps with a
+    frame every 2, model tests/fixtures/sgt/member_11/model.pt. The adapter reads it into the Frame
+    contract: tag ids, species in input order, units from the frame header, finite forces and energy.
+    The same hotspot atom (3, with an injected burst) is detected in the offline pipeline test.
+    Regenerate with tools/fixtures/make_gmd_frame_fixture.py.
+- id: FIX-002
+  status: verified
+  implementation: [tools/fixtures/make_tiny_sgt_models.py, tests/fixtures/sgt/manifest.json, tests/fixtures/datasets/make_tiny_h2o.py, tests/fixtures/datasets/tiny_h2o.extxyz]
+  evidence:
+    - tests/adapters/sgt/test_sgt_inference.py::test_fixture_files_match_the_manifest
+    - tests/adapters/sgt/test_sgt_inference.py::test_fixture_models_report_species_cutoff_and_give_finite_h2o_predictions
+    - tests/adapters/sgt/test_sgt_inference.py::test_committee_shape_and_distinct_members
+    - tests/adapters/sgt/test_sgt_inference.py::test_generator_is_reproducible
+    - tests/datasets/test_tiny_fixture.py::test_gmd_sgt_reads_the_fixture
+  findings: []
+  notes: >-
+    tools/fixtures/make_tiny_sgt_models.py trains two tiny GMD_SGT models (seeds 11 and 12) through the
+    adapter on the synthetic tiny_h2o set. It writes a checkpoint and a TorchScript export per member,
+    plus a manifest with sha256, species [1, 8], cutoff 4.0 and the GMD_SGT version (about 590 KB).
+    Checkpoints regenerate byte-identically. Export hashes differ, because GMD_SGT embeds the
+    source-checkpoint path, but predictions are identical. Synthetic, so no accuracy claims.
+- id: CORE-001
+  status: verified
+  implementation: [src/gmd_active_learning/contracts/frame.py]
+  evidence:
+    - tests/contracts/test_contract_extensions.py::test_frame_keeps_constraints_extra_arrays_and_info_through_ase_and_pickle
+    - tests/contracts/test_contract_extensions.py::test_frame_extxyz_round_trip_keeps_arrays_and_info
+    - tests/contracts/test_contract_extensions.py::test_frame_rejects_bad_extensions
+    - tests/contracts/test_contract_extensions.py::test_md_frame_converters_are_lossless_for_shared_fields
+    - tests/contracts/test_contracts.py::test_frame_round_trips_through_ase
+  findings: []
+  notes: >-
+    New optional Frame fields: arrays (extra per-atom arrays), constraints (ASE todict) and info. Old
+    call sites are unchanged. Pickle and ASE round trips keep FixAtoms/FixCartesian, extra arrays and
+    info. A constraint without todict() is refused; PHAL dropped it with a warning. Units are explicit
+    (contracts.UNITS). GMD velocities (vel) map to Frame.velocities. Fixed: Frame.from_atoms lost the
+    energy of extxyz frames, because ASE moves it into a SinglePointCalculator; this affected every GMD
+    frame. Frame.to_md_frame / from_md_frame are lossless for the shared fields of the legacy MDFrame
+    (committee <-> ensemble_forces; stable ids and run id in metadata).
+- id: CORE-002
+  status: migrated
+  implementation: [src/gmd_active_learning/contracts/monitoring.py]
+  evidence:
+    - tests/contracts/test_contract_extensions.py::test_monitor_result_carries_per_metric_scores
+    - tests/monitors/test_phal_parity.py::test_phal_math_reproduces_every_frame_decision_and_metric
+  findings: [F-06]
+  notes: >-
+    MonitorResult has a new optional metric_scores field (per-metric per-atom scores, shape-checked,
+    JSON with null for NaN) next to the raw MetricValues with their evaluated mask and status, stage
+    (incl. SKIPPED), triggered, stable hotspot IDs, reasons and FrameAction. Not verified: the staged
+    monitor (monitoring owner) does not populate metric_scores from StagedEvaluation.metric_scores yet,
+    so the PHAL golden mapping is not yet lossless through the contract.
+- id: CORE-003
+  status: verified
+  implementation: [src/gmd_active_learning/contracts/events.py, src/gmd_active_learning/contracts/regions.py, src/gmd_active_learning/events/serialization.py]
+  evidence:
+    - tests/contracts/test_contract_extensions.py::test_event_record_pre_frames_requested_and_nested_pickle
+    - tests/events/test_event_store.py::test_event_state_and_pickle_round_trip
+    - tests/events/test_rolling_buffer.py::test_flush_marks_an_unfinished_event_incomplete_f07
+    - tests/contracts/test_contracts.py::test_region_caps_extend_every_per_atom_array_together
+  findings: [F-07]
+  notes: >-
+    EventRecord has complete, truncation_reason, post_frames_requested and now pre_frames_requested
+    (optional, in summary()). Nested frames round-trip through pickle with constraints and extra arrays.
+    ExtractedRegion carries per-atom force_weights (PHAL mask_weights) through capping and JSON.
+    Follow-up for the events owner: the rolling buffer still stores the requested pre count in metadata
+    and should set the field.
+- id: CORE-004
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/online.py, src/gmd_active_learning/adapters/gmd/engine.py, src/gmd_active_learning/adapters/registry.py]
+  evidence:
+    - tests/adapters/gmd/test_engine.py::test_frame_source_end_of_stream_timeout_and_exit_code
+    - tests/adapters/gmd/test_engine.py::test_online_monitor_driver_runs_unchanged_on_the_gmd_stream
+    - tests/monitors/test_online_driver.py::test_frame_source_distinguishes_timeout_from_end_of_stream
+    - tests/workflow/test_backend_contracts.py::test_full_builtin_selection_returns_typed_adapters
+  findings: [F-19]
+  notes: >-
+    The FrameSource protocol is next_frame(timeout) -> Frame | None (end of stream) | POLL_TIMEOUT. It
+    lives in monitors/online.py and is satisfied by GMDFrameSource (a running GMD segment) and by
+    in-memory iterables. Backends resolve through adapters.registry.create_backend with no module-global
+    factory. The controller uses the push-style MDEngine.run_segment(on_frame) of the same adapter.
+- id: CORE-006
+  status: verified
+  implementation: [src/gmd_active_learning/__init__.py]
+  evidence:
+    - tests/contracts/test_contract_extensions.py::test_importing_the_package_loads_no_adapter_torch_or_gmd_sgt
+    - tests/active_learning/test_dispatch_and_surfaces.py::test_package_imports_stay_light
+    - tests/monitors/test_config_and_layering.py::test_importing_monitors_pulls_in_no_torch_or_adapter
+  findings: []
+  notes: >-
+    import gmd_active_learning (plus contracts and workflow.controller) loads no adapter, torch,
+    gmd_sgt or hotspot_al (checked in a clean subprocess). PHAL's facades are dropped:
+    runtime/workflows/schedulers map to adapters/, active_learning/ + workflow/ and
+    adapters/schedulers/, and nothing imports the old names.

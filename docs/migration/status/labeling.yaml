@@ -10,6 +10,7 @@
     - src/gmd_active_learning/adapters/schedulers/base.py
     - src/gmd_active_learning/adapters/dft/cp2k/backend.py
   evidence:
+    - tests/workflow/test_backend_contracts.py::test_md_protocol_is_satisfied_only_by_complete_implementations
     - tests/adapters/test_registry.py::test_role_mismatch_raises_type_error
     - tests/adapters/test_registry.py::test_capability_checks
     - tests/adapters/schedulers/test_local_scheduler.py::test_poll_survives_a_controller_restart
@@ -25,6 +26,7 @@
     cancel and reconcile. The DFT contract is CP2KBackend; its parse and validate steps fill the gap
     PHAL left in DFTBackend. MLIP/MD ABCs (GMD/GMD_SGT streaming ports) belong to the workflow lead and
     are not defined here.
+    MD/MLIP part (lead): structural runtime-checkable protocols in workflow/protocols.py (MDEngine, FrameEnricher, Trainer); an incomplete implementation does not satisfy them. JobState values changed deliberately, so this stays migrated.
 - id: BE-002
   status: verified
   implementation: [src/gmd_active_learning/adapters/registry.py]
@@ -45,9 +47,11 @@
     logged. An unknown name raises BackendNotFoundError, which subclasses both ConfigurationError and
     KeyError. Entry-point group: gmd_active_learning.adapters. Built-ins are imported lazily.
 - id: BE-003
-  status: migrated
+  status: verified
   implementation: [src/gmd_active_learning/adapters/registry.py, configs/sections/backends.yaml]
   evidence:
+    - tests/workflow/test_backend_contracts.py::test_full_builtin_selection_returns_typed_adapters
+    - tests/workflow/test_assembly.py::test_registry_builds_md_and_mlip_backends_and_controller
     - tests/adapters/test_registry.py::test_builtin_schedulers_by_config
     - tests/adapters/test_registry.py::test_builtin_cp2k_by_config_reads_its_sections
     - tests/adapters/test_registry.py::test_config_factory_path_registers_a_plugin
@@ -65,37 +69,7 @@
     schema is strict and has no dry-run mode. Capabilities are now enforced: backends.<role>.
     required_capabilities, and check_runtime_on_create raises CapabilityUnavailableError.
     runtime_report() gives a doctor command the result of every check_runtime().
-- id: BE-004
-  status: in-progress
-  implementation: [src/gmd_active_learning/adapters/registry.py, src/gmd_active_learning/adapters/dft/__init__.py]
-  evidence: []
-  findings: []
-  notes: >-
-    adapters/__init__.py is outside this area. The registry provides register_builtin and keeps every
-    built-in lazy; adapters/dft/__init__.py is import-free, so importing CP2K never imports the SCF
-    stack. MLIP factory registration and the architecture test belong to the workflow lead, who
-    integrates GMD_SGT.
-- id: BE-005
-  status: in-progress
-  implementation: [src/gmd_active_learning/adapters/registry.py]
-  evidence: []
-  findings: [F-28]
-  notes: >-
-    Replaced by GMD_SGT, which the workflow lead integrates. The registry side is ready:
-    register_builtin("mlip", "gmd_sgt", "module:Class") plus required_capabilities, e.g. ["forces",
-    "committee"].
-- id: BE-006
-  status: in-progress
-  implementation: []
-  evidence: []
-  findings: [F-28]
-  notes: Replaced by the GMD_SGT train/export adapter, which the workflow lead integrates. Nothing ported here.
-- id: BE-007
-  status: in-progress
-  implementation: []
-  evidence: []
-  findings: [F-28]
-  notes: Replaced by GMD_SGT inference, which the workflow lead integrates. Nothing ported here.
+    Upgraded by the workflow lead: md:gmd and mlip:gmd_sgt are registered built-ins, and {md: gmd, mlip: gmd_sgt, dft: cp2k, scheduler: pbs} yields GMDEngine, GMDSGTBackend, CP2KBackend and PBSScheduler. The legacy flat-key normalisation is deliberately dropped (strict schema; convert-phal-config maps backend.<role>.engine).
 - id: BE-008
   status: verified
   implementation:
@@ -115,12 +89,6 @@
     executable is cp2k.psmp. check_runtime also probes --version and checks cp2k.data_dir.
     ML-SCF hooks for the SCF slice: ml_scf_enabled, variant_id(), decorate_input(), job_environment()
     and native_backend().
-- id: BE-009
-  status: in-progress
-  implementation: []
-  evidence: []
-  findings: []
-  notes: The LAMMPS MD backend is replaced by the GMD MD adapter (workflow lead, MD-*). The registry accepts it through register_builtin("md", "gmd", ...).
 - id: SCH-001
   status: verified
   implementation: [src/gmd_active_learning/adapters/schedulers/local.py]
@@ -320,6 +288,9 @@
   status: migrated
   implementation: [src/gmd_active_learning/labeling/service.py, src/gmd_active_learning/labeling/task_store.py]
   evidence:
+    - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
+    - tests/workflow/test_scheduling.py::test_restart_mid_queue_resubmits_nothing_already_submitted
+    - tests/integration/test_closed_loop_real.py::test_real_closed_loop_promotes_and_resumes_md_with_the_new_model
     - tests/labeling/test_labeling_service.py::test_prepare_is_idempotent_and_ids_depend_on_region_and_settings
     - tests/labeling/test_labeling_service.py::test_submit_is_idempotent
     - tests/labeling/test_labeling_service.py::test_ambiguous_submission_failure_marks_unknown_and_never_duplicates
@@ -338,10 +309,13 @@
     removed and there is no dry-run.
     Not provable here: task-tree parity with PHAL's dry-run tree, and block-cooldown "skipped" (both
     belong to the workflow).
+    Workflow integration (lead): the controller submits one task per selected region through this service, a restart mid-queue resubmits nothing, and re-running a finished real closed loop creates no new task directories. Still not shown: PHAL dry-run task-tree parity.
 - id: LAB-008
   status: migrated
   implementation: [src/gmd_active_learning/labeling/service.py]
   evidence:
+    - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
+    - tests/integration/test_closed_loop_real.py::test_real_closed_loop_promotes_and_resumes_md_with_the_new_model
     - tests/labeling/test_labeling_service.py::test_single_point_label_is_valid_and_converted
     - tests/labeling/test_labeling_service.py::test_completed_but_invalid_output_is_invalid_not_failed
     - tests/labeling/test_labeling_service.py::test_unknown_state_never_resubmits
@@ -360,6 +334,7 @@
     yields a VALID result.
     Not done here: writing the dataset entry (extxyz/npz/metadata) is the datasets area's job, so
     file-for-file parity with PHAL's dataset files is not shown in this area.
+    Workflow integration (lead): with the scripted fake CP2K and with real CP2K 2026.2 the controller polls each job to COMPLETED, validates, collects and ingests it into the versioned dataset store, and the real closed loop resumes after restart without new jobs. Still not shown: file-for-file parity of dataset files with PHAL.
 - id: LAB-009
   status: verified
   implementation:
@@ -441,52 +416,6 @@
     h2.xyz and toy_cluster.xyz are copied byte-identical (hashes match the inventory). ExtractedRegion
     JSON fixtures were added: h2_cluster, ch3_capped, ch3_radical, h2_periodic and h2_slab. The real
     CP2K smoke labels H2 and parses it; it is opt-out by marker, not opt-in by RUN_EXTERNAL.
-- id: CFG-002
-  status: in-progress
-  implementation:
-    - src/gmd_active_learning/adapters/dft/cp2k/config.py
-    - src/gmd_active_learning/adapters/schedulers/config.py
-    - src/gmd_active_learning/adapters/registry.py
-  evidence:
-    - tests/adapters/dft/test_cp2k_config.py::test_unknown_keys_and_phal_only_keys_are_rejected
-  findings: [F-26]
-  notes: >-
-    This area provides three strict section models (cp2k, scheduler, backends); the full catalog
-    belongs to the config owner.
-
-    Key mapping for this area:
-    - cp2k.periodic: dropped; region.pbc is used.
-    - cp2k.poisson_solver: cp2k.poisson.{non_periodic,partially_periodic,periodic}_solver.
-    - cp2k.charge: region.charge.
-    - cp2k.submit_mode: backends.scheduler.engine (no dry-run).
-    - cp2k.slurm_directives: cp2k.resources.extra_directives, typed per scheduler.
-    - cp2k.max_unknown_polls: cp2k.max_unknown_polls_warning (warns only; never fails).
-    - cp2k.max_walltime_seconds: cp2k.resources.walltime.
-    - cp2k.labeled_dataset_dir: datasets area.
-    - cp2k.single_point.*: dropped (the single point is the label).
-    - cp2k.scf_recording.*: SCF slice (via decorate_input).
-    - pbs.history_query_enabled: scheduler.pbs.history_query_enabled.
-    - backend.<role>.engine: backends.<role>.engine.
-    - plugins: backends.<role>.factory and entry points.
-- id: CFG-003
-  status: in-progress
-  implementation: [configs/sections/cp2k.yaml, configs/sections/scheduler.yaml, configs/sections/backends.yaml]
-  evidence:
-    - tests/adapters/dft/test_cp2k_config.py::test_packaged_cp2k_section_equals_model_defaults
-    - tests/adapters/dft/test_cp2k_config.py::test_phal_numeric_defaults_are_kept
-    - tests/adapters/schedulers/test_scheduler_config.py::test_packaged_scheduler_section_equals_model_defaults
-    - tests/adapters/test_registry.py::test_packaged_backends_section_equals_model_defaults
-  findings: []
-  notes: >-
-    For this area's sections, CP2K numeric defaults equal PHAL's: 400/60 Ry, MAX_SCF 100, EPS_SCF 1e-6,
-    OT, PBE, DZVP-MOLOPT-SR-GTH/GTH-PBE, h_only_opt max_iter 50, uncapped policy error and
-    task_dir cp2k_tasks.
-    Deliberate changes:
-    - executable is cp2k.psmp;
-    - retry.max_retries is 3 (with bounded ladders);
-    - backends default to md gmd, mlip gmd_sgt, dft cp2k and scheduler local;
-    - there are no absolute /runtime paths.
-    The packaged default.yaml is the config owner's.
 - id: CFG-004
   status: in-progress
   implementation: [src/gmd_active_learning/adapters/dft/cp2k/config.py]
@@ -496,15 +425,3 @@
     The CP2K paths in this area are relative to the run directory: task_dir is resolved against
     LabelingService.from_config(base_dir=...), and data_dir and template_path are optional. The
     runtime overlay file itself (configs/runtime.yaml) belongs to the config owner.
-- id: CLI-001
-  status: in-progress
-  implementation: [src/gmd_active_learning/adapters/registry.py, src/gmd_active_learning/adapters/dft/cp2k/backend.py]
-  evidence:
-    - tests/adapters/test_registry.py::test_runtime_check_on_create_and_doctor_report
-  findings: [F-32]
-  notes: >-
-    The CLI (cli.py) is outside this area. runtime_report(config) returns a RuntimeStatus for every
-    configured role, through the same check_runtime() the backends use; PHAL never called
-    check_runtime (F-32). CP2KBackend.check_runtime resolves the executable, probes --version and
-    checks cp2k.data_dir. The schedulers check their submit command. A `gmd-al doctor` command can
-    print these rows.

@@ -169,8 +169,8 @@
     silent 'triggered'. Keys: stages.{light,physics,full}_interval, stages.scheduled_full_interval (= online.monitor_freq)."
 
 - id: MON-014
-  status: migrated
-  implementation: [src/gmd_active_learning/monitors/online.py]
+  status: verified
+  implementation: [src/gmd_active_learning/monitors/online.py, src/gmd_active_learning/adapters/gmd/engine.py]
   evidence:
     - tests/monitors/test_online_driver.py::test_trigger_produces_one_event_via_callback
     - tests/monitors/test_online_driver.py::test_frame_source_distinguishes_timeout_from_end_of_stream
@@ -179,11 +179,17 @@
     - tests/monitors/test_online_driver.py::test_error_without_budget_raises_and_flushes_open_event_as_error
     - tests/monitors/test_online_driver.py::test_progress_callback_and_progress_file
     - tests/monitors/test_online_driver.py::test_segmented_run_with_persisted_state_matches_continuous_run
+    - tests/adapters/gmd/test_engine.py::test_online_monitor_driver_runs_unchanged_on_the_gmd_stream
+    - tests/adapters/gmd/test_engine.py::test_stop_action_stops_the_segment_cooperatively
+    - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
+    - tests/integration/test_gmd_real.py::test_cooperative_stop_and_model_change_at_segment_boundary
   findings: [F-07, F-19]
   notes: "OnlineMonitorDriver: process(frame) (callback mode) or run(iterable | FrameSource); explicit FrameAction
     per frame; POLL_TIMEOUT vs None; pending event flushed incomplete with the stop reason; atomic progress file;
-    full state persistence. Not 'verified' because acceptance (b) needs the GMD frame stream, which belongs to the
-    GMD adapter slice; the in-memory path is tested."
+    full state persistence. Upgraded by the workflow lead: the GMD frame stream (GMDFrameSource over a running
+    segment, fake and real GMD) drives the same driver unchanged, the STOP decision reaches GMD through its stop file
+    (cooperative, latency recorded), and the controller feeds streamed frames through the same monitor in the
+    online e2e test."
 
 - id: MON-015
   status: replaced
@@ -264,49 +270,6 @@
   notes: "Stable atom IDs, deterministic hotspot_id, canonical ordering. hotspot.threshold removed (F-16): clustering
     uses MonitorResult.hotspot_atom_ids; detect_hotspots(threshold=...) kept for score-based use."
 
-- id: CORE-001
-  status: migrated
-  implementation: [src/gmd_active_learning/contracts/frame.py, src/gmd_active_learning/events/serialization.py]
-  evidence:
-    - tests/contracts/test_contracts.py::test_frame_round_trips_through_ase
-    - tests/events/test_event_store.py::test_event_state_and_pickle_round_trip
-  findings: []
-  notes: "Frame contract (lead) pickles and JSON round-trips with committee forces and metadata (frame_to_state).
-    Gaps against the acceptance: Frame carries no ASE constraints/extra per-atom arrays, and there is no
-    MDFrame <-> Frame converter (core/data_types.MDFrame); both belong to the contracts/adapters owners."
-
-- id: CORE-002
-  status: migrated
-  implementation: [src/gmd_active_learning/contracts/monitoring.py, src/gmd_active_learning/monitors/staged_monitor.py]
-  evidence:
-    - tests/monitors/test_phal_parity.py::test_phal_math_reproduces_every_frame_decision_and_metric
-  findings: [F-06]
-  notes: "MonitorResult carries atom scores, per-metric raw values with evaluated masks/status, stage (incl. SKIPPED),
-    triggered, stable hotspot IDs, reasons and FrameAction. PHAL golden results map onto it, but the per-metric
-    SCORES live in StagedEvaluation.metric_scores, not in the contract; adding a metric_scores field to
-    MonitorResult would make the mapping lossless (requested from the contracts owner). Hotspot.atom_indices alias dropped."
-
-- id: CORE-003
-  status: migrated
-  implementation: [src/gmd_active_learning/contracts/events.py, src/gmd_active_learning/events/serialization.py]
-  evidence:
-    - tests/events/test_event_store.py::test_event_state_and_pickle_round_trip
-    - tests/events/test_rolling_buffer.py::test_flush_marks_an_unfinished_event_incomplete_f07
-  findings: [F-07]
-  notes: "EventRecord has complete/post_frames_requested/truncation_reason; nested frames round-trip (pickle and
-    JSON state). pre_frames_requested is stored in metadata (no contract field). The ExtractedRegion half belongs to
-    the extraction slice."
-
-- id: CORE-004
-  status: migrated
-  implementation: [src/gmd_active_learning/monitors/online.py]
-  evidence:
-    - tests/monitors/test_online_driver.py::test_frame_source_distinguishes_timeout_from_end_of_stream
-  findings: [F-19]
-  notes: "FrameSource protocol (next_frame(timeout) -> Frame | None | POLL_TIMEOUT) and in-memory iterables accepted
-    by the driver. Lives in monitors/online.py, not contracts/protocols.py (contracts are read-only for this slice);
-    the GMD frame source and backend registry belong to the adapter slice. No module-global factory."
-
 - id: CORE-005
   status: not-started
   implementation: []
@@ -315,15 +278,6 @@
   notes: "core/exceptions.py is outside this slice. Monitoring uses MonitorError, DataContractError and
     ConfigurationError; PHAL's DataError role is covered by DataContractError (MetricValues finiteness).
     CooldownSkip is not needed here (cooldown is a counter, not an exception)."
-
-- id: CORE-006
-  status: migrated
-  implementation: [src/gmd_active_learning/monitors/__init__.py, src/gmd_active_learning/events/__init__.py, src/gmd_active_learning/hotspots/__init__.py]
-  evidence:
-    - tests/monitors/test_config_and_layering.py::test_importing_monitors_pulls_in_no_torch_or_adapter
-  findings: []
-  notes: "Importing gmd_active_learning and the three monitoring packages loads no adapter or torch (checked in a
-    clean subprocess). The top-level facade decisions (runtime/workflows/schedulers) belong to the lead."
 
 - id: CORE-007
   status: in-progress
