@@ -30,6 +30,7 @@ from gmd_active_learning.contracts.monitoring import FrameAction, MonitorResult,
 from gmd_active_learning.core.exceptions import MonitorError
 from gmd_active_learning.events.config import EventsConfig, load_events_config
 from gmd_active_learning.events.event_store import EventStore
+from gmd_active_learning.events.phal_view import monitor_metadata_for_event
 from gmd_active_learning.events.rolling_buffer import EventBuffer
 from gmd_active_learning.hotspots.config import HotspotsConfig, load_hotspots_config
 from gmd_active_learning.hotspots.detector import hotspots_from_result
@@ -162,7 +163,11 @@ class OnlineMonitorDriver:
                 hotspot.to_dict() for hotspot in hotspots_from_result(frame, result, self.hotspots_config)
             ]
         completed: list[EventRecord] = []
-        event = self.buffer.capture(frame, result, metadata={"frame_index": result.metadata.get("frame_index")})
+        event = self.buffer.capture(
+            frame,
+            result,
+            metadata={"frame_index": result.metadata.get("frame_index"), "monitor": monitor_metadata_for_event(result.metadata)},
+        )
         if event is not None:
             completed.append(event)
         event = self.buffer.push(frame)

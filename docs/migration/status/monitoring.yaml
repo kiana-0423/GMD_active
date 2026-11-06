@@ -235,17 +235,33 @@
     MonitorError (PHAL ValueError on shape) and keeps the pending event; pre_frames_requested is in event metadata."
 
 - id: EVT-002
-  status: migrated
-  implementation: [src/gmd_active_learning/events/event_store.py, src/gmd_active_learning/monitors/online.py]
+  status: verified
+  implementation:
+    - src/gmd_active_learning/events/event_store.py
+    - src/gmd_active_learning/events/phal_view.py
+    - src/gmd_active_learning/monitors/online.py
   evidence:
+    - tests/events/test_phal_event_view.py::test_phal_view_matches_phal_event_json
+    - tests/events/test_phal_event_view.py::test_written_event_frames_match_phal_counts_and_round_trip_bit_exactly
+    - tests/events/test_phal_event_view.py::test_ood_mapping_rules
     - tests/events/test_event_store.py::test_written_event_round_trips_bit_exactly
     - tests/events/test_event_store.py::test_rewriting_an_event_is_idempotent
     - tests/monitors/test_online_driver.py::test_trigger_produces_one_event_via_callback
     - tests/monitors/test_online_driver.py::test_event_store_writes_each_event
-  findings: []
-  notes: "event.json follows the EventRecord contract summary (not PHAL's key set, so the 'identical keys' part of
-    the acceptance is deliberately not met); written atomically last; frames.npz bit-exact plus frames.extxyz.
-    Events reach on_event exactly once; scheduler hand-off is the caller's on_event (no synchronous draining)."
+    - tests/workflow/test_store_registry.py::test_idempotent_records
+    - tests/workflow/test_scheduling.py::test_restart_mid_queue_resubmits_nothing_already_submitted
+  findings: [F-15]
+  notes: "GMD's event.json stays the EventRecord contract summary, written atomically last. events.phal_event_payload(event,
+    backend=, lj_lazy_threshold=) is the PHAL-compatible view. For all 9 golden events, replayed through the GMD monitor and
+    driver, it gives PHAL's event.json with identical keys and values except event_id, which is a stable id (F-15). That
+    covers step, time, hotspot_atoms (frame indices), trigger_reason, ood_scores, backend, model_version and metadata (ood,
+    latest_trigger_step, trigger_steps, trigger_count, per-trigger ood). To make this possible, the online driver now keeps
+    each trigger's monitor metadata (thresholds, lj_fit_count, screen/physics max scores) in trigger_metadata[i].monitor.
+    backend and lj_lazy_threshold are not part of an event, so the caller passes them. frames.extxyz holds
+    len(pre)+1+len(post) frames with PHAL's steps. The bit-exact round trip of positions and forces goes through
+    frames.npz: extxyz is 8-decimal text, in PHAL (ASE writer) as here. Exactly once: the driver hands each event to
+    on_event once, and the controller's store records an event_id once (INSERT OR IGNORE). A restart mid-queue resubmits
+    nothing. Scheduler hand-off is the controller's job, with no synchronous draining inside the monitor."
 
 - id: HOT-001
   status: verified
