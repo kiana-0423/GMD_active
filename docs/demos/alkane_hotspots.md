@@ -14,10 +14,16 @@ configuration's `artifacts_root`. The default is `../alkane_artifacts/<config na
 GMD_active root, that is `GMD_system/alkane_artifacts/<name>/`. Only small summaries are committed,
 under `docs/demos/alkane_hotspots/results/`.
 
-**Status (2026-11-07).** *Executed:* parent generation for the pilot (no DFT), and the real-CP2K
-smoke run (C8H18 at smoke-only settings; see below). *Planned, not executed:* the pilot DFT labels,
-the pilot fragment-fidelity gate, and the campaign. No pilot or campaign number appears on this page
-until it has been measured.
+**Status (2026-11-07).** *Executed:*
+
+- the CP2K timing and cutoff-convergence probe (`results/timing_probe.json`);
+- the C16 pilot: 16 parents, all 16 full-system DFT labels, and the fragment-fidelity gate on
+  calibration and on final_eval (`results/fidelity_pilot/`);
+- the real-CP2K smoke run (C8H18 at smoke-only settings).
+
+The model study, the closed loop and the C32 transfer are reported in their own sections, marked
+executed or planned. *Planned, not executed:* the campaign. No number appears on this page unless it
+was measured.
 
 ## Commands
 
@@ -242,21 +248,90 @@ every setting is complete and none passes, `fidelity/failure.json` records the d
 **Final evaluation.** `fidelity-prepare --split final_eval` refuses to run without a frozen selection
 and builds fragments for the selected setting only. Its report never feeds back into the selection.
 
-**Pilot sweep and expected cost (planned).** The calibration split has 8 parents and 14 sites. Graph
-hops {2, 3, 4} and cluster (core 1.5 A, buffer {3, 4, 5} A) give 84 fragment specs. Because
-identical fragments are shared, these need 52 CP2K calculations of 20-56 atoms. The calibration
-split also needs 8 full parents (4 x C16, 4 x C32).
+**Pilot sizing (from the measured timing probe).** The probe (`results/timing_probe.json`) changed
+the plan before any pilot label was run:
 
-Using the lead's C16 measurement of 1.1 core-hours, a rough estimate is:
+- a C32H66 full label takes about 2.7 h wall (13.5 core-h), extrapolated from SCF steps measured
+  alone;
+- concurrent CP2K jobs and MPI give no throughput on this machine, so jobs run one at a time;
+- 300/50 Ry differs from 400/60 Ry by 0.006 eV/A RMS and 0.021 eV/A at most on C16H34. That is below
+  the 0.03 eV/A target, so parents and fragments both use 300/50 Ry.
 
-- 4 C16 parents: about 4.5 core-hours;
-- C32 parents: not measured yet. The cubic box is 52.5 A wide instead of 32.5 A for C16, about 4.2
-  times the grid volume with twice the atoms, so expect roughly 4-8 times the C16 cost each;
-- fragments: probably below a C16 parent each.
+The pilot (`pilot.yaml`) is therefore C16H34 only: 16 parents (4 per split, one per family) and a
+40 core-h budget. C32H66 is a separate transfer check (`pilot_c32.yaml`, below). C64 and C128 were
+not attempted: their isolated cubic boxes are not affordable on this machine.
 
-`status` replaces this with measured means as soon as the first labels finish. The pilot budget is
-120 core-hours (`budgets.max_total_cpu_core_hours`). Labeling all 12 C32 parents of the pilot could
-exhaust it on its own, so run the calibration split first and check `status`.
+### Executed: C16 pilot fidelity gate (2026-11-06/07)
+
+Copies: `results/fidelity_pilot/`. These are the pre-registration, the selection, both reports, and
+the sha256 of the labels and per-atom tables they were computed from. Pre-registration hash
+`640c118d…`. CP2K 2026.2, PBE-D3, DZVP-MOLOPT-SR-GTH, 300/50 Ry, isolated wavelet box, 5 OpenMP
+threads.
+
+**Calibration** (4 parents, 7 sites; the normal parent has only its control site):
+
+- six settings, 42 fragment specs, sharing 22 distinct fragment calculations;
+- every label is valid and every setting is complete, with 0 failures and 0 retries;
+- mean measured cost: full C16 parent 2370 core-s; fragments 508-1095 core-s, depending on the
+  setting.
+
+| Setting | Pooled core RMSE (eV/A) | Max core error (eV/A) | Mean atoms | Mean caps | Mean cost (core-s) | Passes |
+|---|---|---|---|---|---|---|
+| graph h2 | 0.0278 | **0.2125** | 23.7 | 1.71 | 508 | no (max error) |
+| graph h3 | 0.0108 | 0.0521 | 28.6 | 1.43 | 692 | yes |
+| graph h4 | 0.0113 | 0.0552 | 32.9 | 1.29 | 904 | yes |
+| cluster c1.5 b3 | 0.0118 | 0.0747 | 28.6 | 1.43 | 692 | yes (**selected**) |
+| cluster c1.5 b4 | 0.0113 | 0.0552 | 33.6 | 1.43 | 879 | yes |
+| cluster c1.5 b5 | 0.0095 | 0.0515 | 37.9 | 1.14 | 1095 | yes |
+
+- **Graph h2 fails.** It passes the pooled-RMSE target narrowly but has a maximum error of
+  0.21 eV/A. Its errors sit on core atoms two to three bonds from a cut:
+  - [2,3) bonds: mean 0.067 eV/A, max 0.145;
+  - [3,4) bonds: mean 0.036, max 0.212;
+  - [4,6) bonds: mean 0.008;
+  - [6,∞) bonds: mean 0.001.
+
+  So the failure comes from the boundary, not from the perturbation.
+- **The selected setting**, by the pre-registered rule (lowest measured cost among passing settings),
+  is cluster c1.5 b3. For C16 it builds the same fragments as graph h3 (same atom counts, same shared
+  calculations, same measured cost). The two differ only in which atoms count as core: graph uses the
+  site atoms, cluster uses atoms within 1.5 A of the site. The tie was broken by the fixed setting
+  order. With cluster c1.5 b3, the error falls with the distance to the cut:
+
+  | Bond distance to cut | n | Mean (eV/A) | Max (eV/A) |
+  |---|---|---|---|
+  | [2,3) | 2 | 0.055 | 0.075 |
+  | [3,4) | 10 | 0.034 | 0.052 |
+  | [4,6) | 47 | 0.009 | 0.048 |
+  | [6,∞) | 22 | 0.005 | 0.046 |
+
+- **Perturbation sites vs normal controls:** 0.0139 vs 0.0098 eV/A RMSE. Distorted regions are not
+  reproduced notably worse.
+
+**Final evaluation** (4 untouched parents; frozen setting only; 7 specs, 6 CP2K calculations):
+
+- pooled core RMSE **0.0100 eV/A**; max core error **0.049 eV/A**; 0 failures. **The frozen setting
+  passes on held-out parents.**
+- perturbation sites 0.0093, normal controls 0.0101 eV/A;
+- mean fragment 28.6 atoms and 561 core-s, against 2535 core-s for a full C16 parent;
+- by bond distance to the cut: [3,4) mean 0.032; [4,6) mean 0.008; [6,∞) mean 0.006 eV/A.
+
+**What this supports.** At these DFT settings, for C16H34 torsion, bend and contact distortions, a
+capped fragment of about 29 atoms (C16H34 has 50) reproduces the parent's forces on the scored core
+to about 0.01 eV/A RMS. It costs about a quarter of the full single point: 0.22-0.29 measured.
+
+**What it does not support.**
+
+- Larger savings for longer chains. They are expected, because fragment cost does not grow with
+  chain length, but they are not measured here; see the C32 transfer below.
+- Fidelity for atoms near the boundary. Fragments are scored on their core only. Buffer atoms near
+  the cut carry errors of 0.03-0.2 eV/A and must get zero or small training weight
+  (`training.force_weights`).
+- Any claim beyond 4+4 parents. These are small samples, and no confidence interval is
+  claimed.
+
+Total measured DFT for the pilot labels (16 full + 28 calibration and final_eval fragments): 17.9
+core-h.
 
 **Smoke result (smoke-only settings, not a scientific result).** C8H18 torsion parent, perturbation
 site, graph hops 2, one cap at two bonds from the nearest core atom:

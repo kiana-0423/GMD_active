@@ -1,0 +1,113 @@
+{
+  "split": "final_eval",
+  "created_at": "2026-11-06T19:49:19+00:00",
+  "targets": {
+    "core_force_rmse": 0.03,
+    "max_core_force_error": 0.1,
+    "max_failures": 0,
+    "selection_objective": "min_measured_cost",
+    "distance_bins": [
+      0.0,
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      6.0,
+      100.0
+    ],
+    "environment_radius": 4.0
+  },
+  "preregistration_hash": "640c118dacba8b23c302cf1610af0216cc09e78a3f391351109ed923e2a04728",
+  "settings": [
+    {
+      "setting_id": "cluster-c1.5-b3",
+      "n_specs": 7,
+      "n_evaluated": 7,
+      "n_failed": 0,
+      "n_pending": 0,
+      "complete": true,
+      "pooled_core_force_rmse": 0.009996536141197193,
+      "max_core_force_error": 0.04924649385012063,
+      "per_spec_rmse_max": 0.012940482053939936,
+      "rmse_by_site_kind": {
+        "perturbation_site": 0.009309381299909481,
+        "normal_control": 0.01014341855675237
+      },
+      "error_vs_graph_distance_to_cut": {
+        "[2,3)": {
+          "n": 1,
+          "mean": 0.028948463966259812,
+          "max": 0.028948463966259812
+        },
+        "[3,4)": {
+          "n": 9,
+          "mean": 0.0318465547715118,
+          "max": 0.04924649385012063
+        },
+        "[4,6)": {
+          "n": 43,
+          "mean": 0.008466084101179775,
+          "max": 0.03141617574751061
+        },
+        "[6,100)": {
+          "n": 26,
+          "mean": 0.006370312781054183,
+          "max": 0.04774525713730106
+        }
+      },
+      "mean_n_atoms": 28.571428571428573,
+      "mean_n_caps": 1.2857142857142858,
+      "mean_fragment_cost_core_s": 561.1145784173693,
+      "mean_parent_cost_core_s": 2535.0384874003275,
+      "failures": [],
+      "passes": true
+    }
+  ],
+  "n_specs": 7,
+  "selection_setting_id": "cluster-c1.5-b3",
+  "evaluation": [
+    {
+      "setting_id": "cluster-c1.5-b3",
+      "n_specs": 7,
+      "n_evaluated": 7,
+      "n_failed": 0,
+      "n_pending": 0,
+      "complete": true,
+      "pooled_core_force_rmse": 0.009996536141197193,
+      "max_core_force_error": 0.04924649385012063,
+      "per_spec_rmse_max": 0.012940482053939936,
+      "rmse_by_site_kind": {
+        "perturbation_site": 0.009309381299909481,
+        "normal_control": 0.01014341855675237
+      },
+      "error_vs_graph_distance_to_cut": {
+        "[2,3)": {
+          "n": 1,
+          "mean": 0.028948463966259812,
+          "max": 0.028948463966259812
+        },
+        "[3,4)": {
+          "n": 9,
+          "mean": 0.0318465547715118,
+          "max": 0.04924649385012063
+        },
+        "[4,6)": {
+          "n": 43,
+          "mean": 0.008466084101179775,
+          "max": 0.03141617574751061
+        },
+        "[6,100)": {
+          "n": 26,
+          "mean": 0.006370312781054183,
+          "max": 0.04774525713730106
+        }
+      },
+      "mean_n_atoms": 28.571428571428573,
+      "mean_n_caps": 1.2857142857142858,
+      "mean_fragment_cost_core_s": 561.1145784173693,
+      "mean_parent_cost_core_s": 2535.0384874003275,
+      "failures": [],
+      "passes": true
+    }
+  ]
+}
