@@ -508,6 +508,12 @@ class SignalComputer:
             values["coordination"], reasons["coordination"] = None, "no calibration frames for the coordination reference"
         results: dict[str, dict[str, Any]] = {}
         for name, cfg in self.variant_cfgs.items():
+            if not self.warmup_satisfied:
+                # the staged score of a monitor still in warm-up is not the configured monitor: report, do not score it
+                values[name] = None
+                reasons[name] = (f"monitor warm-up not satisfied ({self.n_calibration_frames} calibration frames < "
+                                 f"running_stats.warmup_frames={self.base.running_stats.warmup_frames})")
+                continue
             evaluation = self._evaluate(name, cfg, item, previous_frame)
             values[name] = np.asarray(evaluation.result.atom_scores, dtype=float)
             results[name] = {"stage": evaluation.result.stage.value, "triggered": evaluation.result.triggered,

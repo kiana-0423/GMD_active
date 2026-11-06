@@ -158,3 +158,15 @@ def test_bootstrap_over_a_single_group_reports_no_interval() -> None:
     assert result["low"] is None and result["high"] is None and result["n_groups"] == 1 and "reason" in result
     two = _bootstrap(np.array(["g0", "g0", "g1"]), lambda idx: float(len(idx)), BootstrapConfig(n=20, seed=1))
     assert two["low"] is not None and two["n_groups"] == 2
+
+
+def test_staged_monitor_in_warm_up_is_unavailable_not_scored() -> None:
+    calibration, evaluation = _frames()
+    monitor = {**MONITOR, "running_stats": {"warmup_frames": 10}}
+    report, _ = run_ground_truth(evaluation, calibration, monitor, _config())
+    assert report["calibration"]["warmup_satisfied"] is False
+    block = report["per_threshold"]["0.3"]
+    assert block["signals"]["phal_staged"]["reason"] == "signal unavailable on every region"
+    assert any(item.startswith("phal_staged: monitor warm-up not satisfied") for item in report["signals_unavailable"])
+    assert block["signals"]["committee"]["average_precision"] is not None  # raw signals do not need the warm-up
+    assert all(c["delta"] is None for c in block["comparisons"] if "phal_staged" in (c["a"], c["b"]))

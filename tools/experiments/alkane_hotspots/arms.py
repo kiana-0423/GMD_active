@@ -793,9 +793,25 @@ class ArmsRunner:
                                      f"{'not been run' if self.ctx.gate_passed is None else 'failed'}; local labels are not validated "
                                      "(set arms.fidelity_gate.required: false only for a recorded negative-control run)")
 
+    def _check_monitor_calibration(self, variant: ArmVariant) -> None:
+        """A PHAL arm whose staged monitor cannot leave warm-up never triggers: refuse it instead of recording 0 labels."""
+
+        if variant.kind not in ("phal_local", "phal_full_system"):
+            return
+        warmup = arm_monitor_config(self.beta.monitor, self.cfg.monitor_overrides, variant).running_stats.warmup_frames
+        n = sum(1 for p in self.ctx.parents
+                if p.get("split") in self.cfg.calibration_splits and p.get("family") in self.cfg.calibration_families)
+        if n < warmup:
+            raise ConfigurationError(
+                f"arm {variant.name}: the monitor is calibrated on {n} configuration(s) (arms.calibration_splits="
+                f"{self.cfg.calibration_splits}, families={self.cfg.calibration_families}) but monitor.running_stats.warmup_frames="
+                f"{warmup}; its z-scored terms would stay suppressed and the arm could never trigger. Provide at least {warmup} "
+                "calibration configurations (more base conformations, or further non-final_eval splits)")
+
     # -- one (variant, repetition) ----------------------------------------------------------------
     def run_one(self, variant: ArmVariant, repetition: int) -> dict[str, Any]:
         self._check_gate(variant)
+        self._check_monitor_calibration(variant)
         seed = self.cfg.seed_for(repetition)
         run_dir = self.ctx.out_dir / "arms" / variant.name / f"rep{repetition}"
         progress_path = run_dir / "progress.json"
@@ -898,9 +914,11 @@ class ArmsRunner:
 
     def run(self, *, only: Sequence[str] | None = None, repetitions: Sequence[int] | None = None) -> dict[str, Any]:
         results: dict[str, Any] = {}
-        for variant in self.cfg.variants():
-            if only and variant.name not in only:
-                continue
+        selected = [v for v in self.cfg.variants() if not only or v.name in only]
+        for variant in selected:  # pre-flight: refuse before any training
+            self._check_gate(variant)
+            self._check_monitor_calibration(variant)
+        for variant in selected:
             reps = range(self.cfg.repetitions) if repetitions is None else repetitions
             results[variant.name] = [self.run_one(variant, rep) for rep in reps]
         return results

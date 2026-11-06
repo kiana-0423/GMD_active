@@ -286,3 +286,20 @@ def test_gate_files_and_alphas_fragment_builder(tmp_path: Path) -> None:
     assert np.allclose(reference.positions, pool[3].region.positions) and sorted(pool[3].core_ids) == core
     with pytest.raises(ConfigurationError, match="gate_selection"):
         build_pool(parents, PoolConfig.model_validate({"splits": ["validation"]}), [root])
+
+
+def test_phal_arms_refuse_a_monitor_that_cannot_leave_warm_up(world) -> None:
+    root, parents, labels, _ = world
+    monitor = {**MONITOR, "running_stats": {"warmup_frames": 99}}
+    beta = BetaConfig.model_validate({"name": "t", "monitor": monitor, "arms": arms_cfg(),
+                                      "training": {"model": {"n_blocks": 1}, "initial_splits": ["initial_train"],
+                                                   "validation_splits": ["calibration"]},
+                                      "evaluation": {"splits": ["final_eval"]}})
+    stub = StubWorld(parents, labels, root)
+    context = ArmContext(parents=parents, labels=labels, bases=(root,), provider=RecordedLabelProvider(labels, (root,)), trainer=stub.train,
+                         predictor_factory=stub.predictor, out_dir=root / "study", config_hash="h", gate_passed=True)
+    runner = ArmsRunner(beta, context)
+    with pytest.raises(ConfigurationError, match="warmup_frames=99"):
+        runner.run(only=["random_local", "phal_local"])
+    assert not (root / "study" / "arms").exists()  # refused before any arm (or training) started
+    assert set(runner.run(only=["random_local"], repetitions=[0])) == {"random_local"}  # non-PHAL arms are unaffected
