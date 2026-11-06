@@ -181,3 +181,25 @@ def test_trained_checkpoint_receptive_field_is_a_separate_executed_section(tmp_p
     assert report["executed"]["receptive_field_checkpoint"]["model_source"] == "checkpoint"
     assert "receptive_field" in report["planned_not_executed"]  # the random-init measurement is still separate
     assert "### Receptive field, trained checkpoint" in render_markdown(report)
+
+
+def test_publish_copies_report_and_figures_without_machine_paths(tmp_path: Path) -> None:
+    root = tmp_path / "art"
+    make_parents(root)
+    study = yaml.safe_load(_study(tmp_path, root).read_text())
+    study["report"] = {"results_dir": str(tmp_path / "results")}
+    study["figures"] = {"formats": ["png", "svg"]}
+    path = tmp_path / "arms_unit_publish.yaml"
+    path.write_text(yaml.safe_dump(study))
+    loaded = load_beta_config(path)
+    figures = loaded.output_dir / "figures"
+    figures.mkdir(parents=True)
+    (figures / "fidelity.png").write_bytes(b"png")
+    (figures / "fidelity.pdf").write_bytes(b"pdf")  # not a configured format: not published
+    (figures / "index.json").write_text(json.dumps({"fidelity": {"paths": [str(figures / "fidelity.png")]}}))
+    cmd_report(loaded, argparse.Namespace(publish=True))
+    target = tmp_path / "results" / "model_study_unit"
+    assert (target / "report.md").is_file() and (target / "figures" / "fidelity.png").read_bytes() == b"png"
+    assert not (target / "figures" / "fidelity.pdf").exists()
+    index = (target / "figures" / "index.json").read_text()
+    assert str(loaded.artifacts_root) not in index and "<artifacts_root>" in index

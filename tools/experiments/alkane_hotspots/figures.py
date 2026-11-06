@@ -251,6 +251,47 @@ def fig_fidelity(rows: Sequence[Mapping[str, Any]] | None, *, x_key: str, y_key:
     return fig
 
 
+def fig_fidelity_distance(calibration: Sequence[Mapping[str, Any]] | None, *, final_eval: Sequence[Mapping[str, Any]] | None = None,
+                          selected: str | None = None, target: float | None = None) -> Any:
+    """Per-core-atom |F_frag - F_parent| vs distance from the artificial boundary (alpha's per_atom_<split>.csv rows).
+
+    (a) bonds to the nearest cut C-C bond, (b) Euclidean distance to the nearest cap; calibration points per
+    setting, final_eval points (frozen setting only) as open black markers.
+    """
+
+    plt = _plt()
+    fig, axes = plt.subplots(1, 2, figsize=(8.2, 3.8), sharey=True)
+    rows = [r for r in calibration or [] if r.get("force_error") not in (None, "")]
+    if not rows:
+        for ax in axes:
+            mark_missing(ax, "no per-atom fidelity rows")
+        return fig
+    settings = sorted({str(r["setting_id"]) for r in rows})
+    for panel, (ax, key, label) in enumerate(zip(axes, ("graph_distance_to_cut", "euclidean_distance_to_cap"),
+                                                ("C-C bonds to the nearest cut bond", "distance to the nearest H cap (A)"))):
+        for index, setting in enumerate(settings):
+            pts = [(float(r[key]), float(r["force_error"])) for r in rows if str(r["setting_id"]) == setting and r.get(key) not in (None, "")]
+            if not pts:
+                continue
+            x = np.asarray([p[0] for p in pts]) + (0.08 * (index - (len(settings) - 1) / 2) if panel == 0 else 0.0)
+            ax.scatter(x, [p[1] for p in pts], s=10, alpha=0.75, color=CATEGORICAL[index % len(CATEGORICAL)],
+                       label=f"{setting}{' (selected)' if setting == selected else ''}", linewidths=0)
+        final = [r for r in final_eval or [] if r.get(key) not in (None, "") and r.get("force_error") not in (None, "")]
+        if final:
+            ax.scatter([float(r[key]) for r in final], [float(r["force_error"]) for r in final], s=22, facecolors="none",
+                       edgecolors=INK, linewidths=0.8, label="final_eval (frozen setting)")
+        if target is not None:
+            ax.axhline(target, color=INK, linestyle=":", linewidth=0.9, label=f"pre-registered max {target:g}")
+        ax.set_xlabel(label)
+        ax.set_yscale("log")
+        ax.grid(True, color=GRID, linewidth=0.5)
+    axes[0].set_ylabel("|F_frag - F_parent| per core atom (eV/A)")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=6, frameon=False)
+    fig.tight_layout(rect=(0.0, 0.14, 1.0, 1.0))
+    return fig
+
+
 # ---------------------------------------------------------------------------------------------- 4 learning curves
 
 
@@ -367,5 +408,5 @@ def fig_timeline(report: Mapping[str, Any] | None) -> Any:
     return fig
 
 
-__all__ = ["CATEGORICAL", "colour_for", "fig_ablations", "fig_fidelity", "fig_hotspots", "fig_receptive_field", "missing_reasons", "fig_learning_curves", "fig_risk_vs_error",
+__all__ = ["CATEGORICAL", "colour_for", "fig_ablations", "fig_fidelity", "fig_fidelity_distance", "fig_hotspots", "fig_receptive_field", "missing_reasons", "fig_learning_curves", "fig_risk_vs_error",
            "fig_timeline", "mark_missing", "save"]

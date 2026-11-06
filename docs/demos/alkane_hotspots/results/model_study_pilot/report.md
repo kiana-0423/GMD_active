@@ -1,6 +1,6 @@
 # Alkane hotspot model study: pilot
 
-Config `<GMD_active>/configs/demos/alkane_hotspots/arms_pilot.yaml` (hash `6d363dceb7ded3a2`), generated 2026-11-06T20:52:11+00:00.
+Config `<GMD_active>/configs/demos/alkane_hotspots/arms_pilot.yaml` (hash `6d363dceb7ded3a2`), generated 2026-11-06T21:03:29+00:00.
 
 ## Label records
 
@@ -101,6 +101,7 @@ Reference threshold 0.4 eV/A (64 positive regions), average precision:
 
 - ablations: ablations.pdf, ablations.svg, ablations.png
 - fidelity: fidelity.pdf, fidelity.svg, fidelity.png
+- fidelity_distance: fidelity_distance.pdf, fidelity_distance.svg, fidelity_distance.png
 - fidelity_max: fidelity_max.pdf, fidelity_max.svg, fidelity_max.png
 - learning_curves: learning_curves.pdf, learning_curves.svg, learning_curves.png
 - learning_curves_labels: learning_curves_labels.pdf, learning_curves_labels.svg, learning_curves_labels.png

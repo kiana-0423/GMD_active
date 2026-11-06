@@ -378,6 +378,24 @@ threads.
 - mean fragment 28.6 atoms and 561 core-s, against 2535 core-s for a full C16 parent;
 - by bond distance to the cut: [3,4) mean 0.032; [4,6) mean 0.008; [6,∞) mean 0.006 eV/A.
 
+**By element** (cluster c1.5 b3; this breakdown was not pre-registered and was computed from
+`per_atom_<split>.csv`):
+
+| Split | Carbon core atoms: n, RMSE, max | Hydrogen core atoms: n, RMSE, max |
+|---|---|---|
+| calibration | 28, 0.020, 0.075 | 53, 0.002, 0.008 |
+| final_eval | 26, 0.017, 0.049 | 53, 0.002, 0.007 |
+
+RMSE is per Cartesian component and all values are in eV/A. The pooled RMSE mixes carbons with
+hydrogens, whose errors are about ten times smaller. Carbons alone also stay below the 0.03 eV/A
+target. This is why `figures/fidelity_distance` shows two bands at every distance.
+
+Figures in `results/model_study_pilot/figures/`:
+
+- `fidelity` and `fidelity_max`: pooled RMSE and maximum error vs fragment size, per policy;
+- `fidelity_distance`: per-core-atom error vs bonds to the nearest cut and vs distance to the
+  nearest cap, with all calibration settings and the final_eval points of the frozen setting.
+
 **What this supports.** At these DFT settings, for C16H34 torsion, bend and contact distortions, a
 capped fragment of about 29 atoms (C16H34 has 50) reproduces the parent's forces on the scored core
 to about 0.01 eV/A RMS. It costs about a quarter of the full single point: 0.22-0.29 measured.

@@ -41,12 +41,18 @@ def test_figures_with_data(tmp_path: Path) -> None:
                            {"segment_index": 1, "model_id": "m1", "end_step": 250, "status": "done"}],
               "promotions": [{"model_id": "m1", "previous_model_id": "m0", "action": "promote", "reason": "gates"}], "event_steps": [80, 90]}
     assert not _says_missing(_saved(fg.fig_timeline(report), tmp_path, "tl")[1])
+    per_atom = [{"setting_id": sid, "force_error": str(err), "graph_distance_to_cut": str(d), "euclidean_distance_to_cap": str(1.5 * d)}
+                for sid in ("graph-h2", "cluster-c1.5-b3") for d, err in ((2, 0.1), (4, 0.01), (6, 0.004))]
+    final = [{"setting_id": "cluster-c1.5-b3", "force_error": "0.02", "graph_distance_to_cut": "3", "euclidean_distance_to_cap": ""}]
+    assert not _says_missing(_saved(fg.fig_fidelity_distance(per_atom, final_eval=final, selected="cluster-c1.5-b3", target=0.1),
+                                    tmp_path, "fdist")[1])
 
 
 @pytest.mark.parametrize("make", [
     lambda: fg.fig_hotspots(None, signal="committee"),
     lambda: fg.fig_risk_vs_error(None, signals=["committee"]),
     lambda: fg.fig_fidelity([], x_key="mean_n_atoms"),
+    lambda: fg.fig_fidelity_distance(None),
     lambda: fg.fig_learning_curves(None),
     lambda: fg.fig_learning_curves({"phal_local": [[{"cumulative_cpu_core_s": 0.0, "force_rmse": None}]]}),
     lambda: fg.fig_ablations({}),

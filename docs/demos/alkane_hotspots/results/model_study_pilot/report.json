@@ -2361,6 +2361,11 @@
           "<artifacts_root>/model_study/figures/fidelity.svg",
           "<artifacts_root>/model_study/figures/fidelity.png"
         ],
+        "fidelity_distance": [
+          "<artifacts_root>/model_study/figures/fidelity_distance.pdf",
+          "<artifacts_root>/model_study/figures/fidelity_distance.svg",
+          "<artifacts_root>/model_study/figures/fidelity_distance.png"
+        ],
         "fidelity_max": [
           "<artifacts_root>/model_study/figures/fidelity_max.pdf",
           "<artifacts_root>/model_study/figures/fidelity_max.svg",
@@ -2384,7 +2389,7 @@
       },
       "index": {
         "path": "<artifacts_root>/model_study/figures/index.json",
-        "sha256": "9e49b6ffa7493a1be7c9d9bd6ffdd9c59c91b7231cf70988baa1ea9382112b1a"
+        "sha256": "9b1bcac8758834490827366a2e78a5127fdabfb921192f2116eb75f60c8b960b"
       },
       "partial": {}
     },
@@ -2556,7 +2561,7 @@
       }
     }
   },
-  "generated_at": "2026-11-06T20:52:11+00:00",
+  "generated_at": "2026-11-06T21:03:29+00:00",
   "labels": {
     "artifact": {
       "path": "<artifacts_root>/labels.jsonl",

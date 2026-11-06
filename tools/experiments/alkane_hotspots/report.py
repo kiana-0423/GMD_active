@@ -109,6 +109,15 @@ def _gt_findings(gt: Mapping[str, Any]) -> list[str]:
     return findings
 
 
+def _read_csv(path: Path) -> list[dict[str, str]] | None:
+    import csv
+
+    if not path.is_file():
+        return None
+    with path.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
 def build_report(loaded: LoadedConfig) -> dict[str, Any]:
     out = loaded.output_dir
     beta = loaded.config
@@ -380,6 +389,12 @@ def render_figures(loaded: LoadedConfig) -> dict[str, dict[str, Any]]:
                                      x_label="fragment size (atoms, mean over specs)"), [fidelity_path])
     emit("fidelity_max", fg.fig_fidelity(rows, x_key="mean_n_atoms", y_key="max_core_force_error", target=targets.get("max_core_force_error"),
                                          x_label="fragment size (atoms, mean over specs)"), [fidelity_path])
+    per_atom_cal, per_atom_final = fidelity_path.parent / "per_atom_calibration.csv", fidelity_path.parent / "per_atom_final_eval.csv"
+    selection = _load(fidelity_path.parent / "selection.json") or {}
+    emit("fidelity_distance", fg.fig_fidelity_distance(_read_csv(per_atom_cal), final_eval=_read_csv(per_atom_final),
+                                                       selected=(selection.get("setting") or {}).get("setting_id"),
+                                                       target=targets.get("max_core_force_error")),
+         [per_atom_cal, per_atom_final])
     evaluation = _load(out / FILES["evaluation"]) or {}
     curves = evaluation.get("curves")
     arms = [v.name for v in beta.arms.variants() if v.name in ("random_local", "committee_local", "phal_local", "phal_full_system")] if beta.arms else []
@@ -419,6 +434,17 @@ def cmd_report(loaded: LoadedConfig, args: argparse.Namespace) -> Path:
         target.mkdir(parents=True, exist_ok=True)
         shutil.copy2(path, target / "report.json")
         shutil.copy2(loaded.output_dir / "report.md", target / "report.md")
+        figures = loaded.output_dir / "figures"
+        if figures.is_dir():  # the rendered figures (every configured format); index.json keeps their provenance
+            (target / "figures").mkdir(exist_ok=True)
+            for item in sorted(figures.iterdir()):
+                if item.suffix.lstrip(".") in loaded.config.figures.formats:
+                    shutil.copy2(item, target / "figures" / item.name)
+            if (figures / "index.json").is_file():
+                text = (figures / "index.json").read_text()
+                for machine, token in ((str(loaded.artifacts_root), "<artifacts_root>"), (str(REPO_ROOT.resolve()), "<GMD_active>")):
+                    text = text.replace(machine, token)
+                (target / "figures" / "index.json").write_text(text)
     return path
 
 
