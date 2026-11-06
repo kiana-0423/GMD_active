@@ -1179,7 +1179,11 @@ def run_closed_loop(cl: LoadedClosedLoop, *, kind: str = "main", max_wall_s: flo
 # ============================================================================================ frozen-model evaluation
 
 
-def chain_observables(frame: Frame, topology: AlkaneTopology) -> dict[str, Any]:
+def chain_observables(frame: Frame, topology: AlkaneTopology, *, covalent_scale: float | None = None) -> dict[str, Any]:
+    """End-to-end distance, radius of gyration, C-C-C-C dihedrals and (with ``covalent_scale``) topology integrity."""
+
+    from gmd_active_learning.utils.bonds import infer_bonds
+
     from .geometry import dihedral_deg
     from .md_box import orthorhombic_lengths, unwrap_molecule
 
@@ -1189,19 +1193,38 @@ def chain_observables(frame: Frame, topology: AlkaneTopology) -> dict[str, Any]:
     carbons = positions[: topology.n_carbons]
     centre = carbons.mean(axis=0)
     dihedrals = [dihedral_deg(positions, i, i + 1, i + 2, i + 3) for i in range(topology.n_carbons - 3)]
+    intact = None
+    if covalent_scale is not None:
+        bonds = sorted(tuple(sorted(pair)) for pair in infer_bonds(positions, topology.numbers, scale=covalent_scale))
+        intact = bonds == list(topology.bonds)
     return {"step": int(frame.step), "end_to_end": float(np.linalg.norm(carbons[-1] - carbons[0])),
             "radius_of_gyration": float(np.sqrt(np.mean(np.sum((carbons - centre) ** 2, axis=1)))),
-            "dihedrals_deg": [float(d) for d in dihedrals], "energy": frame.energy}
+            "dihedrals_deg": [float(d) for d in dihedrals], "energy": frame.energy, "topology_intact": intact}
 
 
 def summarize_observables(rows: Sequence[Mapping[str, Any]], config: FrozenEvalSection) -> dict[str, Any]:
+    """Chain statistics over frames whose bond topology is still the parent's (a dissociated chain is not an alkane)."""
+
     if not rows:
         return {"n_frames": 0}
+    checked = [r for r in rows if r.get("topology_intact") is not None]
+    integrity: dict[str, Any] = {"checked": bool(checked)}
+    if checked:
+        broken = [r["step"] for r in checked if not r["topology_intact"]]
+        integrity.update(n_intact=len(checked) - len(broken), intact_fraction=(len(checked) - len(broken)) / len(checked),
+                         first_broken_step=min(broken) if broken else None)
+        rows = [r for r in rows if r.get("topology_intact") is not False]
+        if not rows:
+            return {"n_frames": len(checked), "topology": integrity,
+                    "reason": "no frame keeps the parent bond topology: chain observables are undefined"}
+    n_total = len(checked) if checked else len(rows)
     e2e = np.asarray([r["end_to_end"] for r in rows])
     rg = np.asarray([r["radius_of_gyration"] for r in rows])
     dihedrals = np.abs(np.concatenate([np.asarray(r["dihedrals_deg"]) for r in rows]))
     counts, edges = np.histogram(np.concatenate([np.asarray(r["dihedrals_deg"]) for r in rows]), bins=config.dihedral_bins, range=(-180.0, 180.0))
-    return {"n_frames": len(rows), "end_to_end": {"mean": float(e2e.mean()), "std": float(e2e.std()), "min": float(e2e.min()), "max": float(e2e.max())},
+    return {"n_frames": n_total, "n_frames_used": len(rows), "topology": integrity,
+            "observables_over": "frames with the parent bond topology" if checked else "all frames (topology not checked)",
+            "end_to_end": {"mean": float(e2e.mean()), "std": float(e2e.std()), "min": float(e2e.min()), "max": float(e2e.max())},
             "radius_of_gyration": {"mean": float(rg.mean()), "std": float(rg.std())},
             "dihedral_gauche_fraction": float(np.mean(dihedrals < config.gauche_window_deg)),
             "dihedral_definition": f"C-C-C-C, gauche = |phi| < {config.gauche_window_deg} deg, trans otherwise",
@@ -1250,7 +1273,7 @@ def frozen_eval(cl: LoadedClosedLoop, *, steps: int | None = None) -> dict[str, 
 
             def on_frame(frame: Frame, rows: list[dict[str, Any]] = rows) -> FrameAction:
                 guard.check(frame)
-                rows.append(chain_observables(frame, asm.topology))
+                rows.append(chain_observables(frame, asm.topology, covalent_scale=cl.config.label_geometry.covalent_scale))
                 return FrameAction.CONTINUE
 
             result = engine.completed_segment(request)
@@ -1306,8 +1329,8 @@ def cmd_closed_loop_run(args: Any, loaded: LoadedConfig) -> int:
 def cmd_frozen_eval(args: Any, loaded: LoadedConfig) -> int:
     cl = load_closed_loop(args.closed_loop, alpha=loaded)
     result = frozen_eval(cl, steps=args.steps)
-    print(json.dumps({k: {"model_id": v["model_id"], **{key: v["pooled"].get(key) for key in ("n_frames", "end_to_end", "radius_of_gyration",
-                                                                                              "dihedral_gauche_fraction")}}
+    print(json.dumps({k: {"model_id": v["model_id"], **{key: v["pooled"].get(key) for key in ("n_frames", "topology", "end_to_end", "radius_of_gyration",
+                                                                                              "dihedral_gauche_fraction", "reason")}}
                       for k, v in result["per_model"].items()}, indent=1))
     return 0
 

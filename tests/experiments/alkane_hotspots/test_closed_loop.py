@@ -347,6 +347,28 @@ def test_all_trans_observables() -> None:
     assert summarize_observables([], FrozenEvalSection()) == {"n_frames": 0}
 
 
+def test_observables_exclude_frames_whose_bond_topology_broke() -> None:
+    topology = AlkaneTopology(8)
+    positions = build_all_trans(8)
+
+    def frame(step: int, xyz: np.ndarray) -> Frame:
+        return Frame(run_id="r", step=step, atom_ids=np.arange(topology.n_atoms), numbers=topology.numbers, positions=xyz,
+                     cell=None, pbc=(False,) * 3)
+
+    broken = positions.copy()
+    broken[7] += np.array([0.0, 0.0, 30.0])  # move the last carbon away: C6-C7 and C7's C-H bonds are gone
+    intact = chain_observables(frame(0, positions), topology, covalent_scale=1.3)
+    lost = chain_observables(frame(10, broken), topology, covalent_scale=1.3)
+    assert intact["topology_intact"] is True and lost["topology_intact"] is False
+    assert chain_observables(frame(0, positions), topology)["topology_intact"] is None  # not checked without a scale
+    summary = summarize_observables([intact, lost], FrozenEvalSection(dihedral_bins=12))
+    assert summary["topology"] == {"checked": True, "n_intact": 1, "intact_fraction": 0.5, "first_broken_step": 10}
+    assert summary["n_frames"] == 2 and summary["n_frames_used"] == 1
+    assert summary["end_to_end"]["max"] == pytest.approx(intact["end_to_end"])  # the broken frame is not averaged in
+    none_left = summarize_observables([lost], FrozenEvalSection())
+    assert none_left["topology"]["intact_fraction"] == 0.0 and "undefined" in none_left["reason"]
+
+
 # ---------------------------------------------------------------------------------------------- configuration
 
 
