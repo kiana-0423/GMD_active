@@ -1,463 +1,433 @@
-# Ledger status for DFT labeling (CP2K), schedulers and the backend registry/plugins.
-# User documentation: docs/labeling_and_scheduling.md. Test paths are relative to the GMD_active root.
-# Real-CP2K evidence ran against CP2K 2026.2 (git:c92cc08, /opt/homebrew/bin/cp2k.psmp); those tests carry
-# the pytest marker `cp2k` and skip only when no CP2K binary is found.
-
+# Status records (see tools/migration/apply_status.py).
 - id: BE-001
   status: replaced
   implementation:
-    - src/gmd_active_learning/adapters/registry.py
-    - src/gmd_active_learning/adapters/schedulers/base.py
-    - src/gmd_active_learning/adapters/dft/cp2k/backend.py
-    - src/gmd_active_learning/workflow/protocols.py
-    - src/gmd_active_learning/labeling/job_states.py
+  - src/gmd_active_learning/adapters/registry.py
+  - src/gmd_active_learning/adapters/schedulers/base.py
+  - src/gmd_active_learning/adapters/dft/cp2k/backend.py
+  - src/gmd_active_learning/workflow/protocols.py
+  - src/gmd_active_learning/labeling/job_states.py
   evidence:
-    - tests/labeling/test_job_state_mapping.py::test_every_phal_job_state_round_trips
-    - tests/labeling/test_job_state_mapping.py::test_only_pending_and_timeout_are_spelled_differently
-    - tests/labeling/test_job_state_mapping.py::test_walltime_failures_from_any_scheduler_report_timeout
-    - tests/labeling/test_job_state_mapping.py::test_execution_request_from_command_stringifies_like_phal
-    - tests/labeling/test_job_state_mapping.py::test_phal_job_states_are_phal_enum_values
-    - tests/workflow/test_backend_contracts.py::test_md_protocol_is_satisfied_only_by_complete_implementations
-    - tests/adapters/test_registry.py::test_role_mismatch_raises_type_error
-    - tests/adapters/test_registry.py::test_capability_checks
-    - tests/adapters/schedulers/test_local_scheduler.py::test_poll_survives_a_controller_restart
-    - tests/adapters/dft/test_cp2k_input.py::test_execution_request_paths_are_work_dir_relative
+  - tests/labeling/test_job_state_mapping.py::test_every_phal_job_state_round_trips
+  - tests/labeling/test_job_state_mapping.py::test_only_pending_and_timeout_are_spelled_differently
+  - tests/labeling/test_job_state_mapping.py::test_walltime_failures_from_any_scheduler_report_timeout
+  - tests/labeling/test_job_state_mapping.py::test_execution_request_from_command_stringifies_like_phal
+  - tests/labeling/test_job_state_mapping.py::test_phal_job_states_are_phal_enum_values
+  - tests/workflow/test_backend_contracts.py::test_md_protocol_is_satisfied_only_by_complete_implementations
+  - tests/adapters/test_registry.py::test_role_mismatch_raises_type_error
+  - tests/adapters/test_registry.py::test_capability_checks
+  - tests/adapters/schedulers/test_local_scheduler.py::test_poll_survives_a_controller_restart
+  - tests/adapters/dft/test_cp2k_input.py::test_execution_request_paths_are_work_dir_relative
   findings: []
-  notes: >-
-    Replaced, not ported 1:1. BackendRole and RuntimeStatus are ported. A structural Backend protocol
-    (name, role, capabilities, check_runtime) replaces the ABCs, and an incomplete implementation does
-    not satisfy it. The MD/MLIP/Trainer protocols live in workflow/protocols.py. The scheduler contract is
-    submit/poll/cancel/reconcile with typed resources; CP2KBackend's parse and validate steps fill PHAL's
-    DFTBackend gap. ExecutionRequest.from_command stringifies command parts and turns work_dir into a Path
-    exactly as PHAL did. The stdout/stderr paths and free-form resources moved to the scheduler and typed
-    SchedulerResources. JobState is replaced by contracts.ExecutionStatus. Seven of PHAL's nine values
-    are spelled identically. pending became queued. timeout became failed with raw_state TIMEOUT and
-    walltime_exceeded, so a walltime kill gets its own retry policy. labeling.job_states translates both
-    ways, and every PHAL value round-trips. PHAL never persisted job states (its jobs dict lived in
-    memory, see LAB-007), so no PHAL-era files need migrating.
+  notes: Replaced, not ported 1:1. BackendRole and RuntimeStatus are ported. A structural Backend protocol (name,
+    role, capabilities, check_runtime) replaces the ABCs, and an incomplete implementation does not satisfy it.
+    The MD/MLIP/Trainer protocols live in workflow/protocols.py. The scheduler contract is submit/poll/cancel/reconcile
+    with typed resources; CP2KBackend's parse and validate steps fill PHAL's DFTBackend gap. ExecutionRequest.from_command
+    stringifies command parts and turns work_dir into a Path exactly as PHAL did. The stdout/stderr paths and free-form
+    resources moved to the scheduler and typed SchedulerResources. JobState is replaced by contracts.ExecutionStatus.
+    Seven of PHAL's nine values are spelled identically. pending became queued. timeout became failed with raw_state
+    TIMEOUT and walltime_exceeded, so a walltime kill gets its own retry policy. labeling.job_states translates
+    both ways, and every PHAL value round-trips. PHAL never persisted job states (its jobs dict lived in memory,
+    see LAB-007), so no PHAL-era files need migrating.
 - id: BE-002
   status: verified
-  implementation: [src/gmd_active_learning/adapters/registry.py]
+  implementation:
+  - src/gmd_active_learning/adapters/registry.py
   evidence:
-    - tests/adapters/test_registry.py::test_third_party_backend_is_constructed_without_core_changes
-    - tests/adapters/test_registry.py::test_entry_point_plugin_is_discovered
-    - tests/adapters/test_registry.py::test_broken_plugin_is_reported_with_its_import_error_and_does_not_block_builtins
-    - tests/adapters/test_registry.py::test_plugin_raising_any_exception_is_contained
-    - tests/adapters/test_registry.py::test_plugin_cannot_silently_replace_a_builtin
-    - tests/adapters/test_registry.py::test_plugin_replaces_a_builtin_when_explicitly_allowed
-    - tests/adapters/test_registry.py::test_role_mismatch_raises_type_error
-  findings: [F-31]
-  notes: >-
-    F-31 fixed. Plugin failures are keyed by the normalized role:name, so a plugin registered as
-    "mlip:My-Engine" reports its import error as PluginLoadError (a RuntimeError subclass). Any
-    exception raised during import is contained. A plugin replaces a built-in only when listed in
-    backends.override_builtins; otherwise the conflict is recorded under "<role:name>#override" and
-    logged. An unknown name raises BackendNotFoundError, which subclasses both ConfigurationError and
-    KeyError. Entry-point group: gmd_active_learning.adapters. Built-ins are imported lazily.
+  - tests/adapters/test_registry.py::test_third_party_backend_is_constructed_without_core_changes
+  - tests/adapters/test_registry.py::test_entry_point_plugin_is_discovered
+  - tests/adapters/test_registry.py::test_broken_plugin_is_reported_with_its_import_error_and_does_not_block_builtins
+  - tests/adapters/test_registry.py::test_plugin_raising_any_exception_is_contained
+  - tests/adapters/test_registry.py::test_plugin_cannot_silently_replace_a_builtin
+  - tests/adapters/test_registry.py::test_plugin_replaces_a_builtin_when_explicitly_allowed
+  - tests/adapters/test_registry.py::test_role_mismatch_raises_type_error
+  findings:
+  - F-31
+  notes: 'F-31 fixed. Plugin failures are keyed by the normalized role:name, so a plugin registered as "mlip:My-Engine"
+    reports its import error as PluginLoadError (a RuntimeError subclass). Any exception raised during import is
+    contained. A plugin replaces a built-in only when listed in backends.override_builtins; otherwise the conflict
+    is recorded under "<role:name>#override" and logged. An unknown name raises BackendNotFoundError, which subclasses
+    both ConfigurationError and KeyError. Entry-point group: gmd_active_learning.adapters. Built-ins are imported
+    lazily.'
 - id: BE-003
   status: verified
-  implementation: [src/gmd_active_learning/adapters/registry.py, configs/sections/backends.yaml]
+  implementation:
+  - src/gmd_active_learning/adapters/registry.py
+  - configs/sections/backends.yaml
   evidence:
-    - tests/workflow/test_backend_contracts.py::test_full_builtin_selection_returns_typed_adapters
-    - tests/workflow/test_assembly.py::test_registry_builds_md_and_mlip_backends_and_controller
-    - tests/adapters/test_registry.py::test_builtin_schedulers_by_config
-    - tests/adapters/test_registry.py::test_builtin_cp2k_by_config_reads_its_sections
-    - tests/adapters/test_registry.py::test_config_factory_path_registers_a_plugin
-    - tests/adapters/test_registry.py::test_runtime_check_on_create_and_doctor_report
-    - tests/adapters/test_registry.py::test_packaged_backends_section_equals_model_defaults
+  - tests/workflow/test_backend_contracts.py::test_full_builtin_selection_returns_typed_adapters
+  - tests/workflow/test_assembly.py::test_registry_builds_md_and_mlip_backends_and_controller
+  - tests/adapters/test_registry.py::test_builtin_schedulers_by_config
+  - tests/adapters/test_registry.py::test_builtin_cp2k_by_config_reads_its_sections
+  - tests/adapters/test_registry.py::test_config_factory_path_registers_a_plugin
+  - tests/adapters/test_registry.py::test_runtime_check_on_create_and_doctor_report
+  - tests/adapters/test_registry.py::test_packaged_backends_section_equals_model_defaults
   findings: []
-  notes: >-
-    Implemented as create_backend, create_typed_backend and backend_engine, with the strict
-    BackendsConfig behind the `backends` section. The factory lives in registry.py; adapters/factory.py
-    is outside this area. Built-ins provided here: dft:cp2k, scheduler:local, scheduler:slurm and
-    scheduler:pbs. md:gmd and mlip:gmd_sgt must be registered by their owners with
-    register_builtin(role, name, "module:attr"), so the full acceptance case (md gmd, mlip gmd_sgt, dft
-    cp2k, scheduler pbs) is only partly provable here. Deliberate deviations: the legacy flat keys
-    (backend.md_engine, backend.dft_engine) and the cp2k.submit_mode fallback are dropped, because the
-    schema is strict and has no dry-run mode. Capabilities are now enforced: backends.<role>.
-    required_capabilities, and check_runtime_on_create raises CapabilityUnavailableError.
-    runtime_report() gives a doctor command the result of every check_runtime().
-    Upgraded by the workflow lead: md:gmd and mlip:gmd_sgt are registered built-ins, and {md: gmd, mlip: gmd_sgt, dft: cp2k, scheduler: pbs} yields GMDEngine, GMDSGTBackend, CP2KBackend and PBSScheduler. The legacy flat-key normalisation is deliberately dropped (strict schema; convert-phal-config maps backend.<role>.engine).
+  notes: 'Implemented as create_backend, create_typed_backend and backend_engine, with the strict BackendsConfig
+    behind the `backends` section. The factory lives in registry.py; adapters/factory.py is outside this area. Built-ins
+    provided here: dft:cp2k, scheduler:local, scheduler:slurm and scheduler:pbs. md:gmd and mlip:gmd_sgt must be
+    registered by their owners with register_builtin(role, name, "module:attr"), so the full acceptance case (md
+    gmd, mlip gmd_sgt, dft cp2k, scheduler pbs) is only partly provable here. Deliberate deviations: the legacy
+    flat keys (backend.md_engine, backend.dft_engine) and the cp2k.submit_mode fallback are dropped, because the
+    schema is strict and has no dry-run mode. Capabilities are now enforced: backends.<role>. required_capabilities,
+    and check_runtime_on_create raises CapabilityUnavailableError. runtime_report() gives a doctor command the result
+    of every check_runtime(). Upgraded by the workflow lead: md:gmd and mlip:gmd_sgt are registered built-ins, and
+    {md: gmd, mlip: gmd_sgt, dft: cp2k, scheduler: pbs} yields GMDEngine, GMDSGTBackend, CP2KBackend and PBSScheduler.
+    The legacy flat-key normalisation is deliberately dropped (strict schema; convert-phal-config maps backend.<role>.engine).'
 - id: BE-008
   status: verified
   implementation:
-    - src/gmd_active_learning/adapters/dft/cp2k/backend.py
-    - src/gmd_active_learning/adapters/dft/cp2k/validation.py
+  - src/gmd_active_learning/adapters/dft/cp2k/backend.py
+  - src/gmd_active_learning/adapters/dft/cp2k/validation.py
   evidence:
-    - tests/adapters/dft/test_cp2k_parse.py::test_force_parsing_and_completion_match_phal_on_every_fixture
-    - tests/adapters/dft/test_cp2k_input.py::test_execution_request_paths_are_work_dir_relative
-    - tests/adapters/dft/test_cp2k_real.py::test_h2_molecule_label
-  findings: [F-12]
-  notes: >-
-    Across the toy fixture and all seven real CP2K 2026.2 outputs, output_is_complete and the parsed
-    forces equal PHAL's (rtol 1e-12; checked by an optional test that is skipped once ref/ is gone).
-    The energy deliberately differs: PHAL returns None on 2026.2 output (F-12). Two deliberate argv
-    deviations: CP2K is run with "-o <output>" instead of redirecting stdout, and an optional MPI
-    launcher template (cp2k.launcher, e.g. ["mpiexec", "-n", "{ntasks}"]) is prepended. The default
-    executable is cp2k.psmp. check_runtime also probes --version and checks cp2k.data_dir.
-    ML-SCF hooks for the SCF slice: ml_scf_enabled, variant_id(), decorate_input(), job_environment()
-    and native_backend().
+  - tests/adapters/dft/test_cp2k_parse.py::test_force_parsing_and_completion_match_phal_on_every_fixture
+  - tests/adapters/dft/test_cp2k_input.py::test_execution_request_paths_are_work_dir_relative
+  - tests/adapters/dft/test_cp2k_real.py::test_h2_molecule_label
+  findings:
+  - F-12
+  notes: 'Across the toy fixture and all seven real CP2K 2026.2 outputs, output_is_complete and the parsed forces
+    equal PHAL''s (rtol 1e-12; checked by an optional test that is skipped once ref/ is gone). The energy deliberately
+    differs: PHAL returns None on 2026.2 output (F-12). Two deliberate argv deviations: CP2K is run with "-o <output>"
+    instead of redirecting stdout, and an optional MPI launcher template (cp2k.launcher, e.g. ["mpiexec", "-n",
+    "{ntasks}"]) is prepended. The default executable is cp2k.psmp. check_runtime also probes --version and checks
+    cp2k.data_dir. ML-SCF hooks for the SCF slice: ml_scf_enabled, variant_id(), decorate_input(), job_environment()
+    and native_backend().'
 - id: SCH-001
   status: verified
-  implementation: [src/gmd_active_learning/adapters/schedulers/local.py]
+  implementation:
+  - src/gmd_active_learning/adapters/schedulers/local.py
   evidence:
-    - tests/adapters/schedulers/test_local_scheduler.py::test_exit_code_is_recorded
-    - tests/adapters/schedulers/test_local_scheduler.py::test_cancel_stops_the_process
-    - tests/adapters/schedulers/test_local_scheduler.py::test_cancel_escalates_to_sigkill_when_sigterm_is_ignored
-    - tests/adapters/schedulers/test_local_scheduler.py::test_walltime_is_enforced
-    - tests/adapters/schedulers/test_local_scheduler.py::test_poll_survives_a_controller_restart
-    - tests/adapters/schedulers/test_local_scheduler.py::test_a_restarted_controller_can_cancel
-  findings: [F-26]
-  notes: >-
-    The job runs as a detached session through a shell wrapper that writes .gmd_exit_code atomically.
-    The pid, pgid, start time and walltime are kept in .gmd_local_job.json, so polling and cancelling
-    work after a controller restart; PHAL kept a Popen in memory and lost the state on restart. Cancel
-    sends SIGTERM to the process group, waits cancel_grace_seconds, then sends SIGKILL; PHAL sent
-    SIGTERM without waiting. The walltime from resources is enforced (scheduler.local.enforce_walltime).
-    A process that disappears without an exit code is FAILED (raw state VANISHED), not RUNNING forever.
-    Stdout goes to job.stdout.
+  - tests/adapters/schedulers/test_local_scheduler.py::test_exit_code_is_recorded
+  - tests/adapters/schedulers/test_local_scheduler.py::test_cancel_stops_the_process
+  - tests/adapters/schedulers/test_local_scheduler.py::test_cancel_escalates_to_sigkill_when_sigterm_is_ignored
+  - tests/adapters/schedulers/test_local_scheduler.py::test_walltime_is_enforced
+  - tests/adapters/schedulers/test_local_scheduler.py::test_poll_survives_a_controller_restart
+  - tests/adapters/schedulers/test_local_scheduler.py::test_a_restarted_controller_can_cancel
+  findings:
+  - F-26
+  notes: The job runs as a detached session through a shell wrapper that writes .gmd_exit_code atomically. The pid,
+    pgid, start time and walltime are kept in .gmd_local_job.json, so polling and cancelling work after a controller
+    restart; PHAL kept a Popen in memory and lost the state on restart. Cancel sends SIGTERM to the process group,
+    waits cancel_grace_seconds, then sends SIGKILL; PHAL sent SIGTERM without waiting. The walltime from resources
+    is enforced (scheduler.local.enforce_walltime). A process that disappears without an exit code is FAILED (raw
+    state VANISHED), not RUNNING forever. Stdout goes to job.stdout.
 - id: SCH-002
   status: verified
-  implementation: [src/gmd_active_learning/adapters/schedulers/batch.py, src/gmd_active_learning/adapters/schedulers/config.py]
+  implementation:
+  - src/gmd_active_learning/adapters/schedulers/batch.py
+  - src/gmd_active_learning/adapters/schedulers/config.py
   evidence:
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_submit_renders_typed_resources_and_parses_job_id
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_submit_renders_pbs_resources_not_slurm_directives
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_foreign_directives_are_rejected
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_failed_submit_raises_scheduler_error_with_stderr
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_silent_submit_raises_instead_of_inventing_an_id
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_hanging_submit_times_out
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_missing_submit_binary_raises_scheduler_error
-  findings: [F-26]
-  notes: >-
-    Fake sbatch/qsub on PATH report job ids "42" and "42.fakepbs". Silent stdout raises; a non-zero
-    exit or a missing binary raises SubmissionRejected (a SchedulerError); a timeout raises
-    SchedulerError, because the outcome is unknown. Byte identity with PHAL scripts is dropped
-    deliberately: the scripts now carry typed directives (#SBATCH --nodes/--ntasks/--time/--mem/
-    --partition/--account; #PBS -l select=...:ncpus:mpiprocs:mem, -l walltime, -q, -A). They also
-    carry an explicit cd and an exit-code wrapper, use "set -u" instead of "set -euo pipefail" so the
-    exit code can be recorded, and place directives before the first command as PHAL did.
-    extra_directives with the other scheduler's prefix are rejected; this fixes PHAL feeding
-    slurm_directives to PBS. Every CLI call is bounded by scheduler.command_timeout_seconds.
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_submit_renders_typed_resources_and_parses_job_id
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_submit_renders_pbs_resources_not_slurm_directives
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_foreign_directives_are_rejected
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_failed_submit_raises_scheduler_error_with_stderr
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_silent_submit_raises_instead_of_inventing_an_id
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_hanging_submit_times_out
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_missing_submit_binary_raises_scheduler_error
+  findings:
+  - F-26
+  notes: 'Fake sbatch/qsub on PATH report job ids "42" and "42.fakepbs". Silent stdout raises; a non-zero exit or
+    a missing binary raises SubmissionRejected (a SchedulerError); a timeout raises SchedulerError, because the
+    outcome is unknown. Byte identity with PHAL scripts is dropped deliberately: the scripts now carry typed directives
+    (#SBATCH --nodes/--ntasks/--time/--mem/ --partition/--account; #PBS -l select=...:ncpus:mpiprocs:mem, -l walltime,
+    -q, -A). They also carry an explicit cd and an exit-code wrapper, use "set -u" instead of "set -euo pipefail"
+    so the exit code can be recorded, and place directives before the first command as PHAL did. extra_directives
+    with the other scheduler''s prefix are rejected; this fixes PHAL feeding slurm_directives to PBS. Every CLI
+    call is bounded by scheduler.command_timeout_seconds.'
 - id: SCH-003
   status: verified
-  implementation: [src/gmd_active_learning/adapters/schedulers/slurm.py]
+  implementation:
+  - src/gmd_active_learning/adapters/schedulers/slurm.py
   evidence:
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_live_squeue_state
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_falls_back_to_sacct_with_exit_code
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_state_table_has_explicit_entries_for_previously_unmapped_states
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_unknown_when_neither_query_knows_the_job
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_query_timeout_gives_unknown_not_an_exception
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_reconcile_uses_exit_code_file_when_scheduler_forgot
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_cancel
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_sacct_fallback_can_be_disabled
-  findings: [F-26]
-  notes: >-
-    PHAL's squeue/sacct table maps the same way, using ExecutionStatus names (PENDING becomes QUEUED;
-    TIMEOUT becomes FAILED with walltime_exceeded). sacct is queried with -P
-    --format=State,ExitCode, so the exit code is recorded (128 + signal when killed by a signal).
-    Explicit mappings: BOOT_FAIL, DEADLINE, SPECIAL_EXIT -> FAILED; REQUEUED/REQUEUE_* -> QUEUED;
-    SUSPENDED, STOPPED, RESIZING -> RUNNING; REVOKED -> UNKNOWN. Tested only against fake CLIs:
-    Slurm is not installed here.
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_live_squeue_state
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_falls_back_to_sacct_with_exit_code
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_state_table_has_explicit_entries_for_previously_unmapped_states
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_unknown_when_neither_query_knows_the_job
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_query_timeout_gives_unknown_not_an_exception
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_reconcile_uses_exit_code_file_when_scheduler_forgot
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_cancel
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_slurm_sacct_fallback_can_be_disabled
+  findings:
+  - F-26
+  notes: 'PHAL''s squeue/sacct table maps the same way, using ExecutionStatus names (PENDING becomes QUEUED; TIMEOUT
+    becomes FAILED with walltime_exceeded). sacct is queried with -P --format=State,ExitCode, so the exit code is
+    recorded (128 + signal when killed by a signal). Explicit mappings: BOOT_FAIL, DEADLINE, SPECIAL_EXIT -> FAILED;
+    REQUEUED/REQUEUE_* -> QUEUED; SUSPENDED, STOPPED, RESIZING -> RUNNING; REVOKED -> UNKNOWN. Tested only against
+    fake CLIs: Slurm is not installed here.'
 - id: SCH-004
   status: migrated
-  implementation: [src/gmd_active_learning/adapters/schedulers/pbs.py]
+  implementation:
+  - src/gmd_active_learning/adapters/schedulers/pbs.py
   evidence:
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_submit_renders_pbs_resources_not_slurm_directives
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_live_state
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_history_finished_states_check_exit_status
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_history_query_can_be_disabled
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_reconcile_from_exit_code_file
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_cancel_marks_cancelled_even_with_signal_exit_status
-    - tests/adapters/schedulers/test_batch_schedulers.py::test_qstat_continuation_lines_are_joined
-  findings: [F-26]
-  notes: >-
-    Tested here, against fake qsub/qstat/qdel on PATH (tests/adapters/schedulers): PBS script rendering
-    (pbspro -l select, or torque -l nodes:ppn, by scheduler.pbs.flavor); qstat -f live states;
-    qstat -x -f history mapped with Exit_status; continuation lines joined; history query switchable
-    (scheduler.pbs.history_query_enabled); qdel giving CANCELLED even with a signal exit status;
-    walltime exit codes -29/-11 setting walltime_exceeded; reconcile from the exit-code file. The mapping
-    matches PHAL, with one deliberate fix (F-26): C and X are checked against Exit_status. Non-zero is
-    FAILED, missing is UNKNOWN (left for reconcile); PHAL reported C as COMPLETED regardless. F without a
-    status stays FAILED, as in PHAL. Remains for the cluster: the live PBS Professional smoke on Miyabi
-    (submit `true`, then `false`, then qdel a sleep; expect COMPLETED / FAILED / CANCELLED) and the exact
-    qstat -f output format of Miyabi's PBS version. PBS is not installed here (no qsub/qstat), so status
-    stays migrated.
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_submit_renders_pbs_resources_not_slurm_directives
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_live_state
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_history_finished_states_check_exit_status
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_history_query_can_be_disabled
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_reconcile_from_exit_code_file
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_pbs_cancel_marks_cancelled_even_with_signal_exit_status
+  - tests/adapters/schedulers/test_batch_schedulers.py::test_qstat_continuation_lines_are_joined
+  findings:
+  - F-26
+  notes: 'Tested here, against fake qsub/qstat/qdel on PATH (tests/adapters/schedulers): PBS script rendering (pbspro
+    -l select, or torque -l nodes:ppn, by scheduler.pbs.flavor); qstat -f live states; qstat -x -f history mapped
+    with Exit_status; continuation lines joined; history query switchable (scheduler.pbs.history_query_enabled);
+    qdel giving CANCELLED even with a signal exit status; walltime exit codes -29/-11 setting walltime_exceeded;
+    reconcile from the exit-code file. The mapping matches PHAL, with one deliberate fix (F-26): C and X are checked
+    against Exit_status. Non-zero is FAILED, missing is UNKNOWN (left for reconcile); PHAL reported C as COMPLETED
+    regardless. F without a status stays FAILED, as in PHAL. Remains for the cluster: the live PBS Professional
+    smoke on Miyabi (submit `true`, then `false`, then qdel a sleep; expect COMPLETED / FAILED / CANCELLED) and
+    the exact qstat -f output format of Miyabi''s PBS version. PBS is not installed here (no qsub/qstat), so status
+    stays migrated.'
 - id: LAB-001
   status: verified
   implementation:
-    - src/gmd_active_learning/adapters/dft/cp2k/input.py
-    - src/gmd_active_learning/adapters/dft/cp2k/config.py
-    - src/gmd_active_learning/labeling/service.py
+  - src/gmd_active_learning/adapters/dft/cp2k/input.py
+  - src/gmd_active_learning/adapters/dft/cp2k/config.py
+  - src/gmd_active_learning/labeling/service.py
   evidence:
-    - tests/adapters/dft/test_cp2k_input.py::test_inputs_are_byte_identical_to_phal_for_equivalent_settings
-    - tests/adapters/dft/test_cp2k_input.py::test_boundary_conditions_follow_the_region_exactly
-    - tests/adapters/dft/test_cp2k_input.py::test_h_only_geo_opt_fixes_every_non_cap_atom
-    - tests/adapters/dft/test_cp2k_real.py::test_h2_molecule_label
-    - tests/adapters/dft/test_cp2k_real.py::test_h_capped_cluster_relaxes_caps_then_labels
-    - tests/labeling/test_labeling_service.py::test_capped_region_runs_cap_relaxation_then_single_point
-  findings: [F-17]
-  notes: >-
-    The _sp.inp and _hopt.inp inputs are byte-identical to PHAL 96263b6 for a capped cluster, an
-    odd-electron radical and a periodic block when settings are equivalent (optional parity test,
-    skipped once ref/ is gone). Real CP2K 2026.2 converges on H2, a capped CH3 (cap GEO_OPT, then the
-    single point), a periodic H2 block and an XY slab.
-
-    F-17 fixed: the cap-only GEO_OPT is submitted, and the single point runs on the relaxed caps.
-
-    New finding (reproduced): CP2K 2026.2 aborts WAVELET with "Poisson solver for non cubic cells not
-    yet implemented". PHAL's padded cluster cells are not cubic, so PHAL's default cluster inputs
-    cannot run. Isolated regions now get a cubic padded box when WAVELET is used.
-
-    Deliberate deviations:
-    - PERIODIC (in &CELL and &POISSON) follows region.pbc exactly; cp2k.periodic is gone.
-    - The solver is chosen per periodicity class (cp2k.poisson); an unsupported pair raises
-      UnsupportedCombinationError.
-    - The analytic stress is requested for XYZ regions (cp2k.stress auto|always|never).
-    - Basis and potential file names, per-element kinds, extra_sections and template_path
-      (string.Template placeholders $global_section, $force_eval_section, $motion_section) are
-      configurable, and the template text enters the settings hash.
-    - The deterministic settings hash covers physics fields only.
-    - cp2k.data_dir is exported as CP2K_DATA_DIR; nothing is hard-coded.
-    - Embedding raises UnsupportedCombinationError (PHAL raised ValueError).
-    - scf_recording (AO matrices) is left to the SCF slice through decorate_input.
+  - tests/adapters/dft/test_cp2k_input.py::test_inputs_are_byte_identical_to_phal_for_equivalent_settings
+  - tests/adapters/dft/test_cp2k_input.py::test_boundary_conditions_follow_the_region_exactly
+  - tests/adapters/dft/test_cp2k_input.py::test_h_only_geo_opt_fixes_every_non_cap_atom
+  - tests/adapters/dft/test_cp2k_real.py::test_h2_molecule_label
+  - tests/adapters/dft/test_cp2k_real.py::test_h_capped_cluster_relaxes_caps_then_labels
+  - tests/labeling/test_labeling_service.py::test_capped_region_runs_cap_relaxation_then_single_point
+  findings:
+  - F-17
+  notes: "The _sp.inp and _hopt.inp inputs are byte-identical to PHAL 96263b6 for a capped cluster, an odd-electron\
+    \ radical and a periodic block when settings are equivalent (optional parity test, skipped once ref/ is gone).\
+    \ Real CP2K 2026.2 converges on H2, a capped CH3 (cap GEO_OPT, then the single point), a periodic H2 block and\
+    \ an XY slab.\nF-17 fixed: the cap-only GEO_OPT is submitted, and the single point runs on the relaxed caps.\n\
+    New finding (reproduced): CP2K 2026.2 aborts WAVELET with \"Poisson solver for non cubic cells not yet implemented\"\
+    . PHAL's padded cluster cells are not cubic, so PHAL's default cluster inputs cannot run. Isolated regions now\
+    \ get a cubic padded box when WAVELET is used.\nDeliberate deviations: - PERIODIC (in &CELL and &POISSON) follows\
+    \ region.pbc exactly; cp2k.periodic is gone. - The solver is chosen per periodicity class (cp2k.poisson); an\
+    \ unsupported pair raises\n  UnsupportedCombinationError.\n- The analytic stress is requested for XYZ regions\
+    \ (cp2k.stress auto|always|never). - Basis and potential file names, per-element kinds, extra_sections and template_path\n\
+    \  (string.Template placeholders $global_section, $force_eval_section, $motion_section) are\n  configurable,\
+    \ and the template text enters the settings hash.\n- The deterministic settings hash covers physics fields only.\
+    \ - cp2k.data_dir is exported as CP2K_DATA_DIR; nothing is hard-coded. - Embedding raises UnsupportedCombinationError\
+    \ (PHAL raised ValueError). - scf_recording (AO matrices) is left to the SCF slice through decorate_input."
 - id: LAB-002
   status: verified
-  implementation: [src/gmd_active_learning/adapters/dft/cp2k/input.py]
+  implementation:
+  - src/gmd_active_learning/adapters/dft/cp2k/input.py
   evidence:
-    - tests/adapters/dft/test_cp2k_input.py::test_odd_electron_region_is_open_shell
-    - tests/adapters/dft/test_cp2k_input.py::test_charge_and_multiplicity_come_from_the_region
-    - tests/adapters/dft/test_cp2k_input.py::test_uncapped_isolated_fragment_gate
+  - tests/adapters/dft/test_cp2k_input.py::test_odd_electron_region_is_open_shell
+  - tests/adapters/dft/test_cp2k_input.py::test_charge_and_multiplicity_come_from_the_region
+  - tests/adapters/dft/test_cp2k_input.py::test_uncapped_isolated_fragment_gate
   findings: []
-  notes: >-
-    Charge comes from ExtractedRegion.charge, which replaces cp2k.charge. Multiplicity comes from
-    region.multiplicity, then cp2k.multiplicity, then derivation; resolution uses
-    utils.electronic_state with cp2k.spin_policy auto|strict. The uncapped-fragment gate fires when
-    metadata.h_capping_skipped is set (the key extraction writes) and the region has no PBC. It is
-    controlled by cp2k.uncapped_fragment_policy (error, the default and fail-closed, raises
+  notes: Charge comes from ExtractedRegion.charge, which replaces cp2k.charge. Multiplicity comes from region.multiplicity,
+    then cp2k.multiplicity, then derivation; resolution uses utils.electronic_state with cp2k.spin_policy auto|strict.
+    The uncapped-fragment gate fires when metadata.h_capping_skipped is set (the key extraction writes) and the
+    region has no PBC. It is controlled by cp2k.uncapped_fragment_policy (error, the default and fail-closed, raises
     UnsupportedCombinationError; warn; allow). Periodic regions pass the gate.
 - id: LAB-003
   status: verified
-  implementation: [src/gmd_active_learning/adapters/dft/cp2k/point_charges.py]
-  evidence: [tests/labeling/test_other_engines.py::test_point_charge_table]
+  implementation:
+  - src/gmd_active_learning/adapters/dft/cp2k/point_charges.py
+  evidence:
+  - tests/labeling/test_other_engines.py::test_point_charge_table
   findings: []
-  notes: >-
-    The table text is identical to PHAL's write_point_charges. It lives in the CP2K adapter as
-    optional tooling, because tools/qmmm/ is outside this area. It is not used by the generator, which
-    refuses enabled embedding (known issue).
+  notes: The table text is identical to PHAL's write_point_charges. It lives in the CP2K adapter as optional tooling,
+    because tools/qmmm/ is outside this area. It is not used by the generator, which refuses enabled embedding (known
+    issue).
 - id: LAB-004
   status: verified
-  implementation: [src/gmd_active_learning/adapters/dft/cp2k/parse.py]
+  implementation:
+  - src/gmd_active_learning/adapters/dft/cp2k/parse.py
   evidence:
-    - tests/adapters/dft/test_cp2k_parse.py::test_toy_fixture_forces_match_phal_conversion
-    - tests/adapters/dft/test_cp2k_parse.py::test_force_eval_print_and_last_block_wins
-    - tests/adapters/dft/test_cp2k_parse.py::test_real_converged_outputs_are_valid
-    - tests/adapters/dft/test_cp2k_parse.py::test_force_parsing_and_completion_match_phal_on_every_fixture
-    - tests/adapters/dft/test_cp2k_parse.py::test_truncated_toy_fixture_is_rejected
+  - tests/adapters/dft/test_cp2k_parse.py::test_toy_fixture_forces_match_phal_conversion
+  - tests/adapters/dft/test_cp2k_parse.py::test_force_eval_print_and_last_block_wins
+  - tests/adapters/dft/test_cp2k_parse.py::test_real_converged_outputs_are_valid
+  - tests/adapters/dft/test_cp2k_parse.py::test_force_parsing_and_completion_match_phal_on_every_fixture
+  - tests/adapters/dft/test_cp2k_parse.py::test_truncated_toy_fixture_is_rejected
   findings: []
-  notes: >-
-    Forces match PHAL to rtol 1e-12 in both formats and with several blocks; the last block wins. A
-    missing block raises LabelingError; DataError does not exist in GMD. The " FORCES| Sum" line is
-    indented in real output, so the block end no longer depends on column 0. The atom count is checked
-    in validation (validation_reasons) and makes the label INVALID; PHAL raised later, out of poll_job.
+  notes: Forces match PHAL to rtol 1e-12 in both formats and with several blocks; the last block wins. A missing
+    block raises LabelingError; DataError does not exist in GMD. The " FORCES| Sum" line is indented in real output,
+    so the block end no longer depends on column 0. The atom count is checked in validation (validation_reasons)
+    and makes the label INVALID; PHAL raised later, out of poll_job.
 - id: LAB-005
   status: verified
-  implementation: [src/gmd_active_learning/adapters/dft/cp2k/parse.py, src/gmd_active_learning/adapters/dft/cp2k/validation.py]
+  implementation:
+  - src/gmd_active_learning/adapters/dft/cp2k/parse.py
+  - src/gmd_active_learning/adapters/dft/cp2k/validation.py
   evidence:
-    - tests/adapters/dft/test_cp2k_parse.py::test_f12_phal_energy_regex_misses_real_2026_output
-    - tests/adapters/dft/test_cp2k_parse.py::test_phal_style_synthetic_output_fields
-    - tests/adapters/dft/test_cp2k_parse.py::test_real_periodic_stress_is_converted_from_bar_with_ase_sign
-    - tests/adapters/dft/test_cp2k_parse.py::test_real_unconverged_output_is_invalid_with_reason
-    - tests/adapters/dft/test_cp2k_parse.py::test_validation_switches
-  findings: [F-12, F-27]
-  notes: >-
-    F-12 reproduced on real CP2K 2026.2 output: "ENERGY| Total FORCE_EVAL ( QS ) energy [hartree] x"
-    has no colon, so PHAL's regex never matched. It is fixed: the unit is read and converted, and the
-    energy is required by default (cp2k.validation.require_energy).
+  - tests/adapters/dft/test_cp2k_parse.py::test_f12_phal_energy_regex_misses_real_2026_output
+  - tests/adapters/dft/test_cp2k_parse.py::test_phal_style_synthetic_output_fields
+  - tests/adapters/dft/test_cp2k_parse.py::test_real_periodic_stress_is_converted_from_bar_with_ase_sign
+  - tests/adapters/dft/test_cp2k_parse.py::test_real_unconverged_output_is_invalid_with_reason
+  - tests/adapters/dft/test_cp2k_parse.py::test_validation_switches
+  findings:
+  - F-12
+  - F-27
+  notes: 'F-12 reproduced on real CP2K 2026.2 output: "ENERGY| Total FORCE_EVAL ( QS ) energy [hartree] x" has no
+    colon, so PHAL''s regex never matched. It is fixed: the unit is read and converted, and the energy is required
+    by default (cp2k.validation.require_energy).
 
-    Stress is printed in [bar] with lower-case rows in 2026.2, which PHAL never parsed. It is now
-    converted to eV/A^3 with the ASE sign convention (-CP2K value).
+    Stress is printed in [bar] with lower-case rows in 2026.2, which PHAL never parsed. It is now converted to eV/A^3
+    with the ASE sign convention (-CP2K value).
 
-    The F-27 rule is kept: a success marker is required and there must be no "SCF run NOT converged"
-    or ABORT marker. Finite energy, forces and stress are also required. Added checks:
-    - the force count equals the atom count;
-    - CP2K terminated normally (PROGRAM ENDED);
-    - the abort message is captured.
+    The F-27 rule is kept: a success marker is required and there must be no "SCF run NOT converged" or ABORT marker.
+    Finite energy, forces and stress are also required. Added checks: - the force count equals the atom count; -
+    CP2K terminated normally (PROGRAM ENDED); - the abort message is captured.
 
-    The residual comes from the last row of the SCF table (PHAL's regex was loose). The CP2K version
-    ("2026.2") and git revision are recorded. ML-SCF markers are parsed. provenance() is JSON-safe.
-    LabelResult keeps ExecutionStatus and ValidationStatus separate.
+    The residual comes from the last row of the SCF table (PHAL''s regex was loose). The CP2K version ("2026.2")
+    and git revision are recorded. ML-SCF markers are parsed. provenance() is JSON-safe. LabelResult keeps ExecutionStatus
+    and ValidationStatus separate.'
 - id: LAB-006
   status: verified
-  implementation: [src/gmd_active_learning/adapters/dft/cp2k/command.py]
+  implementation:
+  - src/gmd_active_learning/adapters/dft/cp2k/command.py
   evidence:
-    - tests/adapters/dft/test_cp2k_input.py::test_command_launcher_and_environment
-    - tests/adapters/dft/test_cp2k_input.py::test_run_cp2k_with_a_fake_executable_and_history_hook
+  - tests/adapters/dft/test_cp2k_input.py::test_command_launcher_and_environment
+  - tests/adapters/dft/test_cp2k_input.py::test_run_cp2k_with_a_fake_executable_and_history_hook
   findings: []
-  notes: >-
-    Same argv as PHAL plus "-o <output>" and the optional launcher. There is no dry-run mode (project
-    rule: no implicit dry-run). Callers that want inputs only use write_cp2k_inputs. A failing history
-    hook only logs. A missing binary, a timeout or a non-zero exit raises LabelingError.
+  notes: 'Same argv as PHAL plus "-o <output>" and the optional launcher. There is no dry-run mode (project rule:
+    no implicit dry-run). Callers that want inputs only use write_cp2k_inputs. A failing history hook only logs.
+    A missing binary, a timeout or a non-zero exit raises LabelingError.'
 - id: LAB-007
   status: replaced
   implementation:
-    - src/gmd_active_learning/labeling/service.py
-    - src/gmd_active_learning/labeling/task_store.py
-    - src/gmd_active_learning/adapters/dft/cp2k/backend.py
+  - src/gmd_active_learning/labeling/service.py
+  - src/gmd_active_learning/labeling/task_store.py
+  - src/gmd_active_learning/adapters/dft/cp2k/backend.py
   evidence:
-    - tests/adapters/dft/test_cp2k_phal_input_parity.py::test_cp2k_dispatch_writes_phal_files_byte_identically
-    - tests/labeling/test_labeling_service.py::test_prepare_is_idempotent_and_ids_depend_on_region_and_settings
-    - tests/labeling/test_labeling_service.py::test_submit_is_idempotent
-    - tests/labeling/test_labeling_service.py::test_ambiguous_submission_failure_marks_unknown_and_never_duplicates
-    - tests/labeling/test_labeling_service.py::test_rejected_submission_leaves_task_resubmittable
-    - tests/labeling/test_labeling_service.py::test_enabled_embedding_is_refused_before_a_task_exists
-    - tests/labeling/test_labeling_service.py::test_capped_region_runs_cap_relaxation_then_single_point
-    - tests/extraction/test_extraction_modes.py::test_block_cooldown_skips_and_state_survives_restart
-    - tests/workflow/test_scheduling.py::test_restart_mid_queue_resubmits_nothing_already_submitted
-    - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
-    - tests/integration/test_closed_loop_real.py::test_real_closed_loop_promotes_and_resumes_md_with_the_new_model
-    - tests/adapters/dft/test_cp2k_real.py::test_restart_safe_idempotent_labeling
-  findings: [F-05, F-17, F-24]
-  notes: >-
-    Replaced by LabelingService (prepare/submit/poll/collect) with an atomic, file-locked task.json that
-    holds the job id, state, attempts and failure reasons. task_id = stable_id(region_id, region
-    fingerprint, settings hash). PHAL's dry-run task tree cannot be reproduced, by design: there is no
-    dry-run mode (the brief forbids implicit dry runs; cp2k.submit_mode is removed). PHAL's task.json held
-    metadata only. The parts of the acceptance that carry over are shown. The CP2K files a task gets
-    (<id>_hopt.inp when capped, <id>_sp.inp) are byte-identical to PHAL's for fixture regions, through the
-    same CP2KBackend.prepare_inputs the service calls. The region is stored as region.json instead of
-    region.extxyz. Block cooldown gives no region, hence no task, and never a failure (the workflow's
-    "skipped"). One job per region is submitted through the scheduler. Re-preparing or re-submitting a
-    known task, including a completed one, is a no-op, also across controller restarts. An ambiguous
-    submission becomes UNKNOWN and is never duplicated. Extraction, capping and embedding happen upstream,
-    so every extraction mode is labeled as given (F-05 fixed for this layer). The H-cap GEO_OPT is now run
-    before the single point (F-17).
+  - tests/adapters/dft/test_cp2k_phal_input_parity.py::test_cp2k_dispatch_writes_phal_files_byte_identically
+  - tests/labeling/test_labeling_service.py::test_prepare_is_idempotent_and_ids_depend_on_region_and_settings
+  - tests/labeling/test_labeling_service.py::test_submit_is_idempotent
+  - tests/labeling/test_labeling_service.py::test_ambiguous_submission_failure_marks_unknown_and_never_duplicates
+  - tests/labeling/test_labeling_service.py::test_rejected_submission_leaves_task_resubmittable
+  - tests/labeling/test_labeling_service.py::test_enabled_embedding_is_refused_before_a_task_exists
+  - tests/labeling/test_labeling_service.py::test_capped_region_runs_cap_relaxation_then_single_point
+  - tests/extraction/test_extraction_modes.py::test_block_cooldown_skips_and_state_survives_restart
+  - tests/workflow/test_scheduling.py::test_restart_mid_queue_resubmits_nothing_already_submitted
+  - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
+  - tests/integration/test_closed_loop_real.py::test_real_closed_loop_promotes_and_resumes_md_with_the_new_model
+  - tests/adapters/dft/test_cp2k_real.py::test_restart_safe_idempotent_labeling
+  findings:
+  - F-05
+  - F-17
+  - F-24
+  notes: 'Replaced by LabelingService (prepare/submit/poll/collect) with an atomic, file-locked task.json that holds
+    the job id, state, attempts and failure reasons. task_id = stable_id(region_id, region fingerprint, settings
+    hash). PHAL''s dry-run task tree cannot be reproduced, by design: there is no dry-run mode (the brief forbids
+    implicit dry runs; cp2k.submit_mode is removed). PHAL''s task.json held metadata only. The parts of the acceptance
+    that carry over are shown. The CP2K files a task gets (<id>_hopt.inp when capped, <id>_sp.inp) are byte-identical
+    to PHAL''s for fixture regions, through the same CP2KBackend.prepare_inputs the service calls. The region is
+    stored as region.json instead of region.extxyz. Block cooldown gives no region, hence no task, and never a failure
+    (the workflow''s "skipped"). One job per region is submitted through the scheduler. Re-preparing or re-submitting
+    a known task, including a completed one, is a no-op, also across controller restarts. An ambiguous submission
+    becomes UNKNOWN and is never duplicated. Extraction, capping and embedding happen upstream, so every extraction
+    mode is labeled as given (F-05 fixed for this layer). The H-cap GEO_OPT is now run before the single point (F-17).'
 - id: LAB-008
   status: replaced
   implementation:
-    - src/gmd_active_learning/labeling/service.py
-    - src/gmd_active_learning/datasets/writer.py
+  - src/gmd_active_learning/labeling/service.py
+  - src/gmd_active_learning/datasets/writer.py
   evidence:
-    - tests/datasets/test_phal_dataset_entry_parity.py::test_dataset_entry_contains_phal_fields
-    - tests/datasets/test_dataset_io_roundtrip.py::test_per_sample_triple_keeps_phal_keys
-    - tests/labeling/test_labeling_service.py::test_single_point_label_is_valid_and_converted
-    - tests/labeling/test_labeling_service.py::test_completed_but_invalid_output_is_invalid_not_failed
-    - tests/labeling/test_labeling_service.py::test_unknown_state_never_resubmits
-    - tests/labeling/test_labeling_service.py::test_a_restarted_controller_resumes_from_task_json
-    - tests/labeling/test_job_state_mapping.py::test_every_phal_job_state_round_trips
-    - tests/adapters/dft/test_cp2k_real.py::test_unconverged_run_is_invalid_with_reason
-    - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
-    - tests/integration/test_closed_loop_real.py::test_real_closed_loop_promotes_and_resumes_md_with_the_new_model
-  findings: [F-24, F-25, F-27]
-  notes: >-
-    Replaced by LabelingService.poll/collect plus datasets.write_dataset_entry. Dataset files: for 28
-    golden capped regions (3 scenarios, cluster/graph/slab), GMD's <task>.extxyz/_labels.npz/_metadata.json
-    contain every field PHAL's write_dataset_entry wrote, with PHAL's values. That covers the forces,
-    mask, original_indices (caps -1) and per-role index arrays; region_labels/atom_role, force_weight,
-    energy_weight 0, core_atom_indices and masked_atom_indices; and the positions, symbols, region_code
-    and force weights in the extxyz. 6 torn-bond regions skip with GMD's documented capping fix.
-    Deliberate differences: the extxyz key is force_weight (GMD_SGT), not mask_weights. GMD adds arrays
-    (force_weight, region_code, image_shift, energy, stress), energy and stress weights, and provenance.
-    The mask comes from the region roles (F-04). Status sequence: ExecutionStatus and ValidationStatus
-    are kept separate. Exit 0 with invalid output is COMPLETED/INVALID, and a non-converged output never
-    yields a VALID result (F-27). UNKNOWN reconciles and never fails or resubmits, which removes PHAL's
-    race with a still-growing output (F-25). PHAL's JobState values map losslessly
-    (labeling.job_states). A restarted controller resumes the persisted job ids.
+  - tests/datasets/test_phal_dataset_entry_parity.py::test_dataset_entry_contains_phal_fields
+  - tests/datasets/test_dataset_io_roundtrip.py::test_per_sample_triple_keeps_phal_keys
+  - tests/labeling/test_labeling_service.py::test_single_point_label_is_valid_and_converted
+  - tests/labeling/test_labeling_service.py::test_completed_but_invalid_output_is_invalid_not_failed
+  - tests/labeling/test_labeling_service.py::test_unknown_state_never_resubmits
+  - tests/labeling/test_labeling_service.py::test_a_restarted_controller_resumes_from_task_json
+  - tests/labeling/test_job_state_mapping.py::test_every_phal_job_state_round_trips
+  - tests/adapters/dft/test_cp2k_real.py::test_unconverged_run_is_invalid_with_reason
+  - tests/e2e/test_online_pipeline.py::test_online_loop_polls_the_label_to_completion_and_resumes_md_with_the_new_model
+  - tests/integration/test_closed_loop_real.py::test_real_closed_loop_promotes_and_resumes_md_with_the_new_model
+  findings:
+  - F-24
+  - F-25
+  - F-27
+  notes: 'Replaced by LabelingService.poll/collect plus datasets.write_dataset_entry. Dataset files: for 28 golden
+    capped regions (3 scenarios, cluster/graph/slab), GMD''s <task>.extxyz/_labels.npz/_metadata.json contain every
+    field PHAL''s write_dataset_entry wrote, with PHAL''s values. That covers the forces, mask, original_indices
+    (caps -1) and per-role index arrays; region_labels/atom_role, force_weight, energy_weight 0, core_atom_indices
+    and masked_atom_indices; and the positions, symbols, region_code and force weights in the extxyz. 6 torn-bond
+    regions skip with GMD''s documented capping fix. Deliberate differences: the extxyz key is force_weight (GMD_SGT),
+    not mask_weights. GMD adds arrays (force_weight, region_code, image_shift, energy, stress), energy and stress
+    weights, and provenance. The mask comes from the region roles (F-04). Status sequence: ExecutionStatus and ValidationStatus
+    are kept separate. Exit 0 with invalid output is COMPLETED/INVALID, and a non-converged output never yields
+    a VALID result (F-27). UNKNOWN reconciles and never fails or resubmits, which removes PHAL''s race with a still-growing
+    output (F-25). PHAL''s JobState values map losslessly (labeling.job_states). A restarted controller resumes
+    the persisted job ids.'
 - id: LAB-009
   status: verified
   implementation:
-    - src/gmd_active_learning/labeling/retry_policy.py
-    - src/gmd_active_learning/adapters/dft/cp2k/config.py
-    - src/gmd_active_learning/adapters/dft/cp2k/input.py
+  - src/gmd_active_learning/labeling/retry_policy.py
+  - src/gmd_active_learning/adapters/dft/cp2k/config.py
+  - src/gmd_active_learning/adapters/dft/cp2k/input.py
   evidence:
-    - tests/labeling/test_retry_policy.py::test_scf_ladder_is_walked_in_order_then_exhausted
-    - tests/labeling/test_retry_policy.py::test_total_retry_budget_bounds_everything
-    - tests/labeling/test_retry_policy.py::test_walltime_parsing_table
-    - tests/labeling/test_labeling_service.py::test_scf_retry_ladder_nbuffer_then_max_scf_without_compounding
-    - tests/labeling/test_labeling_service.py::test_retry_budget_and_cap_are_bounded
-    - tests/labeling/test_labeling_service.py::test_walltime_kill_is_classified_and_retried
-    - tests/labeling/test_labeling_service.py::test_failed_ml_scf_attempt_is_resubmitted_natively
-    - tests/adapters/dft/test_cp2k_real.py::test_retry_ladder_recovers_the_unconverged_run
-    - tests/adapters/dft/test_cp2k_real.py::test_failed_ml_scf_run_is_resubmitted_natively
-  findings: [F-25]
-  notes: >-
-    F-25 fixed.
-    - A failed ML-SCF attempt is resubmitted natively in the same poll. It is recorded as
-      trigger_class ml_scf_failed, and LabelResult.metadata.ml_fallback_used is set. Verified with
-      real CP2K.
-    - Every failure class has its own bounded ladder of RetryStep overrides, applied to the base
-      settings (never to the previous retry input) and capped by cp2k.retry.max_scf_cap. The total is
-      bounded by cp2k.retry.max_retries (default 3; PHAL 0).
-    - Default SCF ladder: first diagonalization with Broyden mixing NBUFFER 4 (CP2K ignores &MIXING
-      under OT), then OT with MAX_SCF x3.
-    - Walltime and execution failures get one plain resubmission. invalid_result, which covers
-      deterministic aborts such as a bad basis, and cancelled jobs are not retried.
-    - Every attempt is persisted in its own attempts/NN-<stage> directory; there are no chained
-      _retryN names.
-    - Walltime parsing accepts [[D-]HH:]MM:SS or seconds. The walltime is enforced by the scheduler
-      (local enforces it itself), not by monotonic time in the controller.
+  - tests/labeling/test_retry_policy.py::test_scf_ladder_is_walked_in_order_then_exhausted
+  - tests/labeling/test_retry_policy.py::test_total_retry_budget_bounds_everything
+  - tests/labeling/test_retry_policy.py::test_walltime_parsing_table
+  - tests/labeling/test_labeling_service.py::test_scf_retry_ladder_nbuffer_then_max_scf_without_compounding
+  - tests/labeling/test_labeling_service.py::test_retry_budget_and_cap_are_bounded
+  - tests/labeling/test_labeling_service.py::test_walltime_kill_is_classified_and_retried
+  - tests/labeling/test_labeling_service.py::test_failed_ml_scf_attempt_is_resubmitted_natively
+  - tests/adapters/dft/test_cp2k_real.py::test_retry_ladder_recovers_the_unconverged_run
+  - tests/adapters/dft/test_cp2k_real.py::test_failed_ml_scf_run_is_resubmitted_natively
+  findings:
+  - F-25
+  notes: "F-25 fixed. - A failed ML-SCF attempt is resubmitted natively in the same poll. It is recorded as\n  trigger_class\
+    \ ml_scf_failed, and LabelResult.metadata.ml_fallback_used is set. Verified with\n  real CP2K.\n- Every failure\
+    \ class has its own bounded ladder of RetryStep overrides, applied to the base\n  settings (never to the previous\
+    \ retry input) and capped by cp2k.retry.max_scf_cap. The total is\n  bounded by cp2k.retry.max_retries (default\
+    \ 3; PHAL 0).\n- Default SCF ladder: first diagonalization with Broyden mixing NBUFFER 4 (CP2K ignores &MIXING\n\
+    \  under OT), then OT with MAX_SCF x3.\n- Walltime and execution failures get one plain resubmission. invalid_result,\
+    \ which covers\n  deterministic aborts such as a bad basis, and cancelled jobs are not retried.\n- Every attempt\
+    \ is persisted in its own attempts/NN-<stage> directory; there are no chained\n  _retryN names.\n- Walltime\
+    \ parsing accepts [[D-]HH:]MM:SS or seconds. The walltime is enforced by the scheduler\n  (local enforces it\
+    \ itself), not by monotonic time in the controller."
 - id: LAB-010
   status: verified
-  implementation: [src/gmd_active_learning/labeling/other_engines.py]
+  implementation:
+  - src/gmd_active_learning/labeling/other_engines.py
   evidence:
-    - tests/labeling/test_other_engines.py::test_gaussian_and_orca_text_is_identical_to_phal
-    - tests/labeling/test_other_engines.py::test_functional_basis_and_charge_reach_the_text
-    - tests/labeling/test_other_engines.py::test_gaussian_h_only_text_differs_from_phal_only_by_the_freeze_fix
-    - tests/labeling/test_other_engines.py::test_phal_engine_capture_is_current
-    - tests/labeling/test_other_engines.py::test_gaussian_and_orca_inputs
-    - tests/labeling/test_other_engines.py::test_gaussian_h_only_optimisation_freezes_non_cap_atoms
+  - tests/labeling/test_other_engines.py::test_gaussian_and_orca_text_is_identical_to_phal
+  - tests/labeling/test_other_engines.py::test_functional_basis_and_charge_reach_the_text
+  - tests/labeling/test_other_engines.py::test_gaussian_h_only_text_differs_from_phal_only_by_the_freeze_fix
+  - tests/labeling/test_other_engines.py::test_phal_engine_capture_is_current
+  - tests/labeling/test_other_engines.py::test_gaussian_and_orca_inputs
+  - tests/labeling/test_other_engines.py::test_gaussian_h_only_optimisation_freezes_non_cap_atoms
   findings: []
-  notes: >-
-    Ported as optional, UNVALIDATED tooling (VALIDATED = False) under labeling/, because tools/ is outside
-    this area. For 3 fixture regions (CH3 radical, capped CH3 at charge +1, H2), the .gjf force input and
-    the ORCA .inp text are identical to PHAL 96263b6. The comparison uses the text frozen in
-    tests/labeling/phal_other_engine_inputs.json, re-checked against ref/ while it exists.
-    OtherEngineSettings is a strict pydantic model (extra keys rejected). Its functional, basis and charge
-    reach the text: route/header, "charge multiplicity", and U/UKS for open shells. charge None uses the
-    region's charge. PHAL read an unschema'd 'dft' section, so with load_config the defaults always
-    applied. basis has no default, since PHAL's 'DZVP' is not a Gaussian keyword. Deliberate deviation:
-    the Gaussian H-only optimisation freezes non-cap atoms. Its text differs from PHAL's only in the route
-    ("opt" instead of "opt=modredundant") and the freeze column. Nothing runs or parses these engines.
-- id: LAB-011
-  status: in-progress
-  implementation: []
-  evidence: []
-  findings: []
-  notes: >-
-    The examples are outside this area (examples/). The adapter functions they need exist:
-    write_cp2k_inputs (example 03, now fail-closed for uncapped fragments) and parse_cp2k_output_file
-    (example 04).
+  notes: 'Ported as optional, UNVALIDATED tooling (VALIDATED = False) under labeling/, because tools/ is outside
+    this area. For 3 fixture regions (CH3 radical, capped CH3 at charge +1, H2), the .gjf force input and the ORCA
+    .inp text are identical to PHAL 96263b6. The comparison uses the text frozen in tests/labeling/phal_other_engine_inputs.json,
+    re-checked against ref/ while it exists. OtherEngineSettings is a strict pydantic model (extra keys rejected).
+    Its functional, basis and charge reach the text: route/header, "charge multiplicity", and U/UKS for open shells.
+    charge None uses the region''s charge. PHAL read an unschema''d ''dft'' section, so with load_config the defaults
+    always applied. basis has no default, since PHAL''s ''DZVP'' is not a Gaussian keyword. Deliberate deviation:
+    the Gaussian H-only optimisation freezes non-cap atoms. Its text differs from PHAL''s only in the route ("opt"
+    instead of "opt=modredundant") and the freeze column. Nothing runs or parses these engines.'
 - id: FIX-003
   status: verified
-  implementation: [tests/fixtures/cp2k/toy_forces.out, tests/fixtures/cp2k/real_2026.2/, tests/fixtures/cp2k/generate_real_cp2k_fixtures.py]
+  implementation:
+  - tests/fixtures/cp2k/toy_forces.out
+  - tests/fixtures/cp2k/real_2026.2/
+  - tests/fixtures/cp2k/generate_real_cp2k_fixtures.py
   evidence:
-    - tests/adapters/dft/test_cp2k_parse.py::test_toy_fixture_forces_match_phal_conversion
-    - tests/adapters/dft/test_cp2k_parse.py::test_truncated_toy_fixture_is_rejected
-    - tests/adapters/dft/test_cp2k_parse.py::test_real_manifest_hashes_match_files
-  findings: [F-12]
-  notes: >-
-    toy_forces.out is copied byte-identical (sha256 06d59c29... matches phal_inventory.json). Real CP2K
-    2026.2 fixtures are added for seven cases: a converged H2 cluster, a periodic block (stress in bar),
-    an XY slab, an unconverged run (MAX_SCF 2, ABORT, exit 1), a capped CH3 cap GEO_OPT with its
-    trajectory, the same GEO_OPT stopped at max_iter 1, and a capped CH3 single point. Inputs come from
-    the GMD adapter. Outputs are CP2K's own files, except that the host, user and pid in the banner are
-    replaced by X of the same width. manifest.json records hashes, settings and the CP2K version.
+  - tests/adapters/dft/test_cp2k_parse.py::test_toy_fixture_forces_match_phal_conversion
+  - tests/adapters/dft/test_cp2k_parse.py::test_truncated_toy_fixture_is_rejected
+  - tests/adapters/dft/test_cp2k_parse.py::test_real_manifest_hashes_match_files
+  findings:
+  - F-12
+  notes: 'toy_forces.out is copied byte-identical (sha256 06d59c29... matches phal_inventory.json). Real CP2K 2026.2
+    fixtures are added for seven cases: a converged H2 cluster, a periodic block (stress in bar), an XY slab, an
+    unconverged run (MAX_SCF 2, ABORT, exit 1), a capped CH3 cap GEO_OPT with its trajectory, the same GEO_OPT stopped
+    at max_iter 1, and a capped CH3 single point. Inputs come from the GMD adapter. Outputs are CP2K''s own files,
+    except that the host, user and pid in the banner are replaced by X of the same width. manifest.json records
+    hashes, settings and the CP2K version.'
 - id: FIX-004
   status: verified
-  implementation: [tests/fixtures/structures/h2.xyz, tests/fixtures/structures/toy_cluster.xyz, tests/fixtures/structures/regions/]
+  implementation:
+  - tests/fixtures/structures/h2.xyz
+  - tests/fixtures/structures/toy_cluster.xyz
+  - tests/fixtures/structures/regions/
   evidence:
-    - tests/labeling/test_legacy_labelers.py::test_cp2k_labeler_writes_a_real_input_and_typed_job_script
-    - tests/adapters/dft/test_cp2k_real.py::test_h2_molecule_label
+  - tests/labeling/test_legacy_labelers.py::test_cp2k_labeler_writes_a_real_input_and_typed_job_script
+  - tests/adapters/dft/test_cp2k_real.py::test_h2_molecule_label
   findings: []
-  notes: >-
-    h2.xyz and toy_cluster.xyz are copied byte-identical (hashes match the inventory). ExtractedRegion
-    JSON fixtures were added: h2_cluster, ch3_capped, ch3_radical, h2_periodic and h2_slab. The real
-    CP2K smoke labels H2 and parses it; it is opt-out by marker, not opt-in by RUN_EXTERNAL.
-- id: CFG-004
-  status: in-progress
-  implementation: [src/gmd_active_learning/adapters/dft/cp2k/config.py]
-  evidence: []
-  findings: []
-  notes: >-
-    The CP2K paths in this area are relative to the run directory: task_dir is resolved against
-    LabelingService.from_config(base_dir=...), and data_dir and template_path are optional. The
-    runtime overlay file itself (configs/runtime.yaml) belongs to the config owner.
+  notes: 'h2.xyz and toy_cluster.xyz are copied byte-identical (hashes match the inventory). ExtractedRegion JSON
+    fixtures were added: h2_cluster, ch3_capped, ch3_radical, h2_periodic and h2_slab. The real CP2K smoke labels
+    H2 and parses it; it is opt-out by marker, not opt-in by RUN_EXTERNAL.'
