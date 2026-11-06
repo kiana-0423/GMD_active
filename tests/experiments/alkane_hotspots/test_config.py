@@ -10,7 +10,7 @@ from ._helpers import CONFIGS
 from tools.experiments.alkane_hotspots.config import AlkaneConfig, load_config
 
 
-@pytest.mark.parametrize("name", ["smoke", "pilot", "campaign"])
+@pytest.mark.parametrize("name", ["smoke", "pilot", "pilot_c32", "campaign"])
 def test_demo_configs_load(name: str) -> None:
     loaded = load_config(CONFIGS / f"{name}.yaml")
     assert loaded.name == name
@@ -21,7 +21,12 @@ def test_smoke_is_flagged_and_pilot_is_production() -> None:
     smoke = load_config(CONFIGS / "smoke.yaml").config
     pilot = load_config(CONFIGS / "pilot.yaml").config
     assert smoke.cp2k.smoke_only and not pilot.cp2k.smoke_only
-    assert pilot.systems.chain_lengths == [16, 32] and pilot.generation.n_parents == 24
+    # Sized from measured CP2K timings (docs/demos/alkane_hotspots/results/timing_probe.json): C16H34 pilot,
+    # C32H66 as a separately budgeted size-transfer check.
+    assert pilot.systems.chain_lengths == [16] and pilot.generation.n_parents == 16
+    transfer = load_config(CONFIGS / "pilot_c32.yaml").config
+    assert transfer.systems.chain_lengths == [32] and transfer.generation.n_parents == 2
+    assert (transfer.cp2k.cutoff, transfer.cp2k.rel_cutoff) == (pilot.cp2k.cutoff, pilot.cp2k.rel_cutoff) == (300.0, 50.0)
     assert (pilot.cp2k.functional, pilot.cp2k.basis, pilot.cp2k.potential, pilot.cp2k.dispersion) == ("PBE", "DZVP-MOLOPT-SR-GTH", "GTH-PBE", True)
     assert pilot.cp2k.charge == 0 and pilot.cp2k.multiplicity == 1 and pilot.cp2k.poisson_solver == "WAVELET"
 
