@@ -51,11 +51,21 @@ python tools/migration/capture_phal_reference.py  # regenerate golden outputs (d
 - Where PHAL behavior is a defect (see `findings.md`), the migrated code fixes it deliberately, and the
   ledger entry and parity test record the intended deviation.
 
-## Removing `ref/lammps_monitor`
+## Reference tree removed (2026-11-06)
 
-This is the final milestone. It requires every ledger entry to be `verified`, `replaced`, or `dropped`,
-and the acceptance checklist in the migration plan to be complete.
+`ref/lammps_monitor` was deleted after these gates passed:
 
-The PHAL source is already preserved off-tree: commit `96263b6` is `main` at
-`github.com/kiana-0423/lammps_monitor`. Two files PHAL's own configs need were never committed
-(see `baseline.md`).
+| Gate | Evidence |
+|---|---|
+| Every ledger entry has an implementation and evidence | `feature_ledger.yaml`: 170 of 187 resolved (verified, replaced or dropped). The 17 `migrated` entries are implemented and tested, but their remaining validation needs infrastructure not available here (Slurm/PBS clusters, container builds, CI runner, mkdocs) or data that PHAL itself lost; none needs the reference tree. |
+| Attribution, licenses, provenance | `NOTICE` (PHAL MIT license); a header on every ported file; `phal_inventory.json`; `phal_release_baseline/` |
+| Reference-derived tests and fixtures are local | `tests/fixtures/phal_reference/` plus other captured PHAL outputs under `tests/`. Live-PHAL comparison tests skip with a reason. |
+| Exact revision recoverable off-tree | `96263b6` is `main` at `github.com/kiana-0423/lammps_monitor` (checked with `git ls-remote`), and `../_archive/lammps_monitor-96263b6.bundle` (sha256 `b5b76e7d…`) clones to a file-identical tree |
+| No unique uncommitted reference files | `git status --porcelain --ignored` in the reference repository was empty; an empty `lammps_run/` directory created by this session's capture runs was removed |
+| No runtime/test/packaging/config dependency | layering test (`tests/architecture/`); precise scan for `hotspot_al` imports and `ref/` paths; only `tools/migration/` capture tools mention the tree |
+| Clean installation without the tree | `tools/migration/clean_install_check.sh`: wheel built from the committed tree, installed in a fresh venv, `src/` deleted. 2146 passed, 47 skipped; all 17 real GMD, GMD_SGT and CP2K tests passed from the installed wheel. |
+| Integration, recovery and rollback acceptance | `tests/integration/` (real closed loop, rollback, GMD); `evidence/` |
+
+After removal, the ledger checks (`check_ledger.py`, `apply_status.py --check`) and the full suite were rerun.
+`build_phal_inventory.py` and `capture_phal_reference.py` now need a fresh checkout of the PHAL
+revision above (`git clone <bundle> ref/lammps_monitor`).
