@@ -5,3 +5,18 @@ __pycache__/
 /dist/
 /ref/
 *.egg-info/
+# Runtime trees and default outputs of examples/tools (never ignore *.extxyz / *.pt / *.lammpstrj
+# globally: tracked fixtures use them; PHAL's global *.extxyz rule caused finding F-11).
+/runtime/
+runs/
+*.sif
+*.oci.tar
+*.o[0-9]*
+*.e[0-9]*
+slurm-*.out
+benchmark*.json
+benchmark*.csv
+gmd_example_run/
+cp2k_jobs/
+dataset_store/
+sgt_tiny_h2o_smoke/
