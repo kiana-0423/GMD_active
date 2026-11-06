@@ -89,7 +89,10 @@ class ServiceLabeler:
     def _view(task: LabelTask) -> LabelTask:
         done = task.metadata.get("stage") == "done"
         if done:
-            task.execution = ExecutionStatus.FAILED if task.execution is ExecutionStatus.FAILED else ExecutionStatus.COMPLETED
+            # FAILED and CANCELLED stay what they are (a cancelled job is not a completed calculation
+            # with an invalid result); every other finished state means the service collected a result.
+            if task.execution not in (ExecutionStatus.FAILED, ExecutionStatus.CANCELLED):
+                task.execution = ExecutionStatus.COMPLETED
         elif task.execution.terminal:
             task.execution = ExecutionStatus.RUNNING  # an intermediate stage finished; the next one is queued
         return task

@@ -91,6 +91,7 @@ def _task(stage: str, execution: ExecutionStatus, attempts: int = 1) -> LabelTas
         ("hopt", ExecutionStatus.COMPLETED, ExecutionStatus.RUNNING),  # cap relaxation done; single point queued
         ("done", ExecutionStatus.COMPLETED, ExecutionStatus.COMPLETED),
         ("done", ExecutionStatus.FAILED, ExecutionStatus.FAILED),
+        ("done", ExecutionStatus.CANCELLED, ExecutionStatus.CANCELLED),  # cancelled: never reported as a completed calculation
         ("sp", ExecutionStatus.UNKNOWN, ExecutionStatus.UNKNOWN),
     ],
 )
