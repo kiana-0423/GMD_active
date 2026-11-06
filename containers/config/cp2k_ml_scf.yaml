@@ -1,0 +1,24 @@
+# Ported from PHAL (configs/cp2k.yaml) at 96263b6; MIT License, see NOTICE.
+# EXPERIMENTAL CP2K ML-SCF deployment overlay (cp2k-ml image; fork bind-mounted at /workspace/cp2k-ml-scf).
+# Merge after containers/config/runtime.yaml. Conventional CP2K labeling stays the default: this only
+# configures the scf.ml_scf wrapper (adapters/dft/scf/cp2k_ml_backend.py). CP2K still builds and
+# diagonalises the Kohn-Sham matrix and judges convergence against EPS_SCF; no ML-SCF component has
+# shown an acceleration benefit (finding F-21, docs/scf/negative_results.md).
+scf:
+  ml_scf:
+    enabled: true
+    # v2026.2 builds with CMake; build.sh --ml-only writes the ML binary here.
+    executable: /workspace/cp2k-ml-scf/build/cp2k-ml/bin/cp2k.psmp
+    model_path: /runtime/cp2k_ml/models/active/model.pt
+    fallback_to_standard_scf: true
+    retry_native_on_failure: true
+    require_final_scf_convergence: true
+    prediction_dir: /runtime/cp2k_ml/predictions
+    electron_tolerance: 1.0e-3
+    predictor:
+      type: dummy          # exercises the pipeline without a trained model
+      model_path: null
+      options: {}
+    mixing:
+      method: pulay        # "ml" is a documented negative result and needs experimental: true
+      history_length: 8
