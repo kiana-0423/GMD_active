@@ -93,7 +93,7 @@ def _gt_findings(gt: Mapping[str, Any]) -> list[str]:
     for tau, block in (gt.get("per_threshold") or {}).items():
         for comp in block.get("comparisons", []):
             if comp.get("delta") is None:
-                findings.append(f"tau={tau}: AP({comp['a']}) - AP({comp['b']}) undefined ({comp.get('reason', 'no positives')})")
+                findings.append(f"tau={tau}: AP({comp['a']}) - AP({comp['b']}) undefined ({comp.get('reason', 'AP undefined')})")
                 continue
             ci = comp.get("delta_ci") or {}
             low, high = ci.get("low"), ci.get("high")
@@ -128,7 +128,9 @@ def build_report(loaded: LoadedConfig) -> dict[str, Any]:
         summary = {}
         for tau, block in gt["per_threshold"].items():
             summary[tau] = {"n_positive": block["n_positive"], "average_precision": {
-                name: s.get("average_precision") for name, s in block["signals"].items()}}
+                name: s.get("average_precision") for name, s in block["signals"].items()},
+                "undefined_reason": {name: s.get("average_precision_reason") or s.get("reason")
+                                     for name, s in block["signals"].items() if s.get("average_precision") is None}}
         executed["ground_truth"] = {"artifact": _artifact(out / FILES["ground_truth"]), "n_configurations": gt["n_configurations"],
                                     "n_regions": gt["n_regions"], "model": gt.get("model"), "per_threshold": summary,
                                     "findings": _gt_findings(gt), "localisation": gt.get("localisation")}
@@ -214,10 +216,11 @@ def render_markdown(report: Mapping[str, Any]) -> str:
         for tau, block in gt["per_threshold"].items():
             lines.append(f"Reference threshold {tau} eV/A ({block['n_positive']} positive regions), average precision:")
             lines.append("")
-            lines.append("| signal | AP |")
-            lines.append("|---|---|")
+            lines.append("| signal | AP | why undefined |")
+            lines.append("|---|---|---|")
+            reasons = block.get("undefined_reason", {})
             for name, ap in block["average_precision"].items():
-                lines.append(f"| {name} | {'undefined' if ap is None else f'{ap:.3f}'} |")
+                lines.append(f"| {name} | {'undefined' if ap is None else f'{ap:.3f}'} | {reasons.get(name) or ''} |")
             lines.append("")
         lines += [f"- {item}" for item in gt["findings"]] + [""]
     if "arms" in executed:

@@ -148,7 +148,7 @@ def test_all_positive_regions_give_undefined_ap_not_one() -> None:
     committee = report["per_threshold"]["0"]["signals"]["committee"]
     assert committee["average_precision"] is None
     assert committee["average_precision_reason"].startswith("no negative regions")
-    assert all(c["delta"] is None for c in report["per_threshold"]["0"]["comparisons"])
+    assert all(c["delta"] is None and "no negative regions" in c["reason"] for c in report["per_threshold"]["0"]["comparisons"])
 
 
 def test_bootstrap_over_a_single_group_reports_no_interval() -> None:

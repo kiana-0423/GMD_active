@@ -2,13 +2,2380 @@
   "config": {
     "artifacts_root": "<artifacts_root>",
     "artifacts_root_setting": "../alkane_artifacts/pilot",
-    "config_hash": "3f2fc68d1e7c45dac95785321c222c60f103c68c458611d903fcb50a7b58ab1c",
+    "config_hash": "6d363dceb7ded3a27eb6bc2874f4b65f644a506dd4c84d523902bb44b1d01426",
     "name": "pilot",
     "path": "<GMD_active>/configs/demos/alkane_hotspots/arms_pilot.yaml"
   },
   "executed": {
+    "arms": {
+      "committee_local": {
+        "cumulative_cpu_core_s": [
+          2922.4894320964813,
+          3737.6673913002014
+        ],
+        "final_force_rmse": [
+          0.6374763130968117,
+          0.7564635890662504
+        ],
+        "kind": "committee_local",
+        "labels_acquired": [
+          8,
+          8
+        ],
+        "progress_files": [
+          {
+            "path": "<artifacts_root>/model_study/arms/committee_local/rep0/progress.json",
+            "sha256": "ac3dbbfbfb254d43f06f76c0b6bc364b916cbf48490f27a2629b7c0a0ef8f57c"
+          },
+          {
+            "path": "<artifacts_root>/model_study/arms/committee_local/rep1/progress.json",
+            "sha256": "0833b5f33a743461e946bb93d757fefa3bc4b5388f8af16dbaaf40b7e1c233ed"
+          }
+        ],
+        "repetitions_complete": 2,
+        "repetitions_found": 2,
+        "repetitions_planned": 2,
+        "rounds_completed": [
+          2,
+          2
+        ]
+      },
+      "committee_signals_only": {
+        "cumulative_cpu_core_s": [
+          0.0,
+          0.0
+        ],
+        "final_force_rmse": [
+          0.8272121457789071,
+          0.8311661570678465
+        ],
+        "kind": "phal_local",
+        "labels_acquired": [
+          0,
+          0
+        ],
+        "progress_files": [
+          {
+            "path": "<artifacts_root>/model_study/arms/committee_signals_only/rep0/progress.json",
+            "sha256": "3fee6f3d5cf09f2176e61d7635bbc86b7977202a66160622c75c0c234b173dd2"
+          },
+          {
+            "path": "<artifacts_root>/model_study/arms/committee_signals_only/rep1/progress.json",
+            "sha256": "a7eceb1749194ddb49dd7892cd7a548be379e6e068d4532b21fd355204f32391"
+          }
+        ],
+        "repetitions_complete": 2,
+        "repetitions_found": 2,
+        "repetitions_planned": 2,
+        "rounds_completed": [
+          2,
+          2
+        ]
+      },
+      "core_only_weights": {
+        "cumulative_cpu_core_s": [
+          0.0,
+          0.0
+        ],
+        "final_force_rmse": [
+          0.8272121457789071,
+          0.8311661570678465
+        ],
+        "kind": "phal_local",
+        "labels_acquired": [
+          0,
+          0
+        ],
+        "progress_files": [
+          {
+            "path": "<artifacts_root>/model_study/arms/core_only_weights/rep0/progress.json",
+            "sha256": "c7ac09522f68d177873bb4138a2ff81346ad94aab3caf2365981792b3c798fc9"
+          },
+          {
+            "path": "<artifacts_root>/model_study/arms/core_only_weights/rep1/progress.json",
+            "sha256": "4a4a661b0bf5c85965dc391ef2641fed8ecca15488606fa49721ef176ea885e9"
+          }
+        ],
+        "repetitions_complete": 2,
+        "repetitions_found": 2,
+        "repetitions_planned": 2,
+        "rounds_completed": [
+          2,
+          2
+        ]
+      },
+      "no_event_buffering": {
+        "cumulative_cpu_core_s": [
+          0.0,
+          0.0
+        ],
+        "final_force_rmse": [
+          0.8272121457789071,
+          0.8311661570678465
+        ],
+        "kind": "phal_local",
+        "labels_acquired": [
+          0,
+          0
+        ],
+        "progress_files": [
+          {
+            "path": "<artifacts_root>/model_study/arms/no_event_buffering/rep0/progress.json",
+            "sha256": "ee1e83416d7c95d01ffbcd7560fd66a92aa759878892b4ca6965de083470a6b1"
+          },
+          {
+            "path": "<artifacts_root>/model_study/arms/no_event_buffering/rep1/progress.json",
+            "sha256": "b6987f6a1d93e60025f99d454dc5b443ccac10bb6810cc1f47f8097f380c0f05"
+          }
+        ],
+        "repetitions_complete": 2,
+        "repetitions_found": 2,
+        "repetitions_planned": 2,
+        "rounds_completed": [
+          2,
+          2
+        ]
+      },
+      "no_lj": {
+        "cumulative_cpu_core_s": [
+          0.0,
+          0.0
+        ],
+        "final_force_rmse": [
+          0.8272121457789071,
+          0.8311661570678465
+        ],
+        "kind": "phal_local",
+        "labels_acquired": [
+          0,
+          0
+        ],
+        "progress_files": [
+          {
+            "path": "<artifacts_root>/model_study/arms/no_lj/rep0/progress.json",
+            "sha256": "6ab4fe0d071978518524cf996e760ab031c2862b2eb666e1df880326d0895f63"
+          },
+          {
+            "path": "<artifacts_root>/model_study/arms/no_lj/rep1/progress.json",
+            "sha256": "0713c50b38549668f5360529aa0764684b2b2a80b08786e446982fdf7b498821"
+          }
+        ],
+        "repetitions_complete": 2,
+        "repetitions_found": 2,
+        "repetitions_planned": 2,
+        "rounds_completed": [
+          2,
+          2
+        ]
+      },
+      "phal_full_system": {
+        "cumulative_cpu_core_s": [
+          0.0,
+          0.0
+        ],
+        "final_force_rmse": [
+          0.8272121457789071,
+          0.8311661570678465
+        ],
+        "kind": "phal_full_system",
+        "labels_acquired": [
+          0,
+          0
+        ],
+        "progress_files": [
+          {
+            "path": "<artifacts_root>/model_study/arms/phal_full_system/rep0/progress.json",
+            "sha256": "a1a454cd9ef5fa3317c9f77b677bd21e8f5cb5ec732b1dd7ab116a0fc561ef6c"
+          },
+          {
+            "path": "<artifacts_root>/model_study/arms/phal_full_system/rep1/progress.json",
+            "sha256": "971d41461a4e679c0c72ffad9b3690af80acd48f63e231a4afc8841e365730c6"
+          }
+        ],
+        "repetitions_complete": 2,
+        "repetitions_found": 2,
+        "repetitions_planned": 2,
+        "rounds_completed": [
+          2,
+          2
+        ]
+      },
+      "phal_local": {
+        "cumulative_cpu_core_s": [
+          0.0,
+          0.0
+        ],
+        "final_force_rmse": [
+          0.8272121457789071,
+          0.8311661570678465
+        ],
+        "kind": "phal_local",
+        "labels_acquired": [
+          0,
+          0
+        ],
+        "progress_files": [
+          {
+            "path": "<artifacts_root>/model_study/arms/phal_local/rep0/progress.json",
+            "sha256": "5c0e628e892db2b8cb1cb51f1968f3aef83e7913f4195d61e9bdbac73e475635"
+          },
+          {
+            "path": "<artifacts_root>/model_study/arms/phal_local/rep1/progress.json",
+            "sha256": "6a35d716e36ffed186774edc0a87236fd2b3549faad7ec5038fde4d20e359ff0"
+          }
+        ],
+        "repetitions_complete": 2,
+        "repetitions_found": 2,
+        "repetitions_planned": 2,
+        "rounds_completed": [
+          2,
+          2
+        ]
+      },
+      "random_local": {
+        "cumulative_cpu_core_s": [
+          3392.9062926769257,
+          3072.6415145397186
+        ],
+        "final_force_rmse": [
+          0.6639297238531372,
+          0.6344319895237486
+        ],
+        "kind": "random_local",
+        "labels_acquired": [
+          8,
+          8
+        ],
+        "progress_files": [
+          {
+            "path": "<artifacts_root>/model_study/arms/random_local/rep0/progress.json",
+            "sha256": "eff6273c961b8bf61bdfc09228fd0e6d35e1a9fa01791f505070c3d39a03a5aa"
+          },
+          {
+            "path": "<artifacts_root>/model_study/arms/random_local/rep1/progress.json",
+            "sha256": "610b637859a2a8a7756da5d54040534dc6c1a05d44af2604a58cbd083e5baf61"
+          }
+        ],
+        "repetitions_complete": 2,
+        "repetitions_found": 2,
+        "repetitions_planned": 2,
+        "rounds_completed": [
+          2,
+          2
+        ]
+      }
+    },
+    "evaluation": {
+      "analysis": {
+        "committee_local": {
+          "at_budget_cpu_core_s": {
+            "14400": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 14400 outside the measured range [0, 2922.49]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 14400 outside the measured range [0, 3737.67]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "3600": {
+              "max": 0.736014304797484,
+              "mean": 0.736014304797484,
+              "min": 0.736014304797484,
+              "n": 2,
+              "n_defined": 1,
+              "per_rep": [
+                {
+                  "reason": "budget 3600 outside the measured range [0, 2922.49]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "between": [
+                    2046.0949683189392,
+                    3737.6673913002014
+                  ],
+                  "interpolated": true,
+                  "value": 0.736014304797484
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                0.736014304797484
+              ]
+            },
+            "7200": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 7200 outside the measured range [0, 2922.49]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 7200 outside the measured range [0, 3737.67]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "at_budget_labels": {
+            "2": {
+              "max": 0.8092871461859688,
+              "mean": 0.7387339455925884,
+              "min": 0.6681807449992081,
+              "n": 2,
+              "n_defined": 2,
+              "per_rep": [
+                {
+                  "between": [
+                    0.0,
+                    4.0
+                  ],
+                  "interpolated": true,
+                  "value": 0.8092871461859688
+                },
+                {
+                  "between": [
+                    0.0,
+                    4.0
+                  ],
+                  "interpolated": true,
+                  "value": 0.6681807449992081
+                }
+              ],
+              "std": 0.09977729314798796,
+              "values": [
+                0.8092871461859688,
+                0.6681807449992081
+              ]
+            },
+            "4": {
+              "max": 0.7913621465930305,
+              "mean": 0.6482787397618002,
+              "min": 0.5051953329305698,
+              "n": 2,
+              "n_defined": 2,
+              "per_rep": [
+                {
+                  "interpolated": false,
+                  "value": 0.7913621465930305
+                },
+                {
+                  "interpolated": false,
+                  "value": 0.5051953329305698
+                }
+              ],
+              "std": 0.2023504944912731,
+              "values": [
+                0.7913621465930305,
+                0.5051953329305698
+              ]
+            },
+            "8": {
+              "max": 0.7564635890662504,
+              "mean": 0.696969951081531,
+              "min": 0.6374763130968117,
+              "n": 2,
+              "n_defined": 2,
+              "per_rep": [
+                {
+                  "interpolated": false,
+                  "value": 0.6374763130968117
+                },
+                {
+                  "interpolated": false,
+                  "value": 0.7564635890662504
+                }
+              ],
+              "std": 0.08413670971290524,
+              "values": [
+                0.6374763130968117,
+                0.7564635890662504
+              ]
+            }
+          },
+          "cost_to_reach": {
+            "0.1": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.637476)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.505195)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.637476)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.505195)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            },
+            "0.15": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.637476)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.505195)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.637476)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.505195)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            }
+          },
+          "final": {
+            "max": 0.7564635890662504,
+            "mean": 0.696969951081531,
+            "min": 0.6374763130968117,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.08413670971290524,
+            "values": [
+              0.6374763130968117,
+              0.7564635890662504
+            ]
+          },
+          "final_cumulative_cpu_core_s": {
+            "max": 3737.6673913002014,
+            "mean": 3330.0784116983414,
+            "min": 2922.4894320964813,
+            "n": 2,
+            "n_defined": 2,
+            "std": 576.4178628267613,
+            "values": [
+              2922.4894320964813,
+              3737.6673913002014
+            ]
+          },
+          "n_repetitions": 2
+        },
+        "committee_signals_only": {
+          "at_budget_cpu_core_s": {
+            "14400": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 14400 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 14400 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "3600": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 3600 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 3600 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "7200": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 7200 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 7200 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "at_budget_labels": {
+            "2": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 2 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 2 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "4": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 4 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 4 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "8": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 8 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 8 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "cost_to_reach": {
+            "0.1": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            },
+            "0.15": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            }
+          },
+          "final": {
+            "max": 0.8311661570678465,
+            "mean": 0.8291891514233768,
+            "min": 0.8272121457789071,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.002795908195297177,
+            "values": [
+              0.8272121457789071,
+              0.8311661570678465
+            ]
+          },
+          "final_cumulative_cpu_core_s": {
+            "max": 0.0,
+            "mean": 0.0,
+            "min": 0.0,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.0,
+            "values": [
+              0.0,
+              0.0
+            ]
+          },
+          "n_repetitions": 2
+        },
+        "core_only_weights": {
+          "at_budget_cpu_core_s": {
+            "14400": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 14400 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 14400 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "3600": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 3600 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 3600 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "7200": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 7200 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 7200 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "at_budget_labels": {
+            "2": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 2 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 2 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "4": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 4 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 4 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "8": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 8 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 8 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "cost_to_reach": {
+            "0.1": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            },
+            "0.15": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            }
+          },
+          "final": {
+            "max": 0.8311661570678465,
+            "mean": 0.8291891514233768,
+            "min": 0.8272121457789071,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.002795908195297177,
+            "values": [
+              0.8272121457789071,
+              0.8311661570678465
+            ]
+          },
+          "final_cumulative_cpu_core_s": {
+            "max": 0.0,
+            "mean": 0.0,
+            "min": 0.0,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.0,
+            "values": [
+              0.0,
+              0.0
+            ]
+          },
+          "n_repetitions": 2
+        },
+        "no_event_buffering": {
+          "at_budget_cpu_core_s": {
+            "14400": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 14400 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 14400 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "3600": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 3600 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 3600 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "7200": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 7200 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 7200 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "at_budget_labels": {
+            "2": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 2 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 2 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "4": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 4 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 4 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "8": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 8 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 8 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "cost_to_reach": {
+            "0.1": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            },
+            "0.15": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            }
+          },
+          "final": {
+            "max": 0.8311661570678465,
+            "mean": 0.8291891514233768,
+            "min": 0.8272121457789071,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.002795908195297177,
+            "values": [
+              0.8272121457789071,
+              0.8311661570678465
+            ]
+          },
+          "final_cumulative_cpu_core_s": {
+            "max": 0.0,
+            "mean": 0.0,
+            "min": 0.0,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.0,
+            "values": [
+              0.0,
+              0.0
+            ]
+          },
+          "n_repetitions": 2
+        },
+        "no_lj": {
+          "at_budget_cpu_core_s": {
+            "14400": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 14400 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 14400 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "3600": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 3600 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 3600 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "7200": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 7200 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 7200 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "at_budget_labels": {
+            "2": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 2 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 2 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "4": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 4 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 4 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "8": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 8 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 8 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "cost_to_reach": {
+            "0.1": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            },
+            "0.15": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            }
+          },
+          "final": {
+            "max": 0.8311661570678465,
+            "mean": 0.8291891514233768,
+            "min": 0.8272121457789071,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.002795908195297177,
+            "values": [
+              0.8272121457789071,
+              0.8311661570678465
+            ]
+          },
+          "final_cumulative_cpu_core_s": {
+            "max": 0.0,
+            "mean": 0.0,
+            "min": 0.0,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.0,
+            "values": [
+              0.0,
+              0.0
+            ]
+          },
+          "n_repetitions": 2
+        },
+        "phal_full_system": {
+          "at_budget_cpu_core_s": {
+            "14400": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 14400 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 14400 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "3600": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 3600 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 3600 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "7200": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 7200 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 7200 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "at_budget_labels": {
+            "2": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 2 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 2 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "4": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 4 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 4 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "8": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 8 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 8 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "cost_to_reach": {
+            "0.1": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            },
+            "0.15": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            }
+          },
+          "final": {
+            "max": 0.8311661570678465,
+            "mean": 0.8291891514233768,
+            "min": 0.8272121457789071,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.002795908195297177,
+            "values": [
+              0.8272121457789071,
+              0.8311661570678465
+            ]
+          },
+          "final_cumulative_cpu_core_s": {
+            "max": 0.0,
+            "mean": 0.0,
+            "min": 0.0,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.0,
+            "values": [
+              0.0,
+              0.0
+            ]
+          },
+          "n_repetitions": 2
+        },
+        "phal_local": {
+          "at_budget_cpu_core_s": {
+            "14400": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 14400 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 14400 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "3600": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 3600 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 3600 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "7200": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 7200 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 7200 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "at_budget_labels": {
+            "2": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 2 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 2 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "4": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 4 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 4 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "8": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 8 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 8 outside the measured range [0, 0]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "cost_to_reach": {
+            "0.1": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            },
+            "0.15": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.827212)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.831166)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            }
+          },
+          "final": {
+            "max": 0.8311661570678465,
+            "mean": 0.8291891514233768,
+            "min": 0.8272121457789071,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.002795908195297177,
+            "values": [
+              0.8272121457789071,
+              0.8311661570678465
+            ]
+          },
+          "final_cumulative_cpu_core_s": {
+            "max": 0.0,
+            "mean": 0.0,
+            "min": 0.0,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.0,
+            "values": [
+              0.0,
+              0.0
+            ]
+          },
+          "n_repetitions": 2
+        },
+        "random_local": {
+          "at_budget_cpu_core_s": {
+            "14400": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 14400 outside the measured range [0, 3392.91]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 14400 outside the measured range [0, 3072.64]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "3600": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 3600 outside the measured range [0, 3392.91]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 3600 outside the measured range [0, 3072.64]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            },
+            "7200": {
+              "max": null,
+              "mean": null,
+              "min": null,
+              "n": 2,
+              "n_defined": 0,
+              "per_rep": [
+                {
+                  "reason": "budget 7200 outside the measured range [0, 3392.91]; not extrapolated",
+                  "value": null
+                },
+                {
+                  "reason": "budget 7200 outside the measured range [0, 3072.64]; not extrapolated",
+                  "value": null
+                }
+              ],
+              "std": null,
+              "values": [
+                null,
+                null
+              ]
+            }
+          },
+          "at_budget_labels": {
+            "2": {
+              "max": 0.8947997099842913,
+              "mean": 0.8004297845323995,
+              "min": 0.706059859080508,
+              "n": 2,
+              "n_defined": 2,
+              "per_rep": [
+                {
+                  "between": [
+                    0.0,
+                    4.0
+                  ],
+                  "interpolated": true,
+                  "value": 0.8947997099842913
+                },
+                {
+                  "between": [
+                    0.0,
+                    4.0
+                  ],
+                  "interpolated": true,
+                  "value": 0.706059859080508
+                }
+              ],
+              "std": 0.1334592284542031,
+              "values": [
+                0.8947997099842913,
+                0.706059859080508
+              ]
+            },
+            "4": {
+              "max": 0.9623872741896753,
+              "mean": 0.7716704176414224,
+              "min": 0.5809535610931694,
+              "n": 2,
+              "n_defined": 2,
+              "per_rep": [
+                {
+                  "interpolated": false,
+                  "value": 0.9623872741896753
+                },
+                {
+                  "interpolated": false,
+                  "value": 0.5809535610931694
+                }
+              ],
+              "std": 0.26971436510370334,
+              "values": [
+                0.9623872741896753,
+                0.5809535610931694
+              ]
+            },
+            "8": {
+              "max": 0.6639297238531372,
+              "mean": 0.6491808566884429,
+              "min": 0.6344319895237486,
+              "n": 2,
+              "n_defined": 2,
+              "per_rep": [
+                {
+                  "interpolated": false,
+                  "value": 0.6639297238531372
+                },
+                {
+                  "interpolated": false,
+                  "value": 0.6344319895237486
+                }
+              ],
+              "std": 0.020858047973949915,
+              "values": [
+                0.6639297238531372,
+                0.6344319895237486
+              ]
+            }
+          },
+          "cost_to_reach": {
+            "0.1": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.66393)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.580954)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.66393)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.1 not reached within the measured budget (best 0.580954)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            },
+            "0.15": {
+              "cpu_core_s": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.66393)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.580954)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              },
+              "labels": {
+                "max": null,
+                "mean": null,
+                "min": null,
+                "n": 2,
+                "n_defined": 0,
+                "per_rep": [
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.66393)"
+                  },
+                  {
+                    "cost": null,
+                    "reason": "target 0.15 not reached within the measured budget (best 0.580954)"
+                  }
+                ],
+                "std": null,
+                "values": [
+                  null,
+                  null
+                ]
+              }
+            }
+          },
+          "final": {
+            "max": 0.6639297238531372,
+            "mean": 0.6491808566884429,
+            "min": 0.6344319895237486,
+            "n": 2,
+            "n_defined": 2,
+            "std": 0.020858047973949915,
+            "values": [
+              0.6639297238531372,
+              0.6344319895237486
+            ]
+          },
+          "final_cumulative_cpu_core_s": {
+            "max": 3392.9062926769257,
+            "mean": 3232.773903608322,
+            "min": 3072.6415145397186,
+            "n": 2,
+            "n_defined": 2,
+            "std": 226.46139639602424,
+            "values": [
+              3392.9062926769257,
+              3072.6415145397186
+            ]
+          },
+          "n_repetitions": 2
+        }
+      },
+      "artifact": {
+        "path": "<artifacts_root>/model_study/evaluation.json",
+        "sha256": "912f06e0537c54933c77cd5ddc712b24a3bf958cce2db4062c7e2e116d4082eb"
+      }
+    },
     "figures": {
       "figures": {
+        "ablations": [
+          "<artifacts_root>/model_study/figures/ablations.pdf",
+          "<artifacts_root>/model_study/figures/ablations.svg",
+          "<artifacts_root>/model_study/figures/ablations.png"
+        ],
+        "fidelity": [
+          "<artifacts_root>/model_study/figures/fidelity.pdf",
+          "<artifacts_root>/model_study/figures/fidelity.svg",
+          "<artifacts_root>/model_study/figures/fidelity.png"
+        ],
+        "fidelity_max": [
+          "<artifacts_root>/model_study/figures/fidelity_max.pdf",
+          "<artifacts_root>/model_study/figures/fidelity_max.svg",
+          "<artifacts_root>/model_study/figures/fidelity_max.png"
+        ],
+        "learning_curves": [
+          "<artifacts_root>/model_study/figures/learning_curves.pdf",
+          "<artifacts_root>/model_study/figures/learning_curves.svg",
+          "<artifacts_root>/model_study/figures/learning_curves.png"
+        ],
+        "learning_curves_labels": [
+          "<artifacts_root>/model_study/figures/learning_curves_labels.pdf",
+          "<artifacts_root>/model_study/figures/learning_curves_labels.svg",
+          "<artifacts_root>/model_study/figures/learning_curves_labels.png"
+        ],
         "receptive_field": [
           "<artifacts_root>/model_study/figures/receptive_field.pdf",
           "<artifacts_root>/model_study/figures/receptive_field.svg",
@@ -17,9 +2384,148 @@
       },
       "index": {
         "path": "<artifacts_root>/model_study/figures/index.json",
-        "sha256": "aa6b6b24714058ab0a65e399c8db6095b7dc011bf44059c54fc7ded079e8f9b7"
+        "sha256": "9e49b6ffa7493a1be7c9d9bd6ffdd9c59c91b7231cf70988baa1ea9382112b1a"
       },
       "partial": {}
+    },
+    "ground_truth": {
+      "artifact": {
+        "path": "<artifacts_root>/model_study/ground_truth.json",
+        "sha256": "42f8c6c57fedaf350f76888e0b0e56dee32fe27260095fb56c40534338a13826"
+      },
+      "findings": [
+        "tau=0.1: AP(committee_plus_lj) - AP(committee_monitor) undefined (committee_plus_lj: signal unavailable on every region; committee_monitor: signal unavailable on every region)",
+        "tau=0.1: AP(phal_staged) - AP(phal_staged_no_lj) undefined (phal_staged: signal unavailable on every region; phal_staged_no_lj: signal unavailable on every region)",
+        "tau=0.1: AP(phal_staged) - AP(committee) undefined (phal_staged: signal unavailable on every region; committee: no negative regions (every region error >= tau): AP is trivially 1 and uninformative)",
+        "tau=0.2: AP(committee_plus_lj) - AP(committee_monitor) undefined (committee_plus_lj: signal unavailable on every region; committee_monitor: signal unavailable on every region)",
+        "tau=0.2: AP(phal_staged) - AP(phal_staged_no_lj) undefined (phal_staged: signal unavailable on every region; phal_staged_no_lj: signal unavailable on every region)",
+        "tau=0.2: AP(phal_staged) - AP(committee) undefined (phal_staged: signal unavailable on every region; committee: no negative regions (every region error >= tau): AP is trivially 1 and uninformative)",
+        "tau=0.4: AP(committee_plus_lj) - AP(committee_monitor) undefined (committee_plus_lj: signal unavailable on every region; committee_monitor: signal unavailable on every region)",
+        "tau=0.4: AP(phal_staged) - AP(phal_staged_no_lj) undefined (phal_staged: signal unavailable on every region; phal_staged_no_lj: signal unavailable on every region)",
+        "tau=0.4: AP(phal_staged) - AP(committee) undefined (phal_staged: signal unavailable on every region; committee: no negative regions (every region error >= tau): AP is trivially 1 and uninformative)"
+      ],
+      "localisation": {
+        "fraction_site_is_max_error": 1.0,
+        "max_error_region_contains_site": 3,
+        "n_perturbed": 3,
+        "top1_hit": {
+          "committee": 0,
+          "committee_monitor": 0,
+          "committee_plus_lj": 0,
+          "coordination": 0,
+          "delta_force": 0,
+          "force": 0,
+          "lj_residual": 0,
+          "phal_staged": 0,
+          "phal_staged_no_lj": 0,
+          "rmin": 0
+        },
+        "top1_hit_rate": {
+          "committee": 0.0,
+          "committee_monitor": 0.0,
+          "committee_plus_lj": 0.0,
+          "coordination": 0.0,
+          "delta_force": 0.0,
+          "force": 0.0,
+          "lj_residual": 0.0,
+          "phal_staged": 0.0,
+          "phal_staged_no_lj": 0.0,
+          "rmin": 0.0
+        }
+      },
+      "model": {
+        "checkpoints": [
+          "<artifacts_root>/model_study/models/15fc8e46a06b35b4e407/train/member_0/ckpt_best.pt",
+          "<artifacts_root>/model_study/models/15fc8e46a06b35b4e407/train/member_1/ckpt_best.pt",
+          "<artifacts_root>/model_study/models/15fc8e46a06b35b4e407/train/member_2/ckpt_best.pt"
+        ],
+        "key": "15fc8e46a06b35b4e407"
+      },
+      "n_configurations": 4,
+      "n_regions": 64,
+      "per_threshold": {
+        "0.1": {
+          "average_precision": {
+            "committee": null,
+            "committee_monitor": null,
+            "committee_plus_lj": null,
+            "coordination": null,
+            "delta_force": null,
+            "force": null,
+            "lj_residual": null,
+            "phal_staged": null,
+            "phal_staged_no_lj": null,
+            "rmin": null
+          },
+          "n_positive": 64,
+          "undefined_reason": {
+            "committee": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative",
+            "committee_monitor": "signal unavailable on every region",
+            "committee_plus_lj": "signal unavailable on every region",
+            "coordination": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative",
+            "delta_force": "signal unavailable on every region",
+            "force": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative",
+            "lj_residual": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative",
+            "phal_staged": "signal unavailable on every region",
+            "phal_staged_no_lj": "signal unavailable on every region",
+            "rmin": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative"
+          }
+        },
+        "0.2": {
+          "average_precision": {
+            "committee": null,
+            "committee_monitor": null,
+            "committee_plus_lj": null,
+            "coordination": null,
+            "delta_force": null,
+            "force": null,
+            "lj_residual": null,
+            "phal_staged": null,
+            "phal_staged_no_lj": null,
+            "rmin": null
+          },
+          "n_positive": 64,
+          "undefined_reason": {
+            "committee": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative",
+            "committee_monitor": "signal unavailable on every region",
+            "committee_plus_lj": "signal unavailable on every region",
+            "coordination": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative",
+            "delta_force": "signal unavailable on every region",
+            "force": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative",
+            "lj_residual": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative",
+            "phal_staged": "signal unavailable on every region",
+            "phal_staged_no_lj": "signal unavailable on every region",
+            "rmin": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative"
+          }
+        },
+        "0.4": {
+          "average_precision": {
+            "committee": null,
+            "committee_monitor": null,
+            "committee_plus_lj": null,
+            "coordination": null,
+            "delta_force": null,
+            "force": null,
+            "lj_residual": null,
+            "phal_staged": null,
+            "phal_staged_no_lj": null,
+            "rmin": null
+          },
+          "n_positive": 64,
+          "undefined_reason": {
+            "committee": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative",
+            "committee_monitor": "signal unavailable on every region",
+            "committee_plus_lj": "signal unavailable on every region",
+            "coordination": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative",
+            "delta_force": "signal unavailable on every region",
+            "force": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative",
+            "lj_residual": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative",
+            "phal_staged": "signal unavailable on every region",
+            "phal_staged_no_lj": "signal unavailable on every region",
+            "rmin": "no negative regions (every region error >= tau): AP is trivially 1 and uninformative"
+          }
+        }
+      }
     },
     "receptive_field": {
       "artifact": {
@@ -50,108 +2556,48 @@
       }
     }
   },
-  "generated_at": "2026-11-06T16:03:42+00:00",
+  "generated_at": "2026-11-06T20:52:11+00:00",
   "labels": {
     "artifact": {
-      "exists": false,
-      "path": "<artifacts_root>/labels.jsonl"
+      "path": "<artifacts_root>/labels.jsonl",
+      "sha256": "c84bc4938687c0773d5f3763f4d12e33f59e8c5b1fd07ad8a4fdb8dabbc52ed7"
     },
-    "by_kind_status": {},
+    "by_kind_status": {
+      "fragment/valid": 43,
+      "full/valid": 16
+    },
     "measured_cost": {
       "fragment": {
-        "median_cpu_core_s": null,
-        "n_with_cost": 0,
-        "total_cpu_core_s": 0.0
+        "median_cpu_core_s": 514.2659246921539,
+        "n_with_cost": 43,
+        "total_cpu_core_s": 28816.038086414337
       },
       "full": {
-        "median_cpu_core_s": null,
-        "n_with_cost": 0,
-        "total_cpu_core_s": 0.0
+        "median_cpu_core_s": 2818.4529584646225,
+        "n_with_cost": 16,
+        "total_cpu_core_s": 42080.53737640381
       }
     },
-    "n_records": 0,
+    "n_records": 59,
     "n_smoke_only": 0,
     "smoke_only_note": null
   },
   "planned_not_executed": {
-    "arms": {
-      "committee_local": {
-        "reason": "not run",
-        "repetitions_planned": 2,
-        "rounds_planned": 2
-      },
-      "committee_signals_only": {
-        "reason": "not run",
-        "repetitions_planned": 2,
-        "rounds_planned": 2
-      },
-      "core_only_weights": {
-        "reason": "not run",
-        "repetitions_planned": 2,
-        "rounds_planned": 2
-      },
-      "no_event_buffering": {
-        "reason": "not run",
-        "repetitions_planned": 2,
-        "rounds_planned": 2
-      },
-      "no_lj": {
-        "reason": "not run",
-        "repetitions_planned": 2,
-        "rounds_planned": 2
-      },
-      "phal_full_system": {
-        "reason": "not run",
-        "repetitions_planned": 2,
-        "rounds_planned": 2
-      },
-      "phal_local": {
-        "reason": "not run",
-        "repetitions_planned": 2,
-        "rounds_planned": 2
-      },
-      "random_local": {
-        "reason": "not run",
-        "repetitions_planned": 2,
-        "rounds_planned": 2
-      }
-    },
-    "evaluation": {
-      "reason": "no evaluation.json (run `evaluate` after `arms-run`)"
-    },
     "figures": {
       "rendered_without_data (panels say NOT EXECUTED)": {
-        "ablations": [
-          "no executed ablation runs"
-        ],
-        "fidelity": [
-          "no fidelity results with mean_n_atoms and pooled_core_force_rmse"
-        ],
-        "fidelity_max": [
-          "no fidelity results with mean_n_atoms and max_core_force_error"
-        ],
         "hotspots": [
-          "no ground-truth per-atom results",
-          "no ground-truth per-atom results"
-        ],
-        "learning_curves": [
-          "no executed arm runs"
-        ],
-        "learning_curves_labels": [
-          "no executed arm runs"
+          "signal phal_staged unavailable"
         ],
         "risk_vs_error": [
-          "no region table for committee",
-          "no region table for lj_residual",
-          "no region table for phal_staged"
+          "phal_staged unavailable on every region"
         ],
         "timeline": [
           "no closed-loop controller report"
         ]
       }
     },
-    "ground_truth": {
-      "reason": "no ground_truth.json"
+    "receptive_field_checkpoint": {
+      "reason": "no receptive_field_checkpoint.json (receptive-field --checkpoint <trained model>)"
     }
   },
   "rules": [

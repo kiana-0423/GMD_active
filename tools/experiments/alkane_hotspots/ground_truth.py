@@ -747,8 +747,16 @@ def analyse(frames: Sequence[GTFrame], tables: Sequence[SignalTable], config: Gr
             def stat(idx: np.ndarray, a=a[both], b=b[both], y=labels[both]) -> float | None:
                 x, z = average_precision(a[idx], y[idx]), average_precision(b[idx], y[idx])
                 return None if x is None or z is None else x - z
-            comparisons.append({"a": left, "b": right, "average_precision_a": ap_a, "average_precision_b": ap_b, "delta": delta,
-                                "delta_ci": _bootstrap(arrays["group"][both], stat, config.bootstrap), "n_regions": int(both.sum())})
+            entry = {"a": left, "b": right, "average_precision_a": ap_a, "average_precision_b": ap_b, "delta": delta,
+                     "delta_ci": _bootstrap(arrays["group"][both], stat, config.bootstrap), "n_regions": int(both.sum())}
+            if delta is None:
+                why = []
+                for name, ap in ((left, ap_a), (right, ap_b)):
+                    if ap is None:
+                        own = signals.get(name, {})
+                        why.append(f"{name}: {own.get('average_precision_reason') or own.get('reason') or 'AP undefined'}")
+                entry["reason"] = "; ".join(why) or "AP undefined"
+            comparisons.append(entry)
         per_threshold[f"{tau:g}"] = {"tau": tau, "n_positive": int(labels.sum()), "signals": signals, "comparisons": comparisons}
     families = sorted(set(arrays["family"].tolist()))
     return {
