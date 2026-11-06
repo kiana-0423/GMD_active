@@ -49,6 +49,68 @@ running CP2K jobs keep going detached, and the next invocation picks them up. Th
 also one script:
 `python examples/alkane_hotspot_demo/run_fidelity_gate.py --config configs/demos/alkane_hotspots/smoke.yaml`.
 
+## Reproducing the pilot and launching the campaign
+
+Run everything from the GMD_active root, in the `gmd-active` environment. CP2K jobs run one at a
+time; concurrency gave no throughput on the development machine. Each line is resumable.
+
+```bash
+M=python\ -m\ tools.experiments.alkane_hotspots; D=configs/demos/alkane_hotspots
+# 1. C16 pilot: parents, labels, fragment-fidelity gate (~18 core-h of DFT, measured)
+$M generate --config $D/pilot.yaml
+$M fidelity-prepare --config $D/pilot.yaml --split calibration
+$M fidelity-run     --config $D/pilot.yaml --split calibration
+$M fidelity-report  --config $D/pilot.yaml --split calibration       # selects and freezes the setting
+$M label-full       --config $D/pilot.yaml --splits initial_train validation
+$M fidelity-prepare --config $D/pilot.yaml --split final_eval
+$M fidelity-run     --config $D/pilot.yaml --split final_eval
+$M fidelity-report  --config $D/pilot.yaml --split final_eval
+# 2. model study + closed loop, v1 (pre-registered settings) and v2 (post-hoc fixes); same labels
+for S in arms_pilot arms_pilot_v2; do
+  $M ground-truth --config $D/pilot.yaml --study $D/$S.yaml
+  $M arms-run     --config $D/pilot.yaml --study $D/$S.yaml
+  $M evaluate     --config $D/pilot.yaml --study $D/$S.yaml
+  $M figures      --config $D/pilot.yaml --study $D/$S.yaml
+  $M report       --config $D/pilot.yaml --study $D/$S.yaml --publish
+done
+for CL in closed_loop_pilot closed_loop_pilot_v2; do
+  $M closed-loop-run --config $D/pilot.yaml --closed-loop $D/$CL.yaml
+  $M frozen-eval     --config $D/pilot.yaml --closed-loop $D/$CL.yaml
+  $M recovery-demo   --config $D/pilot.yaml --closed-loop $D/$CL.yaml
+done
+# 3. diagnostics (no DFT)
+python examples/alkane_hotspot_demo/initial_model_diagnostic.py --study $D/arms_pilot.yaml
+python examples/alkane_hotspot_demo/md_stability_check.py --closed-loop $D/closed_loop_pilot.yaml --model NAME=PATH ...
+# 4. C32H66 size transfer of the frozen C16 setting (~2.7 h wall per full label)
+$M generate --config $D/pilot_c32.yaml
+mkdir -p ../alkane_artifacts/pilot_c32/fidelity
+cp ../alkane_artifacts/pilot/fidelity/{preregistration,selection}.json ../alkane_artifacts/pilot_c32/fidelity/
+$M label-full       --config $D/pilot_c32.yaml --splits final_eval
+$M fidelity-prepare --config $D/pilot_c32.yaml --split final_eval
+$M fidelity-run     --config $D/pilot_c32.yaml --split final_eval
+$M fidelity-report  --config $D/pilot_c32.yaml --split final_eval
+```
+
+**Main campaign, stage 1** (C16 + C32, 64 parents, 550 core-h budget, about 110 h wall serially on
+the development machine; planned, not executed):
+
+```bash
+M=python\ -m\ tools.experiments.alkane_hotspots; D=configs/demos/alkane_hotspots; C=$D/campaign.yaml; S=$D/arms_campaign.yaml
+$M generate --config $C && $M status --config $C
+$M fidelity-prepare --config $C --split calibration && $M fidelity-run --config $C --split calibration
+$M fidelity-report  --config $C --split calibration      # stop here if the gate fails (failure.json)
+$M label-full --config $C --splits initial_train validation
+$M fidelity-prepare --config $C --split final_eval && $M fidelity-run --config $C --split final_eval
+$M fidelity-report  --config $C --split final_eval
+$M ground-truth --config $C --study $S && $M arms-run --config $C --study $S
+$M evaluate --config $C --study $S && $M figures --config $C --study $S && $M report --config $C --study $S --publish
+```
+
+`campaign.yaml` sets the fidelity targets, budgets and splits; its pre-registration is written at
+the first `fidelity-prepare`. Before launching, check `status`: it estimates the remaining cost from
+measured timings. A closed-loop configuration for the campaign is not provided. Write one from
+`closed_loop_pilot_v2.yaml` once the stage-1 gate has passed.
+
 ## Systems
 
 **Structures.** Each parent is an n-alkane C(n)H(2n+2) with a fixed atom order: carbons `0..n-1`
