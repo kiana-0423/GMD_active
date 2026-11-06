@@ -1,0 +1,162 @@
+{
+  "config": {
+    "artifacts_root": "<artifacts_root>",
+    "artifacts_root_setting": "../alkane_artifacts/pilot",
+    "config_hash": "3f2fc68d1e7c45dac95785321c222c60f103c68c458611d903fcb50a7b58ab1c",
+    "name": "pilot",
+    "path": "<GMD_active>/configs/demos/alkane_hotspots/arms_pilot.yaml"
+  },
+  "executed": {
+    "figures": {
+      "figures": {
+        "receptive_field": [
+          "<artifacts_root>/model_study/figures/receptive_field.pdf",
+          "<artifacts_root>/model_study/figures/receptive_field.svg",
+          "<artifacts_root>/model_study/figures/receptive_field.png"
+        ]
+      },
+      "index": {
+        "path": "<artifacts_root>/model_study/figures/index.json",
+        "sha256": "aa6b6b24714058ab0a65e399c8db6095b7dc011bf44059c54fc7ded079e8f9b7"
+      },
+      "partial": {}
+    },
+    "receptive_field": {
+      "artifact": {
+        "path": "<artifacts_root>/model_study/receptive_field.json",
+        "sha256": "69db758fbbd7f5ba163e9240dafffbf7194af96f831db4ab32f85ee8c9d7c2e0"
+      },
+      "interpretation": "local model: structural influence radius 8.95 A (any dependence above round-off) vs nominal force receptive field 16.00 A (2 x n_blocks x local_cutoff)",
+      "measured": {
+        "delete_influence_radius_A": 2.751629342241791,
+        "delete_relative_influence_radius_A": 2.751629342241791,
+        "delete_structural_radius_A": 8.94929770129875,
+        "perturb_influence_radius_A": 2.751629342241791,
+        "perturb_relative_influence_radius_A": 2.751629342241791,
+        "perturb_structural_radius_A": 7.641195081606981,
+        "truncation_converged_radius_A": 3.0
+      },
+      "model_source": "random_init",
+      "nominal": {
+        "energy_receptive_field_A": 8.0,
+        "force_receptive_field_A": 16.0,
+        "force_receptive_field_hops": 4,
+        "force_receptive_field_local_A": 16.0,
+        "global": false,
+        "local_cutoff": 4.0,
+        "long_range_type": "none",
+        "n_blocks": 2,
+        "note": "force depends on atoms within 2 x n_blocks x local_cutoff (per-atom energy: n_blocks x local_cutoff); a long-range term is global"
+      }
+    }
+  },
+  "generated_at": "2026-11-06T16:03:42+00:00",
+  "labels": {
+    "artifact": {
+      "exists": false,
+      "path": "<artifacts_root>/labels.jsonl"
+    },
+    "by_kind_status": {},
+    "measured_cost": {
+      "fragment": {
+        "median_cpu_core_s": null,
+        "n_with_cost": 0,
+        "total_cpu_core_s": 0.0
+      },
+      "full": {
+        "median_cpu_core_s": null,
+        "n_with_cost": 0,
+        "total_cpu_core_s": 0.0
+      }
+    },
+    "n_records": 0,
+    "n_smoke_only": 0,
+    "smoke_only_note": null
+  },
+  "planned_not_executed": {
+    "arms": {
+      "committee_local": {
+        "reason": "not run",
+        "repetitions_planned": 2,
+        "rounds_planned": 2
+      },
+      "committee_signals_only": {
+        "reason": "not run",
+        "repetitions_planned": 2,
+        "rounds_planned": 2
+      },
+      "core_only_weights": {
+        "reason": "not run",
+        "repetitions_planned": 2,
+        "rounds_planned": 2
+      },
+      "no_event_buffering": {
+        "reason": "not run",
+        "repetitions_planned": 2,
+        "rounds_planned": 2
+      },
+      "no_lj": {
+        "reason": "not run",
+        "repetitions_planned": 2,
+        "rounds_planned": 2
+      },
+      "phal_full_system": {
+        "reason": "not run",
+        "repetitions_planned": 2,
+        "rounds_planned": 2
+      },
+      "phal_local": {
+        "reason": "not run",
+        "repetitions_planned": 2,
+        "rounds_planned": 2
+      },
+      "random_local": {
+        "reason": "not run",
+        "repetitions_planned": 2,
+        "rounds_planned": 2
+      }
+    },
+    "evaluation": {
+      "reason": "no evaluation.json (run `evaluate` after `arms-run`)"
+    },
+    "figures": {
+      "rendered_without_data (panels say NOT EXECUTED)": {
+        "ablations": [
+          "no executed ablation runs"
+        ],
+        "fidelity": [
+          "no fidelity results with mean_n_atoms and pooled_core_force_rmse"
+        ],
+        "fidelity_max": [
+          "no fidelity results with mean_n_atoms and max_core_force_error"
+        ],
+        "hotspots": [
+          "no ground-truth per-atom results",
+          "no ground-truth per-atom results"
+        ],
+        "learning_curves": [
+          "no executed arm runs"
+        ],
+        "learning_curves_labels": [
+          "no executed arm runs"
+        ],
+        "risk_vs_error": [
+          "no region table for committee",
+          "no region table for lj_residual",
+          "no region table for phal_staged"
+        ],
+        "timeline": [
+          "no closed-loop controller report"
+        ]
+      }
+    },
+    "ground_truth": {
+      "reason": "no ground_truth.json"
+    }
+  },
+  "rules": [
+    "costs are measured wall time x allocated cores from label records",
+    "final_eval is used for evaluation only",
+    "fragment energies never supervise parents (energy_weight 0 for capped fragments)"
+  ]
+}

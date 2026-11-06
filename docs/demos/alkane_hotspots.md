@@ -266,3 +266,252 @@ site, graph hops 2, one cap at two bonds from the nearest core atom:
 
 This shows that the gate can fail and does record the failure. Whether the pilot settings pass is
 open.
+
+## Model study (part beta): commands
+
+The model-study commands are registered on the same CLI. They take the demo configuration (`--config`,
+which supplies `artifacts_root`) and the study configuration (`--study`,
+`configs/demos/alkane_hotspots/arms_{smoke,pilot,campaign}.yaml`); without `--study` they read the
+demo configuration's `model_side` section. Outputs go to `<artifacts_root>/model_study/`.
+
+```bash
+CFG=configs/demos/alkane_hotspots/pilot.yaml; STUDY=configs/demos/alkane_hotspots/arms_pilot.yaml
+python -m tools.experiments.alkane_hotspots receptive-field --config $CFG --study $STUDY   # no DFT
+python -m tools.experiments.alkane_hotspots ground-truth    --config $CFG --study $STUDY   # needs full labels (initial_train, validation, calibration normals)
+python -m tools.experiments.alkane_hotspots arms-run        --config $CFG --study $STUDY [--only phal_local] [--repetitions 0]
+python -m tools.experiments.alkane_hotspots evaluate        --config $CFG --study $STUDY
+python -m tools.experiments.alkane_hotspots figures         --config $CFG --study $STUDY
+python -m tools.experiments.alkane_hotspots report          --config $CFG --study $STUDY [--publish]
+```
+
+`arms-run` is resumable: every (arm, repetition) keeps `model_study/arms/<arm>/rep<k>/progress.json`,
+rewritten atomically after each round, and a finished round is never redone. A progress file written
+under a different configuration is refused. Trainings with identical data, seed and training section
+share one directory under `model_study/models/`, so the round-0 model is trained once per seed and
+shared by every arm (and by `ground-truth`). `report --publish` copies `report.json`/`report.md` to
+`docs/demos/alkane_hotspots/results/model_study_<name>/` with machine paths replaced by
+`<artifacts_root>` / `<GMD_active>`.
+
+## Model receptive field
+
+`receptive_field.py` measures how the force on a core atom of the demo's GMD_SGT model depends on
+atoms that extraction removes. The model is either the configured architecture with a seeded random
+initialisation, or a trained checkpoint. GMD_SGT zero-initialises its last readout layer, so every
+force of a fresh model is exactly 0. The random-init mode therefore redraws every all-zero weight
+matrix from N(0, `reinit_zero_weights_std`) with a fixed seed and records which ones. This measures
+the architecture's dependency structure, not trained magnitudes. The model runs in float64 and eval mode.
+
+Nominal values. Message passing builds edges within `local_cutoff` r_c. After `n_blocks` T blocks a
+per-atom energy depends on atoms at most T hops, so at most T r_c, away. The force
+F_i = -dE/dr_i = -sum_j dE_j/dr_i collects every E_j that depends on r_i, so **the force depends on atoms
+up to 2T hops (2 T r_c) away**, not T r_c. Any `long_range_type` other than `none` is global within a
+structure: every atom can influence every force.
+
+Measurements on the core atom's force (eV/A):
+
+- `perturb`: displace one atom by `displacement` along a seeded random unit vector.
+- `delete`: remove one atom.
+- `truncate`: keep only the atoms within R of the core, with no caps.
+
+Each measurement gives three radii: absolute `tolerance`, `relative_tolerance` times the largest
+single-atom influence, and `structural_tolerance` (above float64 round-off, i.e. any dependence).
+
+The tests use tiny real GMD_SGT models. For a local model (T = 1, r_c = 2 A), every atom beyond
+2 T r_c changes the core force by less than 1e-12 eV/A. For an `invariant_attention` model, atoms far
+outside every cutoff still change it by more than the tolerance.
+
+## Hotspot ground truth
+
+`ground_truth.py` defines hotspots from reference DFT errors, never from PHAL scores. The definitions
+are also in the module docstring.
+
+- Atom error: e_i = |F_model,i - F_DFT,i|. Only configurations with a valid full-system label are used.
+  F_model is the primary model's force.
+- Regions: one per heavy atom. A region holds the heavy atoms within `radius_bonds` bond hops of its
+  centre (covalent graph, `bond_scale`) plus their hydrogens. Regions overlap, so they are correlated
+  samples; uncertainties are therefore bootstrapped over `split_group`, not over regions.
+- Region error E_R is the max, rms or mean of e_i. A region is positive at threshold tau when E_R >= tau
+  (`reference_thresholds`, eV/A). The region score is the max of the signal over the region.
+- Metrics:
+  - average precision (the PR-curve area) and ROC-AUC (ties count 1/2);
+  - precision, recall, FPR and F1 at the signal's YAML operating threshold;
+  - a threshold sweep;
+  - percentile-bootstrap intervals (`bootstrap.n`, `seed`).
+  
+  An undefined value (no positives or no negatives) is `null` with a reason, never 0.
+- Normal configurations:
+  - `fpr_normal` = FP/(FP+TN) over regions of `normal` configurations;
+  - `alarm_rate_normal` = the fraction of `normal` configurations with at least one flagged region,
+    whatever their error.
+- Localisation: is the max-error region at the perturbation site, and does each signal's top region
+  hit the max-error region?
+
+Signals come from GMD_active's real monitor code on the same frames:
+
+- raw values from `StagedOODMonitor` with every stage forced and lazy LJ off: `committee`,
+  `lj_residual`, `force`, `rmin` (scored as -r_min), and `delta_force` (see below);
+- `coordination` = |q_i - <q>_Z|, with the mean taken over the calibration `normal` frames;
+- monitor variants, scored as the final-stage per-atom score:
+  - `phal_staged`: the configured staged monitor;
+  - `phal_staged_no_lj`: the same with LJ disabled;
+  - `committee_monitor`: the committee term alone;
+  - `committee_plus_lj`: the committee and LJ terms.
+
+Running statistics are calibrated once on the calibration `normal` frames, and every evaluated frame
+starts from that state.
+
+The LJ monitor is evaluated separately:
+
+- its normal-configuration FPR and alarm rate;
+- AP(`committee_plus_lj`) - AP(`committee_monitor`), its incremental value beyond the committee;
+- AP(`phal_staged`) - AP(`phal_staged_no_lj`), LJ enabled vs disabled.
+
+Each difference comes with a bootstrap interval. The report states an interval containing 0 as "no
+detectable difference".
+
+Temporal metrics (`delta_force`, `displacement`, `delta_q`) need an MD trajectory. Using the
+unperturbed base conformation as the previous frame would make `displacement` equal to the applied
+perturbation, which hands the monitor the answer. So `temporal_reference: none` is the default and
+those signals are reported as unavailable. In the synthetic known-answer test a committee that tracks
+the error gets AP = 1, while the LJ residual of non-LJ forces is uninformative and fires on normal
+configurations.
+
+## Acquisition arms
+
+`arms.py` runs four arms on one fixed, recorded candidate pool.
+
+The pool has one candidate per `stride`-th carbon of every configuration in `pool.splits`. It never
+includes final_eval; the pilot uses `calibration`, and `validation` stays for early stopping. With
+`pool.source: gate_selection` each candidate is built by alpha's own `build_fragment` with the
+setting frozen by the fidelity gate (`fidelity/selection.json`), so pool fragments are byte-identical
+to alpha's label requests and share their label cache. A fragment label belongs to a candidate when its
+region has the same parent, the same core atoms and the same non-cap atoms. The pool is written to
+`model_study/pool_<hash>.json`.
+
+| Arm | Ranking | Labels |
+|---|---|---|
+| A `random_local` | seeded random permutation (seed per repetition and round) | fragment |
+| B `committee_local` | max committee force deviation over the candidate's core | fragment |
+| C `phal_local` | each split group's configurations streamed through `OnlineMonitorDriver` (staged physical + committee signals, event buffering, hotspot clustering); per hotspot group the best-scoring candidate whose core holds a hotspot atom; `CandidateSelector` diversity filter (also against labeled fingerprints) and per-event budget | fragment, only from a gate-approved setting with status `valid` |
+| D `phal_full_system` | C's acquisition | the selected candidate's whole parent (one charge per parent) |
+
+Shared by every arm:
+
+- the model architecture and training section (`training`);
+- the initial data: full-system labels of `initial_splits`;
+- the validation data;
+- the label records;
+- the evaluation protocol;
+- the per-round budget and the per-repetition seed.
+
+Supervision (`training.py`):
+
+- force weights per role, from `training.force_weights`;
+- energy weight 0 for every capped fragment, with the reason written into the dataset manifest;
+- full-system labels carry the molecule's own energy, weighted by `energy.full_system_weight`.
+
+A test checks, through GMD_SGT's own reader, collate, model and loss, that perturbing zero-weight
+targets (cap and boundary forces, the capped fragment's energy) changes neither the loss nor any
+parameter gradient, while perturbing a core target does.
+
+Ablations are variants of C:
+
+- `physical_signals: false`: committee only, every frame escalated;
+- `lj: false`;
+- `event_buffering: false`: every triggered frame is its own event;
+- `force_weights`: other core, buffer or boundary weights;
+- `extraction`: another fragment setting, for example another buffer size. A setting that did not
+  pass the gate is refused unless `allow_unvalidated_overrides` is set.
+
+The following raise a configuration error:
+
+- PHAL-only options on A or B;
+- weight or extraction overrides on D;
+- `physical_signals: false` combined with `lj: false`;
+- temporal metrics on static pools;
+- a local arm without a passed gate;
+- a final_eval pool;
+- repeated seeds.
+
+Repetitions use distinct seeds (`arms.seeds`), and their counts are set per profile: smoke 1x1,
+pilot 2 repetitions x 2 rounds, campaign 5 x 5.
+
+## Cost accounting
+
+Every acquisition is charged the label record's measured `cost.cpu_core_s`: wall time times allocated
+cores, from the labeling service's attempt records. Nothing is estimated from atom or call counts.
+
+- A calculation acquired by several arms is one physical calculation. It is charged to each arm at its
+  measured value. Within one arm it is charged once.
+- `invalid` and `failed` labels that consumed CPU time are charged but never trained on.
+- A launch failure without measured time is skipped and recorded.
+- `budget_skipped` labels are skipped.
+
+The per-round budget is `budget.cpu_core_s` and/or `budget.labels`, and both are reported.
+`overshoot: allow` keeps the calculation that crosses the budget and records the overshoot.
+`forbid` skips a recorded label whose measured cost would exceed the budget.
+
+Evaluation (`evaluation.py`) is computed on final_eval full-DFT configurations:
+
+- force RMSE;
+- the 95th and 99th percentile and the maximum of the per-atom force error;
+- the RMSE over the perturbation-site region;
+- a per-family breakdown.
+
+Accuracy at a fixed budget and cost to reach a target are interpolated linearly between the two
+measured points that bracket the value. Outside the measured range the result is `null` with a
+reason; nothing is extrapolated. Variation is reported across repetitions (seeds), never across atoms
+or frames.
+
+## Figures
+
+`figures.py` (matplotlib) writes PDF, SVG and PNG to `model_study/figures/`, and `index.json` records
+each figure's sources (with sha256) and whether every panel had data:
+
+- receptive field: core-force change vs distance, and vs truncation radius, with the nominal radii;
+- system and hotspot view: the chain projected on its principal axes, coloured by reference error and
+  by a signal;
+- region risk vs region error;
+- core-force error vs fragment size, from alpha's `fidelity/report_calibration.json`;
+- accuracy vs cumulative measured DFT cost per arm, and vs label count;
+- ablations: the final metric per variant, with every repetition shown;
+- closed-loop timeline: segments coloured by model, event triggers, and promotions or rollbacks.
+  The input is the controller's `summarize` JSON, optionally with `event_steps`.
+
+A panel without data says "NOT EXECUTED / no data" and why. When any label record is smoke-only, every
+data figure carries a red "SMOKE-ONLY" stamp.
+
+## Results (executed)
+
+`report` writes `report.json` and `report.md`. They separate *executed* sections, each with its
+artifact path, sha256, config hash, label counts, measured costs and the numbers read from it, from
+*planned / not executed* sections. Published copies are in `results/model_study_{smoke,pilot}/`.
+
+Executed on 2026-11-07:
+
+- **Receptive field, pilot architecture, real pilot structure, random init (no DFT).** The model is a
+  local GMD_SGT with n_blocks = 2 and r_c = 4 A, measured on C32-b00-normal0 (98 atoms, core = the
+  central carbon). Artifact: `<artifacts_root>/model_study/receptive_field.json`, sha256 `69db758f…`,
+  study config hash `3f2fc68d…`.
+  - The nominal force receptive field is 16 A; the per-atom energy's is 8 A.
+  - Measured: a dependence above round-off reaches at most 8.95 A (delete) and 7.64 A (perturb).
+    Influences of at least 1e-4 eV/A reach 2.75 A, and truncating at R >= 3 A changes the core force
+    by less than 1e-4 eV/A.
+  - These magnitudes belong to a randomly initialised model. They show that the measurement works on
+    the real geometry, not how a trained model behaves; the trained-checkpoint measurement is planned.
+- **Smoke artifacts:** figures and report only. All three smoke labels are smoke-only, and the report
+  says so. No model-study number comes from them.
+
+## Planned
+
+Planned, not executed (no numbers exist):
+
+- the ground truth on pilot labels;
+- every acquisition arm and ablation (pilot: 2 repetitions x 2 rounds; campaign: 5 x 5);
+- the receptive field of a trained checkpoint;
+- the budget analysis;
+- the closed-loop timeline.
+
+All of them need the pilot full-system labels and a passed fidelity gate (`fidelity/selection.json`).
+The smoke gate failed (see above). If the pilot gate also fails, the local arms A–C cannot run as
+validated arms, and only D and the ground truth remain.

@@ -1,0 +1,143 @@
+{
+  "config": {
+    "artifacts_root": "<artifacts_root>",
+    "artifacts_root_setting": "../alkane_artifacts/smoke",
+    "config_hash": "8486bdbbcfd6b98367a93ae129e79ce109c12281edda8f87007b3f5060d77ddd",
+    "name": "smoke",
+    "path": "<GMD_active>/configs/demos/alkane_hotspots/arms_smoke.yaml"
+  },
+  "executed": {
+    "figures": {
+      "figures": {
+        "fidelity": [
+          "<artifacts_root>/model_study/figures/fidelity.pdf",
+          "<artifacts_root>/model_study/figures/fidelity.svg",
+          "<artifacts_root>/model_study/figures/fidelity.png"
+        ],
+        "fidelity_max": [
+          "<artifacts_root>/model_study/figures/fidelity_max.pdf",
+          "<artifacts_root>/model_study/figures/fidelity_max.svg",
+          "<artifacts_root>/model_study/figures/fidelity_max.png"
+        ]
+      },
+      "index": {
+        "path": "<artifacts_root>/model_study/figures/index.json",
+        "sha256": "6a80c3bdd5c95e3ea59bc20a4f28b8e1b29c963e51b4be5663cd3e22e52440a0"
+      },
+      "partial": {}
+    }
+  },
+  "generated_at": "2026-11-06T16:03:43+00:00",
+  "labels": {
+    "artifact": {
+      "path": "<artifacts_root>/labels.jsonl",
+      "sha256": "bc65bff79d106be8b918b00c5da6e6ef13050f2df597294a22a5be816f25cd0d"
+    },
+    "by_kind_status": {
+      "fragment/valid": 1,
+      "full/valid": 2
+    },
+    "measured_cost": {
+      "fragment": {
+        "median_cpu_core_s": 245.8698592185974,
+        "n_with_cost": 1,
+        "total_cpu_core_s": 245.8698592185974
+      },
+      "full": {
+        "median_cpu_core_s": 66.38507127761841,
+        "n_with_cost": 2,
+        "total_cpu_core_s": 132.77014255523682
+      }
+    },
+    "n_records": 3,
+    "n_smoke_only": 3,
+    "smoke_only_note": "smoke-only labels (reduced CP2K settings) are pipeline checks; their numbers are not results"
+  },
+  "planned_not_executed": {
+    "arms": {
+      "committee_local": {
+        "reason": "not run",
+        "repetitions_planned": 1,
+        "rounds_planned": 1
+      },
+      "committee_signals_only": {
+        "reason": "not run",
+        "repetitions_planned": 1,
+        "rounds_planned": 1
+      },
+      "core_only_weights": {
+        "reason": "not run",
+        "repetitions_planned": 1,
+        "rounds_planned": 1
+      },
+      "no_event_buffering": {
+        "reason": "not run",
+        "repetitions_planned": 1,
+        "rounds_planned": 1
+      },
+      "no_lj": {
+        "reason": "not run",
+        "repetitions_planned": 1,
+        "rounds_planned": 1
+      },
+      "phal_full_system": {
+        "reason": "not run",
+        "repetitions_planned": 1,
+        "rounds_planned": 1
+      },
+      "phal_local": {
+        "reason": "not run",
+        "repetitions_planned": 1,
+        "rounds_planned": 1
+      },
+      "random_local": {
+        "reason": "not run",
+        "repetitions_planned": 1,
+        "rounds_planned": 1
+      }
+    },
+    "evaluation": {
+      "reason": "no evaluation.json (run `evaluate` after `arms-run`)"
+    },
+    "figures": {
+      "rendered_without_data (panels say NOT EXECUTED)": {
+        "ablations": [
+          "no executed ablation runs"
+        ],
+        "hotspots": [
+          "no ground-truth per-atom results",
+          "no ground-truth per-atom results"
+        ],
+        "learning_curves": [
+          "no executed arm runs"
+        ],
+        "learning_curves_labels": [
+          "no executed arm runs"
+        ],
+        "receptive_field": [
+          "no receptive-field result",
+          "no receptive-field result"
+        ],
+        "risk_vs_error": [
+          "no region table for committee",
+          "no region table for lj_residual",
+          "no region table for phal_staged"
+        ],
+        "timeline": [
+          "no closed-loop controller report"
+        ]
+      }
+    },
+    "ground_truth": {
+      "reason": "no ground_truth.json"
+    },
+    "receptive_field": {
+      "reason": "no receptive_field.json"
+    }
+  },
+  "rules": [
+    "costs are measured wall time x allocated cores from label records",
+    "final_eval is used for evaluation only",
+    "fragment energies never supervise parents (energy_weight 0 for capped fragments)"
+  ]
+}
