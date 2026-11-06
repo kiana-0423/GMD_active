@@ -108,7 +108,7 @@ def test_commands_register_on_alphas_cli() -> None:
     assert args.only == ["phal_local"] and args.repetitions == [0]
 
 
-@pytest.mark.parametrize("profile", ["smoke", "pilot", "campaign"])
+@pytest.mark.parametrize("profile", ["smoke", "pilot", "pilot_v2", "campaign"])
 def test_committed_study_configs_validate(profile: str, tmp_path: Path) -> None:
     from .beta_synthetic import REPO_ROOT
 

@@ -380,6 +380,18 @@ def test_closed_loop_configs_validate(name: str) -> None:
     assert "final_eval" not in cl.config.initial_model.train_splits + cl.config.initial_model.validation_splits
 
 
+def test_pilot_v2_closed_loop_differs_from_v1_only_in_study_and_identity() -> None:
+    import yaml
+
+    v1 = yaml.safe_load((CONFIGS / "closed_loop_pilot.yaml").read_text())
+    v2 = yaml.safe_load((CONFIGS / "closed_loop_pilot_v2.yaml").read_text())
+    changed = {key for key in set(v1) | set(v2) if v1.get(key) != v2.get(key)}
+    assert changed == {"name", "study", "output_subdir", "loop"}
+    assert {k for k in v1["loop"] if v1["loop"][k] != v2["loop"][k]} == {"run_id"}
+    cl = load_closed_loop(CONFIGS / "closed_loop_pilot_v2.yaml")
+    assert cl.out_dir.name == "pilot_v2" and cl.beta.config.training.train["batch_size"] == 1
+
+
 def test_md_parent_never_from_validation_or_final_eval() -> None:
     with pytest.raises(ValueError, match="allowed_splits"):
         MDSection(allowed_splits=["validation"])

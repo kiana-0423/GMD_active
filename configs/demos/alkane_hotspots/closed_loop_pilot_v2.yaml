@@ -1,0 +1,111 @@
+# Closed loop, PILOT v2 (post-hoc, not pre-registered): identical to closed_loop_pilot.yaml except that the
+# study is arms_pilot_v2.yaml, whose training section gives the initial model enough optimiser steps (the v1
+# initial model dissociated C16H34 after ~20-70 MD steps, so no event could be labeled), and the output and
+# run id differ so the v1 artifacts stay intact.
+# Alkane hotspot demonstration, part gamma: the real bounded closed loop + recovery on the C16 PILOT.
+# Needs: valid full-system labels of the initial_train and validation splits (label-full), and the fidelity
+# decision (fidelity-report --split calibration). One CP2K job at a time (exclusive_cp2k).
+#   CFG=configs/demos/alkane_hotspots/pilot.yaml; CL=configs/demos/alkane_hotspots/closed_loop_pilot_v2.yaml
+#   python -m tools.experiments.alkane_hotspots closed-loop-run --config $CFG --closed-loop $CL
+#   python -m tools.experiments.alkane_hotspots frozen-eval     --config $CFG --closed-loop $CL
+#   python -m tools.experiments.alkane_hotspots recovery-demo   --config $CFG --closed-loop $CL
+# Artifacts: <artifacts_root of pilot.yaml>/closed_loop_v2/pilot_v2 (outside git). Gate thresholds are fixed here before running.
+name: pilot_v2
+description: Two bounded closed-loop cycles on a C16H34 initial_train parent with the pilot model and pilot CP2K settings.
+base_config: pilot.yaml
+study: arms_pilot_v2.yaml            # beta's monitor configuration and training section (architecture, weights, energy policy)
+output_subdir: closed_loop_v2
+exclusive_cp2k: true              # refuse to launch CP2K while any other CP2K process is running
+
+md:
+  executable: ../GMD/build-torch/gmd
+  parent: {split: initial_train, family: normal, index: 0}   # C16-b01-normal0; never validation/final_eval
+  allowed_splits: [initial_train]
+  directives: {time_step: 0.5, velocity: 300.0, velocity_init: random, velocity_seed: 7, thermostat: nose_hoover,
+               thermostat_tau: 100.0, remove_com_velocity: "true"}
+  frame_interval: 10
+  control_poll_interval: 1
+  segment_timeout_s: 3600.0
+  env: {OMP_NUM_THREADS: "1"}
+  smoke_steps: 5
+
+md_box:
+  margin: 4.0                     # A beyond the nominal force receptive field 2 x 2 x 4 A = 16 A
+  stretch_allowance: 1.0
+  box_length: null                # derived: chain diameter + 16 + 4 + 1 A, rounded up to 0.5 A
+  frame_check: true
+
+loop:
+  run_id: alkane-cl-pilot-v2
+  cycles: 2
+  segment_steps: 2000             # 1 ps at 0.5 fs per cycle
+  segments_per_cycle: 1
+  labels_per_cycle: 2
+  max_per_event: 1
+  diversity_threshold: 0.1
+  min_score: null
+  min_new_samples: 1
+  max_pending_tasks: 4
+  poll_interval_s: 10.0
+  max_poll_wait_s: 900.0
+
+budget:
+  max_cpu_core_hours: 6.0         # measured CP2K CPU core-hours of closed-loop labels (a full C16 label measured ~1.1 core-h)
+
+labeling:
+  mode: auto                      # local fragments only with alpha's passed, frozen fidelity setting; else full-system labels
+
+label_geometry:                   # an event geometry is labeled only if it is still the intact alkane
+  require_parent_topology: true
+  covalent_scale: 1.3             # C-H up to 1.39 A, C-C up to 1.98 A: thermal stretches pass, dissociation does not
+  min_distance: 0.7
+
+initial_model:
+  train_splits: [initial_train]
+  validation_splits: [validation]
+  seed: 11
+  train_overrides: {}             # the study's training budget unchanged
+
+finetune:
+  train: {n_epochs: 60, warmup_steps: 5, patience: 15, lr: 1.0e-3}
+  seed: 101
+
+promotion:                        # evaluated on the validation split (full DFT labels); fixed before the run
+  max_force_rmse: 1.0             # eV/A, absolute sanity bound
+  max_relative_regression: 0.05   # the new model may not be more than 5 % worse than the active one on validation
+  require_validation_samples: 1
+  require_export_validation: true
+  export_max_force_deviation: 1.0e-4
+  require_engine_smoke_test: true
+
+monitor_overrides: {}             # beta's monitor configuration unchanged
+events: {pre_trigger_frames: 1, post_trigger_frames: 1, cooldown_steps: 200}
+hotspots: null                    # beta's arms.hotspots (merge_radius 3 A)
+
+frozen_eval:
+  seeds: [1, 2, 3]
+  steps: 4000                     # 2 ps
+  frame_interval: 20
+  discard_steps: 1000
+  dihedral_bins: 36
+  gauche_window_deg: 120.0
+
+recovery:
+  run_id: alkane-recovery-pilot
+  cycles: 1
+  labels_per_cycle: 1
+  promotion:                      # recovery mechanics: promoted unless export/smoke fail; the strict audit is the quality gate
+    max_force_rmse: 10.0
+    max_relative_regression: 10.0
+    require_export_validation: true
+    require_engine_smoke_test: true
+  strict_promotion:
+    max_force_rmse: 0.05          # eV/A on validation
+    max_relative_regression: 0.0
+    require_export_validation: true
+    require_engine_smoke_test: true
+  kill_after: submitted
+  kill_timeout_s: 3600.0
+  restart_steps: 200
+  cancellation_check: true
+  cancellation_wait_s: 300.0
