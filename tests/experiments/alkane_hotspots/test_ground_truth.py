@@ -137,3 +137,24 @@ def test_config_guards() -> None:
         GroundTruthConfig.model_validate({"signals": {"nonsense": {"threshold": 1.0}}})
     with pytest.raises(ValueError, match="unknown signal"):
         GroundTruthConfig.model_validate({"monitor_variants": {}, "comparisons": [["committee_plus_lj", "committee"]]})
+
+
+def test_all_positive_regions_give_undefined_ap_not_one() -> None:
+    # a weak model exceeds tau everywhere: any ranking (even a constant score) would get AP = 1
+    assert average_precision(np.array([0.3, 0.1, 0.2]), np.ones(3, bool)) is None
+    assert average_precision(np.zeros(3), np.ones(3, bool)) is None
+    calibration, evaluation = _frames()
+    report, _ = run_ground_truth(evaluation, calibration, MONITOR, _config(reference_thresholds=[0.0]))
+    committee = report["per_threshold"]["0"]["signals"]["committee"]
+    assert committee["average_precision"] is None
+    assert committee["average_precision_reason"].startswith("no negative regions")
+    assert all(c["delta"] is None for c in report["per_threshold"]["0"]["comparisons"])
+
+
+def test_bootstrap_over_a_single_group_reports_no_interval() -> None:
+    from tools.experiments.alkane_hotspots.ground_truth import BootstrapConfig, _bootstrap
+
+    result = _bootstrap(np.array(["g0"] * 5), lambda idx: float(len(idx)), BootstrapConfig(n=20, seed=1))
+    assert result["low"] is None and result["high"] is None and result["n_groups"] == 1 and "reason" in result
+    two = _bootstrap(np.array(["g0", "g0", "g1"]), lambda idx: float(len(idx)), BootstrapConfig(n=20, seed=1))
+    assert two["low"] is not None and two["n_groups"] == 2

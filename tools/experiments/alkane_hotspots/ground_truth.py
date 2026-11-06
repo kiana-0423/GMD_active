@@ -532,9 +532,15 @@ def _ranking_steps(scores: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, 
 
 
 def average_precision(scores: np.ndarray, labels: np.ndarray) -> float | None:
+    """Area under the precision-recall step curve; ``None`` without positives *or* without negatives.
+
+    With no negative region every ranking has precision 1, so AP would be 1 for any signal (even a
+    constant one): it carries no information and is reported as undefined, like ROC-AUC.
+    """
+
     labels = np.asarray(labels, dtype=bool)
     n_pos = int(labels.sum())
-    if n_pos == 0 or len(scores) == 0:
+    if n_pos == 0 or n_pos == len(labels) or len(scores) == 0:
         return None
     _, tp, fp = _ranking_steps(np.asarray(scores, dtype=float), labels)
     precision = tp / (tp + fp)
@@ -580,6 +586,9 @@ def _bootstrap(groups: np.ndarray, statistic: Callable[[np.ndarray], float | Non
     if config.n == 0:
         return None
     unique = np.unique(groups)
+    if len(unique) < 2:
+        return {"n_defined": 0, "n_resamples": config.n, "n_groups": int(len(unique)), "low": None, "high": None,
+                "reason": "fewer than 2 split groups: resampling groups cannot estimate an interval"}
     index_by_group = {g: np.flatnonzero(groups == g) for g in unique}
     rng = np.random.default_rng(config.seed)
     values = []
@@ -656,7 +665,8 @@ def evaluate_signal(scores: np.ndarray, labels: np.ndarray, family: np.ndarray, 
     result["prevalence"] = float(y.mean())
     result["roc_auc"] = roc_auc(s, y)
     if ap is None:
-        result["average_precision_reason"] = "no positive regions"
+        result["average_precision_reason"] = ("no positive regions" if not y.any() else
+                                              "no negative regions (every region error >= tau): AP is trivially 1 and uninformative")
     if result["roc_auc"] is None:
         result["roc_auc_reason"] = "needs positive and negative regions"
     result["average_precision_ci"] = _bootstrap(grp, lambda idx: average_precision(s[idx], y[idx]), config.bootstrap)
