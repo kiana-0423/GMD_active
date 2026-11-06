@@ -135,6 +135,7 @@ def read_event(event_dir: str | Path) -> EventRecord:
         truncation_reason=payload.get("truncation_reason"),
         model_version=payload.get("model_version"),
         metadata=dict(payload.get("metadata") or {}),
+        pre_frames_requested=None if payload.get("pre_frames_requested") is None else int(payload["pre_frames_requested"]),
     )
 
 

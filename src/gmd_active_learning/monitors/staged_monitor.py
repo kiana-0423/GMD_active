@@ -279,6 +279,7 @@ class StagedOODMonitor:
             trigger_reasons=list(reasons),
             action=action,
             metadata=metadata,
+            metric_scores={name: np.asarray(values, dtype=float) for name, values in evaluation.metric_scores.items()},
         )
         evaluation.result = result
         evaluation.hotspot_indices = list(hotspot_indices)

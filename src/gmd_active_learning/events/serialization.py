@@ -92,6 +92,7 @@ def event_from_state(state: dict[str, Any]) -> EventRecord:
         truncation_reason=state.get("truncation_reason"),
         model_version=state.get("model_version"),
         metadata=dict(state.get("metadata") or {}),
+        pre_frames_requested=None if state.get("pre_frames_requested") is None else int(state["pre_frames_requested"]),
     )
 
 

@@ -261,6 +261,7 @@ class EventBuffer:
             trigger_frame=pending.trigger_frame,
             post_frames=list(pending.post_frames),
             post_frames_requested=requested,
+            pre_frames_requested=self.config.pre_trigger_frames,
             complete=complete,
             hotspot_atom_ids=list(pending.hotspot_atom_ids),
             trigger_reasons=list(pending.trigger_reasons),
