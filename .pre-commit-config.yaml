@@ -1,0 +1,31 @@
+# Ported from PHAL (.pre-commit-config.yaml) at 96263b6; MIT License, see NOTICE.
+# Install: pip install pre-commit && pre-commit install. Same lint gate as CI, plus generated-doc checks.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--select, "E9,F63,F7,F82"]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+        exclude: ^tests/fixtures/
+      - id: end-of-file-fixer
+        exclude: ^(tests/fixtures/|examples/data/|docs/migration/phal_release_baseline/)
+      - id: trailing-whitespace
+        exclude: ^(tests/fixtures/|examples/data/|docs/migration/phal_release_baseline/)
+  - repo: local
+    hooks:
+      - id: config-reference
+        name: docs/config-reference.md is up to date
+        entry: env PYTHONPATH=src python tools/docs/render_config_reference.py --check
+        language: system
+        pass_filenames: false
+        files: ^(src/gmd_active_learning/.*config.*\.py|configs/sections/.*\.yaml|tools/docs/.*)$
+      - id: migration-ledger
+        name: migration ledger status is applied
+        entry: env PYTHONPATH=src python tools/migration/apply_status.py --check
+        language: system
+        pass_filenames: false
+        files: ^docs/migration/

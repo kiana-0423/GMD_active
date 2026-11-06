@@ -1,0 +1,41 @@
+# Ported from PHAL (.github/workflows/tests.yml) at 96263b6; MIT License, see NOTICE.
+# Offline suite on Python 3.10-3.12. No external program (GMD, GMD_SGT, CP2K, docker, PBS) is available on
+# the runners: tests needing one skip with a reason, and integration/cp2k markers are excluded.
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install package (CPU torch)
+        run: |
+          python -m pip install -U pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch
+          python -m pip install -e ".[dev]"
+          python -m pip install "ruff==0.6.9"
+      - name: Lint (syntax errors and undefined names)
+        run: python -m ruff check --select E9,F63,F7,F82 src tests examples tools
+      - name: Type check (advisory until a mypy baseline exists)
+        continue-on-error: true
+        run: |
+          python -m pip install "mypy==1.10.1" types-PyYAML
+          python -m mypy --ignore-missing-imports src/gmd_active_learning/contracts src/gmd_active_learning/utils
+      - name: Offline test suite
+        run: bash tools/test/run_all_offline.sh -ra
+      - name: Generated docs are up to date
+        run: python tools/docs/render_config_reference.py --check
+      - name: Monitor performance smoke benchmark (warn only)
+        run: python tools/benchmarks/benchmark_monitor.py --quick --json-output benchmark.json --warn-only
