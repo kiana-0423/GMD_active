@@ -1,0 +1,459 @@
+# Migration status: operations, containers, documentation, examples, legacy import, harness.
+# Test paths are relative to the GMD_active root. Docker, Apptainer, PBS and Miyabi are not available
+# here: no image was built, pushed or converted and no PBS job was submitted (see docs/known-issues.md).
+
+- id: OPS-001
+  status: verified
+  implementation: [tools/audit/audit_artifacts.py]
+  evidence:
+    - tests/tools/test_audit_artifacts.py::test_json_is_written_even_without_findings
+    - tests/tools/test_audit_artifacts.py::test_tampered_model_file_is_an_integrity_failure
+    - tests/tools/test_audit_artifacts.py::test_tampered_dataset_version_is_an_integrity_failure
+    - tests/tools/test_audit_artifacts.py::test_modified_engine_output_is_an_integrity_failure
+    - tests/tools/test_audit_artifacts.py::test_extxyz_without_pbc_key_is_flagged_as_implicitly_periodic
+  findings: []
+  notes: "PHAL checks ported (multiplicity parity, close contacts with MIC, unconverged SCF, mm/sm/ms
+    dump boundaries, lj_fit_count == 0) with PHAL's test cases. New 'integrity' severity re-verifies
+    model registry checksums, dataset version tree_sha256 and labeling task.json/result.json; exit 1 on
+    structure/label/integrity. --json is always written (PHAL returned early without findings).
+    Element table from ase.data (PHAL ~45 elements). GMD-output counterpart of the boundary check:
+    extxyz Lattice without pbc= (readers assume periodic) and periodic along a zero-length vector."
+
+- id: OPS-002
+  status: verified
+  implementation: [tools/smoke/sgt_runtime_smoke.py]
+  evidence:
+    - tests/tools/test_smoke.py::test_runtime_smoke_passes_on_cpu
+    - tests/tools/test_smoke.py::test_unsupported_or_unavailable_device_exits_3
+    - tests/tools/test_smoke.py::test_conda_environment_guard_exits_4
+    - tests/tools/test_smoke.py::test_missing_torch_or_gmd_sgt_exits_2
+  findings: []
+  notes: "Replaces the Allegro/NequIP smoke with torch/CUDA/MPS/GMD_SGT (>= 0.4) status and a tensor
+    check; PHAL's exit-code contract (0/1/2/3/4) kept; env GMD_SGT_SMOKE_DEVICE, GMD_SGT_REQUIRED_CONDA_ENV,
+    GMD_SGT_PATH; library stdout is redirected so --json is clean. Shown on CPU and MPS (macOS); not on CUDA."
+
+- id: OPS-003
+  status: verified
+  implementation: [tools/smoke/sgt_tiny_h2o/run_chain.py]
+  evidence:
+    - tests/tools/test_smoke.py::test_tiny_h2o_chain_trains_exports_and_infers_on_cpu
+  findings: []
+  notes: "Synthetic H2O set (tests/fixtures/datasets/make_tiny_h2o.py) -> tiny GMD_SGT training through the
+    adapter -> TorchScript export -> finite inference with export and checkpoint, which must agree to 1e-3
+    eV/A; about 4 s on CPU (acceptance < 90 s). Inference exit codes 4/5/6/7 as PHAL. No conda-env
+    hard-coding (PHAL: allegro-mac). Toy data, no accuracy claim. Needs GMD_SGT ($GMD_SGT_PATH or ../GMD_SGT)."
+
+- id: OPS-004
+  status: migrated
+  implementation: [tools/hpc/pbs/validate_gmd_probe.pbs, tools/hpc/pbs/validate_sgt_train_probe.pbs, tools/hpc/pbs/validate_cp2k_probe.pbs, tools/hpc/pbs/diagnose_hpcx.pbs, tools/hpc/pbs/submit.sh]
+  evidence:
+    - tests/tools/test_containers.py::test_pbs_job_summary_hashes_the_image_at_job_time
+    - tests/tools/test_containers.py::test_pbs_templates_compute_the_sif_digest_and_hard_code_nothing
+    - tests/tools/test_containers.py::test_pbs_scripts_pass_bash_syntax_check
+    - tests/tools/test_containers.py::test_submit_takes_queue_and_group_from_variables
+  findings: [F-32]
+  notes: "GMD, GMD_SGT train and CP2K probe jobs plus the HPC-X UCX/UCC diagnosis, apptainer exec --cleanenv
+    --nv with a /runtime bind; queue/group are variables. F-32 part fixed: the summary JSON hashes the SIF at
+    job time (PHAL wrote a hard-coded sha256). NOT run on Miyabi (no access): the jobs ran here only with stub
+    module/apptainer, so the acceptance (real PBS run) is not demonstrated."
+
+- id: OPS-005
+  status: migrated
+  implementation: [NOTICE, docs/operations.md]
+  evidence:
+    - tests/architecture/test_import_all.py::test_only_declared_modules_need_torch_or_gmd_sgt
+    - tests/tools/test_ci_config.py::test_runner_excludes_external_markers_and_they_are_declared
+  findings: []
+  notes: "pyproject.toml is lead-owned: it already declares the runtime deps, the gmd-al script and markers
+    integration/cp2k/slow, and NOTICE carries PHAL's MIT notice (ported files have the header). Needed
+    changes (listed in docs/operations.md, not made here): ruff/mypy in the dev extra with a baseline
+    config, a docs extra (mkdocs, mkdocstrings[python]), and gmd/gmd_sgt/pbs markers only if tests adopt them."
+
+- id: OPS-006
+  status: migrated
+  implementation: [.github/workflows/tests.yml, .pre-commit-config.yaml]
+  evidence:
+    - tests/tools/test_ci_config.py::test_workflow_runs_the_offline_suite_on_python_310_to_312
+    - tests/tools/test_ci_config.py::test_precommit_config_parses_and_uses_the_ci_lint_gate
+  findings: []
+  notes: "Matrix 3.10-3.12: CPU torch, pip install -e .[dev], ruff gate E9/F63/F7/F82 (syntax errors and
+    undefined names only, no project ruff config exists), advisory mypy on contracts/utils (continue-on-error
+    until a baseline exists), tools/test/run_all_offline.sh, config-reference freshness, warn-only benchmark.
+    Never runs GMD/GMD_SGT/CP2K/containers. Workflow not executed here (no GitHub runner); ruff and mypy
+    are not installed in this environment, so the lint steps are unverified."
+
+- id: OPS-007
+  status: migrated
+  implementation: [docs/operations.md]
+  evidence:
+    - tests/tools/test_docs.py::test_relative_links_resolve
+  findings: [F-11]
+  notes: ".gitignore is lead-owned; the needed rules are listed in docs/operations.md (runtime/ and runs/
+    trees, *.sif, *.oci.tar, scheduler logs *.o<id>/*.e<id>/slurm-*.out, benchmark outputs, example/tool
+    default output dirs). Deliberately NOT a global *.extxyz/*.pt/*.lammpstrj rule: tracked fixtures use
+    them, and PHAL's global *.extxyz rule caused F-11."
+
+- id: OPS-008
+  status: verified
+  implementation: [tools/runtime/init_runtime_tree.py, docs/runtime-data-contract.md]
+  evidence:
+    - tests/tools/test_runtime_tree.py::test_tree_is_created_under_a_configurable_root
+    - tests/tools/test_runtime_tree.py::test_runtime_contract_doc_lists_every_directory
+    - tests/tools/test_runtime_tree.py::test_overlay_validates_and_every_path_is_under_the_root
+  findings: []
+  notes: "Tree created on demand under any root instead of a tracked .gitkeep skeleton; md/traj -> md/runs
+    (GMD run dirs), models/ = GMD_SGT models, cp2k/inputs -> cp2k/tasks (labeling task dirs), plus runs/
+    for gmd-al --work-dir and cp2k_ml/predictions. The contract doc and the overlay come from the same table."
+
+- id: CTR-001
+  status: verified
+  implementation: [containers/build.sh, containers/versions.yaml, containers/Dockerfile.gmd.dockerignore, containers/Dockerfile.sgt-train.dockerignore, containers/Dockerfile.cp2k.dockerignore, containers/Dockerfile.cp2k-ml.dockerignore]
+  evidence:
+    - tests/tools/test_containers.py::test_plan_lists_base_image_tag_and_build_args
+    - tests/tools/test_containers.py::test_floating_refs_are_rejected
+    - tests/tools/test_containers.py::test_manifest_with_floating_or_inexact_pin_is_refused
+    - tests/tools/test_containers.py::test_every_version_pin_is_exact
+    - tests/tools/test_containers.py::test_dry_run_prints_docker_commands_without_docker
+    - tests/tools/test_containers.py::test_dockerfile_specific_ignore_admits_copy_sources_only
+    - tests/tools/test_containers.py::test_unpinned_base_digest_is_reported_and_push_refused
+  findings: []
+  notes: "Acceptance (plan without docker, digest-pinned bases, floating refs rejected) shown. Targets gmd,
+    sgt-train, cp2k, cp2k-probe, cp2k-ml, cp2k-ml-probe; env GMD_AL_*; --dry-run anywhere; bash 3.2 compatible.
+    Pinned GMD/GMD_SGT commits enter via git archive named contexts; push refuses a base without digest; the
+    two base digests are reused from PHAL's records, not re-queried. PHAL's dead containers/.dockerignore is
+    replaced by per-Dockerfile allowlist ignore files (BuildKit consults them). versions.yaml marks every
+    stack not_built/not_validated with null digests."
+
+- id: CTR-002
+  status: dropped
+  implementation: []
+  evidence:
+    - tests/tools/test_containers.py::test_dropped_milestone1_scaffolds_are_not_referenced
+  findings: []
+  notes: "Justification: PHAL's Dockerfile.{base,md,train} were empty Milestone-1 templates (FROM + labels, no
+    RUN/COPY) that PHAL's own docs said must not be used; the role split survives as the gmd / sgt-train /
+    cp2k images. A test confirms nothing references them."
+
+- id: CTR-003
+  status: migrated
+  implementation: [containers/Dockerfile.sgt-train, containers/scripts/validate_sgt_stack.py]
+  evidence:
+    - tests/tools/test_containers.py::test_validate_sgt_stack_runs_a_random_tiny_model_on_cpu
+    - tests/tools/test_containers.py::test_sgt_train_dockerfile_is_pinned_and_inherits_cuda_torch
+    - tests/tools/test_containers.py::test_copy_sources_exist_in_build_context
+  findings: [F-32]
+  notes: "F-32 COPY-config bug cannot recur (every COPY source checked). Validator shown on the host CPU only;
+    the arm64 image build and the GH200 run were not done. torch-cluster/torch-scatter not installed; e3nn
+    0.6.0 / ASE 3.29.0 on the NGC base unverified."
+
+- id: CTR-004
+  status: migrated
+  implementation: [containers/scripts/validate_platform.py]
+  evidence:
+    - tests/tools/test_containers.py::test_validate_platform_emits_documented_keys_on_this_host
+    - tests/tools/test_containers.py::test_validate_platform_require_cuda_fails_without_cuda
+    - tests/tools/test_containers.py::test_validate_platform_reports_a_missing_torch_instead_of_crashing
+  findings: []
+  notes: "PHAL_REQUIRE_CUDA -> GMD_AL_REQUIRE_CUDA; keys nequip/allegro/phal_import -> gmd_sgt/e3nn/gmd_sgt_import;
+    a missing torch is reported in the JSON. Run on the host only, not inside an image or on a GH200."
+
+- id: CTR-005
+  status: migrated
+  implementation: [containers/Dockerfile.gmd, containers/scripts/validate_gmd_stack.py, containers/scripts/build_gmd_probe_model.py, containers/probes/gmd]
+  evidence:
+    - tests/tools/test_containers.py::test_validate_gmd_stack_runs_0_and_10_steps_with_a_random_sgt_model
+    - tests/tools/test_containers.py::test_gmd_log_parser_gates_on_finite_energies
+    - tests/tools/test_containers.py::test_gmd_dockerfile_builds_gmd_with_torch_from_the_base_image
+  findings: []
+  notes: "GMD + LibTorch replaces LAMMPS + pair_allegro. Single-point and 10-step stages with a random untrained
+    GMD_SGT model passed with the host GMD Torch build, not inside an image or on a GH200 (acceptance not
+    shown). GMD rejects 'run 0', so the single-point stage runs one step and gates on the step-0 energy. GMD
+    evaluates TorchScript on CPU but still needs --nv because NGC LibTorch links libcuda.so.1."
+
+- id: CTR-006
+  status: migrated
+  implementation: [containers/Dockerfile.cp2k, containers/Dockerfile.cp2k-ml, containers/scripts/validate_cp2k_stack.py, containers/scripts/validate_cp2k_ml_stack.py, containers/probes/cp2k/h2.inp]
+  evidence:
+    - tests/tools/test_containers.py::test_validate_cp2k_stack_converges_h2_with_a_real_cp2k
+    - tests/tools/test_containers.py::test_validate_cp2k_stack_logic_with_a_scripted_executable
+    - tests/tools/test_containers.py::test_cp2k_dockerfile_is_a_plain_production_build_of_the_pinned_commit
+    - tests/tools/test_containers.py::test_cp2k_ml_dockerfile_is_toolchain_only
+  findings: []
+  notes: "New plain production CP2K v2026.2 image (cp2k.psmp wrapper loads the toolchain env) plus the ported
+    cp2k-ml toolchain image. The H2 single point converged with Homebrew CP2K 2026.2 on the host; never in
+    Docker or as a SIF under PBS (acceptance not shown)."
+
+- id: DOC-001
+  status: verified
+  implementation: [docs/architecture.md]
+  evidence:
+    - tests/tools/test_docs.py::test_architecture_names_existing_modules_and_protocols
+    - tests/architecture/test_layering.py::test_every_module_respects_the_layering
+    - tests/architecture/test_layering.py::test_guard_flags_synthetic_violations
+  findings: []
+  notes: "Layers, protocols, composition root workflow/assembly.py, the persistent state machine, adapters and
+    GMD/GMD_SGT/GMD_active ownership; the architecture test enforces the layering. Corrects PHAL's claims
+    (retries were in an infrastructure package, plugins.* unread, MDBackend frame reading unused)."
+
+- id: DOC-002
+  status: verified
+  implementation: [tools/docs/render_config_reference.py, docs/config-reference.md]
+  evidence:
+    - tests/tools/test_config_reference.py::test_reference_is_up_to_date
+    - tests/tools/test_config_reference.py::test_every_schema_leaf_is_documented
+    - tests/tools/test_config_reference.py::test_every_key_of_the_packaged_default_appears_in_the_reference
+  findings: []
+  notes: "Generated from config.SECTIONS (nested models as dotted keys) with type, default, constraints and
+    description; the tests fail when a schema leaf is missing or the file is stale. Descriptions come from
+    Field descriptions, else configs/sections/*.yaml inline comments; about 300 of 421 leaves (mostly
+    enabled/weight-style keys) still have no prose description; the topic pages explain semantics."
+
+- id: DOC-003
+  status: migrated
+  implementation: [docs/index.md, docs/api.md, tools/docs/mkdocs.yml]
+  evidence:
+    - tests/tools/test_docs.py::test_mkdocs_nav_points_at_existing_pages
+    - tests/tools/test_docs.py::test_api_page_targets_import
+    - tests/tools/test_docs.py::test_mkdocs_build_strict
+  findings: []
+  notes: "mkdocs config lives in tools/docs/ (mkdocs forbids a config inside docs_dir; the repo-root path is
+    lead-owned). Nav targets exist, titles are unique (PHAL had two 'Architecture' entries), every API target
+    imports. mkdocs/mkdocstrings are not installed here, so 'mkdocs build --strict' was not run (that test skips)."
+
+- id: DOC-004
+  status: verified
+  implementation: [docs/adr/004-distance-histogram-dedup.md]
+  evidence:
+    - tests/tools/test_docs.py::test_adr_004_records_the_gmd_decisions
+    - tests/active_learning/test_phal_candidate_parity.py::test_nan_case_of_phal_is_finite_and_does_not_block_later_candidates
+  findings: [F-30]
+  notes: "Ported and amended: L2 kept (cosine rejected), minimum-image pair distances by default (plain = PHAL),
+    density normalisation kept but finite (F-30), labeled-history check, recomputed selection. New ADRs 005
+    (segmented GMD control), 006 (SQLite store), 007 (deterministic IDs)."
+
+- id: DOC-005
+  status: migrated
+  implementation: [docs/containers/README.md, docs/containers/architecture.md, docs/containers/docker.md, docs/containers/apptainer.md, docs/containers/runtime.md, docs/containers/probe-procedure.md, containers/README.md]
+  evidence:
+    - tests/tools/test_containers.py::test_container_docs_describe_the_pbs_flow_honestly
+  findings: []
+  notes: "OCI -> SIF -> PBS flow for the GMD/GMD_SGT/CP2K images; PHAL's 'Slurm launch semantics' mislabel
+    corrected to PBS Pro. There is no current image evidence to link: the docs say so."
+
+- id: DOC-006
+  status: verified
+  implementation: [docs/migration/phal_release_baseline/]
+  evidence:
+    - tests/tools/test_containers.py::test_release_baseline_copies_are_byte_identical_to_phal
+    - tests/tools/test_containers.py::test_release_baseline_archive_is_documented_as_historical
+  findings: []
+  notes: "milestone3-baseline.md, baseline.yaml and manifest.json archived verbatim (byte-identity test skips
+    once ref/ is removed) with a README marking them historical LAMMPS/Allegro provenance whose evidence was
+    git-ignored. GMD_active has no own release baseline yet; the README prescribes the same structure."
+
+- id: DOC-007
+  status: verified
+  implementation: [README.md, docs/contributing.md, CHANGELOG.md]
+  evidence:
+    - tests/tools/test_docs.py::test_readme_documents_every_cli_command
+    - tests/tools/test_docs.py::test_changelog_has_the_release_entry
+  findings: []
+  notes: "README rewritten (English): purpose, install, gmd-al quick start, real-cycle example, examples 01-06,
+    components, limitations (containers/HPC unvalidated, smoke-scale evidence, fail-closed embedding and
+    uncapped fragments, experimental ML-SCF), attribution. Contributing guide rewritten for the GMD rules.
+    CHANGELOG v0.4.0."
+
+- id: UTIL-005
+  status: verified
+  implementation: [src/gmd_active_learning/utils/yaml.py]
+  evidence:
+    - tests/test_logging_yaml.py::test_merge_dicts_recurses_replaces_lists_and_deep_copies
+    - tests/test_logging_yaml.py::test_load_yaml_errors_are_configuration_errors
+    - tests/test_logging_yaml.py::test_merge_yaml_files_layers_left_to_right_and_feeds_the_central_config
+  findings: []
+  notes: "load_yaml (empty -> {}; unreadable/invalid/non-mapping -> ConfigurationError), merge_dicts (recursive,
+    lists replace, deep copy), merge_yaml_files, dump_yaml. PHAL's load_config/default packaging and legacy
+    backend-key normalisation are replaced by gmd_active_learning.config (packaged configs/default.yaml,
+    convert_phal_config), owned by the config area; merge + build_config surfaces schema errors as
+    ConfigurationError (tested)."
+
+- id: UTIL-006
+  status: verified
+  implementation: [src/gmd_active_learning/utils/logging.py]
+  evidence:
+    - tests/test_logging_yaml.py::test_reconfiguring_retunes_the_console_handler
+    - tests/test_logging_yaml.py::test_json_format_emits_one_parseable_object_per_line
+    - tests/test_logging_yaml.py::test_file_handler_is_debug_and_deduplicated
+    - tests/test_logging_yaml.py::test_environment_overrides_config_and_arguments
+  findings: []
+  notes: "configure_logging(level, log_file, log_format, config, name, propagate) on the gmd_active_learning
+    logger; get_logger(name) unchanged for module loggers, PHAL-style when given settings. Env GMD_AL_LOG_LEVEL /
+    GMD_AL_LOG_FILE / GMD_AL_LOG_FORMAT override config and arguments (PHAL's LOG_LEVEL was ignored whenever
+    the config set a level). Deviation: propagate=True by default so caplog/root handlers still see records.
+    No 'logging' config section exists yet (config.py is lead-owned); configure_logging accepts the mapping."
+
+- id: UTIL-008
+  status: verified
+  implementation: [tools/benchmarks/benchmark_monitor.py, docs/performance.md]
+  evidence:
+    - tests/tools/test_benchmark_monitor.py::test_quick_run_writes_phal_csv_columns
+    - tests/tools/test_benchmark_monitor.py::test_regression_gate_passes_fails_and_warns
+    - tests/tools/test_benchmark_monitor.py::test_default_threshold_is_twenty_percent
+    - tests/tools/test_benchmark_monitor.py::test_timing_runs_without_tracemalloc_and_memory_in_its_own_pass
+  findings: []
+  notes: "PHAL's CSV columns first (plus direct_impl, fast_impl, box_A); the LJ residual has one implementation,
+    so its direct/speedup columns are empty and the nonlinear estimator is a separate optional row (PHAL
+    compared different algorithms). Timing outside tracemalloc, memory in its own pass; LJ forces instead of
+    all-ones; constant-density boxes (PHAL's 40 A box had almost no neighbours); --quick; no sys.path hacks."
+
+- id: CORE-005
+  status: verified
+  implementation: [src/gmd_active_learning/core/exceptions.py]
+  evidence:
+    - tests/architecture/test_exceptions.py::test_phal_classes_are_gmd_errors
+    - tests/architecture/test_exceptions.py::test_config_error_is_an_alias_and_cooldown_is_not_a_backend_failure
+    - tests/architecture/test_exceptions.py::test_existing_classes_are_unchanged
+  findings: []
+  notes: "Added additively: BackendError(AdapterError) > InferenceError, MDRuntimeError (replaces
+    LAMMPSRuntimeError), DFTRuntimeError > CP2KRuntimeError; DataError(DataContractError); CooldownSkip
+    (documented as optional control-flow signal: extraction reports cooldown as a result); ConfigError alias of
+    ConfigurationError. All subclass GMDActiveLearningError; existing classes unchanged."
+
+- id: CORE-007
+  status: verified
+  implementation: [tests/architecture/test_layering.py]
+  evidence:
+    - tests/architecture/test_layering.py::test_every_module_respects_the_layering
+    - tests/architecture/test_layering.py::test_every_package_is_classified
+    - tests/architecture/test_layering.py::test_contracts_and_domain_import_no_backend_at_runtime
+    - tests/architecture/test_layering.py::test_no_source_file_reads_the_phal_reference_tree
+    - tests/architecture/test_layering.py::test_guard_flags_synthetic_violations
+  findings: []
+  notes: "Classifies every package (foundation core/utils, contracts, domain monitors/events/hotspots/extraction/
+    datasets/active_learning/retraining, application workflow/labeling, infrastructure adapters/importers/
+    reliability_model, entry points). Domain/contracts may not import adapters, workflow.assembly, cli,
+    labeling or torch/gmd_sgt/subprocess/cp2k/lammps; workflow reaches adapters only via assembly; nothing
+    imports hotspot_al or references ref/. Fixes PHAL's guard: relative imports resolved, importlib string
+    targets checked, utils guarded. A fresh-interpreter check proves importing domain loads no backend."
+
+- id: CORE-008
+  status: verified
+  implementation: [tests/architecture/test_import_all.py]
+  evidence:
+    - tests/architecture/test_import_all.py::test_module_imports
+    - tests/architecture/test_import_all.py::test_walk_covers_every_source_file
+    - tests/architecture/test_import_all.py::test_only_declared_modules_need_torch_or_gmd_sgt
+  findings: []
+  notes: "Destination tests/architecture/ instead of tests/test_import_all.py. Imports all 157+ modules
+    (explicit skip for optional deps), and in a torch/GMD_SGT-blocked interpreter proves only the five
+    reliability_model/torch_utils modules need torch; SCF tooling, the GMD_SGT adapter and the CLI import
+    without it."
+
+- id: CFG-004
+  status: verified
+  implementation: [containers/config/runtime.yaml, tools/runtime/init_runtime_tree.py]
+  evidence:
+    - tests/tools/test_runtime_tree.py::test_committed_runtime_overlay_is_the_generated_one
+    - tests/tools/test_runtime_tree.py::test_overlay_validates_and_every_path_is_under_the_root
+    - tests/tools/test_runtime_tree.py::test_relative_root_is_resolved
+  findings: []
+  notes: "Destination containers/config/runtime.yaml (configs/ is lead-owned). Generated for root /runtime by
+    tools/runtime/init_runtime_tree.py --root R --overlay, so the root is configurable; merged over
+    configs/example_run.yaml it validates with build_config and every path lies under R. Keys cp2k.task_dir,
+    scf.recording.{enabled,output_dir}, scf.dataset.root. PHAL's cp2k.labeled_dataset_dir has no counterpart
+    (labels go to the per-run versioned store under --work-dir)."
+
+- id: CFG-005
+  status: dropped
+  implementation: []
+  evidence:
+    - tests/tools/test_runtime_tree.py::test_dropped_milestone1_config_templates_are_not_referenced
+  findings: []
+  notes: "Justification: PHAL's configs/{default,lammps,train}.yaml held only comments and {} with no consumer
+    (default.yaml's comment even pointed at a moved path). GMD's packaged configs/default.yaml (generated from
+    the models) and the containers/config overlays cover their intended role; a test confirms nothing
+    references lammps.yaml/train.yaml."
+
+- id: CFG-006
+  status: migrated
+  implementation: [containers/config/cp2k_ml_scf.yaml]
+  evidence:
+    - tests/tools/test_runtime_tree.py::test_ml_scf_overlay_validates_over_runtime_overlay
+  findings: [F-21]
+  notes: "Port of configs/cp2k.yaml onto scf.ml_scf (executable in the bind-mounted fork, model under
+    /runtime/cp2k_ml, dummy predictor, pulay mixing history 8, fallback and final-convergence requirements);
+    validates merged over example_run + runtime overlays. Not 'verified': no dft backend named cp2k_ml_scf is
+    registered in adapters/registry.py, so the overlay cannot select the ML-SCF adapter via backends.dft
+    (conventional cp2k stays selected); needs a register_builtin by the SCF/registry owners."
+
+- id: MD-002
+  status: verified
+  implementation: [src/gmd_active_learning/importers/lammps_dump.py, src/gmd_active_learning/importers/__init__.py, tests/fixtures/lammps/toy_hotspot.lammpstrj]
+  evidence:
+    - tests/importers/test_lammps_dump.py::test_fixture_dumps_match_phal_parser
+    - tests/importers/test_lammps_dump.py::test_toy_fixture_hard_coded_expectations
+    - tests/importers/test_lammps_dump.py::test_all_lammps_boundary_styles_map_to_pbc
+    - tests/importers/test_lammps_dump.py::test_triclinic_cell_agrees_with_ase_independent_reader
+    - tests/importers/test_lammps_monitoring.py::test_imported_frames_run_through_the_online_driver_with_default_config
+  findings: []
+  notes: "Destination src/gmd_active_learning/importers/ instead of tools/legacy_import/ (importable, layered as
+    infrastructure). Streams contracts.Frame; positions/origin shift/triclinic cell/pbc rule/id sorting match
+    PHAL (comparison against PHAL's parser skips without ref/). Unknown species rejected up front; explicit
+    units metal|real; velocities converted to A/fs (PHAL left them raw); 'BOX BOUNDS abc origin' rejected with
+    a clear error (PHAL crashed); duplicate ids and missing BOX BOUNDS are errors."
+
+- id: IO-002
+  status: replaced
+  implementation: [src/gmd_active_learning/importers/lammps_dump.py, src/gmd_active_learning/adapters/gmd/engine.py]
+  evidence:
+    - tests/importers/test_lammps_dump.py::test_lammps_dump_reader_parses_positions_forces_cell_and_step
+    - tests/importers/test_lammps_dump.py::test_concatenated_frames_stream_in_order_exactly_once
+    - tests/examples/test_examples.py::test_01_monitors_gmd_frames
+  findings: []
+  notes: "read_dump/iter_dump become importers.read_lammps_dump/iter_lammps_dump for legacy files. Live frames
+    come from the GMD adapter (adapters/gmd/engine.py parse_frames/FrameTail/iter_frames, not
+    adapters/gmd/trajectory.py); example 01 reads the real GMD frame fixture through iter_frames with stable
+    IDs, positions, forces, cell and pbc. The GMD reader's own tests belong to the GMD adapter area."
+
+- id: EXT-011
+  status: verified
+  implementation: [examples/02_extract_hotspots.py, examples/_example_utils.py]
+  evidence:
+    - tests/examples/test_examples.py::test_02_extracts_at_least_one_region_from_gmd_frames
+    - tests/examples/test_examples.py::test_02_extracts_from_the_first_triggered_frame
+    - tests/examples/test_examples.py::test_02_exits_1_without_regions
+  findings: []
+  notes: "Runs on the real GMD frame fixture (examples/data/gmd_water_frames.extxyz) and prints >= 1 region.
+    Default path monitors the trajectory and extracts around the first triggered frame's hotspot clusters;
+    --atom-id reproduces PHAL's synthetic single-hotspot mode. Exits 1 when there is no region (PHAL indexed
+    regions[0] unconditionally)."
+
+- id: LAB-011
+  status: verified
+  implementation: [examples/03_generate_cp2k_inputs.py, examples/04_parse_cp2k_forces.py, examples/data/ch3_capped_sp.out]
+  evidence:
+    - tests/examples/test_examples.py::test_04_statistics_match_phal
+    - tests/examples/test_examples.py::test_03_writes_capped_cluster_inputs
+    - tests/examples/test_examples.py::test_03_refuses_an_uncapped_isolated_fragment
+    - tests/examples/test_examples.py::test_04_rejects_an_unconverged_output
+  findings: [F-35]
+  notes: "Example 04 prints PHAL's statistics, equal to PHAL's parser at rtol 1e-12 on every real CP2K 2026.2
+    single-point fixture (comparison skips without ref/), plus energy, convergence and the label verdict.
+    Example 03 now H-caps and applies the labeling gates, so an uncapped isolated fragment is refused (PHAL
+    skipped capping and wrote it silently); isolated regions get a cubic WAVELET box (F-35). Examples 01, 05
+    and 06 map to MON-015, TRN-004 and MON-014 (other areas' records) with evidence in tests/examples."
+
+- id: TST-007
+  status: verified
+  implementation: [tools/test/run_all_offline.sh, tests/README.md, tests/conftest.py]
+  evidence:
+    - tests/tools/test_ci_config.py::test_runner_excludes_external_markers_and_they_are_declared
+    - tests/tools/test_ci_config.py::test_documented_integration_variables_are_read_by_tests
+    - tests/tools/test_ci_config.py::test_tests_readme_lists_every_test_directory_and_marker
+    - tests/tools/test_ci_config.py::test_runner_is_valid_bash
+  findings: []
+  notes: "One command runs the whole offline suite (compileall + pytest -m 'not integration and not cp2k and
+    not slow'); GMD_AL_RUN_INTEGRATION=1 adds integration/cp2k tests. The documented variables GMD_EXECUTABLE,
+    GMD_SGT_PATH, CP2K_EXECUTABLE, CP2K_BIN are tested to be the ones tests read (PHAL documented
+    ALLEGRO_MODEL while its tests read ALLEGRO_MODEL_PATH). The full offline suite passed through the runner
+    on this machine. tests/conftest.py is the existing one (src/ comes from pyproject pythonpath)."
