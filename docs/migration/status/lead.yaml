@@ -531,18 +531,32 @@
     frame. Frame.to_md_frame / from_md_frame are lossless for the shared fields of the legacy MDFrame
     (committee <-> ensemble_forces; stable ids and run id in metadata).
 - id: CORE-002
-  status: migrated
-  implementation: [src/gmd_active_learning/contracts/monitoring.py]
+  status: verified
+  implementation:
+    - src/gmd_active_learning/contracts/monitoring.py
+    - src/gmd_active_learning/monitors/staged_monitor.py
+    - src/gmd_active_learning/monitors/global_lj_monitor.py
   evidence:
+    - tests/monitors/test_result_contract_completeness.py::test_phal_golden_results_map_losslessly_onto_monitor_result
+    - tests/monitors/test_result_contract_completeness.py::test_reliability_result_decision_fields_are_carried_by_monitor_result
+    - tests/monitors/test_result_contract_completeness.py::test_metric_scores_and_requested_context_are_populated
     - tests/contracts/test_contract_extensions.py::test_monitor_result_carries_per_metric_scores
     - tests/monitors/test_phal_parity.py::test_phal_math_reproduces_every_frame_decision_and_metric
   findings: [F-06]
   notes: >-
-    MonitorResult has a new optional metric_scores field (per-metric per-atom scores, shape-checked,
-    JSON with null for NaN) next to the raw MetricValues with their evaluated mask and status, stage
-    (incl. SKIPPED), triggered, stable hotspot IDs, reasons and FrameAction. Not verified: the staged
-    monitor (monitoring owner) does not populate metric_scores from StagedEvaluation.metric_scores yet,
-    so the PHAL golden mapping is not yet lossless through the contract.
+    MonitorResult carries per-atom scores, metric_scores (per-metric per-atom scores that the staged
+    monitor now fills), MetricValues with an evaluated mask and status per metric, stage (incl. SKIPPED),
+    triggered, stable hotspot IDs, reasons and FrameAction. Lossless PHAL mapping: every golden frame of
+    the 3 scenarios is rebuilt from the JSON-serialised MonitorResult alone into PHAL's OODFrameResult
+    (step, stage, triggered, hotspot_indices, trigger_reason, max_score, atom_scores, metric_scores with
+    exactly PHAL's evaluated metrics, and every metadata key). Two mapping rules are used. Stage SKIPPED
+    maps to PHAL's "light" + skipped flag. lj_lazy_threshold, which PHAL echoed per frame, is the config
+    value monitor.metrics.lj_residual.lazy_threshold. GMD additionally records the light score of
+    scheduled full frames, which PHAL dropped. ReliabilityResult: the global_lj engine's MonitorResult
+    carries status (metadata.status), risk_score (max_score), reasons, scalar metrics
+    (metadata.frame_metrics), should_stop_md (action STOP) and should_save_frame (action SAVE/STOP with
+    the default actions.save_on_trigger). These are checked for SAFE, CANDIDATE and STOP frames.
+    The LJ fit diagnostics enter only as the per-atom residual scores, not the pair parameters.
 - id: CORE-003
   status: verified
   implementation: [src/gmd_active_learning/contracts/events.py, src/gmd_active_learning/contracts/regions.py, src/gmd_active_learning/events/serialization.py]
