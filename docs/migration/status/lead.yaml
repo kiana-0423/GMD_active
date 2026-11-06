@@ -4,21 +4,34 @@
 # (../GMD_SGT), CP2K 2026.2 (cp2k.psmp); those tests skip with a reason when the program is absent.
 
 - id: AL-001
-  status: migrated
-  implementation: [src/gmd_active_learning/extraction/dispatch.py, src/gmd_active_learning/workflow/assembly.py]
+  status: verified
+  implementation:
+    - src/gmd_active_learning/extraction/dispatch.py
+    - src/gmd_active_learning/workflow/assembly.py
+    - src/gmd_active_learning/events/rolling_buffer.py
   evidence:
-    - tests/active_learning/test_dispatch_and_surfaces.py::test_event_dispatch_matches_phal_regions
+    - tests/workflow/test_event_extraction_phal_parity.py::test_event_extractor_reproduces_phal_regions
+    - tests/workflow/test_event_extraction_phal_parity.py::test_all_nine_golden_events_are_covered
+    - tests/workflow/test_event_extraction_phal_parity.py::test_later_trigger_atoms_are_recorded_but_not_extracted
+    - tests/workflow/test_event_extraction_phal_parity.py::test_grouper_orders_regions_by_max_score_like_phal
+    - tests/events/test_rolling_buffer.py::test_first_trigger_hotspots_are_kept_beside_the_merged_ones_al001
     - tests/active_learning/test_dispatch_and_surfaces.py::test_unknown_mode_raises_value_error
     - tests/extraction/test_extraction_phal_parity.py::test_raw_region_matches_phal
-  findings: [F-05]
+  findings: [F-05, F-15]
   notes: >-
-    Event -> hotspot_grouper (MIC clustering, merge radius) -> extract_regions for every mode
-    (cluster/slab/graph/block). For 4 of 9 golden events, every mode gives PHAL's region count, parent
-    atom order, positions (5e-8 A), event_id and parent step. Not verified: when a merged hotspot spans
-    more atoms than PHAL's region kept (ethane evt-50/110, polyethylene, pt111 evt-30), PHAL centred the
-    region on part of the hotspot while GMD centres it on the whole group, so the atom sets differ. That
-    is an extraction-centre decision for the extraction owner. hotspot_id is a stable id, not PHAL's
-    "<event>_hsNNN". An unknown mode raises pydantic ValidationError, a ValueError.
+    All 9 golden events x 4 modes (36 cases) match PHAL through the production path: GMD monitor and
+    event buffer replay -> EventRegionExtractor -> workflow.assembly.hotspot_grouper -> extract_regions.
+    Region count and order, parent atom order, positions (5e-8 A, fixture precision) and parent step
+    are identical. The earlier 4-of-9 gap was a hotspot-source mismatch, not centring. PHAL extracted
+    from the FIRST trigger's result (atom_scores >= hotspot.threshold, merge_radius clusters, sorted by
+    max score). GMD used the union over merged triggers, whose extra atoms were flagged in later frames,
+    and kept clusters in first-appearance order. Fix: the buffer records the first trigger's
+    metadata.trigger_hotspot_atom_ids and trigger_atom_scores. The extractor cuts around those, and the
+    grouper orders clusters by max score. event.hotspot_atom_ids still holds the union. Events written
+    before this change fall back to it. Deliberate deviations: event_id and hotspot_id are stable ids
+    (F-15), not PHAL's "evt-<step>-<uuid>" and "<event>_hsNNN". Hotspot atoms come from the monitor's
+    single label threshold (no separate hotspot.threshold, F-16); the fixtures set both to 6.0. An
+    unknown mode raises pydantic ValidationError, which is a ValueError.
 - id: AL-002
   status: verified
   implementation: [src/gmd_active_learning/active_learning/candidates.py, src/gmd_active_learning/extraction/dispatch.py, src/gmd_active_learning/workflow/controller.py]

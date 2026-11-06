@@ -9,6 +9,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 from gmd_active_learning.adapters.gmd.engine import GMDConfig, GMDEngine
 from gmd_active_learning.adapters.sgt.backend import GMDSGTBackend, SGTConfig
 from gmd_active_learning.config import LoadedConfig
@@ -94,13 +96,23 @@ class ServiceLabeler:
 
 
 def hotspot_grouper(merge_radius: float) -> Any:
-    """One region per hotspot cluster (PHAL extracted one region per merged hotspot)."""
+    """One region per hotspot cluster, as PHAL's ``detect_hotspots`` + extraction strategy did.
+
+    Atoms are clustered by minimum-image single linkage within ``merge_radius``. With per-atom
+    scores the clusters are ordered by max score descending (ties: first appearance), PHAL's region
+    order (``hotspots.sort(key=max_score, reverse=True)``); without scores they keep
+    first-appearance order.
+    """
 
     from gmd_active_learning.hotspots.cluster import cluster_anomalous_atoms
 
-    def group(frame: Frame, atom_ids: list[int]) -> list[list[int]]:
+    def group(frame: Frame, atom_ids: list[int], scores: Any = None) -> list[list[int]]:
         indices = sorted(frame.index_of(atom_ids).tolist())
         clusters = cluster_anomalous_atoms(indices, frame.positions, merge_radius=merge_radius, cell=frame.cell, pbc=frame.pbc)
+        if scores is not None:
+            values = np.asarray(scores, dtype=float)
+            # Python's sort is stable and clusters arrive ordered by smallest member index.
+            clusters = sorted(clusters, key=lambda members: -float(np.max(values[members])))
         return [[int(frame.atom_ids[index]) for index in cluster] for cluster in clusters]
 
     return group

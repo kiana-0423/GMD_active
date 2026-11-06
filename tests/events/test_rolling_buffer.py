@@ -202,6 +202,24 @@ def test_state_round_trip_resumes_an_open_event() -> None:
     assert restored.to_state()["cooldown_until"] == 11
 
 
+def test_first_trigger_hotspots_are_kept_beside_the_merged_ones_al001() -> None:
+    """The first trigger's atoms/scores describe trigger_frame; region extraction uses them (AL-001)."""
+
+    config = {"pre_trigger_frames": 0, "post_trigger_frames": 2}
+    buffer = _buffer(0, 2)
+    first, second = _frame(1, 3), _frame(2, 3)
+    _capture(buffer, first, [0.0, 1.0, 9.0], atoms=[2])
+    buffer.push(first)
+    _capture(buffer, second, [8.0, 0.0, 0.0], atoms=[0])
+    restored = EventBuffer.from_state(json.loads(json.dumps(buffer.to_state())), config)
+    restored.push(second)
+    event = restored.push(_frame(3, 3))
+    assert event is not None and event.hotspot_atom_ids == [0, 2]
+    assert event.metadata["atom_scores"] == [8.0, 1.0, 9.0]
+    assert event.metadata["trigger_hotspot_atom_ids"] == [2]
+    assert event.metadata["trigger_atom_scores"] == [0.0, 1.0, 9.0]
+
+
 def test_store_requires_directory() -> None:
     with pytest.raises(ConfigurationError):
         load_events_config({"store": {"enabled": True}})

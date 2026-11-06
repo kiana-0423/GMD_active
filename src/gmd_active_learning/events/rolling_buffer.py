@@ -4,7 +4,9 @@
 Semantics (PHAL): the buffer keeps the most recent frames; a trigger opens an event with up to
 ``pre_trigger_frames`` preceding frames, and the next ``post_trigger_frames`` frames become its
 post context. A trigger while an event is open is merged into it (``trigger_steps``; hotspot atoms
-unioned, per-atom scores max-ed, reasons de-duplicated) WITHOUT extending the post window.
+unioned, per-atom scores max-ed, reasons de-duplicated) WITHOUT extending the post window. The
+first trigger's own hotspot atoms and scores are kept as ``metadata["trigger_hotspot_atom_ids"]``
+and ``metadata["trigger_atom_scores"]``: they describe ``trigger_frame`` itself.
 
 Deliberate changes:
 
@@ -209,6 +211,13 @@ class EventBuffer:
             max_score=score_max,
             trigger_steps=[trigger_frame.step],
             trigger_metadata=[entry],
+            # The first trigger's own hotspot atoms and scores: they belong to ``trigger_frame``
+            # (later merged triggers were flagged in later frames). Region extraction uses them,
+            # as PHAL extracted from the first trigger's result (AL-001).
+            metadata={
+                "trigger_hotspot_atom_ids": sorted({int(atom_id) for atom_id in hotspot_atom_ids}),
+                "trigger_atom_scores": scores.tolist(),
+            },
         )
         self._last_capture_step = trigger_frame.step
         logger.info("opened event %s at step %d", self._pending.event_id, trigger_frame.step)

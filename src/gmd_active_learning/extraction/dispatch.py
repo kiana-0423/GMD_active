@@ -12,6 +12,8 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 from gmd_active_learning.contracts import EventRecord, ExtractedRegion, Frame
 from gmd_active_learning.core.exceptions import ConfigurationError
 from gmd_active_learning.extraction.block import extract_block_regions
@@ -98,15 +100,19 @@ def load_sections(config: dict[str, Any]) -> tuple[ExtractionConfig, CappingConf
     )
 
 
-HotspotGrouper = Callable[[Frame, list[int]], list[list[int]]]
+#: ``grouper(frame, atom_ids, atom_scores_or_None) -> groups of atom IDs`` in region order.
+HotspotGrouper = Callable[[Frame, list[int], "np.ndarray | None"], list[list[int]]]
 
 
 class EventRegionExtractor:
     """Workflow ``RegionExtractor``: event -> prepared regions scored with the event's max score.
 
-    Regions are cut from the event's trigger frame around ``event.hotspot_atom_ids``. ``grouper``
-    splits those IDs into hotspot groups (one region per group in cluster/slab/graph mode); the
-    default keeps them as one group. Block cooldown state is loaded from and saved to
+    Regions are cut from the event's trigger frame around that frame's own hotspot atoms:
+    ``event.metadata["trigger_hotspot_atom_ids"]`` (the first trigger's atoms; atoms flagged by
+    later merged triggers were flagged in later frames, and PHAL ignored them too). Events written
+    before that key existed fall back to ``event.hotspot_atom_ids``. ``grouper(frame, ids, scores)``
+    splits the IDs into hotspot groups (one region per group in cluster/slab/graph mode), ordered
+    by the first trigger's per-atom scores; the default keeps them as one group. Block cooldown state is loaded from and saved to
     ``extraction.block.cooldown_state_path`` when it is set (relative paths resolve against
     ``state_dir``), so cooldowns survive restarts.
     """
@@ -135,10 +141,25 @@ class EventRegionExtractor:
             else:
                 self.cooldown = BlockCooldownTracker(block.cooldown_steps)
 
+    @staticmethod
+    def trigger_hotspots(event: EventRecord) -> tuple[list[int], np.ndarray | None]:
+        """The trigger frame's own hotspot atom IDs and per-atom scores (``None`` if not recorded)."""
+
+        metadata = event.metadata or {}
+        ids = metadata.get("trigger_hotspot_atom_ids")
+        scores = metadata.get("trigger_atom_scores")
+        if ids is None:
+            LOGGER.debug("event %s has no trigger_hotspot_atom_ids; using the event's hotspot atoms", event.event_id)
+            ids, scores = event.hotspot_atom_ids, metadata.get("atom_scores")
+        array = None if scores is None else np.asarray(scores, dtype=float)
+        if array is not None and array.shape != (event.trigger_frame.n_atoms,):
+            raise ConfigurationError(f"event {event.event_id}: atom scores shape {array.shape} does not match the trigger frame")
+        return [int(atom_id) for atom_id in ids], array
+
     def extract(self, event: EventRecord) -> list[tuple[ExtractedRegion, float]]:
         frame = event.trigger_frame
-        ids = [int(atom_id) for atom_id in event.hotspot_atom_ids]
-        groups = self.grouper(frame, ids) if self.grouper is not None else [ids]
+        ids, scores = self.trigger_hotspots(event)
+        groups = self.grouper(frame, ids, scores) if self.grouper is not None else [ids]
         regions = extract_and_prepare(
             frame,
             groups,
