@@ -104,6 +104,6 @@ budgets:
   max_full_labels: 2
   max_fragment_labels: 120
   max_total_cpu_core_hours: 45.0
-  per_job_walltime_s: 10800
+  per_job_walltime_s: 14400   # measured ~2.7 h per C32H66 full label (results/timing_probe.json)
   max_atoms_per_fragment: 80
   max_atoms_full: 100
