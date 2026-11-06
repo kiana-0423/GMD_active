@@ -1,0 +1,490 @@
+{
+ "config_hash": "f6b57f670da137d0",
+ "n_parents": 24,
+ "n_rejected_candidates": 3,
+ "parents": [
+  {
+   "achieved": null,
+   "contact_distance": null,
+   "family": "normal",
+   "formula": "C16H34",
+   "location": null,
+   "magnitude": 0.0,
+   "max_untouched_angle_deviation_deg": 7.1503,
+   "min_nonbonded": {
+    "CC": 3.7792,
+    "CH": 2.6265,
+    "HH": 2.3446
+   },
+   "n_site_atoms": 0,
+   "parent_id": "C16-b00-normal0",
+   "split": "initial_train",
+   "split_group": "C16-b00",
+   "structure_sha256": "3029138dd96e8531cdf0dd491d65ddbb872ba70e939a0810e23fe7867b80a2ec",
+   "units": null
+  },
+  {
+   "achieved": -59.999999999999986,
+   "contact_distance": null,
+   "family": "torsion",
+   "formula": "C16H34",
+   "location": 8,
+   "magnitude": -60.0,
+   "max_untouched_angle_deviation_deg": 6.8207,
+   "min_nonbonded": {
+    "CC": 3.5485,
+    "CH": 2.4533,
+    "HH": 2.3446
+   },
+   "n_site_atoms": 12,
+   "parent_id": "C16-b00-torsion0",
+   "split": "initial_train",
+   "split_group": "C16-b00",
+   "structure_sha256": "64c3453587af56b923cd85a6dd405e7faa89262bf939b4a79fe5d51de4086f2c",
+   "units": "deg"
+  },
+  {
+   "achieved": 12.000000000000014,
+   "contact_distance": null,
+   "family": "bend",
+   "formula": "C16H34",
+   "location": 10,
+   "magnitude": 12.0,
+   "max_untouched_angle_deviation_deg": 7.0013,
+   "min_nonbonded": {
+    "CC": 3.7859,
+    "CH": 2.5936,
+    "HH": 2.3446
+   },
+   "n_site_atoms": 9,
+   "parent_id": "C16-b00-bend0",
+   "split": "initial_train",
+   "split_group": "C16-b00",
+   "structure_sha256": "0a567ba390bbcc8c9f11abd68c1de81af7b55dc63bd8c489380324d0be47e5bc",
+   "units": "deg"
+  },
+  {
+   "achieved": 2.5999999999999974,
+   "contact_distance": 2.6044856569152643,
+   "family": "contact",
+   "formula": "C16H34",
+   "location": 8,
+   "magnitude": 2.6,
+   "max_untouched_angle_deviation_deg": 6.7116,
+   "min_nonbonded": {
+    "CC": 2.8013,
+    "CH": 2.4026,
+    "HH": 1.8497
+   },
+   "n_site_atoms": 6,
+   "parent_id": "C16-b00-contact0",
+   "split": "initial_train",
+   "split_group": "C16-b00",
+   "structure_sha256": "d05d66a7f2072cbe223f80d77cbac3c899b4ca6e0a4b030598bc9f1f7ac507d9",
+   "units": "angstrom"
+  },
+  {
+   "achieved": null,
+   "contact_distance": null,
+   "family": "normal",
+   "formula": "C16H34",
+   "location": null,
+   "magnitude": 0.0,
+   "max_untouched_angle_deviation_deg": 7.0837,
+   "min_nonbonded": {
+    "CC": 3.7966,
+    "CH": 2.6374,
+    "HH": 2.3596
+   },
+   "n_site_atoms": 0,
+   "parent_id": "C16-b01-normal0",
+   "split": "final_eval",
+   "split_group": "C16-b01",
+   "structure_sha256": "8b3799b9484b15989939040fe7049c750178a21050b60db8e1ead5697bcf4e49",
+   "units": null
+  },
+  {
+   "achieved": -120.0,
+   "contact_distance": null,
+   "family": "torsion",
+   "formula": "C16H34",
+   "location": 8,
+   "magnitude": -120.0,
+   "max_untouched_angle_deviation_deg": 7.1259,
+   "min_nonbonded": {
+    "CC": 2.9599,
+    "CH": 2.5273,
+    "HH": 1.9167
+   },
+   "n_site_atoms": 12,
+   "parent_id": "C16-b01-torsion0",
+   "split": "final_eval",
+   "split_group": "C16-b01",
+   "structure_sha256": "6984e51bb3549aaf4f1cd7c003c5c2050e7cf294e4021cf6f1b5adb312652f0f",
+   "units": "deg"
+  },
+  {
+   "achieved": -12.000000000000028,
+   "contact_distance": null,
+   "family": "bend",
+   "formula": "C16H34",
+   "location": 8,
+   "magnitude": -12.0,
+   "max_untouched_angle_deviation_deg": 7.0837,
+   "min_nonbonded": {
+    "CC": 3.731,
+    "CH": 2.4621,
+    "HH": 2.1284
+   },
+   "n_site_atoms": 9,
+   "parent_id": "C16-b01-bend0",
+   "split": "final_eval",
+   "split_group": "C16-b01",
+   "structure_sha256": "536a7f199f5be9e6caf7cc537d4697895ca2c07f9087457177c7158bf3fe7d08",
+   "units": "deg"
+  },
+  {
+   "achieved": 1.9999999999999991,
+   "contact_distance": 1.9766129731555655,
+   "family": "contact",
+   "formula": "C16H34",
+   "location": 6,
+   "magnitude": 2.0,
+   "max_untouched_angle_deviation_deg": 7.0837,
+   "min_nonbonded": {
+    "CC": 2.8983,
+    "CH": 2.5077,
+    "HH": 1.8386
+   },
+   "n_site_atoms": 6,
+   "parent_id": "C16-b01-contact0",
+   "split": "final_eval",
+   "split_group": "C16-b01",
+   "structure_sha256": "a1f3ab05280b389fa2ac19e1e6d14b6d59a1d802b4bece72af6159351274aaf5",
+   "units": "angstrom"
+  },
+  {
+   "achieved": null,
+   "contact_distance": null,
+   "family": "normal",
+   "formula": "C16H34",
+   "location": null,
+   "magnitude": 0.0,
+   "max_untouched_angle_deviation_deg": 5.9921,
+   "min_nonbonded": {
+    "CC": 3.7594,
+    "CH": 2.6375,
+    "HH": 2.3903
+   },
+   "n_site_atoms": 0,
+   "parent_id": "C16-b02-normal0",
+   "split": "calibration",
+   "split_group": "C16-b02",
+   "structure_sha256": "436e66f0973532a4f3fc05e1dde1a84a06b55fc70d3b85f4bec3698d48a2cb22",
+   "units": null
+  },
+  {
+   "achieved": 120.0,
+   "contact_distance": null,
+   "family": "torsion",
+   "formula": "C16H34",
+   "location": 10,
+   "magnitude": 120.0,
+   "max_untouched_angle_deviation_deg": 6.8616,
+   "min_nonbonded": {
+    "CC": 2.8575,
+    "CH": 2.5143,
+    "HH": 1.9184
+   },
+   "n_site_atoms": 12,
+   "parent_id": "C16-b02-torsion0",
+   "split": "calibration",
+   "split_group": "C16-b02",
+   "structure_sha256": "2e971b094f204d5d65686a4f8965d167efa9354d00a67b85c37ef18ffdbfbc18",
+   "units": "deg"
+  },
+  {
+   "achieved": 12.000000000000014,
+   "contact_distance": null,
+   "family": "bend",
+   "formula": "C16H34",
+   "location": 5,
+   "magnitude": 12.0,
+   "max_untouched_angle_deviation_deg": 5.9921,
+   "min_nonbonded": {
+    "CC": 3.7625,
+    "CH": 2.5595,
+    "HH": 2.3396
+   },
+   "n_site_atoms": 9,
+   "parent_id": "C16-b02-bend0",
+   "split": "calibration",
+   "split_group": "C16-b02",
+   "structure_sha256": "21dc6778e1b14be74e5e57db2532b7e60bee11ff5f12f1ad59963f1ab47484fd",
+   "units": "deg"
+  },
+  {
+   "achieved": 2.300000000000031,
+   "contact_distance": 2.2513922887785736,
+   "family": "contact",
+   "formula": "C16H34",
+   "location": 8,
+   "magnitude": 2.3,
+   "max_untouched_angle_deviation_deg": 6.2196,
+   "min_nonbonded": {
+    "CC": 2.9029,
+    "CH": 2.5213,
+    "HH": 1.8078
+   },
+   "n_site_atoms": 6,
+   "parent_id": "C16-b02-contact0",
+   "split": "calibration",
+   "split_group": "C16-b02",
+   "structure_sha256": "5483ca6ed3528294a2f4dddfe041372edead95b1e36a6491241723c0dfc1b5ed",
+   "units": "angstrom"
+  },
+  {
+   "achieved": null,
+   "contact_distance": null,
+   "family": "normal",
+   "formula": "C32H66",
+   "location": null,
+   "magnitude": 0.0,
+   "max_untouched_angle_deviation_deg": 8.5985,
+   "min_nonbonded": {
+    "CC": 3.716,
+    "CH": 2.6168,
+    "HH": 2.374
+   },
+   "n_site_atoms": 0,
+   "parent_id": "C32-b00-normal0",
+   "split": "calibration",
+   "split_group": "C32-b00",
+   "structure_sha256": "5981507259a12622484f5954cdfe663e33be57324636a44e0ab368816a6f1ead",
+   "units": null
+  },
+  {
+   "achieved": 120.0,
+   "contact_distance": null,
+   "family": "torsion",
+   "formula": "C32H66",
+   "location": 20,
+   "magnitude": 120.0,
+   "max_untouched_angle_deviation_deg": 9.2292,
+   "min_nonbonded": {
+    "CC": 2.9075,
+    "CH": 2.5121,
+    "HH": 1.8863
+   },
+   "n_site_atoms": 12,
+   "parent_id": "C32-b00-torsion0",
+   "split": "calibration",
+   "split_group": "C32-b00",
+   "structure_sha256": "b4e0bc4e967e89fa472cbd23997d02bd8fbafd87fac5591e313fb8b0413872ab",
+   "units": "deg"
+  },
+  {
+   "achieved": -11.999999999999972,
+   "contact_distance": null,
+   "family": "bend",
+   "formula": "C32H66",
+   "location": 16,
+   "magnitude": -12.0,
+   "max_untouched_angle_deviation_deg": 8.1148,
+   "min_nonbonded": {
+    "CC": 3.6792,
+    "CH": 2.4404,
+    "HH": 2.187
+   },
+   "n_site_atoms": 9,
+   "parent_id": "C32-b00-bend0",
+   "split": "calibration",
+   "split_group": "C32-b00",
+   "structure_sha256": "2f359cd08c270708a2500adc9ebb21f3ec8937dad46d6565e4a7ef81c87a4f55",
+   "units": "deg"
+  },
+  {
+   "achieved": 2.3000000000000305,
+   "contact_distance": 2.3597544183780754,
+   "family": "contact",
+   "formula": "C32H66",
+   "location": 12,
+   "magnitude": 2.3,
+   "max_untouched_angle_deviation_deg": 7.9441,
+   "min_nonbonded": {
+    "CC": 2.9192,
+    "CH": 2.4913,
+    "HH": 1.8748
+   },
+   "n_site_atoms": 6,
+   "parent_id": "C32-b00-contact0",
+   "split": "calibration",
+   "split_group": "C32-b00",
+   "structure_sha256": "0c1eecc2df37d90b5eb917b152d35e33f17eb4148e99074e6fb812995761caf6",
+   "units": "angstrom"
+  },
+  {
+   "achieved": null,
+   "contact_distance": null,
+   "family": "normal",
+   "formula": "C32H66",
+   "location": null,
+   "magnitude": 0.0,
+   "max_untouched_angle_deviation_deg": 9.215,
+   "min_nonbonded": {
+    "CC": 3.7922,
+    "CH": 2.6144,
+    "HH": 2.4024
+   },
+   "n_site_atoms": 0,
+   "parent_id": "C32-b01-normal0",
+   "split": "final_eval",
+   "split_group": "C32-b01",
+   "structure_sha256": "2ca04e40f881b9823c96409a74d2a4b06068e7dccc1a1b825077c29a53c35883",
+   "units": null
+  },
+  {
+   "achieved": 60.0,
+   "contact_distance": null,
+   "family": "torsion",
+   "formula": "C32H66",
+   "location": 11,
+   "magnitude": 60.0,
+   "max_untouched_angle_deviation_deg": 9.215,
+   "min_nonbonded": {
+    "CC": 3.5411,
+    "CH": 2.3618,
+    "HH": 2.2082
+   },
+   "n_site_atoms": 12,
+   "parent_id": "C32-b01-torsion0",
+   "split": "final_eval",
+   "split_group": "C32-b01",
+   "structure_sha256": "bd58a2f2d7a1f033d0294e7b2384616ef9aaf5a9d6c47788fca1d7381d190a49",
+   "units": "deg"
+  },
+  {
+   "achieved": 20.000000000000014,
+   "contact_distance": null,
+   "family": "bend",
+   "formula": "C32H66",
+   "location": 20,
+   "magnitude": 20.0,
+   "max_untouched_angle_deviation_deg": 9.215,
+   "min_nonbonded": {
+    "CC": 3.7922,
+    "CH": 2.5127,
+    "HH": 2.2538
+   },
+   "n_site_atoms": 9,
+   "parent_id": "C32-b01-bend0",
+   "split": "final_eval",
+   "split_group": "C32-b01",
+   "structure_sha256": "0b26e53d1d375960ed4cb622c6f798710c2a1ef682e42f5c8a713e01a793b2aa",
+   "units": "deg"
+  },
+  {
+   "achieved": 2.3000000000000305,
+   "contact_distance": 2.2118432233885135,
+   "family": "contact",
+   "formula": "C32H66",
+   "location": 12,
+   "magnitude": 2.3,
+   "max_untouched_angle_deviation_deg": 9.215,
+   "min_nonbonded": {
+    "CC": 2.9758,
+    "CH": 2.5233,
+    "HH": 1.8128
+   },
+   "n_site_atoms": 6,
+   "parent_id": "C32-b01-contact0",
+   "split": "final_eval",
+   "split_group": "C32-b01",
+   "structure_sha256": "5be3a9a0de40506851655f9e5b5f036e52bf70ffee0c5f3e20179f3b8f091c27",
+   "units": "angstrom"
+  },
+  {
+   "achieved": null,
+   "contact_distance": null,
+   "family": "normal",
+   "formula": "C32H66",
+   "location": null,
+   "magnitude": 0.0,
+   "max_untouched_angle_deviation_deg": 9.1934,
+   "min_nonbonded": {
+    "CC": 3.7809,
+    "CH": 2.6461,
+    "HH": 2.3801
+   },
+   "n_site_atoms": 0,
+   "parent_id": "C32-b02-normal0",
+   "split": "validation",
+   "split_group": "C32-b02",
+   "structure_sha256": "dd91db01e9de2c86715ec15b385a671a96c0da4674a3c6d38809016ad2ff6e10",
+   "units": null
+  },
+  {
+   "achieved": -60.000000000000014,
+   "contact_distance": null,
+   "family": "torsion",
+   "formula": "C32H66",
+   "location": 11,
+   "magnitude": -60.0,
+   "max_untouched_angle_deviation_deg": 9.6368,
+   "min_nonbonded": {
+    "CC": 3.5234,
+    "CH": 2.3465,
+    "HH": 2.266
+   },
+   "n_site_atoms": 12,
+   "parent_id": "C32-b02-torsion0",
+   "split": "validation",
+   "split_group": "C32-b02",
+   "structure_sha256": "406442c08a982c8df799690760bf9dc737a013edea17eb55cccdd6411085f590",
+   "units": "deg"
+  },
+  {
+   "achieved": 20.0,
+   "contact_distance": null,
+   "family": "bend",
+   "formula": "C32H66",
+   "location": 11,
+   "magnitude": 20.0,
+   "max_untouched_angle_deviation_deg": 9.1136,
+   "min_nonbonded": {
+    "CC": 3.7884,
+    "CH": 2.4918,
+    "HH": 2.2967
+   },
+   "n_site_atoms": 9,
+   "parent_id": "C32-b02-bend0",
+   "split": "validation",
+   "split_group": "C32-b02",
+   "structure_sha256": "6f5bd17644d2b0593706b50ebeada181b8eddeb659b1b8d6368a4ad59532a7b8",
+   "units": "deg"
+  },
+  {
+   "achieved": 2.3000000000000305,
+   "contact_distance": 2.3277409900956183,
+   "family": "contact",
+   "formula": "C32H66",
+   "location": 12,
+   "magnitude": 2.3,
+   "max_untouched_angle_deviation_deg": 8.8164,
+   "min_nonbonded": {
+    "CC": 2.9062,
+    "CH": 2.51,
+    "HH": 1.8164
+   },
+   "n_site_atoms": 6,
+   "parent_id": "C32-b02-contact0",
+   "split": "validation",
+   "split_group": "C32-b02",
+   "structure_sha256": "42f66d17be4f484fea3111f0ed24cf88fe3029547ef3f2bd904777aaaeeee2e4",
+   "units": "angstrom"
+  }
+ ],
+ "rejection_reasons": {
+  "nonbonded_HH": 3
+ }
+}

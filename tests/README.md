@@ -70,6 +70,7 @@ checks plus host-level runs of the validators (`tests/tools/test_containers.py`)
 | `migration/` | feature ledger, inventory and golden-fixture integrity |
 | `reference/` | NumPy reference implementations used as oracles (masked force loss) |
 | `fakes/` | test-only fake backends (never used by production code) |
+| `experiments/` | demo experiments under `tools/experiments/` (alkane hotspot demonstration); real-CP2K tests marked `cp2k` |
 | `fixtures/` | golden PHAL outputs (immutable), real CP2K 2026.2 outputs, GMD frames, tiny GMD_SGT models |
 
 Top-level `test_*.py` files cover the CLI, logging/YAML utilities and the original GMD_active

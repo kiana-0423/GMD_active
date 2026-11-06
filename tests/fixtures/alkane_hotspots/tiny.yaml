@@ -1,0 +1,36 @@
+# Tiny offline test configuration for tests/experiments/alkane_hotspots (no CP2K is run with it).
+# Two chain lengths, two bases each, all four families; cheap enough for unit tests.
+name: tiny
+artifacts_root: null
+seeds: {generation: 11, split: 3}
+systems:
+  chain_lengths: [12, 14]
+generation:
+  n_parents: 16
+  per_base: {normal: 1, torsion: 1, bend: 1, contact: 1}
+  max_candidates_per_slot: 20
+families:
+  thermal: {amplitude: 0.02}
+  torsion: {deltas_deg: [120.0, -120.0], locations: [0.5]}
+  bend: {deltas_deg: [-10.0, 15.0], locations: [0.5]}
+  contact: {target_distances: [2.3], locations: [0.4], fold_bonds: 5, n_starts: 3}
+checks: {bond_tolerance: 0.25}
+splits:
+  fractions: {initial_train: 0.25, calibration: 0.25, validation: 0.25, final_eval: 0.25}
+cp2k:
+  executable: cp2k.fake
+  omp_threads: 1
+  cutoff: 200.0
+  smoke_only: true
+labels: {full_splits: [calibration], poll_interval_s: 0.05}
+fragments:
+  sites: [perturbation_site, normal_control]
+  graph_hops: [1, 2]
+  cluster: {core_radii: [1.5], buffer_radii: [3.0]}
+budgets:
+  max_full_labels: 10
+  max_fragment_labels: 50
+  max_total_cpu_core_hours: 10.0
+  per_job_walltime_s: 600
+  max_atoms_per_fragment: 60
+  max_atoms_full: 60
