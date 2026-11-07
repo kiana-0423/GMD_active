@@ -1,0 +1,23 @@
+# Append-only amendments to repair_c16_authorization.yaml (which stays byte-identical to the file recorded at the
+# execution start). load_authorization applies them in order; every change must chain from the current value, and
+# the allowances listed under `unchanged` are verified. The executor journals each amendment the first time it sees
+# it and refuses to continue if a recorded amendment is later edited, removed or reordered.
+amendments:
+  - id: A1-q0-34
+    at: "2026-11-07T09:58:39Z"
+    granted_by: user
+    statement: >-
+      I authorize increasing the q0 DFT allowance from 30 to 34 CPU core-hours. The shared initial-model allowance
+      remains 45 core-hours, the total additional DFT allowance remains 240 core-hours, and the original 120-hour
+      execution window remains unchanged. Continue the existing q0 run; reuse all completed labels and reconcile the
+      running job. Do not increase it again automatically.
+    rationale: >-
+      Measured labeling costs exceed the original estimate: the first 11 q0 full-system C16 labels of this execution
+      took 6.7-23.0 min wall (mean 12.8 min, about 1.07 core-h at 5 cores) against about 0.73 core-h per label in the
+      plan's timing sources, which projects q0 (30 labels) to about 32 core-h, above the original 30 core-h sub-limit.
+    changes:
+      initial_model_q0_core_h: {from: 30.0, to: 34.0}
+    unchanged:
+      total_core_h: 240.0
+      stages.initial_model: 45.0
+      max_elapsed_h: 120.0

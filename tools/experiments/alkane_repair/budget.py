@@ -76,6 +76,27 @@ class AuthorizationConfig(_Strict):
     cp2k_max_concurrent_jobs: int = Field(1, ge=1, le=1)
     cores_per_job: int = Field(..., ge=1)
     enforcement: EnforcementConfig
+    applied_amendments: list[dict[str, Any]] = Field(default_factory=list, description="set by load_authorization; never in the YAML")
+
+
+#: allowance fields an amendment may change (``stages.<name>`` for a stage); enforcement settings, cores and
+#: concurrency are not amendable.
+AMENDABLE = ("total_core_h", "initial_model_q0_core_h", "per_run_core_h", "max_elapsed_h", *(f"stages.{s}" for s in STAGES))
+
+
+class AllowanceChange(_Strict):
+    from_: float = Field(..., alias="from")
+    to: float = Field(..., gt=0.0)
+
+
+class Amendment(_Strict):
+    id: str = Field(..., min_length=1)
+    at: str = Field(..., min_length=1, description="UTC timestamp of the grant")
+    granted_by: str = Field(..., min_length=1)
+    statement: str = Field(..., min_length=1, description="the grant as given")
+    rationale: str = Field(..., min_length=1)
+    changes: dict[str, AllowanceChange]
+    unchanged: dict[str, float] = Field(default_factory=dict, description="allowances the grant explicitly keeps, with their values (verified)")
 
 
 def timeout_of_launcher(launcher: list[str]) -> tuple[float, float] | None:
@@ -93,11 +114,64 @@ def authorization_path(loaded: LoadedBenchmark) -> Path:
     return loaded.path.parent / f"{loaded.config.name}_authorization.yaml"
 
 
+def amendments_path(loaded: LoadedBenchmark) -> Path:
+    return loaded.path.parent / f"{loaded.config.name}_authorization_amendments.yaml"
+
+
+def amendment_digest(amendment: Mapping[str, Any]) -> str:
+    import hashlib
+
+    return hashlib.sha256(json.dumps(amendment, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def _allowance(raw: dict[str, Any], key: str) -> float | None:
+    if key.startswith("stages."):
+        return (raw.get("stages") or {}).get(key.split(".", 1)[1])
+    return raw.get(key)
+
+
+def _apply_amendments(loaded: LoadedBenchmark, raw: dict[str, Any]) -> list[dict[str, Any]]:
+    """Apply the append-only amendment list in order; each change must chain from the current value."""
+
+    path = amendments_path(loaded)
+    if not path.is_file():
+        return []
+    entries = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("amendments") or []
+    applied, seen = [], set()
+    for entry in entries:
+        amendment = Amendment.model_validate(entry)
+        if amendment.id in seen:
+            raise BudgetRefused(f"authorization amendment {amendment.id!r} appears twice")
+        seen.add(amendment.id)
+        for key, change in amendment.changes.items():
+            if key not in AMENDABLE:
+                raise BudgetRefused(f"amendment {amendment.id}: {key!r} is not an amendable allowance ({', '.join(AMENDABLE)})")
+            current = _allowance(raw, key)
+            if current is None or abs(float(current) - change.from_) > 1e-9:
+                raise BudgetRefused(f"amendment {amendment.id}: {key} 'from' {change.from_} does not match the current allowance {current}")
+            if key.startswith("stages."):
+                raw["stages"][key.split(".", 1)[1]] = change.to
+            else:
+                raw[key] = change.to
+        for key, value in amendment.unchanged.items():
+            current = _allowance(raw, key)
+            if key not in AMENDABLE or key in amendment.changes or current is None or abs(float(current) - value) > 1e-9:
+                raise BudgetRefused(f"amendment {amendment.id}: {key} is declared unchanged at {value} but is {current}"
+                                    + (" (and changed by the amendment)" if key in amendment.changes else ""))
+        applied.append({**entry, "sha256": amendment_digest(entry)})
+    return applied
+
+
 def load_authorization(loaded: LoadedBenchmark) -> AuthorizationConfig:
     path = authorization_path(loaded)
     if not path.is_file():
         raise BudgetRefused(f"no execution authorization ({path}); expensive work needs an explicit compute allowance")
-    auth = AuthorizationConfig.model_validate((yaml.safe_load(path.read_text(encoding="utf-8")) or {})["authorization"])
+    raw = dict((yaml.safe_load(path.read_text(encoding="utf-8")) or {})["authorization"])
+    if "applied_amendments" in raw:
+        raise BudgetRefused("applied_amendments is set by the loader; amendments live in the amendments file")
+    raw["stages"] = dict(raw.get("stages") or {})
+    applied = _apply_amendments(loaded, raw)
+    auth = AuthorizationConfig.model_validate({**raw, "applied_amendments": applied})
     unknown = set(auth.stages) - set(STAGES)
     if unknown:
         raise BudgetRefused(f"authorization: unknown stages {sorted(unknown)}")
@@ -107,6 +181,10 @@ def load_authorization(loaded: LoadedBenchmark) -> AuthorizationConfig:
             raise BudgetRefused(f"authorization for {stage} ({auth.stages[stage]}) exceeds the protocol budget ({protocol})")
     if auth.per_run_core_h > loaded.config.repair.budget_core_h_per_run + 1e-9:
         raise BudgetRefused("authorization per-run allowance exceeds the protocol's budget_core_h_per_run")
+    if auth.initial_model_q0_core_h > auth.stages.get("initial_model", 0.0) + 1e-9:
+        raise BudgetRefused(f"the q0 sub-allowance ({auth.initial_model_q0_core_h}) exceeds the initial-model allowance ({auth.stages.get('initial_model', 0.0)})")
+    if sum(auth.stages.values()) > auth.total_core_h + 1e-9:
+        raise BudgetRefused(f"stage allowances sum to {sum(auth.stages.values())} core-h, more than the total {auth.total_core_h}")
     limits = timeout_of_launcher(loaded.alpha.config.cp2k.launcher)
     expected = (auth.enforcement.attempt_wall_cap_s, auth.enforcement.kill_grace_s)
     if limits is None or abs(limits[0] - expected[0]) > 0.5 or abs(limits[1] - expected[1]) > 0.5:
@@ -300,6 +378,8 @@ class ComputeLedger:
                                                       "initial_model_q0": consumption["q0_core_s"] / 3600.0,
                                                       "runs": {k: v / 3600.0 for k, v in consumption["runs_core_s"].items()}},
                 "remaining": remaining, "running": consumption["running"], "n_attempts": consumption["n_attempts"],
+                "allowances": {"total_core_h": auth.total_core_h, "stages_core_h": dict(auth.stages), "initial_model_q0_core_h": auth.initial_model_q0_core_h,
+                               "amendments": [a["id"] for a in auth.applied_amendments]},
                 "note": "measured from every attempt directory (completed, failed, cancelled, retried, running); all of it is newly consumed by this "
                         "benchmark (no cached label of another root is charged here)"}
 
@@ -377,7 +457,8 @@ class GuardedService:
     def submit(self, task: Any) -> Any:
         task_id = task if isinstance(task, str) else task.task_id
         work = Path(self._inner.work_dir_for(task_id))
-        self._guard.require_room(self._guard.ledger.classify(work), self._kind_of(work), label=task_id)
+        if would_launch(work):  # an existing job (running or finished) is reconciled, never charged twice
+            self._guard.require_room(self._guard.ledger.classify(work), self._kind_of(work), label=task_id)
         return self._inner.submit(task)
 
     def poll(self, task: Any) -> Any:
@@ -405,7 +486,8 @@ class GuardedLabeler:
 
     def submit(self, task: Any) -> Any:
         work = Path(task.work_dir)
-        self.guard.require_room(self.guard.ledger.classify(work), "fragment" if _is_fragment(work) else "full", label=task.task_id)
+        if would_launch(work):
+            self.guard.require_room(self.guard.ledger.classify(work), "fragment" if _is_fragment(work) else "full", label=task.task_id)
         return self.inner.submit(task)
 
     def poll(self, task: Any) -> Any:
@@ -417,6 +499,19 @@ class GuardedLabeler:
             result = self.inner.cancel(result)
             self.guard.record_cancellation(work, violation)
         return result
+
+
+def would_launch(task_dir: Path) -> bool:
+    """Whether a labeling submit for this task directory would start a new job (no task or a never-submitted one).
+
+    The labeling service's ``submit`` is a no-op for a task that already has (or had) a job; such a task is
+    reconciled by polling, its attempts are already in the ledger, and it must not be refused or charged again.
+    """
+
+    record = read_json(task_dir / "task.json") if (task_dir / "task.json").is_file() else None
+    if record is None:
+        return True
+    return record.get("execution") == "prepared" and not (record.get("metadata") or {}).get("attempts")
 
 
 def _is_fragment(task_dir: Path) -> bool:
@@ -461,5 +556,5 @@ def build_guard(loaded: LoadedBenchmark) -> BudgetGuard:
     return BudgetGuard(ComputeLedger(loaded, auth), estimator(loaded, auth), loaded.root / "execution" / "budget_journal.jsonl")
 
 
-__all__ = ["AuthorizationConfig", "BudgetGuard", "BudgetRefused", "ComputeLedger", "GuardedLabeler", "GuardedService", "STAGES", "build_guard",
-           "estimator", "load_authorization", "scan_attempt"]
+__all__ = ["AMENDABLE", "Amendment", "AuthorizationConfig", "BudgetGuard", "BudgetRefused", "ComputeLedger", "GuardedLabeler", "GuardedService", "STAGES", "build_guard",
+           "amendment_digest", "amendments_path", "estimator", "load_authorization", "scan_attempt", "would_launch"]

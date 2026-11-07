@@ -161,6 +161,99 @@ def _elapsed_h(journal: Journal) -> float:
     return (time.time() - float(journal.state["start"]["execution_start_epoch"])) / 3600.0
 
 
+def verify_authorization_record(loaded: LoadedBenchmark, journal: Journal, auth: Any) -> None:
+    """The original authorization is unchanged; amendments are append-only and journalled once each.
+
+    The authorization file recorded at the execution start must keep its hash (an amendment never edits it).
+    Every amendment in the amendments file is journalled (with the code commit that applies it) the first
+    time it is seen; afterwards its content may not change and it may not be removed.
+    """
+
+    from .budget import authorization_path
+
+    original = journal.state["start"]["authorization"]["sha256"]
+    current = file_sha256(authorization_path(loaded))
+    if current != original:
+        raise ExecutionStop("blocked", f"the original authorization file changed since the execution start ({original[:12]} -> {current[:12]}); "
+                                       "allowances change only through the amendments file")
+    recorded = journal.state.setdefault("amendments", {})
+    applied = {a["id"]: a for a in auth.applied_amendments}
+    for amendment_id, entry in recorded.items():
+        if amendment_id not in applied:
+            raise ExecutionStop("blocked", f"authorization amendment {amendment_id} was recorded but is missing from the amendments file")
+        if applied[amendment_id]["sha256"] != entry["sha256"]:
+            raise ExecutionStop("blocked", f"authorization amendment {amendment_id} changed after it was recorded")
+    order = list(recorded)
+    if list(applied)[: len(order)] != order:
+        raise ExecutionStop("blocked", f"authorization amendments reordered: recorded {order}, file {list(applied)}")
+    for amendment_id, amendment in applied.items():
+        if amendment_id in recorded:
+            continue
+        recorded[amendment_id] = {"sha256": amendment["sha256"], "recorded_at": utc_now()}
+        journal.save()
+        journal.log("authorization_amendment", amendment={k: v for k, v in amendment.items() if k != "sha256"}, sha256=amendment["sha256"],
+                    code=_git(loaded.repo_path(".")),
+                    effective={"total_core_h": auth.total_core_h, "stages": dict(auth.stages), "initial_model_q0_core_h": auth.initial_model_q0_core_h,
+                               "per_run_core_h": auth.per_run_core_h, "max_elapsed_h": auth.max_elapsed_h})
+
+
+# ---------------------------------------------------------------------------------------------- projections before stages
+
+
+_FINISHED_BY = {"initial_model": "qualified", "development": "development", "fidelity_audit": "development", "repair_val": "repair_val",
+                "repair_runs": "repair_runs", "final_test": "final_test"}
+
+
+def _closed_loop_runs(loaded: LoadedBenchmark, journal: Journal) -> int:
+    if "run_order" in journal.state:
+        runs = journal.state.get("runs", {})
+        return sum(1 for i in journal.state["run_order"] if i["kind"] == "closed_loop" and runs.get(i["run"], {}).get("status") not in ("done", "failed_terminal"))
+    from .plan import build_plan
+
+    return int(sum(v["n_runs"] for v in build_plan(loaded, write=False)["stages"]["repair_runs"]["by_arm"].values() if v["kind"] == "closed_loop"))
+
+
+def _finished(journal: Journal, stage: str) -> bool:
+    key = _FINISHED_BY[stage]
+    if key == "qualified":
+        return any(journal.stage(f"qualification_q{q}").get("accepted") for q in range(4))
+    return journal.done(key)
+
+
+def gate(loaded: LoadedBenchmark, journal: Journal, label: str, stage: str, *, qualification_stage: int | None = None) -> dict[str, Any]:
+    """Re-estimate a stage before it starts; stop (unaffordable, with a redistribution proposal) if it does not fit."""
+
+    from .projection import project, redistribution_proposal, write_projection
+
+    runs = _closed_loop_runs(loaded, journal) if stage == "repair_runs" else None
+    projection = project(loaded, stage, qualification_stage=qualification_stage, closed_loop_runs=runs)
+    summary = [{k: s[k] for k in ("scope", "expected_core_h", "upper90_core_h", "remaining_core_h", "fits")} for s in projection["scopes"]]
+    costs = {k: {m: v.get(m) for m in ("n", "mean", "sd", "source")} for k, v in projection["costs_core_s"].items()}
+    if projection["fits"]:
+        write_projection(loaded, label, projection)
+        journal.log("projection", stage=label, fits=True, scopes=summary, costs_core_s=costs)
+        return projection
+    future: dict[str, float] = {}
+    current = {s["scope"] for s in projection["scopes"]}
+    for other in ("development", "repair_val", "repair_runs", "final_test"):
+        if other in current or _finished(journal, other):
+            continue
+        item = project(loaded, other, closed_loop_runs=_closed_loop_runs(loaded, journal) if other == "repair_runs" else None)
+        for s in item["scopes"]:
+            # a donor keeps its hard bound where one exists (repair runs: runs x per-run cap), else its 90% upper projection
+            bound = (s["by_kind"].get("fragment") or {}).get("per_run_cap_bound_core_h")
+            future[s["scope"]] = max(s["upper90_core_h"], bound) if bound is not None else s["upper90_core_h"]
+    finished = {s for s in _FINISHED_BY if s not in current and s not in future and _finished(journal, s)}
+    proposal = redistribution_proposal(loaded, projection, future=future, finished=finished)
+    projection["redistribution_proposal"] = proposal
+    path = write_projection(loaded, label, projection)
+    journal.log("projection", stage=label, fits=False, scopes=summary, costs_core_s=costs, proposal=proposal, path=str(path))
+    journal.set_stage(label, "unaffordable", scopes=summary, proposal=proposal)
+    short = "; ".join(f"{s['scope']}: upper {s['upper90_core_h']:.1f} vs remaining {s['remaining_core_h']:.1f} core-h" for s in summary if not s["fits"])
+    raise ExecutionStop("unaffordable", f"{label} is projected not to fit under the current authorization ({short}); "
+                                        f"no allowance was moved; proposal in {path}")
+
+
 def _check_time(journal: Journal, auth: Any) -> None:
     elapsed = _elapsed_h(journal)
     if elapsed >= auth.max_elapsed_h:
@@ -196,6 +289,12 @@ def execute(loaded: LoadedBenchmark, *, echo: Callable[[str], None] = print, max
         journal.state["start"] = start_record(loaded)
         journal.save()
         journal.log("execution_start", record=journal.state["start"])
+    try:
+        verify_authorization_record(loaded, journal, auth)
+    except ExecutionStop as stop:
+        journal.log("stop", status=stop.status, message=str(stop))
+        echo(f"STOP {stop.status}: {stop}")
+        return journal.state
     journal.log("resume", elapsed_h=_elapsed_h(journal), ledger=build_guard(loaded).ledger.snapshot())
     try:
         _run_stages(loaded, journal, auth, echo=echo, max_runs=max_runs)
@@ -247,6 +346,8 @@ def _run_stages(loaded: LoadedBenchmark, journal: Journal, auth: Any, *, echo: C
                 break
             if journal.stage(name).get("status") == "done":
                 continue
+        if q >= 1 and journal.stage(name).get("status") != "running":  # an expansion starts only if it is projected to fit whole
+            gate(loaded, journal, name, "initial_model", qualification_stage=q)
         journal.set_stage(name, "running")
         journal.next_action(f"label --stage initial_model --qualification-stage {q}; qualify --stage {q}")
         labels = label_stage(loaded, "initial_model", qualification_stage=q, echo=echo)
@@ -266,6 +367,7 @@ def _run_stages(loaded: LoadedBenchmark, journal: Journal, auth: Any, *, echo: C
     # 2. development references, failures, fidelity audit, eligibility
     _check_time(journal, auth)
     if not journal.done("development"):
+        gate(loaded, journal, "development", "development")
         journal.set_stage("development", "running")
         journal.next_action("label --stage development; failures; fidelity-audit")
         labels = label_stage(loaded, "development", echo=echo)
@@ -287,6 +389,7 @@ def _run_stages(loaded: LoadedBenchmark, journal: Journal, auth: Any, *, echo: C
     # 3. repair-validation references (promotion evidence)
     _check_time(journal, auth)
     if not journal.done("repair_val"):
+        gate(loaded, journal, "repair_val", "repair_val")
         journal.set_stage("repair_val", "running")
         labels = label_stage(loaded, "repair_val", echo=echo)
         if labels["missing"]:
@@ -320,6 +423,7 @@ def _run_stages(loaded: LoadedBenchmark, journal: Journal, auth: Any, *, echo: C
         journal.save()
         journal.log("run_order_fixed", n_runs=len(journal.state["run_order"]), families=families, arms=arms)
     if not journal.done("repair_runs"):
+        gate(loaded, journal, "repair_runs_projection", "repair_runs")
         _repair_runs(loaded, journal, auth, echo=echo, max_runs=max_runs)
 
     # 6. freeze outcomes, then sealed final-test labels and evaluation
@@ -327,6 +431,7 @@ def _run_stages(loaded: LoadedBenchmark, journal: Journal, auth: Any, *, echo: C
         freeze_outcomes(loaded, journal)
     _check_time(journal, auth)
     if not journal.done("final_test"):
+        gate(loaded, journal, "final_test_projection", "final_test")
         journal.set_stage("final_test", "running")
         labels = label_stage(loaded, "final_test", echo=echo)
         if labels["missing"]:
@@ -428,4 +533,4 @@ def freeze_outcomes(loaded: LoadedBenchmark, journal: Journal) -> dict[str, Any]
     return payload
 
 
-__all__ = ["ExecutionStop", "Journal", "eligibility", "execute", "fixed_run_order", "freeze_outcomes", "start_record"]
+__all__ = ["ExecutionStop", "Journal", "eligibility", "execute", "fixed_run_order", "freeze_outcomes", "gate", "start_record", "verify_authorization_record"]

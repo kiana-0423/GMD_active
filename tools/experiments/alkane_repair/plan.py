@@ -83,7 +83,7 @@ def measured_timings(loaded: LoadedBenchmark) -> dict[str, Any]:
             "md_steps_per_s": _stats(md_rates)}
 
 
-def build_plan(loaded: LoadedBenchmark) -> dict[str, Any]:
+def build_plan(loaded: LoadedBenchmark, *, write: bool = True) -> dict[str, Any]:
     from .repair import run_matrix
 
     config = loaded.config
@@ -174,7 +174,8 @@ def build_plan(loaded: LoadedBenchmark) -> dict[str, Any]:
                                 "a stage budget would be exceeded -> the job is not started",
                                 "budgets.repair_runs reached -> no further repair run"],
             "statement": "costs from measured timings of earlier runs on this machine; repair-run DFT is an upper bound"}
-    write_json(loaded.root / "plan" / "execution_plan.json", plan)
+    if write:
+        write_json(loaded.root / "plan" / "execution_plan.json", plan)
     return plan
 
 

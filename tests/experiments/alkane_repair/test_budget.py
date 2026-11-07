@@ -176,3 +176,123 @@ def test_attempt_cap_follows_the_launcher(bench) -> None:
     wall, grace = timeout_of_launcher(bench.alpha.config.cp2k.launcher)
     assert attempt_cap_core_s(auth) == pytest.approx((wall + grace) * auth.cores_per_job)
     assert timeout_of_launcher(["/bin/sh", "-c", "x"]) is None
+
+
+# ---------------------------------------------------------------------------------------------- amendments
+
+
+def _amend(bench, *entries) -> Path:
+    path = bench.path.parent / f"{bench.config.name}_authorization_amendments.yaml"
+    path.write_text(yaml.safe_dump({"amendments": list(entries)}))
+    return path
+
+
+def _entry(**overrides):
+    entry = {"id": "A1", "at": "2026-11-07T00:00:00Z", "granted_by": "user", "statement": "raise q0", "rationale": "measured costs",
+             "changes": {"initial_model_q0_core_h": {"from": 1.0, "to": 0.8}}, "unchanged": {"total_core_h": 4.0, "stages.initial_model": 1.0}}
+    entry.update(overrides)
+    return entry
+
+
+def test_amendments_chain_and_keep_the_invariants(bench) -> None:
+    from tools.experiments.alkane_repair.budget import authorization_path
+
+    original = authorization_path(bench).read_bytes()
+    _amend(bench, _entry(), _entry(id="A2", changes={"initial_model_q0_core_h": {"from": 0.8, "to": 0.9}}, unchanged={}))
+    auth = load_authorization(bench)
+    assert auth.initial_model_q0_core_h == 0.9 and [a["id"] for a in auth.applied_amendments] == ["A1", "A2"]
+    assert authorization_path(bench).read_bytes() == original  # the original record is never rewritten
+    assert dict(ComputeLedger(bench, auth).limits({"stage": "initial_model", "q": 0}))["initial_model_q0"] == pytest.approx(0.9 * 3600)
+    for bad, match in ((_entry(changes={"initial_model_q0_core_h": {"from": 2.0, "to": 0.8}}), "does not match the current allowance"),
+                       (_entry(changes={"initial_model_q0_core_h": {"from": 1.0, "to": 1.5}}), "exceeds the initial-model allowance"),
+                       (_entry(changes={"stages.repair_runs": {"from": 1.0, "to": 2.0}}), "exceeds the protocol budget|more than the total"),
+                       (_entry(changes={"cores_per_job": {"from": 2, "to": 4}}), "not an amendable allowance"),
+                       (_entry(unchanged={"total_core_h": 5.0}), "declared unchanged"),
+                       (_entry(unchanged={"initial_model_q0_core_h": 1.0}), "declared unchanged")):
+        _amend(bench, bad)
+        with pytest.raises(BudgetRefused, match=match):
+            load_authorization(bench)
+    _amend(bench, _entry(), _entry())
+    with pytest.raises(BudgetRefused, match="appears twice"):
+        load_authorization(bench)
+
+
+def test_executor_journals_amendments_and_refuses_tampering(bench) -> None:
+    from gmd_active_learning.contracts.ids import file_sha256
+
+    from tools.experiments.alkane_repair.budget import authorization_path
+    from tools.experiments.alkane_repair.execute import ExecutionStop, Journal, verify_authorization_record
+
+    journal = Journal(bench)
+    journal.state["start"] = {"authorization": {"sha256": file_sha256(authorization_path(bench))}}
+    _amend(bench, _entry())
+    verify_authorization_record(bench, journal, load_authorization(bench))
+    verify_authorization_record(bench, journal, load_authorization(bench))  # journalled once
+    events = [json.loads(line) for line in journal.journal_path.read_text().splitlines()]
+    assert [e["event"] for e in events] == ["authorization_amendment"] and events[0]["amendment"]["id"] == "A1"
+    assert events[0]["effective"]["initial_model_q0_core_h"] == 0.8
+    _amend(bench, _entry(rationale="edited afterwards"))
+    with pytest.raises(ExecutionStop, match="changed after it was recorded"):
+        verify_authorization_record(bench, journal, load_authorization(bench))
+    _amend(bench)
+    with pytest.raises(ExecutionStop, match="missing from the amendments file"):
+        verify_authorization_record(bench, journal, load_authorization(bench))
+    _amend(bench, _entry())
+    path = authorization_path(bench)
+    path.write_text(path.read_text().replace("total_core_h: 4.0", "total_core_h: 4.0 # edited"))
+    with pytest.raises(ExecutionStop, match="original authorization file changed"):
+        verify_authorization_record(bench, journal, load_authorization(bench))
+
+
+def test_submit_of_an_existing_job_is_reconciled_not_refused(bench, tmp_path: Path) -> None:
+    from tools.experiments.alkane_repair.budget import would_launch
+
+    auth = load_authorization(bench)
+    work = bench.root / "cp2k_tasks" / "task"
+    assert would_launch(work)
+    work.mkdir(parents=True)
+    (work / "task.json").write_text(json.dumps({"execution": "prepared", "metadata": {"attempts": []}}))
+    assert would_launch(work)
+    (work / "task.json").write_text(json.dumps({"execution": "running", "metadata": {"attempts": [{"n": 1}]}}))
+    assert not would_launch(work)
+    submitted = []
+
+    class Inner:
+        def work_dir_for(self, task_id: str) -> Path:
+            return work
+
+        def submit(self, task: str) -> str:
+            submitted.append(task)
+            return task
+
+    full = BudgetGuard(ComputeLedger(bench, auth), lambda kind: auth.total_core_h * 3600 * 2, bench.root / "execution" / "journal.jsonl")
+    service = GuardedService(Inner(), full, kind_of=lambda w: "full")
+    assert service.submit("t") == "t" and submitted == ["t"]  # no room for a new job, but this one already exists
+    (work / "task.json").write_text(json.dumps({"execution": "prepared", "metadata": {"attempts": []}}))
+    with pytest.raises(BudgetRefused):
+        service.submit("t")
+
+
+def test_gate_stops_an_unaffordable_stage_with_a_total_preserving_proposal(bench) -> None:
+    from tools.experiments.alkane_repair.execute import ExecutionStop, Journal, gate
+
+    auth = load_authorization(bench)
+    records = load_records(bench.root)
+    n_dev = len({r["parent_id"] for r in records if r["partition"] == "development"})
+    cost_h = 1.5 * auth.stages["development"] / n_dev  # measured full-label cost that makes development unaffordable
+    now = time.time()
+    wall = cost_h * 3600 / auth.cores_per_job
+    for i, record in enumerate([r for r in records if r["partition"] in ("id_train", "id_val")][:3]):
+        _attempt(_task(bench.root / "cp2k_tasks", f"q{i}", record["parent_id"]), "01", started=now - 10000 + i * 1000, ended=now - 10000 + i * 1000 + wall)
+    journal = Journal(bench)
+    journal.state["stages"]["qualification_q0"] = {"status": "done", "accepted": True}
+    with pytest.raises(ExecutionStop, match="projected not to fit"):
+        gate(bench, journal, "development", "development")
+    state = journal.stage("development")
+    assert state["status"] == "unaffordable" and not journal.done("development")
+    proposal = state["proposal"]
+    if proposal["feasible"]:
+        assert proposal["sum_after"] == pytest.approx(sum(auth.stages.values())) and proposal["proposed_stages"]["development"] > auth.stages["development"]
+        assert all(t["to"] == "development" or t["to"] in proposal["deficits"] for t in proposal["transfers"])
+    assert load_authorization(bench).stages == auth.stages  # nothing is moved automatically
+    assert (bench.root / "execution" / "projections" / "development.json").is_file()

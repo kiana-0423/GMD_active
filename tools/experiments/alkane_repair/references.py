@@ -146,7 +146,7 @@ def label_stage(loaded: LoadedBenchmark, stage: str, *, qualification_stage: int
 
     from tools.experiments.alkane_hotspots.labels import LabelRequest, LabelRunner, LabelStore, build_service, cp2k_provenance, label_id_for, parent_region
 
-    from .budget import BudgetRefused, GuardedService, build_guard
+    from .budget import BudgetRefused, GuardedService, build_guard, would_launch
 
     require_frozen(loaded)
     alpha, structures = stage_structures(loaded, stage, qualification_stage=qualification_stage)
@@ -178,7 +178,8 @@ def label_stage(loaded: LoadedBenchmark, stage: str, *, qualification_stage: int
         if stage == "initial_model":
             scope["q"] = 0 if record["partition"] == "id_val" or record["base_id"] in q0_bases else 1
         try:
-            guard.require_room(scope, "full", label=record["parent_id"])
+            if would_launch(Path(raw_service.work_dir_for(raw_service.task_id_for(region)))):  # an in-flight job is reconciled, not re-checked
+                guard.require_room(scope, "full", label=record["parent_id"])
         except BudgetRefused as exc:
             outcome["not_started"].append({"parent_id": record["parent_id"], "reason": str(exc)})
             continue
@@ -267,7 +268,7 @@ def fidelity_audit(loaded: LoadedBenchmark, *, run_labels: bool = True, max_wall
     require_frozen(loaded)
     selection = install_fidelity_selection(loaded)
     setting = selection["setting"]
-    from .budget import BudgetRefused, GuardedService, build_guard
+    from .budget import BudgetRefused, GuardedService, build_guard, would_launch
 
     guard = build_guard(loaded)
     raw_service = build_service(loaded.alpha)
@@ -283,7 +284,8 @@ def fidelity_audit(loaded: LoadedBenchmark, *, run_labels: bool = True, max_wall
         record = store.get(label_id)
         if (record is None or record["status"] != "valid") and run_labels:
             try:
-                guard.require_room({"stage": "fidelity_audit"}, "fragment", label=f"audit:{spec['parent_id']}:{spec['shape']}")
+                if would_launch(Path(raw_service.work_dir_for(raw_service.task_id_for(spec["region"])))):
+                    guard.require_room({"stage": "fidelity_audit"}, "fragment", label=f"audit:{spec['parent_id']}:{spec['shape']}")
                 room = True
             except BudgetRefused as exc:
                 room, refusal = False, str(exc)
