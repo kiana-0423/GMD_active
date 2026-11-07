@@ -318,7 +318,10 @@ def fig_learning_curves(curves: Mapping[str, Sequence[Sequence[Mapping[str, Any]
         depth = min(len(rep) for rep in reps)
         mean_x = [np.mean([rep[k][x_key] for rep in reps]) / scale for k in range(depth)]
         mean_y = [np.mean([rep[k][metric] for rep in reps]) for k in range(depth)]
-        ax.plot(mean_x, mean_y, color=colour, linewidth=2.0, marker="o", markersize=5, label=f"{ARM_LABELS.get(name, name)} (n={len(reps)})")
+        idle = all(not (rep[-1].get("n_labels") or 0) for rep in reps)  # nothing acquired in any repetition
+        label = f"{ARM_LABELS.get(name, name)} (n={len(reps)})" + (": not exercised, 0 labels" if idle else "")
+        ax.plot(mean_x, mean_y, color=colour, linewidth=2.0, marker="o", markersize=5, label=label,
+                markerfacecolor="none" if idle else colour)
         plotted += 1
     if not plotted:
         mark_missing(ax, "no executed arm runs")

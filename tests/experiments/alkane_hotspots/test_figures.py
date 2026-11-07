@@ -65,3 +65,13 @@ def test_missing_data_is_labelled_not_fabricated(make, tmp_path: Path) -> None:
 
 def test_colour_follows_the_arm() -> None:
     assert fg.colour_for("phal_local", ["phal_local"]) == fg.colour_for("phal_local", ["random_local", "no_lj", "phal_local"])
+
+
+def test_learning_curve_legend_marks_arms_that_acquired_nothing() -> None:
+    curves = {"random_local": [[{"cumulative_cpu_core_s": 0.0, "n_labels": 0, "force_rmse": 0.7},
+                                {"cumulative_cpu_core_s": 3600.0, "n_labels": 4, "force_rmse": 0.5}]],
+              "phal_local": [[{"cumulative_cpu_core_s": 0.0, "n_labels": 0, "force_rmse": 0.7},
+                              {"cumulative_cpu_core_s": 0.0, "n_labels": 0, "force_rmse": 0.7}]]}
+    fig = fg.fig_learning_curves(curves)
+    labels = [text.get_text() for text in fig.axes[0].get_legend().get_texts()]
+    assert labels[0].endswith("(n=1)") and labels[1].endswith("(n=1): not exercised, 0 labels")
