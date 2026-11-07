@@ -1,0 +1,460 @@
+{
+  "created_at": "2026-11-07T01:13:46+00:00",
+  "config": "<GMD_active>/configs/demos/alkane_hotspots/closed_loop_pilot_v2.yaml",
+  "run_id": "alkane-recovery-pilot",
+  "smoke_only": false,
+  "interruption": {
+    "controller_pid": 50405,
+    "signal": "SIGKILL",
+    "returncode": -9,
+    "killed_after_s": 22.103047500015236,
+    "snapshot_after_kill": {
+      "tasks": [
+        {
+          "task_id": "label-af6d1ae77ba4c71c",
+          "state": "submitted",
+          "cycle": 0,
+          "attempt": 1,
+          "job_id": "50520"
+        }
+      ],
+      "task_dirs": [
+        "label-af6d1ae77ba4c71c"
+      ],
+      "attempts": {
+        "label-af6d1ae77ba4c71c": [
+          {
+            "index": 1,
+            "stage": "sp",
+            "kind": "initial",
+            "job_id": "50520",
+            "submitted_at": "2026-11-07T01:14:06+00:00",
+            "pgid": 50520,
+            "state": "running"
+          }
+        ]
+      }
+    },
+    "cp2k_jobs_alive_after_kill": {
+      "label-af6d1ae77ba4c71c:1": true
+    },
+    "note": "local CP2K jobs run in their own session and survive the controller by design, so a restart can adopt them"
+  },
+  "resume": {
+    "final_stage": "done",
+    "summary": {
+      "run_id": "alkane-recovery-pilot",
+      "stage": "done",
+      "cycle": 0,
+      "active_model_id": "model-265a4764b6d11e5d",
+      "active_dataset_version": "dsv-3a19994e859756c2",
+      "segments": [
+        {
+          "segment_index": 0,
+          "cycle": 0,
+          "model_id": "model-314c099fc32fc306",
+          "status": "completed",
+          "end_step": 2000
+        }
+      ],
+      "events": 3,
+      "candidates": {
+        "pending": 0,
+        "selected": 0,
+        "labeling": 0,
+        "labeled": 1,
+        "rejected": 2,
+        "invalid": 0,
+        "failed": 0
+      },
+      "tasks": {
+        "submitting": 0,
+        "submitted": 0,
+        "unknown": 0,
+        "collected": 0,
+        "ingested": 1,
+        "invalid": 0,
+        "failed": 0
+      },
+      "samples": 1,
+      "models": [
+        {
+          "model_id": "model-314c099fc32fc306",
+          "state": "retired",
+          "metrics": {
+            "energy_rmse_per_atom": 0.020343811423008878,
+            "force_rmse": 0.505909258028807,
+            "n_validation": 4.0
+          }
+        },
+        {
+          "model_id": "model-265a4764b6d11e5d",
+          "state": "promoted",
+          "metrics": {
+            "energy_rmse_per_atom": 0.007122195113931874,
+            "force_rmse": 0.49099132660981426,
+            "n_validation": 4.0
+          }
+        }
+      ],
+      "promotions": [
+        {
+          "model_id": "model-314c099fc32fc306",
+          "previous_model_id": null,
+          "action": "promote",
+          "reason": "initial model"
+        },
+        {
+          "model_id": "model-265a4764b6d11e5d",
+          "previous_model_id": "model-314c099fc32fc306",
+          "action": "promote",
+          "reason": "cycle 0 gates passed"
+        }
+      ],
+      "rounds": [
+        {
+          "round_id": 0,
+          "n_events": 3,
+          "n_candidates": 3,
+          "n_selected": 1,
+          "n_rejected": 2,
+          "rejected_reasons": {
+            "cycle_budget": 2
+          }
+        }
+      ]
+    },
+    "verification": {
+      "passed": true,
+      "problems": [],
+      "adopted": [
+        {
+          "task_id": "label-af6d1ae77ba4c71c",
+          "job_id": "50520",
+          "same_job_after_resume": true,
+          "n_initial_attempts": 1,
+          "later_attempts": []
+        }
+      ],
+      "n_tasks": 1,
+      "n_samples": 1,
+      "n_label_files": 1,
+      "n_dataset_versions": 2,
+      "new_task_dirs_after_resume": []
+    }
+  },
+  "segment_with_promoted_model": {
+    "reason": "promoted model drives the MD",
+    "segment_index": 1,
+    "status": "completed",
+    "start_step": 2000,
+    "end_step": 2200,
+    "model_id": "model-265a4764b6d11e5d",
+    "previous_model_id": "model-314c099fc32fc306",
+    "gmd_status": {
+      "model_changed_from": "39c3cf34fb8a20d2ed5545288aa0c06ba55b2bcc847de09e69d54d82971717ba",
+      "start_step": 2000,
+      "step": 2200,
+      "state": "completed"
+    },
+    "model_change": [
+      {
+        "kind": "model_change",
+        "note": "potential-energy jump from replacing the model at fixed coordinates (restart boundary); not integration drift",
+        "old_segment": 0,
+        "new_segment": 1,
+        "old_model_id": "model-314c099fc32fc306",
+        "new_model_id": "model-265a4764b6d11e5d",
+        "boundary_step": 2000,
+        "energy_old_model_ev": -3028.97900390625,
+        "energy_new_model_ev": -3028.4833984375,
+        "jump_ev": 0.49560546875,
+        "same_coordinates": true,
+        "max_position_difference": 0.0,
+        "reevaluated": {
+          "configuration_step": 2000,
+          "energy_old_model_ev": -3028.97900390625,
+          "energy_new_model_ev": -3028.4833984375,
+          "jump_ev": 0.49560546875,
+          "source": "both exports re-evaluated on the old segment's last frame"
+        },
+        "new_first_step": 2000,
+        "jump_ev_per_atom": 0.009912109375
+      }
+    ]
+  },
+  "strict_gate_audit": {
+    "model_id": "model-265a4764b6d11e5d",
+    "metrics": {
+      "energy_rmse_per_atom": 0.007122195113931874,
+      "force_rmse": 0.49099132660981426,
+      "n_validation": 4.0
+    },
+    "parent_metrics": {
+      "energy_rmse_per_atom": 0.020343811423008878,
+      "force_rmse": 0.5059092593977997,
+      "n_validation": 4.0
+    },
+    "strict_gates": {
+      "max_force_rmse": 0.05,
+      "max_energy_rmse_per_atom": null,
+      "max_relative_regression": 0.0,
+      "require_validation_samples": 1,
+      "require_export_validation": true,
+      "export_max_force_deviation": 0.0001,
+      "require_engine_smoke_test": true
+    },
+    "strict_report": {
+      "passed": false,
+      "checks": {
+        "validation_samples": {
+          "passed": true,
+          "value": 4,
+          "required": 1
+        },
+        "force_rmse": {
+          "passed": false,
+          "value": 0.49099132660981426,
+          "limit": 0.05
+        },
+        "no_regression_vs_active": {
+          "passed": true,
+          "value": 0.49099132660981426,
+          "limit": 0.5059092593977997,
+          "parent": 0.5059092593977997
+        },
+        "export_matches_checkpoint": {
+          "passed": true,
+          "value": 9.5367431640625e-07,
+          "limit": 0.0001
+        },
+        "engine_smoke_test": {
+          "passed": true,
+          "detail": {
+            "passed": true,
+            "status": "completed",
+            "frames": 2,
+            "detail": {
+              "decisions": []
+            }
+          }
+        }
+      }
+    },
+    "failed_checks": [
+      "force_rmse"
+    ],
+    "outcome": "rolled_back",
+    "rolled_back": true,
+    "rejected_model_id": "model-265a4764b6d11e5d",
+    "restored_model_id": "model-314c099fc32fc306",
+    "rejected_state": "rejected",
+    "restored_state": "promoted"
+  },
+  "restart_after_rollback": {
+    "reason": "restart after rollback",
+    "segment_index": 2,
+    "status": "completed",
+    "start_step": 2200,
+    "end_step": 2400,
+    "model_id": "model-314c099fc32fc306",
+    "previous_model_id": "model-265a4764b6d11e5d",
+    "gmd_status": {
+      "model_changed_from": "0d7026f3a0eb653a1061b0de21b8673578deda3c51d3940b7529f476077bb635",
+      "start_step": 2200,
+      "step": 2400,
+      "state": "completed"
+    },
+    "model_change": [
+      {
+        "kind": "model_change",
+        "note": "potential-energy jump from replacing the model at fixed coordinates (restart boundary); not integration drift",
+        "old_segment": 1,
+        "new_segment": 2,
+        "old_model_id": "model-265a4764b6d11e5d",
+        "new_model_id": "model-314c099fc32fc306",
+        "boundary_step": 2200,
+        "energy_old_model_ev": -3028.81396484375,
+        "energy_new_model_ev": -3027.9453125,
+        "jump_ev": 0.86865234375,
+        "same_coordinates": true,
+        "max_position_difference": 0.0,
+        "reevaluated": {
+          "configuration_step": 2200,
+          "energy_old_model_ev": -3028.81396484375,
+          "energy_new_model_ev": -3027.9453125,
+          "jump_ev": 0.86865234375,
+          "source": "both exports re-evaluated on the old segment's last frame"
+        },
+        "new_first_step": 2200,
+        "jump_ev_per_atom": 0.017373046875
+      }
+    ]
+  },
+  "cancellation": {
+    "task_id": "label-920bb7c901bf08ed",
+    "job_id": "51657",
+    "pgid": 51657,
+    "processes_before_cancel": [
+      {
+        "pid": 51657,
+        "stat": "Ss",
+        "command": "/bin/sh <artifacts_root>/closed_loop_v2/pilot_v2/recovery/cancellation_tasks/label-920bb7c901bf08ed/attempts/01-"
+      },
+      {
+        "pid": 51659,
+        "stat": "R",
+        "command": "cp2k.psmp -i sp.inp -o sp.out"
+      }
+    ],
+    "cp2k_output_bytes_at_cancel": 31891,
+    "settle_s": 3.0,
+    "processes_after_cancel": [],
+    "cancel_latency_s": 0.053038917016237974,
+    "execution_after_cancel": "cancelled",
+    "attempt": {
+      "state": "cancelled",
+      "raw_state": "CANCELLED",
+      "exit_code": null,
+      "failure_class": "cancelled",
+      "retry_decision": "cancelled jobs are never retried automatically",
+      "reasons": [
+        "job ended cancelled (exit code None)",
+        "no SCF convergence marker in the output",
+        "no total energy (ENERGY| Total FORCE_EVAL) in the output",
+        "no force block in the output",
+        "CP2K did not terminate normally (no 'PROGRAM ENDED'; output truncated or killed)"
+      ]
+    },
+    "failure_reasons": [
+      "attempt 1 (sp): cancelled: job ended cancelled (exit code None); no SCF convergence marker in the output; no total energy (ENERGY| Total FORCE_EVAL) in the output; no force block in the output; CP2K did not terminate normally (no 'PROGRAM ENDED'; output truncated or killed)",
+      "cancelled jobs are never retried automatically"
+    ],
+    "checks": {
+      "no_live_process_in_job_group": true,
+      "task_execution_cancelled": true,
+      "task_finished": true,
+      "single_attempt_no_retry": true,
+      "failure_class_cancelled": true,
+      "poll_after_cancel_no_resubmission": true,
+      "workflow_bridge_reports_cancelled": true,
+      "cancel_marker_written": true
+    },
+    "passed": true
+  },
+  "final_summary": {
+    "run_id": "alkane-recovery-pilot",
+    "stage": "done",
+    "cycle": 0,
+    "active_model_id": "model-314c099fc32fc306",
+    "active_dataset_version": "dsv-3a19994e859756c2",
+    "segments": [
+      {
+        "segment_index": 0,
+        "cycle": 0,
+        "model_id": "model-314c099fc32fc306",
+        "status": "completed",
+        "end_step": 2000
+      },
+      {
+        "segment_index": 1,
+        "cycle": 0,
+        "model_id": "model-265a4764b6d11e5d",
+        "status": "completed",
+        "end_step": 2200
+      },
+      {
+        "segment_index": 2,
+        "cycle": 0,
+        "model_id": "model-314c099fc32fc306",
+        "status": "completed",
+        "end_step": 2400
+      }
+    ],
+    "events": 3,
+    "candidates": {
+      "pending": 0,
+      "selected": 0,
+      "labeling": 0,
+      "labeled": 1,
+      "rejected": 2,
+      "invalid": 0,
+      "failed": 0
+    },
+    "tasks": {
+      "submitting": 0,
+      "submitted": 0,
+      "unknown": 0,
+      "collected": 0,
+      "ingested": 1,
+      "invalid": 0,
+      "failed": 0
+    },
+    "samples": 1,
+    "models": [
+      {
+        "model_id": "model-314c099fc32fc306",
+        "state": "promoted",
+        "metrics": {
+          "energy_rmse_per_atom": 0.020343811423008878,
+          "force_rmse": 0.505909258028807,
+          "n_validation": 4.0
+        }
+      },
+      {
+        "model_id": "model-265a4764b6d11e5d",
+        "state": "rejected",
+        "metrics": {
+          "energy_rmse_per_atom": 0.007122195113931874,
+          "force_rmse": 0.49099132660981426,
+          "n_validation": 4.0
+        }
+      }
+    ],
+    "promotions": [
+      {
+        "model_id": "model-314c099fc32fc306",
+        "previous_model_id": null,
+        "action": "promote",
+        "reason": "initial model"
+      },
+      {
+        "model_id": "model-265a4764b6d11e5d",
+        "previous_model_id": "model-314c099fc32fc306",
+        "action": "promote",
+        "reason": "cycle 0 gates passed"
+      },
+      {
+        "model_id": "model-314c099fc32fc306",
+        "previous_model_id": "model-265a4764b6d11e5d",
+        "action": "rollback",
+        "reason": "strict gate audit failed ['force_rmse'] on real validation metrics"
+      }
+    ],
+    "rounds": [
+      {
+        "round_id": 0,
+        "n_events": 3,
+        "n_candidates": 3,
+        "n_selected": 1,
+        "n_rejected": 2,
+        "rejected_reasons": {
+          "cycle_budget": 2
+        }
+      }
+    ]
+  },
+  "image_check": {
+    "n_frames_checked": 242,
+    "min_image_distance": 20.71306508854734,
+    "min_at": {
+      "run_id": "alkane-recovery-pilot",
+      "step": 30,
+      "model_version": "model-314c099fc32fc306"
+    },
+    "below_margin": [],
+    "force_receptive_field": 16.0,
+    "margin": 4.0,
+    "enabled": true
+  }
+}

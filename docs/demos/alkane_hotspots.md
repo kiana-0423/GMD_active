@@ -1099,5 +1099,88 @@ Identical to v1 except for three things:
 - the output directory is `closed_loop_v2`;
 - the run id is new.
 
-It runs after the C32 transfer has released CP2K (`exclusive_cp2k`). Results: "Executed: pilot v2"
-below, or "not executed" if absent.
+It runs after the C32 transfer has released CP2K (`exclusive_cp2k`).
+
+### Executed: pilot v2 (`closed_loop_pilot_v2.yaml`, 2026-11-07), post-hoc
+
+Real run on the same parent (`C16-b01-normal0`), the same MD settings and the same frozen fidelity
+setting as v1. Path-sanitised copies of the reports: `results/closed_loop_pilot_v2/`. Config hash
+`335f4717…`, CP2K settings hash `27635ef6…`. Wall time: 16 min for the loop, 3 min for frozen-eval,
+8 min for the recovery demo.
+
+**The loop.** Two cycles of 2000 MD steps (1 ps each), at most 2 labels per cycle.
+
+| | Cycle 0 | Cycle 1 |
+|---|---|---|
+| Events (trigger steps) | 3 (170, 980, 1260) | 7 (2050-3540) |
+| Candidates labeled / rejected | 2 / 1 (`cycle_budget`) | 1 / 6 (`duplicate`) |
+| Fragment labels (atoms, core-s) | 44 atoms 2452; 26 atoms 847 | 29 atoms 494 |
+| Fine-tune (wall) | 16 s | 29 s |
+| Validation force RMSE after promotion (eV/A) | 0.506 → 0.460 | 0.460 → 0.398 |
+
+- **Triggers.** Every event fired on `force_large`, `committee_deviation` and `lj_residual` at once
+  (max score 6.3-14.0), then honoured the 200-step cooldown. With this model the monitor fires
+  about every 250 steps on a normal chain at 300 K, so the trigger does not discriminate here; the
+  labeling budget and the duplicate filter do the selection.
+- **Duplicate filter.** In cycle 1, six of the seven candidates were within `diversity_threshold`
+  0.1 of an already-labeled region, so the one labeled was the lowest-scoring candidate (6.48). The
+  filter behaves as configured. For a normal chain, the pair-distance histograms of different
+  regions are close, and at 0.1 this filter, not the score, decides what is labeled.
+- **Labels.** All 3 were valid on the first attempt; the extractor refused nothing (every event
+  geometry kept the parent topology); 1.05 core-h of measured DFT out of the 6 core-h budget.
+- **Promotions.** Both fine-tuned models passed the pre-registered gates (force RMSE <= 1.0 eV/A,
+  no more than 5 % worse than the active model, export within 1e-4 eV/A of the checkpoint, engine
+  smoke test). Validation is 4 full-DFT structures, so the RMSE steps are indicative only.
+- **Model change at step 2000.** Both exports were re-evaluated on the old segment's last frame:
+  -3028.979 eV with the old model, -3026.733 eV with the new one, a jump of 2.25 eV (0.045 eV/atom)
+  at identical coordinates. This is the model replacement, not integration drift. The second
+  promotion came at the end of the run, so no segment ran on it.
+- **Image check.** 401 frames, minimum image distance 20.71 A, none inside the 4 A margin.
+- **Provenance.** Each model lists its parent, dataset version and samples; every sample resolves
+  to its label id and parent (`provenance` in the report): 4 initial_train full labels, then +2 and
+  +1 fragment labels.
+
+**Frozen-model evaluation** (initial vs final model; 3 seeds × 4000 steps = 2 ps, frames every 20
+steps after the first 1000, chain observables over frames with the parent topology only):
+
+| Model | Intact frames, seeds 1/2/3 | End-to-end (A) | Radius of gyration (A) | Gauche fraction |
+|---|---|---|---|---|
+| initial | 15/151, 151/151, 0/151 | 13.3 ± 1.5 | 4.59 ± 0.26 | 0.46 |
+| final | 148/151, 148/151, 151/151 | 16.4 ± 1.7 | 5.49 ± 0.32 | 0.25 |
+
+- The initial model breaks the chain in two of three seeds; the final model keeps it intact in 447
+  of 453 frames, with short breaks (3 frames each) in seeds 1 and 2. Three fragment labels of 26-44
+  atoms produced this change.
+- The initial model's observables come from 166 intact frames, mostly seed 2, so the two rows are
+  not like-for-like statistics. No DFT reference trajectory exists to say which conformational
+  statistics are right.
+- Image check: 1206 frames, minimum 18.76 A (final model, seed 2). 82 frames fell inside the 4 A
+  margin but none reached the 16 A receptive field, which is the hard stop. The box was sized for the
+  start structure's 20.5 A diameter plus a 1 A `stretch_allowance`; the more extended chains of the
+  final model exceed that. Longer runs need a larger `stretch_allowance`.
+
+**Recovery demonstration** (`recovery_report.json`; real CP2K and GMD; the run id is separate):
+
+- **Interrupt.** The controller was killed with SIGKILL 22 s into the run, while one CP2K fragment
+  job was running. The job survived (it runs in its own session).
+- **Reconcile.** The resumed controller adopted the same job (same job id, no new attempt, no new
+  task directory), ingested its label, trained and promoted a model, and ran 200 MD steps on it.
+  Verification passed with no problems. The energy jump at that model change was 0.50 eV.
+- **Reject and roll back.** The strict audit (`recovery.strict_promotion`: validation force RMSE
+  <= 0.05 eV/A, no regression) failed on the real validation metrics: 0.491 eV/A against 0.05.
+  The model was marked rejected and the initial model restored. The 0.05 eV/A bound is chosen so
+  that a pilot-scale model fails it; this exercises the rollback path on real data, it does not
+  judge the model.
+- **Restart after rollback.** 200 MD steps on the restored model, energy jump 0.87 eV at the swap.
+- **Cancellation.** A separate CP2K job was cancelled mid-SCF. The job group had no live process
+  afterwards, the attempt was recorded as `cancelled` and not retried, and a later poll did not
+  resubmit it (8 of 8 checks passed; cancel latency 0.05 s).
+
+**What this supports.** On one C16H34 trajectory, the closed loop runs end to end on real programs:
+events from MD, local fragment labels from CP2K with the frozen fidelity setting, fine-tuning, gated
+promotion, a measured energy jump at each model change, and frozen-model evaluation. A few local
+labels turned a model that dissociates the chain into one that keeps it intact for 2 ps in most
+frames. Interruption, adoption, rollback and cancellation work on real jobs. **What it does not
+support:** any statement about efficiency or about PHAL's triggers being better than an
+alternative (one trajectory, no comparison arm; the model study is the place for that), and any
+claim about conformational statistics.
