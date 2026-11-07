@@ -21,11 +21,16 @@ under `docs/demos/alkane_hotspots/results/`.
   calibration and on final_eval (`results/fidelity_pilot/`);
 - the real-CP2K smoke run (C8H18 at smoke-only settings);
 - the C32H66 size transfer of the frozen fragment setting: 2 parents, 2 full and 4 fragment labels
-  (`results/fidelity_pilot_c32/`).
+  (`results/fidelity_pilot_c32/`);
+- the pilot model study: v1 (pre-registered), v2, v2b and v2c (post-hoc; `results/model_study_pilot*/`).
+  Only v2c exercised every arm;
+- the pilot closed loop: v1 (no label; the initial model dissociated the chain) and v2 (3 local
+  labels, 2 promotions, frozen-model evaluation, recovery demonstration;
+  `results/closed_loop_pilot_v2/`).
 
-The model study and the closed loop are reported in their own sections, marked
-executed or planned. *Planned, not executed:* the campaign. No number appears on this page unless it
-was measured.
+*Planned, not executed:* the campaign (C16 + C32, 64 parents) and any C64/C128 stage. No number
+appears on this page unless it was measured. Measured DFT so far: 20.0 core-h for the C16 pilot label
+store, 22.0 core-h for the C32 transfer, 1.05 + 0.63 core-h for the closed-loop and recovery labels.
 
 ## Commands
 
@@ -67,14 +72,22 @@ $M label-full       --config $D/pilot.yaml --splits initial_train validation
 $M fidelity-prepare --config $D/pilot.yaml --split final_eval
 $M fidelity-run     --config $D/pilot.yaml --split final_eval
 $M fidelity-report  --config $D/pilot.yaml --split final_eval
-# 2. model study + closed loop, v1 (pre-registered settings) and v2 (post-hoc fixes); same labels
+# 2. model study + closed loop, v1 (pre-registered settings) and v2/v2b/v2c (post-hoc); same labels
 for S in arms_pilot arms_pilot_v2; do
-  $M ground-truth --config $D/pilot.yaml --study $D/$S.yaml
+  $M ground-truth    --config $D/pilot.yaml --study $D/$S.yaml
+  $M receptive-field --config $D/pilot.yaml --study $D/$S.yaml
+done
+$M receptive-field --config $D/pilot.yaml --study $D/arms_pilot_v2.yaml \
+    --checkpoint model_study_v2/models/<round-0 key>/train/member_0/ckpt_best.pt
+A=../alkane_artifacts/pilot   # v2b/v2c reuse the v2 round-0 models (training is idempotent per work dir)
+for V in v2b v2c; do mkdir -p $A/model_study_$V && cp -cR $A/model_study_v2/models $A/model_study_$V/models; done
+for S in arms_pilot arms_pilot_v2 arms_pilot_v2b arms_pilot_v2c; do
   $M arms-run     --config $D/pilot.yaml --study $D/$S.yaml
   $M evaluate     --config $D/pilot.yaml --study $D/$S.yaml
   $M figures      --config $D/pilot.yaml --study $D/$S.yaml
   $M report       --config $D/pilot.yaml --study $D/$S.yaml --publish
 done
+# v2b needs the rank_phal of commit 53abd57 (before cabe099) to reproduce its defective PHAL arms
 for CL in closed_loop_pilot closed_loop_pilot_v2; do
   $M closed-loop-run --config $D/pilot.yaml --closed-loop $D/$CL.yaml
   $M frozen-eval     --config $D/pilot.yaml --closed-loop $D/$CL.yaml
