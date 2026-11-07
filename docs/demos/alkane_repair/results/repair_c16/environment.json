@@ -1,0 +1,67 @@
+{
+ "artifacts_root": "<artifacts_root>",
+ "authorization": {
+  "path": "<config_dir>/repair_c16_authorization.yaml",
+  "sha256": "0984e4326a9fd84ac9c43580635711bc21b2b3318021dd6aac3fa7872ea2cb42"
+ },
+ "benchmark_config": {
+  "path": "<config_dir>/repair_c16.yaml",
+  "sha256": "3841c1183eb3252d06cbabb0cf0906cf68563e1ccda4d54adf1952f7ff89fdbf"
+ },
+ "cp2k": {
+  "executable": "/opt/homebrew/bin/cp2k.psmp",
+  "version": [
+   " CP2K version 2026.2",
+   " Source code revision git:c92cc08"
+  ]
+ },
+ "environment": {
+  "git": {
+   "branch": "phal-migration",
+   "commit": "6e1a3216cad1b21128c42666c162414b5c8afcc7",
+   "dirty": false
+  },
+  "machine": "arm64",
+  "packages": {
+   "PyYAML": "6.0.3",
+   "ase": "3.29.0",
+   "numpy": "2.2.6",
+   "pydantic": "2.14.3",
+   "scipy": "1.17.1",
+   "torch": "2.15.0"
+  },
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "python": "3.11.16"
+ },
+ "execution_start": "2026-11-07T07:25:46+00:00",
+ "execution_start_epoch": 1794036346.777335,
+ "gmd": {
+  "executable": "<workspace>/GMD/build-torch/gmd",
+  "sha256": "8c4d1f5eb9bc94d2349c31ebdda3f183c3a00f23351ff36eb969a559b58d01c3"
+ },
+ "host": "Cancanneeds-MacBook-Pro.local",
+ "platform": "macOS-27.2-arm64-arm-64bit",
+ "repositories": {
+  "GMD": {
+   "commit": "54ac558e30f9fb85a3474f7749016e24aa109a46",
+   "dirty": false,
+   "path": "<workspace>/GMD"
+  },
+  "GMD_SGT": {
+   "commit": "49ece72edabf46e1e5ee9a3949071acc650c7a13",
+   "dirty": true,
+   "path": "<workspace>/GMD_SGT"
+  },
+  "GMD_active": {
+   "commit": "6e1a3216cad1b21128c42666c162414b5c8afcc7",
+   "dirty": false,
+   "path": "<GMD_active>"
+  },
+  "cp2k-ml-scf": {
+   "commit": "0332a18e806d9f24fe0709c2c61724cc076679d8",
+   "dirty": false,
+   "path": "<workspace>/cp2k-ml-scf"
+  }
+ },
+ "sealed_root": "<artifacts_root>/sealed"
+}

@@ -1,13 +1,14 @@
 {
  "assessment": {
   "answers": {
-   "1_initial_model_reliable_in_domain": "not established (pending)",
-   "2_reference_confirmed_failure": "not yet tested (no reference labels of challenge structures)",
-   "3_detected_and_labeled_relevant_region": "not yet tested (no completed closed-loop repair run)",
-   "4_local_labels_improved_independent_predictions": "not yet tested (sealed evaluation not executed)",
-   "5_retention": "not yet tested (sealed evaluation not executed)",
-   "6_physical_signals": "not yet tested (sealed evaluation not executed)",
+   "1_initial_model_reliable_in_domain": "no: stage 0 (24 train structures): not accepted; id_val force RMSE 0.303 eV/A, atom-error p95 1.009 eV/A, 2/18 MD trajectories intact; failed criteria ['id_val_force_rmse', 'id_val_atom_error_p95', 'md_topology']; qualification_q1 unaffordable under the authorization",
+   "2_reference_confirmed_failure": "not tested (execution closed: no qualified initial model) (no reference labels of challenge structures)",
+   "3_detected_and_labeled_relevant_region": "not tested (execution closed: no qualified initial model) (no completed closed-loop repair run)",
+   "4_local_labels_improved_independent_predictions": "not tested (execution closed: no qualified initial model) (sealed evaluation not executed)",
+   "5_retention": "not tested (execution closed: no qualified initial model) (sealed evaluation not executed)",
+   "6_physical_signals": "not tested (execution closed: no qualified initial model) (sealed evaluation not executed)",
    "7_unsupported": [
+    "any claim about local repair, the arms or PHAL: no repair run was executed",
     "equilibrium conformational statistics (no reference ensemble)",
     "chain lengths other than the benchmark's (C64/C128 not attempted)",
     "event-buffering benefit, unless the enabled no-buffering ablation was executed and evaluated",
@@ -16,26 +17,239 @@
    ]
   },
   "implementation": {
+   "closed": true,
    "plan": true,
    "planned_runs": 180,
-   "protocol_frozen": false,
-   "qualification_run": false,
+   "protocol_frozen": true,
+   "qualification_run": true,
    "repair_runs": 0,
    "sealed_evaluation": false,
    "structures": true
   },
-  "scientific_status": "no confirmatory result yet"
+  "scientific_status": "terminated before the scientific question (unaffordable: qualification_q1 is projected not to fit under the current authorization (initial_model: upper 28.3 vs remaining 13.1 core-h)); closed by user: close out after q0 failed qualification and q1 was unaffordable; no further DFT, no amendment, no protocol change"
  },
  "benchmark": "repair_c16",
+ "budget_cancellations": [],
  "compute": {
   "fidelity_audit_core_h": 0.0,
   "note": "measured CP2K CPU core-hours (wall x cores), failed attempts and retries included; repair-run labels are always newly computed (MD frames), so attributed and newly consumed compute coincide for them",
-  "reference_label_stages_core_h": {},
+  "reference_label_stages_core_h": {
+   "initial_model_q0": 43.00411586728361
+  },
   "repair_runs_core_h": 0.0
  },
  "development_failures": null,
+ "execution": {
+  "closed": {
+   "at": "2026-11-07T16:43:25+00:00",
+   "decision": "close out after q0 failed qualification and q1 was unaffordable; no further DFT, no amendment, no protocol change",
+   "elapsed_h": 9.293977429734335,
+   "granted_by": "user",
+   "ledger": {
+    "allowances": {
+     "amendments": [
+      "A1-q0-34",
+      "A2-final-time-reserve"
+     ],
+     "initial_model_q0_core_h": 34.0,
+     "stages_core_h": {
+      "development": 7.0,
+      "fidelity_audit": 3.0,
+      "final_test": 14.0,
+      "initial_model": 45.0,
+      "repair_runs": 165.0,
+      "repair_val": 6.0
+     },
+     "total_core_h": 240.0
+    },
+    "at": "2026-11-07T16:43:25+00:00",
+    "consumed_core_h": {
+     "initial_model_q0": 31.870519286062983,
+     "runs": {},
+     "stages": {
+      "initial_model": 31.870519286062983
+     },
+     "total": 31.870519286062983
+    },
+    "n_attempts": 33,
+    "note": "measured from every attempt directory (completed, failed, cancelled, retried, running); all of it is newly consumed by this benchmark (no cached label of another root is charged here)",
+    "remaining": {
+     "initial_model_q0_core_h": 2.1294807139370175,
+     "stages_core_h": {
+      "development": 7.0,
+      "fidelity_audit": 3.0,
+      "final_test": 14.0,
+      "initial_model": 13.129480713937017,
+      "repair_runs": 165.0,
+      "repair_val": 6.0
+     },
+     "total_core_h": 208.12948071393703
+    },
+    "running": []
+   },
+   "stages": {
+    "freeze": "done",
+    "qualification_q0": "done",
+    "qualification_q1": "unaffordable"
+   },
+   "statement": "proceed with option 1 (close out now: write the deliverables for this outcome; no more compute)",
+   "terminal": {
+    "at": "2026-11-07T16:25:43+00:00",
+    "message": "qualification_q1 is projected not to fit under the current authorization (initial_model: upper 28.3 vs remaining 13.1 core-h); no allowance was moved; proposal in <artifacts_root>/execution/projections/qualification_q1.json",
+    "status": "unaffordable"
+   }
+  },
+  "next_action": "none: closed (report only)",
+  "protocol_sha256": "bf54d50284226e75e99de654d35e4e0734ec0ccf6bf3ad3bb3ffc347debb96dd",
+  "run_order_fixed_at": null,
+  "run_status_counts": {},
+  "stages": {
+   "freeze": {
+    "finished_at": "2026-11-07T07:25:47+00:00",
+    "protocol_sha256": "bf54d50284226e75e99de654d35e4e0734ec0ccf6bf3ad3bb3ffc347debb96dd",
+    "started_at": "2026-11-07T07:25:46+00:00",
+    "status": "done",
+    "structures": {
+     "public": "db7bc1d86d0f6aafbad52f815ec89cf4c055445092488dc5ece314016d119d73",
+     "sealed": "d2239ce5042f278ae030eb1087b8344cfc1608e0eaa365df0fa70a6bf9b220e8"
+    }
+   },
+   "qualification_q0": {
+    "accepted": false,
+    "criteria": {
+     "id_val_atom_error_p95": false,
+     "id_val_force_rmse": false,
+     "md_topology": false,
+     "no_hidden_stabilisation": true
+    },
+    "finished_at": "2026-11-07T16:25:42+00:00",
+    "id_val": {
+     "atom_error_max": 1.740827317761579,
+     "atom_error_mean": 0.437778660853701,
+     "atom_error_p95": 1.0091878187623382,
+     "force_rmse": 0.30314768926879965,
+     "model_force_rms": 1.6652674232266724,
+     "n_atoms": 300,
+     "n_structures": 6,
+     "reference_force_rms": 1.7859472802431442
+    },
+    "started_at": "2026-11-07T07:25:47+00:00",
+    "status": "done"
+   },
+   "qualification_q1": {
+    "finished_at": "2026-11-07T16:25:43+00:00",
+    "proposal": {
+     "deficits": {
+      "initial_model": 15.3
+     },
+     "feasible": false,
+     "statement": "the deficit of initial_model cannot be covered from projected slack without exceeding the total of 240.0 core-h; the stage is unaffordable under the current authorization",
+     "transfers": [
+      {
+       "core_h": 2.9,
+       "from": "repair_runs",
+       "to": "initial_model"
+      },
+      {
+       "core_h": 0.4,
+       "from": "fidelity_audit",
+       "to": "initial_model"
+      }
+     ],
+     "uncovered_core_h": 12.0
+    },
+    "scopes": [
+     {
+      "expected_core_h": 25.496415428850387,
+      "fits": false,
+      "remaining_core_h": 13.129480713937017,
+      "scope": "initial_model",
+      "upper90_core_h": 28.338419783162024
+     }
+    ],
+    "status": "unaffordable"
+   }
+  },
+  "start": {
+   "artifacts_root": "<artifacts_root>",
+   "authorization": {
+    "path": "<config_dir>/repair_c16_authorization.yaml",
+    "sha256": "0984e4326a9fd84ac9c43580635711bc21b2b3318021dd6aac3fa7872ea2cb42"
+   },
+   "benchmark_config": {
+    "path": "<config_dir>/repair_c16.yaml",
+    "sha256": "3841c1183eb3252d06cbabb0cf0906cf68563e1ccda4d54adf1952f7ff89fdbf"
+   },
+   "cp2k": {
+    "executable": "/opt/homebrew/bin/cp2k.psmp",
+    "version": [
+     " CP2K version 2026.2",
+     " Source code revision git:c92cc08"
+    ]
+   },
+   "environment": {
+    "git": {
+     "branch": "phal-migration",
+     "commit": "6e1a3216cad1b21128c42666c162414b5c8afcc7",
+     "dirty": false
+    },
+    "machine": "arm64",
+    "packages": {
+     "PyYAML": "6.0.3",
+     "ase": "3.29.0",
+     "numpy": "2.2.6",
+     "pydantic": "2.14.3",
+     "scipy": "1.17.1",
+     "torch": "2.15.0"
+    },
+    "platform": "macOS-27.2-arm64-arm-64bit",
+    "python": "3.11.16"
+   },
+   "execution_start": "2026-11-07T07:25:46+00:00",
+   "execution_start_epoch": 1794036346.777335,
+   "gmd": {
+    "executable": "<workspace>/GMD/build-torch/gmd",
+    "sha256": "8c4d1f5eb9bc94d2349c31ebdda3f183c3a00f23351ff36eb969a559b58d01c3"
+   },
+   "host": "Cancanneeds-MacBook-Pro.local",
+   "platform": "macOS-27.2-arm64-arm-64bit",
+   "repositories": {
+    "GMD": {
+     "commit": "54ac558e30f9fb85a3474f7749016e24aa109a46",
+     "dirty": false,
+     "path": "<workspace>/GMD"
+    },
+    "GMD_SGT": {
+     "commit": "49ece72edabf46e1e5ee9a3949071acc650c7a13",
+     "dirty": true,
+     "path": "<workspace>/GMD_SGT"
+    },
+    "GMD_active": {
+     "commit": "6e1a3216cad1b21128c42666c162414b5c8afcc7",
+     "dirty": false,
+     "path": "<GMD_active>"
+    },
+    "cp2k-ml-scf": {
+     "commit": "0332a18e806d9f24fe0709c2c61724cc076679d8",
+     "dirty": false,
+     "path": "<workspace>/cp2k-ml-scf"
+    }
+   },
+   "sealed_root": "<artifacts_root>/sealed"
+  },
+  "terminal": {
+   "at": "2026-11-07T16:25:43+00:00",
+   "message": "qualification_q1 is projected not to fit under the current authorization (initial_model: upper 28.3 vs remaining 13.1 core-h); no allowance was moved; proposal in <artifacts_root>/execution/projections/qualification_q1.json",
+   "status": "unaffordable"
+  }
+ },
  "fidelity_audit": null,
  "figures": {
+  "compute": [
+   "compute.pdf",
+   "compute.svg",
+   "compute.png"
+  ],
   "failures": [
    "failures.pdf",
    "failures.svg",
@@ -45,6 +259,11 @@
    "qualification.pdf",
    "qualification.svg",
    "qualification.png"
+  ],
+  "qualification_md": [
+   "qualification_md.pdf",
+   "qualification_md.svg",
+   "qualification_md.png"
   ],
   "region_errors": [
    "region_errors.pdf",
@@ -60,9 +279,71 @@
    "stability.pdf",
    "stability.svg",
    "stability.png"
+  ],
+  "training_curves": [
+   "training_curves.pdf",
+   "training_curves.svg",
+   "training_curves.png"
   ]
  },
- "generated_at": "2026-11-07T05:50:40+00:00",
+ "generated_at": "2026-11-07T16:45:11+00:00",
+ "label_cost_reconciliation": {
+  "basis": "the ledger (attempt files, charged to each attempt's last file write) is the enforcement basis",
+  "differing_tasks": [
+   {
+    "attempts": 2,
+    "label_record_core_h": 12.354152309232289,
+    "ledger_core_h": 1.271203597386678,
+    "parent_id": "C16-r008-ord2",
+    "task_id": "label-91ef50ccbc255dd1"
+   }
+  ],
+  "label_records_core_h": 43.00411586728361,
+  "ledger_core_h": 31.870519286062983,
+  "listed_above_core_s": 300.0
+ },
+ "ledger": {
+  "allowances": {
+   "amendments": [
+    "A1-q0-34",
+    "A2-final-time-reserve"
+   ],
+   "initial_model_q0_core_h": 34.0,
+   "stages_core_h": {
+    "development": 7.0,
+    "fidelity_audit": 3.0,
+    "final_test": 14.0,
+    "initial_model": 45.0,
+    "repair_runs": 165.0,
+    "repair_val": 6.0
+   },
+   "total_core_h": 240.0
+  },
+  "at": "2026-11-07T16:45:11+00:00",
+  "consumed_core_h": {
+   "initial_model_q0": 31.870519286062983,
+   "runs": {},
+   "stages": {
+    "initial_model": 31.870519286062983
+   },
+   "total": 31.870519286062983
+  },
+  "n_attempts": 33,
+  "note": "measured from every attempt directory (completed, failed, cancelled, retried, running); all of it is newly consumed by this benchmark (no cached label of another root is charged here)",
+  "remaining": {
+   "initial_model_q0_core_h": 2.1294807139370175,
+   "stages_core_h": {
+    "development": 7.0,
+    "fidelity_audit": 3.0,
+    "final_test": 14.0,
+    "initial_model": 13.129480713937017,
+    "repair_runs": 165.0,
+    "repair_val": 6.0
+   },
+   "total_core_h": 208.12948071393703
+  },
+  "running": []
+ },
  "monitor_calibration": {},
  "plan": {
   "benchmark": "repair_c16",
@@ -99,7 +380,7 @@
    }
   },
   "cpu_cores_per_cp2k_job": 5,
-  "created_at": "2026-11-07T05:47:07+00:00",
+  "created_at": "2026-11-07T07:25:47+00:00",
   "measured_timings": {
    "fragment_label_core_s": {
     "max": 2045.815167427063,
@@ -579,14 +860,2987 @@
   },
   "passed": true
  },
- "protocol_freeze": null,
+ "projections": {
+  "qualification_q1": {
+   "at": "2026-11-07T16:25:42+00:00",
+   "costs_core_s": {
+    "fragment": {
+     "max": 2045.815167427063,
+     "mean": 638.4771589279175,
+     "n": 50,
+     "own": {
+      "n": 0
+     },
+     "p90": 939.3186668157581,
+     "sd": 234.74787591554835,
+     "source": "plan timing sources (only 0 measured in this execution)"
+    },
+    "full": {
+     "max": 8114.937996864319,
+     "mean": 3824.462314327558,
+     "n": 30,
+     "p90": 5968.080696940422,
+     "sd": 1629.616950732651,
+     "source": "this execution (all attempts per task)"
+    }
+   },
+   "fits": false,
+   "fits_total": true,
+   "margin_core_h": 0.08333333333333333,
+   "need": {
+    "fragment": 0.0,
+    "full": 24.0
+   },
+   "qualification_stage": 1,
+   "redistribution_proposal": {
+    "deficits": {
+     "initial_model": 15.3
+    },
+    "feasible": false,
+    "statement": "the deficit of initial_model cannot be covered from projected slack without exceeding the total of 240.0 core-h; the stage is unaffordable under the current authorization",
+    "transfers": [
+     {
+      "core_h": 2.9,
+      "from": "repair_runs",
+      "to": "initial_model"
+     },
+     {
+      "core_h": 0.4,
+      "from": "fidelity_audit",
+      "to": "initial_model"
+     }
+    ],
+    "uncovered_core_h": 12.0
+   },
+   "remaining_total_core_h": 208.12948071393703,
+   "rule": "start only if the one-sided upper bound (enforcement.estimate_quantile) of the stage's DFT plus the enforcement margin fits every remaining allowance",
+   "scopes": [
+    {
+     "by_kind": {
+      "full": {
+       "expected_core_h": 25.496415428850387,
+       "n": 24.0,
+       "upper90_core_h": 28.338419783162024
+      }
+     },
+     "expected_core_h": 25.496415428850387,
+     "fits": false,
+     "fits_expected": false,
+     "remaining_core_h": 13.129480713937017,
+     "scope": "initial_model",
+     "upper90_core_h": 28.338419783162024
+    }
+   ],
+   "stage": "initial_model",
+   "upper_quantile": 0.9
+  }
+ },
+ "protocol_freeze": {
+  "benchmark": "repair_c16",
+  "frozen_at": "2026-11-07T07:25:47+00:00",
+  "note": "execution under repair_c16_authorization.yaml",
+  "protocol": {
+   "files": {
+    "alpha_config": {
+     "path": "<config_dir>/repair_c16_alpha.yaml",
+     "sha256": "3ffbeded3a55175222d0a24b75753139ae2a88fc2410d72a4ba4f29274d92714"
+    },
+    "benchmark": {
+     "path": "<config_dir>/repair_c16.yaml",
+     "sha256": "3841c1183eb3252d06cbabb0cf0906cf68563e1ccda4d54adf1952f7ff89fdbf"
+    },
+    "model_config": {
+     "path": "<config_dir>/repair_c16_model.yaml",
+     "sha256": "6dfbbe0bcd8fed05f8eaec19c6a563812ea79099de076d4cdadf7ded544f353c"
+    },
+    "protocol": {
+     "path": "<GMD_active>/docs/demos/alkane_repair/protocol.md",
+     "sha256": "ff766358fa62380561d14adcba1be7a4a78f0e6a99d786684f2eef01619962cf"
+    }
+   },
+   "protocol_version": "1.0",
+   "sha256": "bf54d50284226e75e99de654d35e4e0734ec0ccf6bf3ad3bb3ffc347debb96dd"
+  },
+  "statement": "Frozen before any confirmatory experiment of this benchmark. All pilot results (alkane_hotspots v1, v2, v2b, v2c) predate this protocol and are exploratory evidence; this protocol was not registered before them.",
+  "structures": {
+   "public": "db7bc1d86d0f6aafbad52f815ec89cf4c055445092488dc5ece314016d119d73",
+   "sealed": "d2239ce5042f278ae030eb1087b8344cfc1608e0eaa365df0fa70a6bf9b220e8"
+  }
+ },
  "protocol_version": "1.0",
  "qualification": {
   "frozen": null,
-  "stages": [],
-  "status": null
+  "stages": [
+   {
+    "acceptance": {
+     "forbidden_directive_keys": [
+      "force_cap",
+      "max_force",
+      "force_clip",
+      "fix",
+      "constraint",
+      "constraints",
+      "shake",
+      "rattle",
+      "restraint",
+      "wall"
+     ],
+     "id_val_atom_error_p95_max": 0.3,
+     "id_val_force_rmse_max": 0.1,
+     "md": {
+      "covalent_scale": 1.3,
+      "frame_interval": 20,
+      "min_intact_fraction": 1.0,
+      "seeds": [
+       1,
+       2
+      ],
+      "start_partitions": [
+       "calibration",
+       "id_val"
+      ],
+      "steps": 4000
+     },
+     "required_force_field": "ml"
+    },
+    "accepted": false,
+    "best_val": null,
+    "checkpoints": [
+     "<artifacts_root>/initial_model/stage0/train/member_0/ckpt_best.pt",
+     "<artifacts_root>/initial_model/stage0/train/member_1/ckpt_best.pt",
+     "<artifacts_root>/initial_model/stage0/train/member_2/ckpt_best.pt"
+    ],
+    "created_at": "2026-11-07T16:25:42+00:00",
+    "criteria": {
+     "id_val_atom_error_p95": false,
+     "id_val_force_rmse": false,
+     "md_topology": false,
+     "no_hidden_stabilisation": true
+    },
+    "dataset": {
+     "train": [
+      {
+       "base_id": "C16-r000",
+       "label_id": "label-e36ffdbe3ca234e8",
+       "parent_id": "C16-r000-ord0",
+       "sample_id": "sample-82b5779586e523fd"
+      },
+      {
+       "base_id": "C16-r000",
+       "label_id": "label-ba7acab4d5040727",
+       "parent_id": "C16-r000-ord1",
+       "sample_id": "sample-29e09a33542a5f3a"
+      },
+      {
+       "base_id": "C16-r000",
+       "label_id": "label-3b6a149452b34247",
+       "parent_id": "C16-r000-ord2",
+       "sample_id": "sample-c78d4dbb76db658c"
+      },
+      {
+       "base_id": "C16-r000",
+       "label_id": "label-aab1da552a566e5a",
+       "parent_id": "C16-r000-ord3",
+       "sample_id": "sample-d25786628c4abd2a"
+      },
+      {
+       "base_id": "C16-r002",
+       "label_id": "label-b62a5711feaa3163",
+       "parent_id": "C16-r002-ord0",
+       "sample_id": "sample-9efd9f11dc3d2066"
+      },
+      {
+       "base_id": "C16-r002",
+       "label_id": "label-863b9dc0e711c518",
+       "parent_id": "C16-r002-ord1",
+       "sample_id": "sample-ed938b7d606bb92d"
+      },
+      {
+       "base_id": "C16-r002",
+       "label_id": "label-6252542546fb0982",
+       "parent_id": "C16-r002-ord2",
+       "sample_id": "sample-ef2c3d303b76d0ca"
+      },
+      {
+       "base_id": "C16-r002",
+       "label_id": "label-7f8273f75666d165",
+       "parent_id": "C16-r002-ord3",
+       "sample_id": "sample-0893afd8ba988b95"
+      },
+      {
+       "base_id": "C16-r004",
+       "label_id": "label-201c9235770e7242",
+       "parent_id": "C16-r004-ord0",
+       "sample_id": "sample-7f8d0dc10a01d624"
+      },
+      {
+       "base_id": "C16-r004",
+       "label_id": "label-ad199b9075a94023",
+       "parent_id": "C16-r004-ord1",
+       "sample_id": "sample-9ac86ee3e69ce276"
+      },
+      {
+       "base_id": "C16-r004",
+       "label_id": "label-eaaeb57270c31b4d",
+       "parent_id": "C16-r004-ord2",
+       "sample_id": "sample-bab2e804540a2352"
+      },
+      {
+       "base_id": "C16-r004",
+       "label_id": "label-9b9c3dc79d88eb69",
+       "parent_id": "C16-r004-ord3",
+       "sample_id": "sample-a406c3e86975b596"
+      },
+      {
+       "base_id": "C16-r005",
+       "label_id": "label-ffdf49add339d4e6",
+       "parent_id": "C16-r005-ord0",
+       "sample_id": "sample-75aeb63ef836b2df"
+      },
+      {
+       "base_id": "C16-r005",
+       "label_id": "label-b18406b9cf291cc6",
+       "parent_id": "C16-r005-ord1",
+       "sample_id": "sample-622ae65e2cac083f"
+      },
+      {
+       "base_id": "C16-r005",
+       "label_id": "label-26bad86fba55d484",
+       "parent_id": "C16-r005-ord2",
+       "sample_id": "sample-70a46b2067c696de"
+      },
+      {
+       "base_id": "C16-r005",
+       "label_id": "label-e8b80bca7c648939",
+       "parent_id": "C16-r005-ord3",
+       "sample_id": "sample-856a4304821ae376"
+      },
+      {
+       "base_id": "C16-r006",
+       "label_id": "label-252801805dd11d5f",
+       "parent_id": "C16-r006-ord0",
+       "sample_id": "sample-b735bf2b0d5d2fe5"
+      },
+      {
+       "base_id": "C16-r006",
+       "label_id": "label-dd76589f2411726b",
+       "parent_id": "C16-r006-ord1",
+       "sample_id": "sample-9e8d41564b522fb6"
+      },
+      {
+       "base_id": "C16-r006",
+       "label_id": "label-36231a821d0f9e90",
+       "parent_id": "C16-r006-ord2",
+       "sample_id": "sample-4a6390efdc59adf7"
+      },
+      {
+       "base_id": "C16-r006",
+       "label_id": "label-b30ee9fb7be47fcb",
+       "parent_id": "C16-r006-ord3",
+       "sample_id": "sample-0a9b0cf066838fb3"
+      },
+      {
+       "base_id": "C16-r008",
+       "label_id": "label-0da42989c55876bf",
+       "parent_id": "C16-r008-ord0",
+       "sample_id": "sample-ab253545fd20bc42"
+      },
+      {
+       "base_id": "C16-r008",
+       "label_id": "label-bb74d725a622e27c",
+       "parent_id": "C16-r008-ord1",
+       "sample_id": "sample-b24f128cf1869ea5"
+      },
+      {
+       "base_id": "C16-r008",
+       "label_id": "label-2e69b7370aed4340",
+       "parent_id": "C16-r008-ord2",
+       "sample_id": "sample-0d0d5e40572d5de6"
+      },
+      {
+       "base_id": "C16-r008",
+       "label_id": "label-1ea37062596149ce",
+       "parent_id": "C16-r008-ord3",
+       "sample_id": "sample-55d53d5e94958533"
+      }
+     ],
+     "validation": [
+      {
+       "base_id": "C16-r018",
+       "label_id": "label-685f957c4da722f5",
+       "parent_id": "C16-r018-ord0",
+       "sample_id": "sample-2df9fb64556e0d6d"
+      },
+      {
+       "base_id": "C16-r018",
+       "label_id": "label-54c1217f1d7dad62",
+       "parent_id": "C16-r018-ord1",
+       "sample_id": "sample-fd13d3bdd7b49712"
+      },
+      {
+       "base_id": "C16-r021",
+       "label_id": "label-f17a2b667aebb71b",
+       "parent_id": "C16-r021-ord0",
+       "sample_id": "sample-9dcd0d3259309b28"
+      },
+      {
+       "base_id": "C16-r021",
+       "label_id": "label-be78b8a8a2cf4a08",
+       "parent_id": "C16-r021-ord1",
+       "sample_id": "sample-d456672900cc93e1"
+      },
+      {
+       "base_id": "C16-r027",
+       "label_id": "label-65d52f1ed57fa187",
+       "parent_id": "C16-r027-ord0",
+       "sample_id": "sample-6518708feb24ecb6"
+      },
+      {
+       "base_id": "C16-r027",
+       "label_id": "label-f7f1e3f70f1d50e9",
+       "parent_id": "C16-r027-ord1",
+       "sample_id": "sample-cbbfd6ede33c6730"
+      }
+     ]
+    },
+    "export": "<artifacts_root>/initial_model/stage0/export/model.pt",
+    "hidden_stabilisation_check": {
+     "forbidden_directives_found": [],
+     "force_field": "ml (GMD force_field ml, the exported model only)",
+     "monitor_stop_actions_note": "monitor stop actions end a trajectory; they never modify forces",
+     "passed": true
+    },
+    "id_val_accuracy": {
+     "atom_error_max": 1.740827317761579,
+     "atom_error_mean": 0.437778660853701,
+     "atom_error_p95": 1.0091878187623382,
+     "force_rmse": 0.30314768926879965,
+     "model_force_rms": 1.6652674232266724,
+     "n_atoms": 300,
+     "n_structures": 6,
+     "reference_force_rms": 1.7859472802431442
+    },
+    "id_val_per_structure": [
+     {
+      "atom_error_max": 1.034231380887836,
+      "atom_error_mean": 0.42381823676845365,
+      "atom_error_p95": 0.90693855523194,
+      "base_id": "C16-r018",
+      "force_rmse": 0.285748837305197,
+      "model_force_rms": 1.5327028420120232,
+      "n_atoms": 50,
+      "parent_id": "C16-r018-ord0",
+      "reference_force_rms": 1.607610175537417
+     },
+     {
+      "atom_error_max": 1.4139550047063074,
+      "atom_error_mean": 0.4917616132553526,
+      "atom_error_p95": 1.094123451460934,
+      "base_id": "C16-r018",
+      "force_rmse": 0.3365523366517462,
+      "model_force_rms": 1.737271989847754,
+      "n_atoms": 50,
+      "parent_id": "C16-r018-ord1",
+      "reference_force_rms": 1.8663381469432403
+     },
+     {
+      "atom_error_max": 1.2900386601125977,
+      "atom_error_mean": 0.34659995289865814,
+      "atom_error_p95": 0.8244262362522236,
+      "base_id": "C16-r021",
+      "force_rmse": 0.24716322360106655,
+      "model_force_rms": 1.2974504594866747,
+      "n_atoms": 50,
+      "parent_id": "C16-r021-ord0",
+      "reference_force_rms": 1.359652554352602
+     },
+     {
+      "atom_error_max": 1.523454047041165,
+      "atom_error_mean": 0.4262512493054295,
+      "atom_error_p95": 0.7964001572450349,
+      "base_id": "C16-r021",
+      "force_rmse": 0.285274911000915,
+      "model_force_rms": 1.6541538891500613,
+      "n_atoms": 50,
+      "parent_id": "C16-r021-ord1",
+      "reference_force_rms": 1.7574540578958824
+     },
+     {
+      "atom_error_max": 1.1792946395027069,
+      "atom_error_mean": 0.4661510758881326,
+      "atom_error_p95": 1.1155946517887054,
+      "base_id": "C16-r027",
+      "force_rmse": 0.31453179470907217,
+      "model_force_rms": 1.4942380069027026,
+      "n_atoms": 50,
+      "parent_id": "C16-r027-ord0",
+      "reference_force_rms": 1.5994381749200526
+     },
+     {
+      "atom_error_max": 1.740827317761579,
+      "atom_error_mean": 0.4720898370061791,
+      "atom_error_p95": 1.1439328063701375,
+      "base_id": "C16-r027",
+      "force_rmse": 0.3392190618121177,
+      "model_force_rms": 2.149197890249681,
+      "n_atoms": 50,
+      "parent_id": "C16-r027-ord1",
+      "reference_force_rms": 2.361041139424827
+     }
+    ],
+    "md_denominator": "every trajectory counts; intact_fraction is over all frames of a trajectory",
+    "md_trajectories": [
+     {
+      "first_broken_step": 2000,
+      "intact_fraction": 0.4975124378109453,
+      "min_image_distance": 22.86354223939101,
+      "n_broken": 101,
+      "n_frames": 201,
+      "partition": "calibration",
+      "seed": 1,
+      "start": "C16-r007-ord0",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 1920,
+      "intact_fraction": 0.47761194029850745,
+      "min_image_distance": 22.920932980068724,
+      "n_broken": 105,
+      "n_frames": 201,
+      "partition": "calibration",
+      "seed": 2,
+      "start": "C16-r007-ord0",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 1680,
+      "intact_fraction": 0.417910447761194,
+      "min_image_distance": 22.432354281174806,
+      "n_broken": 117,
+      "n_frames": 201,
+      "partition": "calibration",
+      "seed": 1,
+      "start": "C16-r017-ord0",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": null,
+      "intact_fraction": 1.0,
+      "min_image_distance": 22.564098234498093,
+      "n_broken": 0,
+      "n_frames": 201,
+      "partition": "calibration",
+      "seed": 2,
+      "start": "C16-r017-ord0",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 1260,
+      "intact_fraction": 0.31343283582089554,
+      "min_image_distance": 22.99917123792177,
+      "n_broken": 138,
+      "n_frames": 201,
+      "partition": "id_val",
+      "seed": 1,
+      "start": "C16-r018-ord0",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 2100,
+      "intact_fraction": 0.5223880597014925,
+      "min_image_distance": 22.986839707101193,
+      "n_broken": 96,
+      "n_frames": 201,
+      "partition": "id_val",
+      "seed": 2,
+      "start": "C16-r018-ord0",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 1320,
+      "intact_fraction": 0.3283582089552239,
+      "min_image_distance": 23.92377977503381,
+      "n_broken": 135,
+      "n_frames": 201,
+      "partition": "id_val",
+      "seed": 1,
+      "start": "C16-r018-ord1",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 3240,
+      "intact_fraction": 0.8059701492537313,
+      "min_image_distance": 23.996618908714918,
+      "n_broken": 39,
+      "n_frames": 201,
+      "partition": "id_val",
+      "seed": 2,
+      "start": "C16-r018-ord1",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 3220,
+      "intact_fraction": 0.8009950248756219,
+      "min_image_distance": 24.239097841493805,
+      "n_broken": 40,
+      "n_frames": 201,
+      "partition": "id_val",
+      "seed": 1,
+      "start": "C16-r021-ord0",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 1700,
+      "intact_fraction": 0.4228855721393035,
+      "min_image_distance": 23.84536768795969,
+      "n_broken": 116,
+      "n_frames": 201,
+      "partition": "id_val",
+      "seed": 2,
+      "start": "C16-r021-ord0",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 3100,
+      "intact_fraction": 0.7711442786069652,
+      "min_image_distance": 23.593530280424833,
+      "n_broken": 46,
+      "n_frames": 201,
+      "partition": "id_val",
+      "seed": 1,
+      "start": "C16-r021-ord1",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 2460,
+      "intact_fraction": 0.6119402985074627,
+      "min_image_distance": 23.785534569438198,
+      "n_broken": 78,
+      "n_frames": 201,
+      "partition": "id_val",
+      "seed": 2,
+      "start": "C16-r021-ord1",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 2200,
+      "intact_fraction": 0.5472636815920398,
+      "min_image_distance": 22.40570129618284,
+      "n_broken": 91,
+      "n_frames": 201,
+      "partition": "calibration",
+      "seed": 1,
+      "start": "C16-r026-ord0",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 2180,
+      "intact_fraction": 0.5422885572139303,
+      "min_image_distance": 22.682663999839452,
+      "n_broken": 92,
+      "n_frames": 201,
+      "partition": "calibration",
+      "seed": 2,
+      "start": "C16-r026-ord0",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 2720,
+      "intact_fraction": 0.6766169154228856,
+      "min_image_distance": 24.34820282001405,
+      "n_broken": 65,
+      "n_frames": 201,
+      "partition": "id_val",
+      "seed": 1,
+      "start": "C16-r027-ord0",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": null,
+      "intact_fraction": 1.0,
+      "min_image_distance": 24.49863396138194,
+      "n_broken": 0,
+      "n_frames": 201,
+      "partition": "id_val",
+      "seed": 2,
+      "start": "C16-r027-ord0",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 3040,
+      "intact_fraction": 0.7562189054726368,
+      "min_image_distance": 24.069330962055886,
+      "n_broken": 49,
+      "n_frames": 201,
+      "partition": "id_val",
+      "seed": 1,
+      "start": "C16-r027-ord1",
+      "status": "completed"
+     },
+     {
+      "first_broken_step": 1460,
+      "intact_fraction": 0.36318407960199006,
+      "min_image_distance": 23.882467698755455,
+      "n_broken": 128,
+      "n_frames": 201,
+      "partition": "id_val",
+      "seed": 2,
+      "start": "C16-r027-ord1",
+      "status": "completed"
+     }
+    ],
+    "n_train": 24,
+    "n_val": 6,
+    "qualification_stage": 0,
+    "train_bases": [
+     "C16-r000",
+     "C16-r002",
+     "C16-r004",
+     "C16-r005",
+     "C16-r006",
+     "C16-r008"
+    ],
+    "train_wall_s": 525.9877755410271,
+    "training_hash": "7f09b289f97eca54",
+    "val_bases": [
+     "C16-r018",
+     "C16-r021",
+     "C16-r027"
+    ]
+   }
+  ],
+  "status": {
+   "next": "label and qualify stage 1",
+   "prerequisite": "pending",
+   "qualified": false,
+   "stages": {
+    "0": {
+     "accepted": false,
+     "criteria": {
+      "id_val_atom_error_p95": false,
+      "id_val_force_rmse": false,
+      "md_topology": false,
+      "no_hidden_stabilisation": true
+     },
+     "id_val_atom_error_p95": 1.0091878187623382,
+     "id_val_force_rmse": 0.30314768926879965,
+     "n_train": 24
+    }
+   },
+   "updated_at": "2026-11-07T16:25:42+00:00"
+  }
  },
- "reference_labels": {},
+ "qualification_training": {
+  "stage0": {
+   "member_0": {
+    "best_epoch": 78,
+    "best_val_force": 0.3014150286714236,
+    "epoch": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36,
+     37,
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55,
+     56,
+     57,
+     58,
+     59,
+     60,
+     61,
+     62,
+     63,
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71,
+     72,
+     73,
+     74,
+     75,
+     76,
+     77,
+     78,
+     79,
+     80,
+     81,
+     82,
+     83,
+     84,
+     85,
+     86,
+     87,
+     88,
+     89,
+     90,
+     91,
+     92,
+     93,
+     94,
+     95,
+     96,
+     97,
+     98,
+     99,
+     100,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106,
+     107,
+     108,
+     109,
+     110,
+     111,
+     112,
+     113,
+     114,
+     115,
+     116,
+     117,
+     118,
+     119,
+     120,
+     121,
+     122,
+     123,
+     124,
+     125,
+     126,
+     127,
+     128,
+     129,
+     130,
+     131,
+     132,
+     133,
+     134,
+     135,
+     136,
+     137,
+     138,
+     139,
+     140,
+     141,
+     142,
+     143,
+     144,
+     145,
+     146,
+     147,
+     148,
+     149,
+     150,
+     151,
+     152,
+     153,
+     154,
+     155,
+     156,
+     157,
+     158,
+     159,
+     160,
+     161,
+     162,
+     163,
+     164,
+     165,
+     166,
+     167,
+     168,
+     169,
+     170,
+     171,
+     172,
+     173,
+     174,
+     175,
+     176,
+     177,
+     178,
+     179,
+     180,
+     181,
+     182,
+     183,
+     184,
+     185,
+     186,
+     187,
+     188,
+     189,
+     190,
+     191,
+     192,
+     193,
+     194,
+     195,
+     196,
+     197,
+     198,
+     199,
+     200,
+     201,
+     202,
+     203,
+     204,
+     205,
+     206,
+     207,
+     208,
+     209,
+     210,
+     211,
+     212,
+     213,
+     214,
+     215,
+     216,
+     217,
+     218,
+     219,
+     220,
+     221,
+     222,
+     223,
+     224,
+     225,
+     226,
+     227,
+     228,
+     229,
+     230,
+     231,
+     232,
+     233,
+     234,
+     235,
+     236,
+     237,
+     238,
+     239,
+     240,
+     241,
+     242,
+     243,
+     244,
+     245,
+     246,
+     247,
+     248,
+     249,
+     250,
+     251,
+     252,
+     253,
+     254,
+     255,
+     256,
+     257,
+     258,
+     259,
+     260,
+     261,
+     262,
+     263,
+     264,
+     265,
+     266,
+     267,
+     268,
+     269,
+     270,
+     271,
+     272,
+     273,
+     274,
+     275,
+     276,
+     277,
+     278
+    ],
+    "final_train_force": 0.0753692517367502,
+    "train_force": [
+     1.7329266717036564,
+     1.0793386275569599,
+     0.5387093933920065,
+     0.4251386771599452,
+     0.4347965158522129,
+     0.3468495321770509,
+     0.282479506606857,
+     0.3020542183270057,
+     0.28733257949352264,
+     0.26346195364991826,
+     0.24976205577452978,
+     0.2978078213830789,
+     0.27072947037716705,
+     0.24565318350990614,
+     0.24611880133549371,
+     0.19444365861515203,
+     0.22316794221599898,
+     0.20054686379929385,
+     0.2389350775629282,
+     0.18993845830361047,
+     0.19725070893764496,
+     0.2291955171773831,
+     0.24096021180351576,
+     0.16426360917588076,
+     0.17061136228342852,
+     0.2012975395967563,
+     0.2191026173532009,
+     0.2259903990974029,
+     0.17243764518449703,
+     0.16176330174009004,
+     0.1717963016902407,
+     0.22606412259240946,
+     0.17194042603174844,
+     0.2073730326568087,
+     0.1800061191121737,
+     0.17646635323762894,
+     0.19800080358982086,
+     0.19212954305112362,
+     0.1463187156865994,
+     0.1842632731422782,
+     0.1883236818636457,
+     0.15811372051636377,
+     0.15652615297585726,
+     0.17046920551608005,
+     0.16247281370063624,
+     0.15247266894827285,
+     0.18490152712911367,
+     0.14050089412679276,
+     0.16807915860166153,
+     0.1724569940318664,
+     0.13886071586360535,
+     0.15056111322094998,
+     0.15515617902080217,
+     0.1738003365074595,
+     0.15634740144014359,
+     0.14158745016902685,
+     0.20511209964752197,
+     0.1339438712845246,
+     0.14089101490875086,
+     0.13470680639147758,
+     0.1515968463694056,
+     0.15382851442943016,
+     0.1173900409291188,
+     0.13984040264040232,
+     0.18721436026195684,
+     0.183613204707702,
+     0.12744769360870123,
+     0.13746667498101792,
+     0.18728331321229538,
+     0.19544054536769787,
+     0.15824188850820065,
+     0.14906757231801748,
+     0.1362022776156664,
+     0.12417475258310635,
+     0.12444288625071447,
+     0.13649549831946692,
+     0.1325144013389945,
+     0.13454756358017525,
+     0.14519186535229286,
+     0.12984269174436727,
+     0.1557265386606256,
+     0.13872782047837973,
+     0.16569355316460133,
+     0.12774075443545976,
+     0.11743443024655183,
+     0.14182243309915066,
+     0.12138285922507445,
+     0.12874681688845158,
+     0.11159332934767008,
+     0.11736941710114479,
+     0.12135720687607925,
+     0.11164459927628438,
+     0.13386581589778265,
+     0.1260649204875032,
+     0.13242124610890946,
+     0.16211632639169693,
+     0.1575799034908414,
+     0.12154300510883331,
+     0.11682949587702751,
+     0.12737155115852752,
+     0.1432455563917756,
+     0.14620924772073826,
+     0.1208554245531559,
+     0.10597854014486074,
+     0.1084749052921931,
+     0.15045540034770966,
+     0.16015129132817188,
+     0.12857650872319937,
+     0.13119173484543958,
+     0.1345130360374848,
+     0.18976855960985026,
+     0.21731802945335707,
+     0.13394279653827348,
+     0.12232572430123885,
+     0.1127376261477669,
+     0.11048220470547676,
+     0.10765835270285606,
+     0.1054432550445199,
+     0.1131639468173186,
+     0.1326506081968546,
+     0.10236627453317244,
+     0.13666277409841618,
+     0.11204886405418317,
+     0.1350548385332028,
+     0.12024267483502626,
+     0.1054334236929814,
+     0.11143248062580824,
+     0.12652434967458248,
+     0.14049051577846208,
+     0.11287218021849792,
+     0.11385307398935159,
+     0.10750466057409842,
+     0.09697685576975346,
+     0.10128188319504261,
+     0.10014981186638276,
+     0.11931788517783086,
+     0.11993739691873391,
+     0.17664430507769188,
+     0.11985431890934706,
+     0.1034796175857385,
+     0.09592529929553469,
+     0.11865953666468461,
+     0.14278015463302532,
+     0.11018073310454686,
+     0.10697509006907542,
+     0.11418908120443423,
+     0.12093547297020753,
+     0.10531864718844493,
+     0.10071859943370025,
+     0.11305918234090011,
+     0.188042925670743,
+     0.10706351262827714,
+     0.11155786737799644,
+     0.10014882823452353,
+     0.10418890633930762,
+     0.11090322521825631,
+     0.11198041463891666,
+     0.10938550780216853,
+     0.1346156212190787,
+     0.15654418772707382,
+     0.10167800635099411,
+     0.10107129874328773,
+     0.11168044464041789,
+     0.1004221389691035,
+     0.11206088370333116,
+     0.11524468412001927,
+     0.1062171719968319,
+     0.0995486459384362,
+     0.12760630746682486,
+     0.12341616271684568,
+     0.10558545123785734,
+     0.11986293674757083,
+     0.1152159736181299,
+     0.09122840672110517,
+     0.10645967597762744,
+     0.10274014016613364,
+     0.13051226952423653,
+     0.11479833660026391,
+     0.09739402712633212,
+     0.09448802378028631,
+     0.11499413071821134,
+     0.10813836893066764,
+     0.10556615764896075,
+     0.10342505946755409,
+     0.08427053922787309,
+     0.09697229601442814,
+     0.09622695250436664,
+     0.10435262105117242,
+     0.11246934502075116,
+     0.09152667581414183,
+     0.09589403650412957,
+     0.09354473215838273,
+     0.09578923756877582,
+     0.15009172384937605,
+     0.09318842164551218,
+     0.07979454177742203,
+     0.09582933178171515,
+     0.11677374318242073,
+     0.09376686345785856,
+     0.0837911373625199,
+     0.08755609439685941,
+     0.10384913890932997,
+     0.1018502324198683,
+     0.09748875784377257,
+     0.08820277980218331,
+     0.09470892045646906,
+     0.09246510546654463,
+     0.11536634620279074,
+     0.09315640417238076,
+     0.095316289147983,
+     0.09386031438286106,
+     0.09262819044912855,
+     0.0806791417611142,
+     0.08760659846787651,
+     0.08421209299316008,
+     0.09038144551838438,
+     0.11325930043434103,
+     0.10951067476222913,
+     0.0934706184392174,
+     0.10739059373736382,
+     0.0907718197753032,
+     0.08745870909964044,
+     0.09580481331795454,
+     0.08356999124710758,
+     0.10410543624311686,
+     0.09581139652679364,
+     0.09949474331612389,
+     0.09585019868488114,
+     0.08571871401121219,
+     0.08736780378967524,
+     0.08643453071514766,
+     0.08250232273712754,
+     0.08622261416167021,
+     0.097878305396686,
+     0.09968450292944908,
+     0.09407708204040925,
+     0.08996383240446448,
+     0.12724465069671473,
+     0.09506106314559777,
+     0.07957689526180427,
+     0.08786629357685645,
+     0.07360359141603112,
+     0.07726227398961782,
+     0.09880589150513212,
+     0.08815554343163967,
+     0.10569819544131558,
+     0.10301698837429285,
+     0.08420367275054257,
+     0.07469866347188751,
+     0.08149486019586523,
+     0.09331732088079055,
+     0.07474203299110134,
+     0.07525286714856823,
+     0.08318927325308323,
+     0.09396003233268857,
+     0.1057616703522702,
+     0.07893121677140395,
+     0.09435905671368043,
+     0.08099618274718523,
+     0.09463554775963227,
+     0.07636269088834524,
+     0.0907392012886703,
+     0.0688153370283544,
+     0.08549297523374359,
+     0.06970201463749011,
+     0.07455172731230657,
+     0.07360162834326427,
+     0.08532909505690138,
+     0.0691386116668582,
+     0.07846598187461495,
+     0.07233118638396263,
+     0.07999901256213586,
+     0.10589478289087613,
+     0.07389045770590504,
+     0.07386269140988588,
+     0.07924340323855479,
+     0.0724716023541987,
+     0.0753692517367502
+    ],
+    "train_force_at_best": 0.13454756358017525,
+    "val_force": [
+     1.7366235454877217,
+     1.1951853334903717,
+     0.9592442611853281,
+     0.6960166643063227,
+     0.6877356966336569,
+     0.6594236791133881,
+     0.7762330373128256,
+     0.6403204301993052,
+     0.8053581913312277,
+     0.9811031023661295,
+     0.9593130946159363,
+     0.6456514298915863,
+     0.6899792949358622,
+     0.6579704185326894,
+     0.6138187249501547,
+     0.6258964240550995,
+     0.7017760376135508,
+     0.6511992712815603,
+     0.5431400338808695,
+     0.4907731314500173,
+     0.5392344693342844,
+     0.7471149663130442,
+     0.5217875689268112,
+     0.5083426038424174,
+     0.4090895652770996,
+     0.45166078209877014,
+     0.4318024069070816,
+     0.5163561205069224,
+     0.4094013422727585,
+     0.45954568684101105,
+     0.4939144402742386,
+     0.3895851920048396,
+     0.39315450688203174,
+     0.39367595314979553,
+     0.45198723673820496,
+     0.42212116221586865,
+     0.4634821464618047,
+     0.43063032627105713,
+     0.4784857928752899,
+     0.549732098976771,
+     0.3741515080134074,
+     0.3639161139726639,
+     0.5255405406157175,
+     0.4863606592019399,
+     0.45018553733825684,
+     0.3510021169980367,
+     0.40324265758196515,
+     0.44167959193388623,
+     0.48945048451423645,
+     0.4691752841075261,
+     0.46159784992535907,
+     0.35843517382939655,
+     0.3939135322968165,
+     0.3272561927636464,
+     0.3580456127723058,
+     0.5634477635224661,
+     0.37964241206645966,
+     0.39027797679106396,
+     0.4440140724182129,
+     0.36803487439950305,
+     0.5900006790955862,
+     0.4071627010901769,
+     0.5060927867889404,
+     0.5451571941375732,
+     0.36989011863867444,
+     0.33570223053296405,
+     0.3698345373074214,
+     0.5639429986476898,
+     0.35598735014597577,
+     0.42631015678246814,
+     0.3288141191005707,
+     0.3918408900499344,
+     0.422084112962087,
+     0.42448189357916516,
+     0.41793612639109295,
+     0.3364281604687373,
+     0.32018329203128815,
+     0.3014150286714236,
+     0.3754241814215978,
+     0.43655894696712494,
+     0.4004893998305003,
+     0.3402402649323146,
+     0.4162286122639974,
+     0.37282808621724445,
+     0.3616337776184082,
+     0.3504510124524434,
+     0.3453698605298996,
+     0.3840720256169637,
+     0.3635706901550293,
+     0.4058307905991872,
+     0.3407419373591741,
+     0.44319092233975727,
+     0.3469538191954295,
+     0.4792096863190333,
+     0.40534674127896625,
+     0.39788972834746045,
+     0.4143443504969279,
+     0.35526291529337567,
+     0.36372246344884235,
+     0.3720034857590993,
+     0.42211486399173737,
+     0.37036243577798206,
+     0.41537802418073017,
+     0.35074322919050854,
+     0.33941608170668286,
+     0.4647689213355382,
+     0.43128476043542224,
+     0.4120654910802841,
+     0.45708995560805005,
+     0.4188393106063207,
+     0.5371082772811254,
+     0.4260074744621913,
+     0.3785211096207301,
+     0.4143291711807251,
+     0.42620034019152325,
+     0.45547330876191455,
+     0.4026850362618764,
+     0.39449619750181836,
+     0.39666322867075604,
+     0.4126216471195221,
+     0.47064058979352313,
+     0.4567492852608363,
+     0.4618694931268692,
+     0.39643557369709015,
+     0.5376242150863012,
+     0.4877762794494629,
+     0.4483366260925929,
+     0.5426171024640402,
+     0.5056704332431158,
+     0.5146642675002416,
+     0.5165695945421854,
+     0.4754733145236969,
+     0.45508258044719696,
+     0.5088220238685608,
+     0.5621540397405624,
+     0.5410773952802023,
+     0.4868017981449763,
+     0.45727381606896716,
+     0.5378818859656652,
+     0.5120689024527868,
+     0.5118012179931005,
+     0.4736504703760147,
+     0.5218879878520966,
+     0.4926210294167201,
+     0.5791831910610199,
+     0.5511717150608698,
+     0.5976582616567612,
+     0.6552303532759348,
+     0.5610948453346888,
+     0.5889081060886383,
+     0.602607786655426,
+     0.5612319360176722,
+     0.6046621352434158,
+     0.6671004096666971,
+     0.6082379519939423,
+     0.592660034696261,
+     0.6171839982271194,
+     0.6135955303907394,
+     0.545889084537824,
+     0.6599427163600922,
+     0.6482522984345754,
+     0.6150066753228506,
+     0.6217766553163528,
+     0.6897843678792318,
+     0.6495160907506943,
+     0.6440967669089636,
+     0.6069932281970978,
+     0.6796828905741373,
+     0.687025914589564,
+     0.7113421658674876,
+     0.7834269603093466,
+     0.7933196127414703,
+     0.7211034893989563,
+     0.6830372512340546,
+     0.7032352983951569,
+     0.7427663008371989,
+     0.6578504145145416,
+     0.6790377199649811,
+     0.7188708186149597,
+     0.7217598458131155,
+     0.7951747179031372,
+     0.7614162166913351,
+     0.7915045917034149,
+     0.7079797784487406,
+     0.7050560911496481,
+     0.7759895424048106,
+     0.7854015131791433,
+     0.8605484863122305,
+     0.7819987237453461,
+     0.6959405740102133,
+     0.6784659127394358,
+     0.6691689789295197,
+     0.7088225980599722,
+     0.7926687399546305,
+     0.7645428578058878,
+     0.7313287754853567,
+     0.7393595576286316,
+     0.7319222887357076,
+     0.7166186769803365,
+     0.8057867189248403,
+     0.6521721879641215,
+     0.7149294515450796,
+     0.6399668653806051,
+     0.7167342603206635,
+     0.6981662710507711,
+     0.7633769810199738,
+     0.7581469019254049,
+     0.7332644065221151,
+     0.698336531718572,
+     0.7055498858292898,
+     0.7581667999426523,
+     0.7330952286720276,
+     0.700478216012319,
+     0.7879562377929688,
+     0.7677794396877289,
+     0.743980864683787,
+     0.699616273244222,
+     0.7176798482735952,
+     0.7493428389231364,
+     0.8351392845312754,
+     0.8479108512401581,
+     0.7981396416823069,
+     0.7866237660249075,
+     0.7655889292558035,
+     0.7788497110207876,
+     0.751771499713262,
+     0.8094596664110819,
+     0.8432286183039347,
+     0.8290050725142161,
+     0.7920655508836111,
+     0.7484596073627472,
+     0.7357967495918274,
+     0.7618272006511688,
+     0.7586396038532257,
+     0.7712441583474478,
+     0.7652370631694794,
+     0.7615461548169454,
+     0.7329503496487936,
+     0.7390977442264557,
+     0.7196571826934814,
+     0.7241676350434622,
+     0.747189462184906,
+     0.7992907563845316,
+     0.7724888126055399,
+     0.7322521209716797,
+     0.742177297671636,
+     0.7538172006607056,
+     0.7495376666386923,
+     0.756134162346522,
+     0.6978035271167755,
+     0.6510128378868103,
+     0.7038086156050364,
+     0.7856708765029907,
+     0.7636509040991465,
+     0.7581124007701874,
+     0.7370737691720327,
+     0.7482906579971313,
+     0.7265372971693674,
+     0.7176476418972015,
+     0.7094613015651703,
+     0.7641672889391581,
+     0.7528777122497559,
+     0.7816837330659231,
+     0.6750768820444742,
+     0.7678835093975067,
+     0.7223936220010122,
+     0.7521702349185944,
+     0.755427896976471,
+     0.7962264021237692,
+     0.8241564830144247,
+     0.8016441067059835,
+     0.7606185575326284,
+     0.7965259353319804,
+     0.7674459218978882,
+     0.8061791857083639,
+     0.7685730159282684,
+     0.7846322258313497,
+     0.8020323018232981
+    ]
+   },
+   "member_1": {
+    "best_epoch": 26,
+    "best_val_force": 0.43175408740838367,
+    "epoch": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36,
+     37,
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55,
+     56,
+     57,
+     58,
+     59,
+     60,
+     61,
+     62,
+     63,
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71,
+     72,
+     73,
+     74,
+     75,
+     76,
+     77,
+     78,
+     79,
+     80,
+     81,
+     82,
+     83,
+     84,
+     85,
+     86,
+     87,
+     88,
+     89,
+     90,
+     91,
+     92,
+     93,
+     94,
+     95,
+     96,
+     97,
+     98,
+     99,
+     100,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106,
+     107,
+     108,
+     109,
+     110,
+     111,
+     112,
+     113,
+     114,
+     115,
+     116,
+     117,
+     118,
+     119,
+     120,
+     121,
+     122,
+     123,
+     124,
+     125,
+     126,
+     127,
+     128,
+     129,
+     130,
+     131,
+     132,
+     133,
+     134,
+     135,
+     136,
+     137,
+     138,
+     139,
+     140,
+     141,
+     142,
+     143,
+     144,
+     145,
+     146,
+     147,
+     148,
+     149,
+     150,
+     151,
+     152,
+     153,
+     154,
+     155,
+     156,
+     157,
+     158,
+     159,
+     160,
+     161,
+     162,
+     163,
+     164,
+     165,
+     166,
+     167,
+     168,
+     169,
+     170,
+     171,
+     172,
+     173,
+     174,
+     175,
+     176,
+     177,
+     178,
+     179,
+     180,
+     181,
+     182,
+     183,
+     184,
+     185,
+     186,
+     187,
+     188,
+     189,
+     190,
+     191,
+     192,
+     193,
+     194,
+     195,
+     196,
+     197,
+     198,
+     199,
+     200,
+     201,
+     202,
+     203,
+     204,
+     205,
+     206,
+     207,
+     208,
+     209,
+     210,
+     211,
+     212,
+     213,
+     214,
+     215,
+     216,
+     217,
+     218,
+     219,
+     220,
+     221,
+     222,
+     223,
+     224,
+     225,
+     226
+    ],
+    "final_train_force": 0.08068209467455745,
+    "train_force": [
+     1.7325177192687988,
+     1.006522823125124,
+     0.49686265115936595,
+     0.3911261682709058,
+     0.35799139613906544,
+     0.3264748478929202,
+     0.3808130833009879,
+     0.2975783435006936,
+     0.27514806513984996,
+     0.34637743296722573,
+     0.3064346071332693,
+     0.28301181582113105,
+     0.25656550377607346,
+     0.2868334650993347,
+     0.26566605145732564,
+     0.21950973197817802,
+     0.2013003503282865,
+     0.2354853662351767,
+     0.22291907419761023,
+     0.22898808183769384,
+     0.24060343019664288,
+     0.2109107474486033,
+     0.19326965200404325,
+     0.18476320058107376,
+     0.2001519271483024,
+     0.22212221225102743,
+     0.2440829991052548,
+     0.2110474562893311,
+     0.19875217912097773,
+     0.2147016472493609,
+     0.2241910838832458,
+     0.19397215421001116,
+     0.20071784282724062,
+     0.22088615441073975,
+     0.20685120578855276,
+     0.19379942336430153,
+     0.20114448852837086,
+     0.17953182198107243,
+     0.18854787945747375,
+     0.20760744779060283,
+     0.16758560482412577,
+     0.14679159627606472,
+     0.1995896672209104,
+     0.18133557215332985,
+     0.16057058982551098,
+     0.17015635377417007,
+     0.16888672672212124,
+     0.18166524761666855,
+     0.2315274936457475,
+     0.15759648444751898,
+     0.19245279269913831,
+     0.17827404911319414,
+     0.16192106467982134,
+     0.14866354378561178,
+     0.13541319749007621,
+     0.15979633449266353,
+     0.1753387087956071,
+     0.16904163484772047,
+     0.20795446851601204,
+     0.16824245794365802,
+     0.1751227000107368,
+     0.1422288278117776,
+     0.17806452636917433,
+     0.17235092694560686,
+     0.14906343507270017,
+     0.15785653175165257,
+     0.25026660909255344,
+     0.20046736393123865,
+     0.11462332556645076,
+     0.1573934080079198,
+     0.16638066495458284,
+     0.13271640986204147,
+     0.16143047157675028,
+     0.12710808714230856,
+     0.14861205344398817,
+     0.16051946642498174,
+     0.14469274319708347,
+     0.1356084831058979,
+     0.1648963357632359,
+     0.16992235742509365,
+     0.1806703864907225,
+     0.13028053504725298,
+     0.1392510530228416,
+     0.15352077006051937,
+     0.14627523565044007,
+     0.14120753264675537,
+     0.13794797752052546,
+     0.12309498650332291,
+     0.12108057209601004,
+     0.13034050849576792,
+     0.11983445286750793,
+     0.175116667834421,
+     0.14125102882583937,
+     0.11803243526568015,
+     0.1411196111390988,
+     0.1325948986535271,
+     0.15541425285240015,
+     0.20794005629916987,
+     0.18585147025684515,
+     0.14491512719541788,
+     0.11481936275959015,
+     0.12481058668345213,
+     0.11478302410493295,
+     0.12975466810166836,
+     0.1262895129621029,
+     0.15524505730718374,
+     0.23445694955686727,
+     0.21856229969610771,
+     0.13081121941407522,
+     0.14005947454522052,
+     0.1311065706734856,
+     0.16949758740762869,
+     0.11850680410861969,
+     0.1278299887975057,
+     0.14809654373675585,
+     0.1269629489009579,
+     0.11179515967766444,
+     0.12209894073506196,
+     0.11519298236817122,
+     0.15362440391133228,
+     0.1350108409921328,
+     0.10453411067525546,
+     0.12949503865092993,
+     0.15565830189734697,
+     0.14629690969983736,
+     0.12673989993830523,
+     0.11328697732339303,
+     0.10704787339394291,
+     0.11655106395483017,
+     0.11317099103083213,
+     0.12446210548902552,
+     0.12131254654377699,
+     0.12928057927638292,
+     0.11621167541791995,
+     0.09330430316428344,
+     0.10916100085402529,
+     0.12765671126544476,
+     0.14956628810614347,
+     0.1254357590029637,
+     0.11302229855209589,
+     0.10628164404382308,
+     0.13434349683423838,
+     0.13471103770037493,
+     0.11138747818768024,
+     0.13637215302636227,
+     0.14783766120672226,
+     0.11322011705487967,
+     0.1282897305985292,
+     0.1233200766146183,
+     0.10741924090931813,
+     0.1172620290890336,
+     0.11361399137725432,
+     0.12313188519328833,
+     0.11137842386960983,
+     0.13146335678175092,
+     0.15793516548971334,
+     0.13153437028328577,
+     0.11139002783844869,
+     0.11617130584393938,
+     0.13036911313732466,
+     0.11721892127146323,
+     0.09897157130762935,
+     0.11536139560242493,
+     0.1321256272494793,
+     0.1198211923862497,
+     0.11442113698770602,
+     0.10567869835843642,
+     0.09845493609706561,
+     0.09610127999136846,
+     0.0912797199562192,
+     0.10385636519640684,
+     0.1076570466781656,
+     0.0921299159526825,
+     0.10077542640889685,
+     0.10175087054570515,
+     0.09872891753911972,
+     0.09083826529483001,
+     0.10317720814297597,
+     0.09489833656698465,
+     0.11112168027708928,
+     0.08927508412549894,
+     0.08383095031604171,
+     0.09316878936563928,
+     0.08055787580087781,
+     0.10249732915932934,
+     0.11805921032403906,
+     0.09972542275985082,
+     0.09855738965173562,
+     0.08099291333928704,
+     0.08170152098561327,
+     0.09312925937895973,
+     0.09573992590109508,
+     0.08774910432597001,
+     0.12283270185192426,
+     0.10844050720334053,
+     0.08230850830053289,
+     0.09591990429908037,
+     0.0889698532409966,
+     0.09259357846652468,
+     0.14127038915952048,
+     0.09886893971512715,
+     0.0877196171010534,
+     0.08682751655578613,
+     0.08163679080704848,
+     0.0794643157472213,
+     0.085949400284638,
+     0.09752284099037449,
+     0.0972465608889858,
+     0.08894726975510518,
+     0.09976538425932328,
+     0.08445328427478671,
+     0.08205003896728158,
+     0.09057872990767162,
+     0.08603633350382249,
+     0.102598343975842,
+     0.07763661040614049,
+     0.09530332032591105,
+     0.08632948560019334,
+     0.07696150507157047,
+     0.09053753471622865,
+     0.08345434411118428,
+     0.12332366655270259,
+     0.07692729216068983,
+     0.08240772395705183,
+     0.08254233949507277,
+     0.08068209467455745
+    ],
+    "train_force_at_best": 0.22212221225102743,
+    "val_force": [
+     1.739110032717387,
+     1.4763194521268208,
+     1.259716272354126,
+     1.0393721262613933,
+     0.7238315244515737,
+     0.7550232907136282,
+     0.6410035987695059,
+     0.7188259859879812,
+     0.787968784570694,
+     0.5806353042523066,
+     0.7515973051389059,
+     0.6705110569794973,
+     0.5003031740585963,
+     0.5244254420200983,
+     0.5842746446530024,
+     0.5126258979241053,
+     0.5598812351624171,
+     0.6635401248931885,
+     0.5573465923468272,
+     0.8367922405401865,
+     0.5714406619469324,
+     0.4928114314874013,
+     0.5694759488105774,
+     0.48857665061950684,
+     0.45231616993745166,
+     0.43175408740838367,
+     0.605348601937294,
+     0.5229388376077017,
+     0.5239982555309931,
+     0.4431193123261134,
+     0.610082820057869,
+     0.6903257469336191,
+     0.5608600477377573,
+     0.5571688065926234,
+     0.5996165623267492,
+     0.6007870038350424,
+     0.5493616263071696,
+     0.5237780412038168,
+     0.5354868819316229,
+     0.6360880335172018,
+     0.5329482009013494,
+     0.6480584740638733,
+     0.6168127258618673,
+     0.5750998854637146,
+     0.5876239736874899,
+     0.6476287841796875,
+     0.6867340306440989,
+     0.6439699033896128,
+     0.7343867917855581,
+     0.6551140745480856,
+     0.6717479526996613,
+     0.5859819749991099,
+     0.6095628440380096,
+     0.6257011493047079,
+     0.6487212081750234,
+     0.6582775215307871,
+     0.7599609692891439,
+     0.7511458893616995,
+     0.8306766549746195,
+     0.798191249370575,
+     0.7869237860043844,
+     0.8479979932308197,
+     0.7663152714570364,
+     0.7739906311035156,
+     0.7979403535525004,
+     0.8013181189695994,
+     0.79758087793986,
+     0.7041141390800476,
+     0.7250244915485382,
+     0.7864468892415365,
+     0.6916290024916331,
+     0.6704351802666982,
+     0.6822744309902191,
+     0.7147810757160187,
+     0.684032013018926,
+     0.7209523816903433,
+     0.6943369309107462,
+     0.6996336778004965,
+     0.7066881060600281,
+     0.7433448731899261,
+     0.6964285175005595,
+     0.7108287413914999,
+     0.7438885668913523,
+     0.7271325488885244,
+     0.705341617266337,
+     0.7595018446445465,
+     0.7653932770093282,
+     0.7737457354863485,
+     0.6825535297393799,
+     0.5992350180943807,
+     0.7146606842676798,
+     0.8373638788859049,
+     0.741965115070343,
+     0.8205078939596812,
+     0.7565304934978485,
+     0.7833985785643259,
+     0.8032314976056417,
+     0.7366599043210348,
+     0.9487559596697489,
+     0.801251063744227,
+     0.7934494415918986,
+     0.8174123664697012,
+     0.7413395245869955,
+     0.8192791442076365,
+     0.8213412960370382,
+     0.7556777795155843,
+     0.682484894990921,
+     0.7283002038796743,
+     0.8680160939693451,
+     0.7309063673019409,
+     0.8595514893531799,
+     0.7620047430197397,
+     0.7571090658505758,
+     0.7258834838867188,
+     0.7313946882883707,
+     0.7158435185750326,
+     0.7010496457417806,
+     0.7013973792394003,
+     0.6920042534669241,
+     0.7011907498041788,
+     0.704905241727829,
+     0.7537703514099121,
+     0.7722533742586771,
+     0.7150446772575378,
+     0.7460689842700958,
+     0.774241715669632,
+     0.7008285125096639,
+     0.7505889137585958,
+     0.6789254049460093,
+     0.7033654749393463,
+     0.671161820491155,
+     0.7352801064650217,
+     0.7395290036996206,
+     0.7592950960000356,
+     0.6967879931131998,
+     0.7469299336274465,
+     0.6901906033356985,
+     0.6493203739325205,
+     0.7092813551425934,
+     0.6760435700416565,
+     0.7456483542919159,
+     0.7613438864549001,
+     0.8105023304621378,
+     0.7877564827601115,
+     0.7372243305047353,
+     0.7332283159097036,
+     0.7851764559745789,
+     0.8494389255841573,
+     0.7300106485684713,
+     0.7734520733356476,
+     0.7003320852915446,
+     0.7538809378941854,
+     0.763969232638677,
+     0.7699197133382162,
+     0.7876763244469961,
+     0.7524084349473318,
+     0.8218903144200643,
+     0.7830105920632681,
+     0.7971968452135721,
+     0.884766697883606,
+     0.800537625948588,
+     0.7511278788248698,
+     0.752312699953715,
+     0.8082283437252045,
+     0.8105799754460653,
+     0.8202279309431711,
+     0.7485719919204712,
+     0.7799115379651388,
+     0.7896704177061716,
+     0.763880600531896,
+     0.8472457428773245,
+     0.7779519657293955,
+     0.8028885225454966,
+     0.7990686098734537,
+     0.8887772659460703,
+     0.8439510961373647,
+     0.8729948699474335,
+     0.9141891499360403,
+     0.8665558993816376,
+     0.853724737962087,
+     0.827842523654302,
+     0.7976896067460378,
+     0.833942731221517,
+     0.826939860979716,
+     0.851495494445165,
+     0.7673834164937338,
+     0.7585424383481344,
+     0.8652205765247345,
+     0.8747784396012624,
+     0.8306568761666616,
+     0.8117541174093882,
+     0.822652538617452,
+     0.8381059467792511,
+     0.867266317208608,
+     0.8454623818397522,
+     0.845308264096578,
+     0.82573202252388,
+     0.8921485543251038,
+     0.8709104359149933,
+     0.9019777476787567,
+     0.9096597135066986,
+     0.8999419311682383,
+     0.8841050068537394,
+     0.8375548819700877,
+     0.8697609305381775,
+     0.900782565275828,
+     0.8552611271540324,
+     0.9044953187306722,
+     0.9082479576269785,
+     0.9280234475930532,
+     0.8785432775815328,
+     0.8845896224180857,
+     0.8889703353246053,
+     0.944865087668101,
+     0.8810889224211375,
+     0.868669350941976,
+     0.8761367897192637,
+     0.8943954308827718,
+     0.876738985379537,
+     0.8939231435457865,
+     0.857625792423884,
+     0.8885160883267721,
+     0.87887970606486,
+     0.9802423218886057,
+     0.9204542736212412,
+     0.904782791932424
+    ]
+   },
+   "member_2": {
+    "best_epoch": 12,
+    "best_val_force": 0.46515630185604095,
+    "epoch": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36,
+     37,
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55,
+     56,
+     57,
+     58,
+     59,
+     60,
+     61,
+     62,
+     63,
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71,
+     72,
+     73,
+     74,
+     75,
+     76,
+     77,
+     78,
+     79,
+     80,
+     81,
+     82,
+     83,
+     84,
+     85,
+     86,
+     87,
+     88,
+     89,
+     90,
+     91,
+     92,
+     93,
+     94,
+     95,
+     96,
+     97,
+     98,
+     99,
+     100,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106,
+     107,
+     108,
+     109,
+     110,
+     111,
+     112,
+     113,
+     114,
+     115,
+     116,
+     117,
+     118,
+     119,
+     120,
+     121,
+     122,
+     123,
+     124,
+     125,
+     126,
+     127,
+     128,
+     129,
+     130,
+     131,
+     132,
+     133,
+     134,
+     135,
+     136,
+     137,
+     138,
+     139,
+     140,
+     141,
+     142,
+     143,
+     144,
+     145,
+     146,
+     147,
+     148,
+     149,
+     150,
+     151,
+     152,
+     153,
+     154,
+     155,
+     156,
+     157,
+     158,
+     159,
+     160,
+     161,
+     162,
+     163,
+     164,
+     165,
+     166,
+     167,
+     168,
+     169,
+     170,
+     171,
+     172,
+     173,
+     174,
+     175,
+     176,
+     177,
+     178,
+     179,
+     180,
+     181,
+     182,
+     183,
+     184,
+     185,
+     186,
+     187,
+     188,
+     189,
+     190,
+     191,
+     192,
+     193,
+     194,
+     195,
+     196,
+     197,
+     198,
+     199,
+     200,
+     201,
+     202,
+     203,
+     204,
+     205,
+     206,
+     207,
+     208,
+     209,
+     210,
+     211,
+     212
+    ],
+    "final_train_force": 0.08573276114960511,
+    "train_force": [
+     1.7327738503615062,
+     1.0354351922869682,
+     0.6288403682410717,
+     0.47939973572889966,
+     0.36126548300186795,
+     0.3562760179241498,
+     0.2738191100458304,
+     0.3226390176763137,
+     0.3122576680034399,
+     0.2802874445915222,
+     0.265582865724961,
+     0.32378356407086056,
+     0.2259017856170734,
+     0.20521860321362814,
+     0.24763610710700354,
+     0.2313675954937935,
+     0.25515218762060005,
+     0.21082130322853723,
+     0.2342046828319629,
+     0.3210221516589324,
+     0.2281127286454042,
+     0.1824891803165277,
+     0.21066379050413767,
+     0.21746628234783807,
+     0.17864789192875227,
+     0.20234381034970284,
+     0.30378576430181664,
+     0.20667150740822157,
+     0.24285837511221567,
+     0.19435334081451097,
+     0.1675793081521988,
+     0.1474429735292991,
+     0.14818148780614138,
+     0.15958515368402004,
+     0.18825086082021394,
+     0.1681378809735179,
+     0.21266036946326494,
+     0.2602687602241834,
+     0.21279882763822874,
+     0.1895967877159516,
+     0.17412907537072897,
+     0.166085798603793,
+     0.1719676119585832,
+     0.1735257701948285,
+     0.17394842145343622,
+     0.16713547706604004,
+     0.14336523599922657,
+     0.13945276538530985,
+     0.14717159575472274,
+     0.12597738051166138,
+     0.14646906281510988,
+     0.17997217333565155,
+     0.13600039637337127,
+     0.144469091668725,
+     0.14900664861003557,
+     0.12358471658080816,
+     0.15577446886648735,
+     0.14312036149203777,
+     0.16731810724983612,
+     0.1529738586395979,
+     0.16870866436511278,
+     0.12713455719252428,
+     0.1672233228261272,
+     0.1670026546344161,
+     0.21394373724857965,
+     0.2352143550912539,
+     0.15986346267163754,
+     0.1619898791735371,
+     0.12112357250104348,
+     0.13077726929138103,
+     0.13518495361010233,
+     0.141983348565797,
+     0.1119214544693629,
+     0.1145664236197869,
+     0.18699213800330958,
+     0.1656422233209014,
+     0.15637426792333523,
+     0.1487849373370409,
+     0.1933912861471375,
+     0.13252584108461937,
+     0.17169914053132138,
+     0.14995107954988876,
+     0.146090659002463,
+     0.13772911919901767,
+     0.17325162825485071,
+     0.157432586265107,
+     0.14599145265916982,
+     0.17965297245730957,
+     0.1646897733832399,
+     0.13845824170857668,
+     0.1320570589353641,
+     0.12305486698945363,
+     0.12769347056746483,
+     0.12063522326449554,
+     0.11415759567171335,
+     0.16166572334865728,
+     0.12904706442107758,
+     0.16169013859083256,
+     0.10537273188432057,
+     0.1284268330782652,
+     0.14926093444228172,
+     0.16920339595526457,
+     0.12002509801338117,
+     0.15075548676153025,
+     0.14159472597142062,
+     0.15072780133535466,
+     0.14205633693685135,
+     0.1938745261480411,
+     0.12955019871393839,
+     0.12982075102627277,
+     0.11575218879928191,
+     0.1639166036620736,
+     0.13877911741534868,
+     0.1309198277692,
+     0.10454699862748384,
+     0.10793810368825991,
+     0.11987251819421847,
+     0.12368867949893077,
+     0.19527027569711208,
+     0.11938614988078673,
+     0.11663376570989688,
+     0.1099734865128994,
+     0.11980956171949704,
+     0.10627387867619593,
+     0.12626951622466245,
+     0.11452341297020514,
+     0.117332197415332,
+     0.13297159566233555,
+     0.10469484142959118,
+     0.10000586478660504,
+     0.11732626458009084,
+     0.12889254527787367,
+     0.12480756143728892,
+     0.14358740020543337,
+     0.1345698026319345,
+     0.13660031091421843,
+     0.11064941560228665,
+     0.10145004093647003,
+     0.11056169712295134,
+     0.10247683866570394,
+     0.10139969332764547,
+     0.10374166630208492,
+     0.10776959856351216,
+     0.10346010482559602,
+     0.09311126048366229,
+     0.09505687933415174,
+     0.11847001034766436,
+     0.09178579629709323,
+     0.09551530207196872,
+     0.15187874188025793,
+     0.1507919399688641,
+     0.09610514808446169,
+     0.10827194650967915,
+     0.09485329408198595,
+     0.09804950018102924,
+     0.09031062449018161,
+     0.09228979330509901,
+     0.12340844019005696,
+     0.12617254567643008,
+     0.11132680314282577,
+     0.09117962559685111,
+     0.11564804675678413,
+     0.12610566460837921,
+     0.16786375579734644,
+     0.10799432856341203,
+     0.13700202914575735,
+     0.11716670449823141,
+     0.09871903775880735,
+     0.10205339050541322,
+     0.0984773167098562,
+     0.09537996926034491,
+     0.11070516550292571,
+     0.1048529427498579,
+     0.1093733028198282,
+     0.08980046802510817,
+     0.09044041205197573,
+     0.09538778165976207,
+     0.10537473112344742,
+     0.07906095248957475,
+     0.09408040468891461,
+     0.11177708177516858,
+     0.1006078210969766,
+     0.13998808370282254,
+     0.1313518611714244,
+     0.0938905185709397,
+     0.11538802646100521,
+     0.1235680989921093,
+     0.10395032664140065,
+     0.10923648190995057,
+     0.11156502552330494,
+     0.09310832309226195,
+     0.11524123201767604,
+     0.08801267466818292,
+     0.08716603725527723,
+     0.106313930824399,
+     0.1078883670270443,
+     0.10875941440463066,
+     0.1230625215296944,
+     0.09679451026022434,
+     0.1161530075284342,
+     0.10616724751889706,
+     0.10583059769123793,
+     0.11012599586198728,
+     0.1118670927050213,
+     0.13813793255637088,
+     0.09870377307136853,
+     0.08830553495014708,
+     0.08093468612059951,
+     0.1067502045383056,
+     0.12202344896892707,
+     0.11589814412097137,
+     0.08573276114960511
+    ],
+    "train_force_at_best": 0.32378356407086056,
+    "val_force": [
+     1.7415441870689392,
+     1.507893681526184,
+     1.070419152577718,
+     0.862964540719986,
+     0.7190254479646683,
+     0.545761634906133,
+     0.5421969840923945,
+     0.5036716411511103,
+     0.5047028313080469,
+     0.7079660693804423,
+     0.4888317883014679,
+     0.46515630185604095,
+     0.5581433127323786,
+     0.5759202539920807,
+     0.6485538681348165,
+     0.7020962536334991,
+     0.7884329458077749,
+     0.8797932465871176,
+     0.7250466048717499,
+     0.8758512636025747,
+     0.617058684428533,
+     0.7943210005760193,
+     1.014343370993932,
+     1.056853840748469,
+     0.7973389724890391,
+     0.9012244542439779,
+     0.6111816664536794,
+     0.5548257827758789,
+     0.6122122704982758,
+     0.7000376482804617,
+     0.7686296999454498,
+     0.7263701657454172,
+     0.8198831776777903,
+     0.8351811369260153,
+     0.7404989103476206,
+     0.7998108565807343,
+     0.7801614801088969,
+     0.8317723174889883,
+     0.7738352616628011,
+     0.7531222105026245,
+     0.7888579666614532,
+     0.8077750901381174,
+     0.5892801880836487,
+     0.665716141462326,
+     0.7257795631885529,
+     0.6034020980199178,
+     0.5882984946171442,
+     0.6270651618639628,
+     0.7388070027033488,
+     0.8955971697966257,
+     0.6378462314605713,
+     0.5896193981170654,
+     0.8024321297804514,
+     0.8220630089441935,
+     0.6262491345405579,
+     0.6706897219022115,
+     0.6704233884811401,
+     0.71527099609375,
+     0.6711400051911672,
+     0.8485837380091349,
+     0.6369557082653046,
+     0.6348866621653239,
+     0.7321755190690359,
+     0.5933822343746821,
+     0.8109686474005381,
+     0.6771844228108724,
+     0.6951658129692078,
+     0.5828762352466583,
+     0.7066745360692342,
+     0.7798833946386973,
+     0.7647313276926676,
+     0.8338710765043894,
+     0.8171720008055369,
+     0.835025280714035,
+     0.842194269100825,
+     0.6583037078380585,
+     0.9202109674612681,
+     0.6202867974837621,
+     0.7776264250278473,
+     0.735674778620402,
+     0.7059059937795004,
+     0.7631463507811228,
+     0.759433259566625,
+     0.6538756589094797,
+     0.736726293961207,
+     0.6382626493771871,
+     0.6931896507740021,
+     0.6359239916006724,
+     0.6872299611568451,
+     0.702510784069697,
+     0.8518855472405752,
+     0.6732576191425323,
+     0.6411100924015045,
+     0.7414255241552988,
+     0.6818673312664032,
+     0.7876785496870676,
+     0.7881111403306326,
+     0.6653614342212677,
+     0.7328263223171234,
+     0.7949469288190206,
+     0.8001834154129028,
+     0.8153999050458273,
+     0.8308822810649872,
+     0.7459066609541575,
+     0.8860092957814535,
+     0.7898673514525095,
+     0.8648641208807627,
+     0.8451383511225382,
+     0.792012095451355,
+     0.7663750350475311,
+     0.6946894029776255,
+     0.6599273780981699,
+     0.7559780875841776,
+     0.7805372476577759,
+     0.7900303800900778,
+     0.7567823529243469,
+     0.8456136385599772,
+     0.839797685543696,
+     0.7054734726746877,
+     0.7348269323507944,
+     0.7602832814057668,
+     0.7197426160176595,
+     0.7904093265533447,
+     0.7908160189787546,
+     0.820731391509374,
+     0.7804713547229767,
+     0.7008865177631378,
+     0.7515605588754019,
+     0.7715911865234375,
+     0.8456645409266154,
+     0.830265869696935,
+     0.9522116184234619,
+     0.9137579997380575,
+     0.8778047462304434,
+     0.7861026028792063,
+     0.8317087789376577,
+     0.8663590351740519,
+     0.8286314706007639,
+     0.7897433837254842,
+     0.768154501914978,
+     0.8045890033245087,
+     0.7873249451319376,
+     0.7887179652849833,
+     0.8201245466868082,
+     0.783811628818512,
+     0.8364563286304474,
+     0.8069060544172922,
+     0.7797664205233256,
+     0.722698301076889,
+     0.7028615375359853,
+     0.8065466582775116,
+     0.8266116182009379,
+     0.7737963298956553,
+     0.7577645480632782,
+     0.8080698947111765,
+     0.8298339744408926,
+     0.83310999472936,
+     0.8017329474290212,
+     0.7822596927483877,
+     0.7766247193018595,
+     0.7706403434276581,
+     0.7912031511465708,
+     0.7954634428024292,
+     0.8267941176891327,
+     0.7609373529752096,
+     0.8336444993813833,
+     0.7778367896874746,
+     0.8216598033905029,
+     0.8072859744230906,
+     0.8441154261430105,
+     0.8219744265079498,
+     0.7947658797105154,
+     0.7814223865667979,
+     0.7388038337230682,
+     0.8579548497994741,
+     0.825941930214564,
+     0.8786170979340872,
+     0.843051960070928,
+     0.7916191021601359,
+     0.8645291229089102,
+     0.7987097501754761,
+     0.7968034247557322,
+     0.8240719238917033,
+     0.8428638974825541,
+     0.8105774720509847,
+     0.8035115996996561,
+     0.7841349244117737,
+     0.7127257883548737,
+     0.740899016459783,
+     0.7267861366271973,
+     0.7554477055867513,
+     0.778747171163559,
+     0.7861290673414866,
+     0.7871171732743582,
+     0.8120800654093424,
+     0.8066812554995219,
+     0.7907795409361521,
+     0.7957143386205038,
+     0.8536935150623322,
+     0.8896582722663879,
+     0.7770528395970663,
+     0.8463865319887797,
+     0.8079140384991964,
+     0.8123578429222107,
+     0.8107163707415262,
+     0.8395511110623678,
+     0.8377544383207957,
+     0.7947264909744263,
+     0.83317631483078,
+     0.8498449921607971,
+     0.875541090965271,
+     0.8369235893090566
+    ]
+   }
+  }
+ },
+ "reference_labels": {
+  "initial_model_q0": {
+   "budget_core_h": 45.0,
+   "completed": [
+    "C16-r008-ord2",
+    "C16-r008-ord3",
+    "C16-r018-ord0",
+    "C16-r018-ord1",
+    "C16-r021-ord0",
+    "C16-r021-ord1",
+    "C16-r027-ord0",
+    "C16-r027-ord1"
+   ],
+   "failed": [],
+   "finished_at": "2026-11-07T16:04:47+00:00",
+   "ledger": {
+    "allowances": {
+     "amendments": [
+      "A1-q0-34",
+      "A2-final-time-reserve"
+     ],
+     "initial_model_q0_core_h": 34.0,
+     "stages_core_h": {
+      "development": 7.0,
+      "fidelity_audit": 3.0,
+      "final_test": 14.0,
+      "initial_model": 45.0,
+      "repair_runs": 165.0,
+      "repair_val": 6.0
+     },
+     "total_core_h": 240.0
+    },
+    "at": "2026-11-07T16:04:47+00:00",
+    "consumed_core_h": {
+     "initial_model_q0": 31.870519286062983,
+     "runs": {},
+     "stages": {
+      "initial_model": 31.870519286062983
+     },
+     "total": 31.870519286062983
+    },
+    "n_attempts": 33,
+    "note": "measured from every attempt directory (completed, failed, cancelled, retried, running); all of it is newly consumed by this benchmark (no cached label of another root is charged here)",
+    "remaining": {
+     "initial_model_q0_core_h": 2.1294807139370175,
+     "stages_core_h": {
+      "development": 7.0,
+      "fidelity_audit": 3.0,
+      "final_test": 14.0,
+      "initial_model": 13.129480713937017,
+      "repair_runs": 165.0,
+      "repair_val": 6.0
+     },
+     "total_core_h": 208.12948071393703
+    },
+    "running": []
+   },
+   "measured_stage_core_h": 43.00411586728361,
+   "missing": [],
+   "n_structures": 30,
+   "not_started": [],
+   "pending": [],
+   "qualification_stage": 0,
+   "reused": [
+    "C16-r000-ord0",
+    "C16-r000-ord1",
+    "C16-r000-ord2",
+    "C16-r000-ord3",
+    "C16-r002-ord0",
+    "C16-r002-ord1",
+    "C16-r002-ord2",
+    "C16-r002-ord3",
+    "C16-r004-ord0",
+    "C16-r004-ord1",
+    "C16-r004-ord2",
+    "C16-r004-ord3",
+    "C16-r005-ord0",
+    "C16-r005-ord1",
+    "C16-r005-ord2",
+    "C16-r005-ord3",
+    "C16-r006-ord0",
+    "C16-r006-ord1",
+    "C16-r006-ord2",
+    "C16-r006-ord3",
+    "C16-r008-ord0",
+    "C16-r008-ord1"
+   ],
+   "root": "public",
+   "stage": "initial_model",
+   "valid": [
+    "C16-r000-ord0",
+    "C16-r000-ord1",
+    "C16-r000-ord2",
+    "C16-r000-ord3",
+    "C16-r002-ord0",
+    "C16-r002-ord1",
+    "C16-r002-ord2",
+    "C16-r002-ord3",
+    "C16-r004-ord0",
+    "C16-r004-ord1",
+    "C16-r004-ord2",
+    "C16-r004-ord3",
+    "C16-r005-ord0",
+    "C16-r005-ord1",
+    "C16-r005-ord2",
+    "C16-r005-ord3",
+    "C16-r006-ord0",
+    "C16-r006-ord1",
+    "C16-r006-ord2",
+    "C16-r006-ord3",
+    "C16-r008-ord0",
+    "C16-r008-ord1",
+    "C16-r008-ord2",
+    "C16-r008-ord3",
+    "C16-r018-ord0",
+    "C16-r018-ord1",
+    "C16-r021-ord0",
+    "C16-r021-ord1",
+    "C16-r027-ord0",
+    "C16-r027-ord1"
+   ]
+  }
+ },
  "runs": [
   {
    "arm": "B_continued",
@@ -596,7 +3850,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-bend0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -606,7 +3860,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-bend0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -616,7 +3870,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-bend0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -626,7 +3880,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-bend0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -636,7 +3890,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-bend0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -646,7 +3900,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-contact0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -656,7 +3910,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-contact0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -666,7 +3920,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-contact0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -676,7 +3930,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-contact0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -686,7 +3940,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-contact0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -696,7 +3950,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-torsion0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -706,7 +3960,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-torsion0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -716,7 +3970,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-torsion0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -726,7 +3980,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-torsion0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -736,7 +3990,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r010-torsion0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -746,7 +4000,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-bend0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -756,7 +4010,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-bend0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -766,7 +4020,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-bend0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -776,7 +4030,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-bend0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -786,7 +4040,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-bend0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -796,7 +4050,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-contact0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -806,7 +4060,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-contact0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -816,7 +4070,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-contact0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -826,7 +4080,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-contact0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -836,7 +4090,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-contact0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -846,7 +4100,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-torsion0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -856,7 +4110,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-torsion0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -866,7 +4120,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-torsion0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -876,7 +4130,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-torsion0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -886,7 +4140,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r016-torsion0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -896,7 +4150,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-bend0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -906,7 +4160,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-bend0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -916,7 +4170,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-bend0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -926,7 +4180,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-bend0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -936,7 +4190,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-bend0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -946,7 +4200,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-contact0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -956,7 +4210,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-contact0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -966,7 +4220,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-contact0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -976,7 +4230,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-contact0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -986,7 +4240,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-contact0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -996,7 +4250,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-torsion0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -1006,7 +4260,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-torsion0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -1016,7 +4270,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-torsion0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -1026,7 +4280,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-torsion0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "B_continued",
@@ -1036,7 +4290,7 @@
    "kind": "continued_training",
    "run": "B_continued__C16-r020-torsion0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1046,7 +4300,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-bend0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1056,7 +4310,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-bend0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1066,7 +4320,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-bend0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1076,7 +4330,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-bend0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1086,7 +4340,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-bend0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1096,7 +4350,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-contact0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1106,7 +4360,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-contact0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1116,7 +4370,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-contact0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1126,7 +4380,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-contact0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1136,7 +4390,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-contact0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1146,7 +4400,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-torsion0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1156,7 +4410,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-torsion0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1166,7 +4420,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-torsion0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1176,7 +4430,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-torsion0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1186,7 +4440,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r010-torsion0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1196,7 +4450,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-bend0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1206,7 +4460,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-bend0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1216,7 +4470,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-bend0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1226,7 +4480,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-bend0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1236,7 +4490,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-bend0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1246,7 +4500,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-contact0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1256,7 +4510,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-contact0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1266,7 +4520,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-contact0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1276,7 +4530,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-contact0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1286,7 +4540,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-contact0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1296,7 +4550,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-torsion0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1306,7 +4560,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-torsion0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1316,7 +4570,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-torsion0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1326,7 +4580,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-torsion0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1336,7 +4590,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r016-torsion0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1346,7 +4600,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-bend0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1356,7 +4610,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-bend0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1366,7 +4620,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-bend0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1376,7 +4630,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-bend0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1386,7 +4640,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-bend0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1396,7 +4650,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-contact0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1406,7 +4660,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-contact0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1416,7 +4670,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-contact0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1426,7 +4680,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-contact0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1436,7 +4690,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-contact0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1446,7 +4700,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-torsion0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1456,7 +4710,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-torsion0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1466,7 +4720,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-torsion0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1476,7 +4730,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-torsion0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "C_committee",
@@ -1486,7 +4740,7 @@
    "kind": "closed_loop",
    "run": "C_committee__C16-r020-torsion0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1496,7 +4750,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-bend0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1506,7 +4760,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-bend0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1516,7 +4770,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-bend0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1526,7 +4780,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-bend0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1536,7 +4790,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-bend0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1546,7 +4800,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-contact0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1556,7 +4810,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-contact0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1566,7 +4820,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-contact0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1576,7 +4830,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-contact0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1586,7 +4840,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-contact0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1596,7 +4850,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-torsion0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1606,7 +4860,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-torsion0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1616,7 +4870,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-torsion0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1626,7 +4880,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-torsion0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1636,7 +4890,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r010-torsion0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1646,7 +4900,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-bend0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1656,7 +4910,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-bend0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1666,7 +4920,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-bend0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1676,7 +4930,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-bend0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1686,7 +4940,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-bend0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1696,7 +4950,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-contact0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1706,7 +4960,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-contact0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1716,7 +4970,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-contact0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1726,7 +4980,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-contact0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1736,7 +4990,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-contact0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1746,7 +5000,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-torsion0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1756,7 +5010,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-torsion0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1766,7 +5020,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-torsion0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1776,7 +5030,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-torsion0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1786,7 +5040,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r016-torsion0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1796,7 +5050,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-bend0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1806,7 +5060,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-bend0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1816,7 +5070,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-bend0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1826,7 +5080,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-bend0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1836,7 +5090,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-bend0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1846,7 +5100,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-contact0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1856,7 +5110,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-contact0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1866,7 +5120,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-contact0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1876,7 +5130,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-contact0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1886,7 +5140,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-contact0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1896,7 +5150,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-torsion0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1906,7 +5160,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-torsion0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1916,7 +5170,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-torsion0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1926,7 +5180,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-torsion0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_phal",
@@ -1936,7 +5190,7 @@
    "kind": "closed_loop",
    "run": "D_phal__C16-r020-torsion0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -1946,7 +5200,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-bend0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -1956,7 +5210,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-bend0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -1966,7 +5220,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-bend0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -1976,7 +5230,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-bend0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -1986,7 +5240,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-bend0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -1996,7 +5250,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-contact0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2006,7 +5260,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-contact0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2016,7 +5270,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-contact0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2026,7 +5280,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-contact0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2036,7 +5290,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-contact0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2046,7 +5300,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-torsion0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2056,7 +5310,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-torsion0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2066,7 +5320,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-torsion0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2076,7 +5330,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-torsion0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2086,7 +5340,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r010-torsion0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2096,7 +5350,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-bend0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2106,7 +5360,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-bend0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2116,7 +5370,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-bend0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2126,7 +5380,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-bend0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2136,7 +5390,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-bend0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2146,7 +5400,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-contact0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2156,7 +5410,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-contact0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2166,7 +5420,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-contact0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2176,7 +5430,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-contact0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2186,7 +5440,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-contact0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2196,7 +5450,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-torsion0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2206,7 +5460,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-torsion0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2216,7 +5470,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-torsion0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2226,7 +5480,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-torsion0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2236,7 +5490,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r016-torsion0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2246,7 +5500,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-bend0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2256,7 +5510,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-bend0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2266,7 +5520,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-bend0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2276,7 +5530,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-bend0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2286,7 +5540,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-bend0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2296,7 +5550,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-contact0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2306,7 +5560,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-contact0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2316,7 +5570,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-contact0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2326,7 +5580,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-contact0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2336,7 +5590,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-contact0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2346,7 +5600,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-torsion0__s1",
    "seed": 1,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2356,7 +5610,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-torsion0__s2",
    "seed": 2,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2366,7 +5620,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-torsion0__s3",
    "seed": 3,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2376,7 +5630,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-torsion0__s4",
    "seed": 4,
-   "status": "planned"
+   "status": "not started (execution closed)"
   },
   {
    "arm": "D_noLJ",
@@ -2386,7 +5640,7 @@
    "kind": "closed_loop",
    "run": "D_noLJ__C16-r020-torsion0__s5",
    "seed": 5,
-   "status": "planned"
+   "status": "not started (execution closed)"
   }
  ],
  "sealed_access_log": [],

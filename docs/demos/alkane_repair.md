@@ -84,6 +84,8 @@ $R label --stage repair_val $B && $R label --stage final_test $B
 for A in C_committee D_phal D_noLJ; do $R calibrate-monitor --arm $A $B; done
 $R repair-run $B                                          # or a slice: --arm/--case/--seed
 $R evaluate $B && $R report --publish $B
+# under an authorization: $R execute $B runs this order, resumably; $R close $B --decision ... --granted-by ... --statement ...
+# ends a stopped execution by decision (execute then launches nothing)
 ```
 
 Every command is resumable and refuses to run if a protocol file changed after the freeze. The smoke
@@ -307,6 +309,23 @@ The repair-run order is fixed before any outcome exists: seed-major, families in
 order rotated per seed and case. A budget interruption therefore leaves complete seeds and no arm
 systematically last. The five seeds vary the GMD velocity initialisation and the fine-tune seed. They
 are not five independently trained initial models: every run starts from the same frozen checkpoint.
+
+## 6b. Outcome of the C16 execution (closed 2026-11-07T16:43Z)
+
+The execution ended at its first prerequisite. Full account: `results/repair_c16/FINAL_REPORT.md`
+(Chinese summary: `results/repair_c16/STATUS_zh.md`).
+
+- **q0 did not qualify.** 24 training labels from 6 bases gave id_val force RMSE 0.303 eV/A (limit 0.10)
+  and atom-error p95 1.01 (limit 0.30); 2 of 18 MD trajectories stayed intact. The no-hidden-stabilisation
+  check passed. The ensemble overfits (training RMSE about 0.08, validation 0.30-0.47).
+- **q1 was unaffordable.** Expected 25.5 and upper 28.3 core-h against 13.1 remaining in initial_model; no
+  total-preserving redistribution covers it (12.0 core-h uncovered). Nothing was moved.
+- **The user closed the execution** (`close`). DFT consumed: 31.87 of 240 core-h (q0 limit 34 after A1).
+  No repair run, final-test label or sealed evaluation was executed; the sealed set was never opened.
+- **No claim about repair, the arms or PHAL follows from this execution.**
+- **Cost lesson.** A full C16 label cost 1.06 core-h measured against 0.73 planned. The label provenance
+  record charges a vanished attempt up to its detection (43.0 core-h in total), the ledger up to its last
+  file write (31.87, the enforcement basis); the report lists the difference.
 
 ## 7. What remains unsupported
 
