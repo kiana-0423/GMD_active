@@ -194,6 +194,66 @@ that would exceed its budget does not start a job.
 Nothing beyond the smoke profile has been launched. The 550 core-hour campaign of the pilot, and
 C64/C128, are out of scope.
 
+## 6a. Execution under the authorization (2026-11-07)
+
+The execution authorization (`configs/demos/alkane_repair/repair_c16_authorization.yaml`) allows:
+
+| Scope | Limit |
+|---|---|
+| Total DFT | 240 core-h |
+| Initial model (both qualification attempts) | 45 core-h, of which q0 at most 30 |
+| Development | 7 core-h |
+| Fidelity audit | 3 core-h |
+| Repair validation | 6 core-h |
+| Sealed final test | 14 core-h |
+| Repair runs | 165 core-h, each run at most 1.2 core-h |
+| Elapsed time | 120 h |
+| Hardware | one CP2K job at a time, five cores, local only |
+
+These are allowances, not targets. The run is driven by `execute`, which keeps an append-only
+journal (`execution/journal.jsonl`) and a state file (`execution/state.json`). The start record holds:
+the commits of GMD_active, GMD, GMD_SGT and cp2k-ml-scf (GMD_SGT's working tree was already dirty and is
+recorded as such), the Python, package and CP2K versions, the GMD binary hash, the artifact roots, and
+the authorization hash.
+
+**How the allowances are enforced.**
+
+- **Ledger.** Consumption is recomputed from every CP2K attempt directory: completed, failed,
+  cancelled, retried and running (elapsed wall time x cores). Each attempt is classified into scopes:
+  total, stage, the q0 sub-limit, and the repair run. A restart cannot reset it, and nothing is
+  counted twice.
+- **Before submission.** A job starts only if every scope it charges has room for the 90th percentile
+  of measured costs of its kind plus a 300 core-s margin.
+- **While running.** Every poll recomputes consumption. A job whose scope reaches its allowance minus
+  the margin is cancelled: the scheduler terminates its process group, and the cancellation and its
+  consumption are journalled (`execution/budget_journal.jsonl`).
+- **Hard backstop.** Every CP2K attempt runs under `/usr/bin/timeout -k 30 1800` (the launcher). An
+  attempt can therefore consume at most (1800 + 30) s x 5 cores, even if every controlling process has
+  died. `ulimit -t` was tried first and rejected: in a real-CP2K test, CP2K's Fortran runtime caught
+  SIGXCPU and hung in its backtrace handler while spinning, and macOS did not escalate to SIGKILL. The
+  `timeout` backstop is tested with a process that ignores SIGTERM and with real CP2K attempts.
+- **What `--max-wall-s` is not.** It only stops waiting for jobs and is never used as a compute cap.
+
+**Order of stages.** Freeze (after the geometry preflight and the plan's budget check), then:
+
+1. q0 labels and qualification;
+2. q1 only if q0 is scientifically not accepted;
+3. development references, failure analysis and fidelity audit, giving the eligibility of each family;
+4. repair-validation references;
+5. monitor calibration, giving the availability of each arm;
+6. repair runs in a fixed order;
+7. outcomes frozen;
+8. sealed final-test references;
+9. sealed evaluation and report.
+
+A stage that ends for budget or infrastructure reasons is recorded as incomplete, never as a
+scientific failure.
+
+The repair-run order is fixed before any outcome exists: seed-major, families interleaved, and the arm
+order rotated per seed and case. A budget interruption therefore leaves complete seeds and no arm
+systematically last. The five seeds vary the GMD velocity initialisation and the fine-tune seed. They
+are not five independently trained initial models: every run starts from the same frozen checkpoint.
+
 ## 7. What remains unsupported
 
 Until stages 1-5 run: every scientific claim of the benchmark (the seven assessment questions in the
