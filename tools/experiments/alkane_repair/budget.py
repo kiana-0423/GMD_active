@@ -73,6 +73,8 @@ class AuthorizationConfig(_Strict):
     initial_model_q0_core_h: float = Field(..., gt=0.0)
     per_run_core_h: float = Field(..., gt=0.0)
     max_elapsed_h: float = Field(..., gt=0.0)
+    final_reserve_h: float = Field(0.0, ge=0.0, description="hours of the elapsed window kept for the final test, evaluation and report: "
+                                                             "no repair run starts if it would end inside the reserve (0 disables)")
     cp2k_max_concurrent_jobs: int = Field(1, ge=1, le=1)
     cores_per_job: int = Field(..., ge=1)
     enforcement: EnforcementConfig
@@ -81,7 +83,7 @@ class AuthorizationConfig(_Strict):
 
 #: allowance fields an amendment may change (``stages.<name>`` for a stage); enforcement settings, cores and
 #: concurrency are not amendable.
-AMENDABLE = ("total_core_h", "initial_model_q0_core_h", "per_run_core_h", "max_elapsed_h", *(f"stages.{s}" for s in STAGES))
+AMENDABLE = ("total_core_h", "initial_model_q0_core_h", "per_run_core_h", "max_elapsed_h", "final_reserve_h", *(f"stages.{s}" for s in STAGES))
 
 
 class AllowanceChange(_Strict):
@@ -127,6 +129,8 @@ def amendment_digest(amendment: Mapping[str, Any]) -> str:
 def _allowance(raw: dict[str, Any], key: str) -> float | None:
     if key.startswith("stages."):
         return (raw.get("stages") or {}).get(key.split(".", 1)[1])
+    if key not in raw and key in AuthorizationConfig.model_fields and not AuthorizationConfig.model_fields[key].is_required():
+        return AuthorizationConfig.model_fields[key].default  # an optional allowance absent from the original file has its default
     return raw.get(key)
 
 
@@ -183,6 +187,8 @@ def load_authorization(loaded: LoadedBenchmark) -> AuthorizationConfig:
         raise BudgetRefused("authorization per-run allowance exceeds the protocol's budget_core_h_per_run")
     if auth.initial_model_q0_core_h > auth.stages.get("initial_model", 0.0) + 1e-9:
         raise BudgetRefused(f"the q0 sub-allowance ({auth.initial_model_q0_core_h}) exceeds the initial-model allowance ({auth.stages.get('initial_model', 0.0)})")
+    if auth.final_reserve_h >= auth.max_elapsed_h:
+        raise BudgetRefused(f"the final reserve ({auth.final_reserve_h} h) must be shorter than the elapsed window ({auth.max_elapsed_h} h)")
     if sum(auth.stages.values()) > auth.total_core_h + 1e-9:
         raise BudgetRefused(f"stage allowances sum to {sum(auth.stages.values())} core-h, more than the total {auth.total_core_h}")
     limits = timeout_of_launcher(loaded.alpha.config.cp2k.launcher)

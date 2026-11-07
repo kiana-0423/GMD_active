@@ -21,3 +21,24 @@ amendments:
       total_core_h: 240.0
       stages.initial_model: 45.0
       max_elapsed_h: 120.0
+  - id: A2-final-time-reserve
+    at: "2026-11-07T14:19:24Z"
+    granted_by: user
+    statement: >-
+      Please do some time reserve (optional): stop starting new repair runs once the remaining 120-hour window falls
+      below a reserve for the final test and the evaluation, so the window cannot close before the sealed final-test
+      labels, the sealed evaluation and the report.
+    rationale: >-
+      The projected end of the run (about 105-115 h of the 120 h window after a 2.2 h outage) leaves a thin margin, and
+      the window is checked before every repair run and before the final test, so overrunning repair runs could leave no
+      scientific result. Reserve = final-test labels (15 full-system labels, about 3.6 h at the 90% upper projection of
+      measured costs) + sealed stability evaluation (up to about 21.7 h serial MD in the plan) ~= 25 h. A repair run starts
+      only if it is expected (median measured run wall time) to end before the reserve; the runs not started are recorded
+      as not evaluated. No DFT allowance, threshold, protocol setting or the 120 h window changes.
+    changes:
+      final_reserve_h: {from: 0.0, to: 25.0}
+    unchanged:
+      total_core_h: 240.0
+      stages.initial_model: 45.0
+      initial_model_q0_core_h: 34.0
+      max_elapsed_h: 120.0

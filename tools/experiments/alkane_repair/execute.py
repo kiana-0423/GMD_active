@@ -194,7 +194,7 @@ def verify_authorization_record(loaded: LoadedBenchmark, journal: Journal, auth:
         journal.log("authorization_amendment", amendment={k: v for k, v in amendment.items() if k != "sha256"}, sha256=amendment["sha256"],
                     code=_git(loaded.repo_path(".")),
                     effective={"total_core_h": auth.total_core_h, "stages": dict(auth.stages), "initial_model_q0_core_h": auth.initial_model_q0_core_h,
-                               "per_run_core_h": auth.per_run_core_h, "max_elapsed_h": auth.max_elapsed_h})
+                               "per_run_core_h": auth.per_run_core_h, "max_elapsed_h": auth.max_elapsed_h, "final_reserve_h": auth.final_reserve_h})
 
 
 # ---------------------------------------------------------------------------------------------- projections before stages
@@ -252,6 +252,53 @@ def gate(loaded: LoadedBenchmark, journal: Journal, label: str, stage: str, *, q
     short = "; ".join(f"{s['scope']}: upper {s['upper90_core_h']:.1f} vs remaining {s['remaining_core_h']:.1f} core-h" for s in summary if not s["fits"])
     raise ExecutionStop("unaffordable", f"{label} is projected not to fit under the current authorization ({short}); "
                                         f"no allowance was moved; proposal in {path}")
+
+
+def _run_wall_h(journal: Journal) -> float:
+    """Median wall time of the repair runs finished so far (1 h before any has finished)."""
+
+    import numpy as np
+
+    starts: dict[str, datetime] = {}
+    walls = []
+    if journal.journal_path.is_file():
+        for line in journal.journal_path.read_text(encoding="utf-8").splitlines():
+            event = json.loads(line) if line.strip() else {}
+            if event.get("event") == "run_start":
+                starts[event["run"]] = datetime.fromisoformat(event["at"])
+            elif event.get("event") == "run_end" and event.get("run") in starts:
+                walls.append((datetime.fromisoformat(event["at"]) - starts.pop(event["run"])).total_seconds() / 3600.0)
+    return float(np.median(walls)) if walls else 1.0
+
+
+def reserve_check(loaded: LoadedBenchmark, journal: Journal) -> dict[str, Any]:
+    """Whether the next repair run can start and still end before the final reserve (current authorization)."""
+
+    from .budget import load_authorization
+
+    auth = load_authorization(loaded)  # re-read so an amendment applies without a restart
+    elapsed = _elapsed_h(journal)
+    run_h = _run_wall_h(journal)
+    latest_start = auth.max_elapsed_h - auth.final_reserve_h - run_h
+    return {"allowed": auth.final_reserve_h <= 0.0 or elapsed <= latest_start, "elapsed_h": elapsed, "expected_run_wall_h": run_h,
+            "final_reserve_h": auth.final_reserve_h, "max_elapsed_h": auth.max_elapsed_h, "latest_start_h": latest_start}
+
+
+def _truncate_for_reserve(journal: Journal, order: list[dict[str, Any]], reserve: dict[str, Any]) -> None:
+    """Stop starting repair runs; the rest are recorded not started and the executor proceeds to the final test."""
+
+    runs = journal.state.setdefault("runs", {})
+    skipped = []
+    for item in order:
+        if runs.get(item["run"], {}).get("status") not in ("done", "failed_terminal"):
+            runs[item["run"]] = {**runs.get(item["run"], {}), "status": "not_started", "reason": "time reserve for the final test and evaluation"}
+            skipped.append(item["run"])
+    journal.save()
+    journal.log("time_reserve_reached", reserve=reserve, n_not_started=len(skipped))
+    journal.set_stage("repair_runs", "done", truncated_by_time_reserve=True, reserve=reserve, not_started=skipped,
+                      n_done=sum(1 for v in runs.values() if v["status"] == "done"),
+                      n_failed=sum(1 for v in runs.values() if v["status"] == "failed_terminal"))
+    journal.next_action("freeze outcomes, then the sealed final test (repair runs truncated by the time reserve)")
 
 
 def _check_time(journal: Journal, auth: Any) -> None:
@@ -466,6 +513,10 @@ def _repair_runs(loaded: LoadedBenchmark, journal: Journal, auth: Any, *, echo: 
         if item.get("retry_pass") and runs.get(name, {}).get("status") != "failed":
             continue
         _check_time(journal, auth)
+        reserve = reserve_check(loaded, journal)
+        if not reserve["allowed"]:
+            _truncate_for_reserve(journal, order, reserve)
+            return
         if max_runs is not None and started >= max_runs:
             journal.next_action(f"repair-run {name} (resume `execute`)")
             raise ExecutionStop("paused", f"paused after {started} runs (--max-runs)")
@@ -533,4 +584,4 @@ def freeze_outcomes(loaded: LoadedBenchmark, journal: Journal) -> dict[str, Any]
     return payload
 
 
-__all__ = ["ExecutionStop", "Journal", "eligibility", "execute", "fixed_run_order", "freeze_outcomes", "gate", "start_record", "verify_authorization_record"]
+__all__ = ["ExecutionStop", "Journal", "eligibility", "execute", "fixed_run_order", "freeze_outcomes", "gate", "reserve_check", "start_record", "verify_authorization_record"]

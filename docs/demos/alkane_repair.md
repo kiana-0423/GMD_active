@@ -248,6 +248,7 @@ amendment is later edited, removed or reordered.
 | Amendment | Granted (UTC) | Change | Kept | Rationale |
 |---|---|---|---|---|
 | A1-q0-34 | 2026-11-07 09:58 | q0 sub-allowance 30 -> 34 core-h | initial model 45, total 240, window 120 h | Measured q0 labels cost about 1.07 core-h each, against about 0.73 in the plan's timing sources. That projects q0 (30 labels) to about 32 core-h. |
+| A2-final-time-reserve | 2026-11-07 14:19 | final reserve 0 -> 25 h | all DFT allowances, window 120 h | A 2.2 h outage left a thin time margin. The reserve covers the final-test labels (about 3.6 h) and the sealed stability evaluation (up to about 21.7 h serial MD). |
 
 **Re-estimation before each expensive stage.** Before each of these stages starts, the executor
 re-projects its DFT cost from this execution's own measurements:
@@ -274,6 +275,12 @@ proposal draws only on slack:
 
 No allowance is moved without a new amendment. A partial expansion is never started: q1 runs only if
 the whole expansion is projected to fit.
+
+**Time reserve.** A repair run starts only if it is expected to end, at the median measured run wall
+time, before the last `final_reserve_h` hours of the window. Otherwise the remaining runs are recorded as
+not started (time reserve) and the repair stage is closed as truncated. The executor then continues with
+the frozen outcomes, the sealed final test, the evaluation and the report. The reserve is re-read before
+every run, so an amendment applies without a restart.
 
 **Restarts.** A restarted driver reconciles existing jobs: it charges no room check for a task that
 already has an attempt. The CP2K job of a running label survives the driver only if the driver alone is

@@ -296,3 +296,23 @@ def test_gate_stops_an_unaffordable_stage_with_a_total_preserving_proposal(bench
         assert all(t["to"] == "development" or t["to"] in proposal["deficits"] for t in proposal["transfers"])
     assert load_authorization(bench).stages == auth.stages  # nothing is moved automatically
     assert (bench.root / "execution" / "projections" / "development.json").is_file()
+
+
+def test_time_reserve_stops_new_repair_runs_and_hands_over_to_the_final_test(bench) -> None:
+    from tools.experiments.alkane_repair.execute import Journal, _repair_runs, reserve_check
+
+    auth = load_authorization(bench)
+    journal = Journal(bench)
+    journal.state["start"] = {"execution_start_epoch": time.time() - 3600.0 * (auth.max_elapsed_h - 2.0)}  # 2 h of the window left
+    assert reserve_check(bench, journal)["allowed"]  # no reserve: disabled by default
+    _amend(bench, _entry(changes={"final_reserve_h": {"from": 0.0, "to": 1.5}}, unchanged={"max_elapsed_h": auth.max_elapsed_h}))
+    check = reserve_check(bench, journal)
+    assert not check["allowed"] and check["final_reserve_h"] == 1.5 and check["expected_run_wall_h"] == 1.0
+    journal.state["run_order"] = [{"run": "D__x__s1", "kind": "closed_loop"}, {"run": "B__x__s1", "kind": "continued_training"}]
+    journal.state["runs"] = {"B__x__s1": {"status": "done"}}
+    _repair_runs(bench, journal, auth, echo=print, max_runs=None)
+    assert journal.done("repair_runs") and journal.stage("repair_runs")["truncated_by_time_reserve"]
+    assert journal.state["runs"]["D__x__s1"]["status"] == "not_started" and journal.state["runs"]["B__x__s1"]["status"] == "done"
+    _amend(bench, _entry(changes={"final_reserve_h": {"from": 0.0, "to": auth.max_elapsed_h}}, unchanged={}))
+    with pytest.raises(BudgetRefused, match="shorter than the elapsed window"):
+        load_authorization(bench)
