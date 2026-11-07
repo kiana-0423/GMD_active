@@ -800,7 +800,81 @@ Ground truth keeps validation out of its calibration, so its staged-monitor sign
 (2 < 3 frames). Labels, parents, the fidelity setting, thresholds, budgets, arms, ablations and seeds
 are unchanged.
 
-Results: see "Executed: pilot v2" below, or "planned" if it has not run yet.
+### Executed: pilot v2 (`arms_pilot_v2.yaml`, 2026-11-07), post-hoc
+
+Artifacts in `<artifacts_root>/model_study_v2/`; published report and figures in
+`results/model_study_pilot_v2/`. No new full labels; the arms' fragment labels came from CP2K on
+demand through the same label store.
+
+**Receptive field.**
+
+- Random init (C16H34 `C16-b03-normal0`): a dependence above 1e-4 eV/A reaches 2.76 A; any
+  dependence above round-off reaches 9.65 A (delete) and 7.59 A (perturb).
+- Trained round-0 checkpoint (member 0): above 1e-4 eV/A up to 7.59 A (delete) and 7.55 A (perturb);
+  any dependence up to 10.90 A; truncating the environment at R >= 8 A changes the core force by less
+  than 1e-4 eV/A.
+- So the trained model's force on an atom depends on its environment out to about 8 A, half the
+  nominal 16 A. A random model understates this; the trained value is the one that matters. It is
+  larger than the frozen fragment's core-plus-buffer (1.5 + 3 A); that is consistent because the
+  model is trained on the fragment's own geometry with the fragment's DFT forces, and the fidelity
+  gate shows those forces match the parent's on the core.
+
+**Ground truth (validation: 4 configurations, 64 regions; round-0 committee of 3).**
+
+- Region errors: median 1.84 eV/A, 99th percentile 2.36 eV/A. All 64 regions are positive at 0.1,
+  0.2 and 0.4 eV/A, so AP is undefined for every signal (reason stated per signal in the report).
+- Staged-monitor signals: unavailable (2 calibration frames outside validation < 3).
+- Localisation: in 0 of 3 perturbed configurations does the max-error region contain the
+  perturbation site (v1: 3 of 3). The force and r_min signals put their top region on the site in
+  3 of 3, committee, LJ residual and coordination in 0 of 3. With errors this large everywhere, the
+  sites are not where this model is worst; r_min and force find the sites geometrically.
+
+**Acquisition arms (2 repetitions × 2 rounds × at most 4 labels; final_eval force RMSE).**
+
+| Arm | Labels (rep 0, 1) | Measured DFT (core-s) | RMSE round 0 → 2 (eV/A) | Monitor-triggered pool frames |
+|---|---|---|---|---|
+| A random_local | 8, 8 | 3393, 3073 | 0.645 → 0.390; 0.749 → 0.328 | n/a |
+| B committee_local | 8, 8 | 3606, 3468 | 0.645 → 0.455; 0.749 → 0.411 | n/a |
+| C phal_local | 0, 0 | 0, 0 | not exercised | 0/8, 0/8 |
+| D phal_full_system | 0, 0 | 0, 0 | not exercised | 0/8, 0/8 |
+| no_lj, no_event_buffering, core_only_weights | 0, 0 each | 0 | not exercised | 0/8 each |
+| committee_signals_only | 2, 3 | 1255, 1893 | 0.645 → 0.484; 0.749 → 0.481 | 2/8, 4/8 |
+
+- **The pre-registered PHAL arms acquired nothing.** The monitor was calibrated this time (3 normal
+  frames), but on the static pool every atom's light-stage score was 0: the force term is a z-score
+  gated at 4 against the calibration frames, and r_min scores only below 0.8 A. The physics and
+  committee stages run only after a light trigger (`physics_interval`/`full_interval`:
+  `triggered`), and the LJ residual is fitted only for atoms with a light score >= 3, so neither was
+  ever reached. Re-running the round-0 ranking with every stage forced on gives maximum scores of
+  4.7-8.2 and one trigger (the contact parent, via the committee term). The staged design does
+  trigger along MD trajectories (closed loop above), where frames change from step to step.
+- **committee_signals_only** (physical signals off, which also evaluates every stage) is the only
+  PHAL-family variant that acquired labels. It triggered on 2 and 4 of 8 frames, and the duplicate
+  filter left 2 and 3 labels.
+- **A vs B.** Both lower the error. A ends lower (0.36 vs 0.43 mean), but with 2 repetitions and
+  training noise of about 0.2 eV/A (initial-model diagnostic) they cannot be told apart.
+- **At 2 labels**, committee_signals_only measured 0.48; A and B were not measured at 2 labels
+  (their values there, 0.60 and 0.57, are interpolated between rounds), so this is not a
+  comparison.
+- Only 3 new CP2K fragment calculations ran in v2 (17-26 atoms, 1211 core-s together); every other
+  acquired label was already in the label store, mostly from the v1 arms on the same pool. Each
+  arm is still charged the measured CPU time of every label it acquires, cached or not, so arms are
+  compared on equal terms.
+- No arm reached the 0.15 or 0.10 eV/A accuracy targets (`cost_to_reach` records "not reached"
+  with the best value per repetition).
+
+The report marks every arm that acquired nothing as not exercised, with the trigger count; the
+learning-curve legend says the same. The follow-up that runs the PHAL arms with the full score is
+pilot v2b below.
+
+### Pilot v2b (`arms_pilot_v2b.yaml`): post-hoc, exploratory, not pre-registered
+
+v2 with one change for the PHAL arms: every monitor stage is evaluated on the static pool, and the
+LJ residual is fitted on every atom (`arms.monitor_overrides`). Thresholds (screen 4, physics 5,
+label 6, z gates) are unchanged. The round-0 models are the v2 models (the training work directory
+is reused), so arms A and B replay v2 from cached models and labels. Ablations: `no_lj` only.
+Ground truth and the receptive field are not repeated (identical inputs). `arms_campaign.yaml`,
+which has not run, uses the same protocol for its PHAL arms.
 
 ## Closed-loop execution and recovery
 
