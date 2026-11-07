@@ -1,0 +1,80 @@
+# Alkane repair benchmark, SMOKE profile (C8H18, smoke-only CP2K, torsion family only, toy budgets).
+# Exercises every command end to end on real GMD, CP2K and GMD_SGT. Thresholds are deliberately permissive
+# and the monitor thresholds of C/D are lowered so that 200-step segments produce events: NO scientific claim.
+name: repair_smoke
+protocol_version: "smoke-1.0"
+protocol_document: ../../../docs/demos/alkane_repair/protocol.md
+description: Mechanics of the repair benchmark on C8H18 (smoke-only).
+smoke_only: true
+alpha_config: repair_smoke_alpha.yaml
+model_config: repair_smoke_model.yaml
+seeds: {generation: 20261108, assignment: 11}
+chain_length: 8
+coverage: {max_torsion_deviation_deg: 35.0, max_angle_deviation_deg: 10.0, min_segment_contact: 3.4, min_segment_separation: 6}
+ordinary: {base_torsion_sigma_deg: 8.0, base_angle_sigma_deg: 2.0, sample_torsion_sigma_deg: 5.0, thermal_amplitude: 0.04, max_attempts: 200}
+challenges:
+  torsion: {deltas_deg: [120.0, -120.0], locations: [0.5], min_excess_deg: 50.0, max_deviation_deg: 135.0}
+  bend: {enabled: false, deltas_deg: [16.0], locations: [0.5], min_excess_deg: 4.0}
+  contact: {enabled: false, target_distances: [2.5], locations: [0.5], min_excess: 0.6}
+partitions:
+  id_train:    {bases: 2, ordinary_per_base: 2}
+  id_val:      {bases: 1, ordinary_per_base: 1}
+  calibration: {bases: 1, ordinary_per_base: 1}
+  development: {bases: 1, challenges_per_family: 1}
+  repair:      {bases: 1, challenges_per_family: 1}
+  repair_val:  {bases: 1, challenges_per_family: 1}
+  final_test:  {bases: 1, ordinary_per_base: 1, challenges_per_family: 1}
+initial_model:
+  seed: 11
+  stages: [{id_train_bases: 2}]
+  acceptance:
+    id_val_force_rmse_max: 5.0
+    id_val_atom_error_p95_max: 10.0
+    md: {start_partitions: [calibration, id_val], seeds: [1], steps: 200, frame_interval: 10, min_intact_fraction: 1.0, covalent_scale: 1.3}
+failure: {region_bond_hops: 1, abs_threshold: 0.01, ratio_to_id_val: 0.01}
+monitor_calibration: {partitions: [calibration], seeds: [1], steps: 200, frame_interval: 5, max_alarm_fraction: 1.0}
+arms:
+  - {name: A_frozen, kind: frozen}
+  - {name: B_continued, kind: continued_training}
+  - name: C_committee
+    kind: closed_loop
+    monitor_overrides:
+      metrics: {force: {enabled: false}, delta_force: {enabled: false}, displacement: {enabled: false}, delta_q: {enabled: false},
+                lj_residual: {enabled: false}, rmin: {weight: 0.0}}
+      stages: {physics_interval: always, full_interval: always, screen_threshold: 0.05, physics_threshold: 0.05, label_threshold: 0.05}
+    required_warm_metrics: [committee]
+  - name: D_phal
+    kind: closed_loop
+    monitor_overrides:
+      stages: {screen_threshold: 0.5, physics_threshold: 0.5, label_threshold: 0.5}
+    required_warm_metrics: [force]
+repair:
+  seeds: [1, 2]
+  cycles: 1
+  segment_steps: 200
+  labels_per_cycle: 1
+  max_per_event: 1
+  diversity_threshold: 0.0
+  min_new_samples: 1
+  budget_core_h_per_run: 0.3
+  md_directives: {time_step: 0.5, velocity: 300.0, velocity_init: random, thermostat: nose_hoover, thermostat_tau: 100.0, remove_com_velocity: "true"}
+  frame_interval: 5
+  md_box: {margin: 4.0, stretch_allowance: 3.0, frame_check: true}
+  label_geometry: {require_parent_topology: true, covalent_scale: 1.3, min_distance: 0.7}
+  events: {pre_trigger_frames: 1, post_trigger_frames: 1, cooldown_steps: 50}
+  hotspots: {merge_radius: 3.0}
+  finetune_train: {n_epochs: 20, warmup_steps: 5, patience: 10, lr: 1.0e-3}
+  promotion: {max_force_rmse: 10.0, overall_max_relative_regression: 10.0, family_min_relative_improvement: 0.0,
+              id_val_max_relative_regression: 10.0}
+  poll_interval_s: 2.0
+  max_poll_wait_s: 600.0
+evaluation:
+  success: {challenge_region_rmse_max: 5.0, min_relative_improvement: 0.0, id_retention_max_relative_regression: 10.0, require_stability: true}
+  stability: {seeds: [1], steps: 100, frame_interval: 10, covalent_scale: 1.3, min_intact_fraction: 1.0}
+budgets: {initial_model: 1.0, development: 0.5, fidelity_audit: 0.5, repair_val: 0.5, final_test: 0.5, repair_runs: 2.0}
+plan:
+  timing_sources: [../alkane_artifacts/smoke, ../alkane_artifacts/pilot]
+  fidelity_audit_fragments_per_challenge: 2
+fidelity:
+  selection_dir: ../alkane_artifacts/pilot/fidelity
+  require_audit: false

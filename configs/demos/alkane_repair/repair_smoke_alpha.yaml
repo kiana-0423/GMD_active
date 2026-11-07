@@ -1,0 +1,73 @@
+# Alkane repair benchmark, SMOKE profile: C8H18 with smoke-only CP2K settings (copied from
+# configs/demos/alkane_hotspots/smoke.yaml; only name, artifacts_root and label caps differ). Mechanics only.
+name: repair_smoke
+description: Repair-benchmark mechanics on C8H18 with smoke-only CP2K settings (no scientific claim).
+artifacts_root: ../alkane_artifacts/repair_smoke
+seeds:
+  generation: 20261107
+  split: 7
+systems:
+  chain_lengths: [8]
+generation:
+  n_parents: 2
+  per_base: {normal: 1, torsion: 1}
+  max_candidates_per_slot: 10
+families:
+  thermal:
+    amplitude: 0.03
+  torsion:
+    enabled: true
+    deltas_deg: [120.0]
+    locations: [0.5]
+  bend:
+    enabled: false
+  contact:
+    enabled: false
+checks:
+  bond_tolerance: 0.25
+splits:
+  fractions: {initial_train: 0.0, calibration: 1.0, validation: 0.0, final_eval: 0.0}
+  stratify_by: none
+cp2k:
+  executable: cp2k.psmp
+  data_dir: null
+  launcher: []
+  omp_threads: 2
+  mpi_ranks: 1
+  functional: PBE
+  basis: DZVP-MOLOPT-SR-GTH
+  potential: GTH-PBE
+  dispersion: true
+  charge: 0
+  multiplicity: 1
+  cutoff: 200.0              # smoke only
+  rel_cutoff: 40.0           # smoke only
+  eps_scf: 1.0e-5            # smoke only
+  max_scf: 60
+  poisson_solver: WAVELET
+  box_padding: 4.0           # smoke only
+  h_only_opt:
+    enabled: true            # exercised in the smoke; switched off in the pilot
+    max_iter: 20
+  smoke_only: true
+labels:
+  full_splits: [calibration]
+  poll_interval_s: 2.0
+  max_concurrent_jobs: 1
+fragments:
+  sites: [perturbation_site]
+  graph_hops: [2]
+  cluster:
+    core_radii: [1.5]
+    buffer_radii: []
+fidelity:
+  core_force_rmse: 0.03
+  max_core_force_error: 0.10
+  max_failures: 0
+budgets:
+  max_full_labels: 30
+  max_fragment_labels: 30
+  max_total_cpu_core_hours: 4.0
+  per_job_walltime_s: 1800
+  max_atoms_per_fragment: 40
+  max_atoms_full: 40

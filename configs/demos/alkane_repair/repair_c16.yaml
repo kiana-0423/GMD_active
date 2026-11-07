@@ -1,0 +1,154 @@
+# Alkane repair benchmark, C16H34 (confirmatory profile). Protocol: docs/demos/alkane_repair/protocol.md.
+# Every threshold, window, budget and partition size of the benchmark is here (AGENTS.md rule 6). Frozen by
+# `freeze-protocol` together with the protocol document, repair_c16_alpha.yaml, repair_c16_model.yaml and the
+# generated structure sets; a change afterwards is a new benchmark (new name and artifacts root).
+#   python -m tools.experiments.alkane_repair <command> --benchmark configs/demos/alkane_repair/repair_c16.yaml
+name: repair_c16
+protocol_version: "1.0"
+protocol_document: ../../../docs/demos/alkane_repair/protocol.md
+description: >-
+  Does PHAL repair force-field failures on C16H34 conformations withheld from the initial training coverage
+  (gauche torsions, strong C-C-C bends, nonbonded contacts), while retaining in-domain accuracy and stability?
+alpha_config: repair_c16_alpha.yaml
+model_config: repair_c16_model.yaml
+seeds: {generation: 20261108, assignment: 11}
+chain_length: 16
+
+coverage:                          # the initial training coverage, operationally (in-domain = every window holds)
+  max_torsion_deviation_deg: 35.0  # every backbone dihedral within 180 +- 35 (trans region only)
+  max_angle_deviation_deg: 10.0    # every C-C-C angle within the ideal +- 10
+  min_segment_contact: 3.4         # A, no close contact between segments >= 6 carbons apart
+  min_segment_separation: 6
+ordinary:
+  base_torsion_sigma_deg: 8.0
+  base_angle_sigma_deg: 2.0
+  sample_torsion_sigma_deg: 5.0
+  thermal_amplitude: 0.04          # A per Cartesian component
+  max_attempts: 200
+challenges:                        # withheld regimes; the challenged descriptor must clear its window by min_excess
+  torsion: {deltas_deg: [120.0, -120.0], locations: [0.35, 0.5, 0.65], min_excess_deg: 50.0, max_deviation_deg: 135.0}   # gauche well: |phi| 45-95 deg
+  bend: {deltas_deg: [16.0, -16.0, 20.0], locations: [0.35, 0.5, 0.65], min_excess_deg: 4.0}
+  contact: {target_distances: [2.2, 2.5], locations: [0.4, 0.5], fold_bonds: 5, target_tolerance: 0.02, n_starts: 4,
+            clash_margin: 0.05, max_evaluations: 4000, min_excess: 0.6}
+partitions:                        # independent base conformations; every derived structure inherits its base's partition
+  id_train:    {bases: 12, ordinary_per_base: 4}
+  id_val:      {bases: 3, ordinary_per_base: 2}
+  calibration: {bases: 3, ordinary_per_base: 1}                          # monitor calibration starts (no DFT)
+  development: {bases: 2, ordinary_per_base: 1, challenges_per_family: 1}
+  repair:      {bases: 3, challenges_per_family: 1}                      # MD starts of the repair cases (no DFT)
+  repair_val:  {bases: 2, challenges_per_family: 1}                      # promotion evidence
+  final_test:  {bases: 3, ordinary_per_base: 2, challenges_per_family: 1}  # sealed
+
+initial_model:
+  seed: 11
+  train_overrides: {}
+  stages:                          # data growth; stage 1 is labeled only if stage 0 is not accepted
+    - {id_train_bases: 6}
+    - {id_train_bases: 12}
+  acceptance:
+    id_val_force_rmse_max: 0.10    # eV/A per component
+    id_val_atom_error_p95_max: 0.30
+    md: {start_partitions: [calibration, id_val], seeds: [1, 2], steps: 4000, frame_interval: 20, min_intact_fraction: 1.0, covalent_scale: 1.3}
+
+failure:
+  region_bond_hops: 1
+  abs_threshold: 0.30              # eV/A region force RMSE
+  ratio_to_id_val: 3.0             # x the qualified model's id_val force RMSE
+
+monitor_calibration:
+  partitions: [calibration]
+  seeds: [1, 2]
+  steps: 2000
+  frame_interval: 10
+  max_alarm_fraction: 0.02         # an arm whose calibrated monitor triggers on > 2 % of in-domain frames is refused
+
+arms:
+  - {name: A_frozen, kind: frozen, description: "frozen initial model, no repair"}
+  - {name: B_continued, kind: continued_training, description: "fine-tuning rounds on the original data only (no new labels)"}
+  - name: C_committee
+    kind: closed_loop
+    description: committee-based local active learning (committee deviation only, every frame scored)
+    monitor_overrides:
+      metrics:
+        force: {enabled: false}
+        delta_force: {enabled: false}
+        displacement: {enabled: false}
+        delta_q: {enabled: false}
+        lj_residual: {enabled: false}
+        rmin: {weight: 0.0}        # kept for the same MD safety stop as D (stop_min_distance), contributes no score
+      stages: {physics_interval: always, full_interval: always}
+    required_warm_metrics: [committee]
+  - name: D_phal
+    kind: closed_loop
+    description: PHAL staged online monitor as pre-registered in repair_c16_model.yaml
+    required_warm_metrics: [force, delta_force, displacement, delta_q]
+  - name: D_noLJ
+    kind: closed_loop
+    description: matched ablation of D without the local LJ residual
+    monitor_overrides:
+      metrics: {lj_residual: {enabled: false}}
+    required_warm_metrics: [force, delta_force, displacement, delta_q]
+  - name: D_nobuffer
+    kind: closed_loop
+    enabled: false                 # optional temporal ablation (+~1/3 of the repair-run DFT); a benefit is claimed only if run
+    description: D without event buffering (no pre/post-trigger frames, no cooldown)
+    events: {pre_trigger_frames: 0, post_trigger_frames: 0, cooldown_steps: 0}
+    required_warm_metrics: [force, delta_force, displacement, delta_q]
+
+repair:
+  seeds: [1, 2, 3, 4, 5]           # paired across arms (GMD velocity seed; fine-tune seed = offset + seed)
+  cycles: 3
+  segment_steps: 2000              # 1 ps per cycle at 0.5 fs
+  labels_per_cycle: 2
+  max_per_event: 1
+  diversity_threshold: 0.1
+  min_new_samples: 1
+  budget_core_h_per_run: 1.2       # measured CP2K core-h per run (6 fragments at the measured 0.19 core-h mean)
+  md_directives: {time_step: 0.5, velocity: 300.0, velocity_init: random, thermostat: nose_hoover, thermostat_tau: 100.0,
+                  remove_com_velocity: "true"}
+  frame_interval: 10
+  md_box: {margin: 4.0, stretch_allowance: 3.0, frame_check: true}   # pilot: 1 A allowance let extended chains enter the margin
+  label_geometry: {require_parent_topology: true, covalent_scale: 1.3, min_distance: 0.7}
+  events: {pre_trigger_frames: 1, post_trigger_frames: 1, cooldown_steps: 200}
+  hotspots: {merge_radius: 3.0}
+  finetune_train: {n_epochs: 60, warmup_steps: 5, patience: 15, lr: 1.0e-3}
+  finetune_seed_offset: 1000
+  promotion:
+    max_force_rmse: 0.5            # sanity bound on all validation structures (not evidence of accuracy)
+    overall_max_relative_regression: 0.10
+    family_min_relative_improvement: 0.10   # repair-validation RMSE of the run's family must drop >= 10 %
+    id_val_max_relative_regression: 0.10    # id_val RMSE may rise <= 10 %
+    require_export_validation: true
+    export_max_force_deviation: 1.0e-4
+    require_engine_smoke_test: true
+  poll_interval_s: 10.0
+  max_poll_wait_s: 900.0
+  executable: ../GMD/build-torch/gmd
+  env: {OMP_NUM_THREADS: "1"}
+
+evaluation:
+  success:                         # per run, on the sealed final-test structures of the run's family
+    challenge_region_rmse_max: 0.20
+    min_relative_improvement: 0.30
+    id_retention_max_relative_regression: 0.10
+    require_stability: true
+  stability: {seeds: [1, 2, 3], steps: 4000, frame_interval: 20, covalent_scale: 1.3, min_intact_fraction: 1.0}
+  bootstrap: {n: 2000, seed: 20261108, confidence: 0.95}
+  consistency_check: true
+
+budgets:                           # measured DFT CPU core-hours per stage (failed attempts and retries count)
+  initial_model: 45.0              # stage 0: 30 full labels; stage 1: +24
+  development: 7.0
+  fidelity_audit: 3.0
+  repair_val: 6.0
+  final_test: 14.0
+  repair_runs: 165.0               # 3 closed-loop arms x 9 cases x 5 seeds, each capped at budget_core_h_per_run
+
+plan:
+  timing_sources: [../alkane_artifacts/pilot, ../alkane_artifacts/pilot_c32]
+  fidelity_audit_fragments_per_challenge: 2
+  expected_labels_per_run_fraction: 1.0
+
+fidelity:
+  selection_dir: ../alkane_artifacts/pilot/fidelity   # frozen setting of the pilot's C16 gate (cluster-c1.5-b3)
+  require_audit: true
