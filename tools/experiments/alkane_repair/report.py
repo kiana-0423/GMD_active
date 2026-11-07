@@ -40,6 +40,7 @@ def localisation(loaded: LoadedBenchmark, name: str, case: dict[str, Any]) -> di
     if report is None:
         return {"status": "no_closed_loop_report"}
     region = set(challenged_region(case, AlkaneTopology(int(case["chain_length"])), loaded.config.failure.region_bond_hops))
+    expected = loaded.model.config.training.force_weights.as_dict()
     labels = []
     for task in report.get("label_tasks", []):
         path = loaded.root / RUNS_SUBDIR / name / "run" / "cp2k_tasks" / task["task_id"] / "region.json"
@@ -47,10 +48,30 @@ def localisation(loaded: LoadedBenchmark, name: str, case: dict[str, Any]) -> di
             continue
         extracted = ExtractedRegion.from_dict(read_json(path))
         core = {int(p) for p, r in zip(extracted.parent_atom_ids, extracted.roles) if r is RegionRole.CORE and int(p) >= 0}
-        labels.append({"task_id": task["task_id"], "validation": task.get("validation"), "n_core": len(core), "covers_challenged_region": bool(core & region),
-                       "cycle": task.get("cycle")})
+        weights: dict[str, list[float]] = {}
+        for role, weight in zip(extracted.roles, extracted.force_weights):
+            weights.setdefault(role.value, []).append(float(weight))
+        by_role = {role: sorted(set(values)) for role, values in weights.items()}
+        mismatched = sorted(role for role, values in by_role.items() if expected.get(role) is not None and values != [float(expected[role])])
+        labels.append({"task_id": task["task_id"], "validation": task.get("validation"), "n_atoms": extracted.n_atoms, "n_core": len(core),
+                       "covers_challenged_region": bool(core & region), "cycle": task.get("cycle"), "attempts": task.get("attempts"),
+                       "force_weights_by_role": by_role, "weights_match_config": not mismatched, "mismatched_roles": mismatched})
     events = report.get("events", [])
+    by_cycle: dict[int, dict[str, int]] = {}
+    for event in events:
+        by_cycle.setdefault(int(event["cycle"]), {"events": 0, "labels": 0})["events"] += 1
+    for label in labels:
+        by_cycle.setdefault(int(label["cycle"]), {"events": 0, "labels": 0})["labels"] += 1
+    transitions = report.get("transitions", [])
+    from datetime import datetime
+
+    end_to_end = None
+    if len(transitions) >= 2:
+        end_to_end = (datetime.fromisoformat(transitions[-1]["at"]) - datetime.fromisoformat(transitions[0]["at"])).total_seconds()
     return {"status": "evaluated", "n_events": len(events), "first_event_step": min((e["trigger_step"] for e in events), default=None),
+            "per_cycle": {str(k): v for k, v in sorted(by_cycle.items())},
+            "train_wall_s": sum(float(t.get("wall_s") or 0.0) for t in report.get("trainings", [])), "end_to_end_wall_s": end_to_end,
+            "all_label_weights_match_config": all(x["weights_match_config"] for x in labels),
             "n_labels": len(labels), "n_valid_labels": sum(1 for x in labels if x["validation"] == "valid"),
             "n_labels_covering_challenged_region": sum(1 for x in labels if x["covers_challenged_region"]), "labels": labels,
             "trigger_reasons": sorted({r for e in events for r in (e.get("trigger_reasons") or [])}),

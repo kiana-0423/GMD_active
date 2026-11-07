@@ -46,6 +46,7 @@ workflow:
     require_export_validation: true
     export_max_force_deviation: 0.0001
     require_engine_smoke_test: true
+    metric_gates: []
 md:
   executable: gmd
   initial_structure: initial_structure.xyz

@@ -36,6 +36,9 @@ def test_smoke_profile_end_to_end_and_cached_rerun(tmp_path: Path) -> None:
     assert all(json.loads((p / "repair_run.json").read_text())["final_stage"] == "done" for p in (art / "repair_runs").iterdir() if (p / "repair_run.json").is_file())
     report = json.loads((art / "report" / "report.json").read_text())
     assert report["assessment"]["implementation"]["repair_runs"] == 6 and report["assessment"]["scientific_status"].startswith("smoke profile")
+    closed = [r["localisation"] for r in report["runs"] if r.get("localisation")]
+    assert len(closed) == 4 and all(loc["all_label_weights_match_config"] and loc["end_to_end_wall_s"] > 0 for loc in closed)
+    assert all(label["force_weights_by_role"]["core"] == [1.0] for loc in closed for label in loc["labels"])
     # cached re-execution: nothing is recomputed, the sealed evaluation is reproduced, and the access is logged again
     for step in chain:
         assert run(*step) == 0, step

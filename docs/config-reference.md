@@ -79,6 +79,7 @@ uses its defaults when absent.
 | `workflow.promotion.require_export_validation` | bool | `true` |  |  |
 | `workflow.promotion.export_max_force_deviation` | float | `0.0001` | > 0.0 | eV/A, export vs checkpoint |
 | `workflow.promotion.require_engine_smoke_test` | bool | `true` |  |  |
+| `workflow.promotion.metric_gates` | list[MetricGate] | `[]` |  | gates on named metrics (empty: none) |
 
 ## md
 
