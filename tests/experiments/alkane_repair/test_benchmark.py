@@ -287,5 +287,39 @@ def test_assessment_answers_only_from_evidence(smoke) -> None:
     assert answers["1_initial_model_reliable_in_domain"].startswith("not established")
     assert answers["2_reference_confirmed_failure"].startswith("not yet tested")
     assert answers["4_local_labels_improved_independent_predictions"].startswith("not yet tested")
-    assert data["assessment"]["scientific_status"] == "no confirmatory result yet"
+    assert data["assessment"]["scientific_status"].startswith("smoke profile")  # a smoke profile never reports a scientific result
     assert data["assessment"]["implementation"]["planned_runs"] == 6
+
+
+def test_audit_counts_only_informative_complete_fragments() -> None:
+    from tools.experiments.alkane_repair.references import summarize_audit
+
+    def row(family: str, status: str = "evaluated", covers: bool = False, err: float = 0.02) -> dict:
+        return {"family": family, "status": status, "covers_parent": covers, "sum_squared": err * err * 30, "n_components": 30,
+                "max_core_force_error": 2 * err}
+
+    out = summarize_audit([row("torsion"), row("torsion", covers=True, err=0.0), row("bend", status="pending"), row("contact", err=0.05),
+                           row("bend", covers=True, err=0.0)], ["torsion", "bend", "contact"], 0.03, 0.10)
+    assert out["torsion"]["passes"] and out["torsion"]["n_trivial_whole_parent"] == 1 and out["torsion"]["n_fragments"] == 1
+    assert not out["bend"]["passes"] and not out["bend"]["complete"]  # the only informative fragment is still pending
+    assert not out["contact"]["passes"] and out["contact"]["pooled_core_force_rmse"] == pytest.approx(0.05)
+    assert not summarize_audit([row("torsion", covers=True, err=0.0)], ["torsion"], 0.03, 0.10)["torsion"]["passes"]  # whole-parent only: no evidence
+
+
+def test_smoke_profile_never_reports_a_scientific_result(smoke) -> None:
+    from tools.experiments.alkane_repair.report import collect
+
+    write_structures(smoke, generate(smoke))
+    assert collect(smoke)["assessment"]["scientific_status"].startswith("smoke profile")
+
+
+def test_cost_estimate_falls_back_to_measured_sources(smoke, tmp_path: Path) -> None:
+    from tools.experiments.alkane_hotspots.labels import LabelStore
+    from tools.experiments.alkane_repair.references import cost_estimate
+
+    source = tmp_path / "measured"
+    source.mkdir()
+    (source / "labels.jsonl").write_text(json.dumps({"kind": "full", "status": "valid", "chain_length": 8, "cost": {"cpu_core_s": 123.0}}) + "\n")
+    smoke.config.plan.timing_sources = [str(source)]
+    estimate, origin = cost_estimate(smoke, LabelStore(smoke.root), smoke.alpha, "full", 8)
+    assert estimate == pytest.approx(123.0) and "timing_sources" in origin

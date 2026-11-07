@@ -71,6 +71,10 @@ def collect(loaded: LoadedBenchmark) -> dict[str, Any]:
     out["protocol_freeze"] = _maybe(root / FREEZE_FILE)
     out["structures"] = _maybe(root / "structures_summary.json")
     out["plan"] = _maybe(root / "plan" / "execution_plan.json")
+    preflight = _maybe(root / "preflight.json")
+    out["preflight"] = None if preflight is None else {"passed": preflight["passed"], "coverage": preflight["coverage"],
+                                                       "boxes": {k: v for k, v in preflight["boxes"].items() if k != "rows"},
+                                                       "fragments": {k: v for k, v in preflight["fragments"].items() if k != "rows"}}
     out["reference_labels"] = {p.stem: read_json(p) for p in sorted((root / "reference_labels").glob("*.json"))}
     out["qualification"] = {"status": _maybe(root / STATUS_FILE), "frozen": _maybe(root / FROZEN_FILE),
                             "stages": [read_json(p) for p in sorted((root / "initial_model").glob("stage*/qualification.json"))]}
@@ -166,8 +170,11 @@ def assess(loaded: LoadedBenchmark, data: dict[str, Any]) -> dict[str, Any]:
     implementation = {"structures": data["structures"] is not None, "protocol_frozen": data["protocol_freeze"] is not None,
                       "plan": data["plan"] is not None, "qualification_run": bool(q["stages"]), "repair_runs": sum(1 for r in data["runs"] if r["status"] == "done"),
                       "planned_runs": len(data["runs"]), "sealed_evaluation": ev is not None}
-    return {"implementation": implementation, "answers": answers,
-            "scientific_status": "no confirmatory result yet" if not ev or ev.get("partial") else "sealed evaluation complete"}
+    if loaded.config.smoke_only:
+        scientific = "smoke profile: mechanics only, no scientific result"
+    else:
+        scientific = "no confirmatory result yet" if not ev or ev.get("partial") else "sealed evaluation complete"
+    return {"implementation": implementation, "answers": answers, "scientific_status": scientific}
 
 
 def render_markdown(data: dict[str, Any]) -> str:
@@ -181,6 +188,11 @@ def render_markdown(data: dict[str, Any]) -> str:
     s = data.get("structures")
     if s:
         lines += ["## Structures", "", "| Partition | Counts |", "|---|---|"] + [f"| {p} | {json.dumps(c)} |" for p, c in sorted(s["counts"].items())] + [""]
+    pf = data.get("preflight")
+    if pf:
+        lines += ["## Geometry preflight (no DFT)", "", f"- passed: {pf['passed']}; MD boxes: {pf['boxes']['n']} (max {pf['boxes']['max_length_A']:.1f} A); "
+                  f"fragments: {pf['fragments']['n']} ({pf['fragments']['n_failed']} failed, {pf['fragments']['n_over_atom_limit']} over the atom limit, "
+                  f"atoms {pf['fragments']['atoms_range']}, caps {pf['fragments']['caps_range']})", ""]
     q = data["qualification"]
     lines += ["## Initial model", ""]
     for stage in q["stages"]:

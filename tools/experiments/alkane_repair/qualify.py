@@ -89,6 +89,15 @@ def qualify(loaded: LoadedBenchmark, qualification_stage: int) -> dict[str, Any]
     train, val, record = _samples(loaded, structures, training)
     out = loaded.root / "initial_model" / f"stage{qualification_stage}"
     training_hash = content_hash({"training": training.model_dump(mode="json"), "seed": config.initial_model.seed}, length=16)
+    finished = out / "qualification.json"
+    if finished.is_file():  # idempotent: a finished stage is never retrained, re-exported or re-judged
+        report = read_json(finished)
+        if (report["training_hash"], report["dataset"]) != (training_hash, record):
+            raise QualificationError(f"{finished} was produced with other data or settings; a qualification stage is never redone in place")
+        write_status(loaded)
+        return report
+    if (loaded.root / FROZEN_FILE).is_file() and read_json(loaded.root / FROZEN_FILE)["qualification_stage"] == qualification_stage:
+        raise QualificationError(f"stage {qualification_stage} is frozen but its qualification record is missing; refusing to retrain it")
     dataset = write_dataset(train, val, out / "dataset", version=f"q{qualification_stage}-{training_hash}")
     backend = make_backend(training, root=loaded.repo_path("."))
     started = time.monotonic()

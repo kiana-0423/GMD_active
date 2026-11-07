@@ -1,0 +1,4081 @@
+{
+ "assessment": {
+  "answers": {
+   "1_initial_model_reliable_in_domain": "not established (pending)",
+   "2_reference_confirmed_failure": "not yet tested (no reference labels of challenge structures)",
+   "3_detected_and_labeled_relevant_region": "not yet tested (no completed closed-loop repair run)",
+   "4_local_labels_improved_independent_predictions": "not yet tested (sealed evaluation not executed)",
+   "5_retention": "not yet tested (sealed evaluation not executed)",
+   "6_physical_signals": "not yet tested (sealed evaluation not executed)",
+   "7_unsupported": [
+    "equilibrium conformational statistics (no reference ensemble)",
+    "chain lengths other than the benchmark's (C64/C128 not attempted)",
+    "event-buffering benefit, unless the enabled no-buffering ablation was executed and evaluated",
+    "efficiency (labels or core-hours to repair) beyond the measured, small-sample values",
+    "any equivalence or 'no difference' between arms from this sample size"
+   ]
+  },
+  "implementation": {
+   "plan": true,
+   "planned_runs": 180,
+   "protocol_frozen": false,
+   "qualification_run": false,
+   "repair_runs": 0,
+   "sealed_evaluation": false,
+   "structures": true
+  },
+  "scientific_status": "no confirmatory result yet"
+ },
+ "benchmark": "repair_c16",
+ "compute": {
+  "fidelity_audit_core_h": 0.0,
+  "note": "measured CP2K CPU core-hours (wall x cores), failed attempts and retries included; repair-run labels are always newly computed (MD frames), so attributed and newly consumed compute coincide for them",
+  "reference_label_stages_core_h": {},
+  "repair_runs_core_h": 0.0
+ },
+ "development_failures": null,
+ "fidelity_audit": null,
+ "figures": {
+  "failures": [
+   "failures.pdf",
+   "failures.svg",
+   "failures.png"
+  ],
+  "qualification": [
+   "qualification.pdf",
+   "qualification.svg",
+   "qualification.png"
+  ],
+  "region_errors": [
+   "region_errors.pdf",
+   "region_errors.svg",
+   "region_errors.png"
+  ],
+  "retention": [
+   "retention.pdf",
+   "retention.svg",
+   "retention.png"
+  ],
+  "stability": [
+   "stability.pdf",
+   "stability.svg",
+   "stability.png"
+  ]
+ },
+ "generated_at": "2026-11-07T05:50:40+00:00",
+ "monitor_calibration": {},
+ "plan": {
+  "benchmark": "repair_c16",
+  "budgets": {
+   "development": {
+    "budget_core_h": 7.0,
+    "projected_core_h": 5.8445190800560844,
+    "within_budget": true
+   },
+   "fidelity_audit": {
+    "budget_core_h": 3.0,
+    "projected_core_h": 2.128257196426391,
+    "within_budget": true
+   },
+   "final_test": {
+    "budget_core_h": 14.0,
+    "projected_core_h": 10.958473275105158,
+    "within_budget": true
+   },
+   "initial_model": {
+    "budget_core_h": 45.0,
+    "projected_core_h": 39.45050379037857,
+    "within_budget": true
+   },
+   "repair_runs": {
+    "budget_core_h": 165.0,
+    "projected_core_h": 143.6573607587814,
+    "within_budget": true
+   },
+   "repair_val": {
+    "budget_core_h": 6.0,
+    "projected_core_h": 4.383389310042063,
+    "within_budget": true
+   }
+  },
+  "cpu_cores_per_cp2k_job": 5,
+  "created_at": "2026-11-07T05:47:07+00:00",
+  "measured_timings": {
+   "fragment_label_core_s": {
+    "max": 2045.815167427063,
+    "mean": 638.4771589279175,
+    "median": 497.1781784296036,
+    "n": 50,
+    "p90": 939.3186668157581
+   },
+   "full_label_attempts": {
+    "max": 1.0,
+    "mean": 1.0,
+    "median": 1.0,
+    "n": 16,
+    "p90": 1.0
+   },
+   "full_label_core_s": {
+    "max": 5086.526852846146,
+    "mean": 2630.033586025238,
+    "median": 2818.4529584646225,
+    "n": 16,
+    "p90": 3892.42444396019
+   },
+   "md_steps_per_s": {
+    "max": 143.08155965198702,
+    "mean": 90.82491262255878,
+    "median": 83.28205270741636,
+    "n": 28,
+    "p90": 129.89376277251154
+   },
+   "sources": [
+    {
+     "root": "../alkane_artifacts/pilot",
+     "status": "read"
+    },
+    {
+     "root": "../alkane_artifacts/pilot_c32",
+     "status": "read"
+    }
+   ],
+   "train_s_per_structure_epoch": {
+    "max": 0.04,
+    "mean": 0.028062996031746033,
+    "median": 0.0275,
+    "n": 64,
+    "p90": 0.036
+   }
+  },
+  "protocol_version": "1.0",
+  "stages": {
+   "development": {
+    "dft": {
+     "core_h": 5.8445190800560844,
+     "core_h_if_full_at_p90": 8.64983209768931,
+     "n_fragment": 0,
+     "n_full": 8,
+     "wall_h_serial": 1.1689038160112168
+    }
+   },
+   "fidelity_audit": {
+    "dft": {
+     "core_h": 2.128257196426391,
+     "core_h_if_full_at_p90": 2.128257196426391,
+     "n_fragment": 12,
+     "n_full": 0,
+     "wall_h_serial": 0.42565143928527827
+    }
+   },
+   "final_test": {
+    "dft": {
+     "core_h": 10.958473275105158,
+     "core_h_if_full_at_p90": 16.218435183167458,
+     "n_fragment": 0,
+     "n_full": 15,
+     "wall_h_serial": 2.1916946550210317
+    },
+    "note": "labels are produced in the sealed root and read only by the sealed evaluation"
+   },
+   "initial_model_q0": {
+    "condition": "always",
+    "dft": {
+     "core_h": 21.916946550210316,
+     "core_h_if_full_at_p90": 32.436870366334915,
+     "n_fragment": 0,
+     "n_full": 30,
+     "wall_h_serial": 4.383389310042063
+    },
+    "md_wall_h": 0.24014777914112315,
+    "train_wall_h": 0.55
+   },
+   "initial_model_q1": {
+    "condition": "only if qualification stage 0 fails",
+    "dft": {
+     "core_h": 17.533557240168253,
+     "core_h_if_full_at_p90": 25.94949629306793,
+     "n_fragment": 0,
+     "n_full": 24,
+     "wall_h_serial": 3.5067114480336508
+    },
+    "md_wall_h": 0.24014777914112315,
+    "train_wall_h": 1.1
+   },
+   "monitor_calibration": {
+    "dft": {
+     "core_h": 0.0,
+     "core_h_if_full_at_p90": 0.0,
+     "n_fragment": 0,
+     "n_full": 0,
+     "wall_h_serial": 0.0
+    },
+    "md_wall_h": 0.04002462985685386
+   },
+   "repair_runs": {
+    "by_arm": {
+     "B_continued": {
+      "dft_core_h": 0.0,
+      "dft_wall_h_serial": 0.0,
+      "kind": "continued_training",
+      "labels_per_run_upper": 0.0,
+      "md_wall_h": 0.0,
+      "n_runs": 45,
+      "train_wall_h": 8.91
+     },
+     "C_committee": {
+      "dft_core_h": 47.885786919593805,
+      "dft_wall_h_serial": 9.57715738391876,
+      "kind": "closed_loop",
+      "labels_per_run_upper": 6.0,
+      "md_wall_h": 0.9005541717792118,
+      "n_runs": 45,
+      "train_wall_h": 10.02375
+     },
+     "D_noLJ": {
+      "dft_core_h": 47.885786919593805,
+      "dft_wall_h_serial": 9.57715738391876,
+      "kind": "closed_loop",
+      "labels_per_run_upper": 6.0,
+      "md_wall_h": 0.9005541717792118,
+      "n_runs": 45,
+      "train_wall_h": 10.02375
+     },
+     "D_phal": {
+      "dft_core_h": 47.885786919593805,
+      "dft_wall_h_serial": 9.57715738391876,
+      "kind": "closed_loop",
+      "labels_per_run_upper": 6.0,
+      "md_wall_h": 0.9005541717792118,
+      "n_runs": 45,
+      "train_wall_h": 10.02375
+     }
+    },
+    "cases": 9,
+    "dft": {
+     "core_h": 143.6573607587814,
+     "wall_h_serial": 28.731472151756282
+    },
+    "per_run_cap_core_h": 1.2,
+    "seeds": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ]
+   },
+   "repair_val": {
+    "dft": {
+     "core_h": 4.383389310042063,
+     "core_h_if_full_at_p90": 6.487374073266983,
+     "n_fragment": 0,
+     "n_full": 6,
+     "wall_h_serial": 0.8766778620084127
+    }
+   },
+   "sealed_evaluation": {
+    "dft": {
+     "core_h": 0.0,
+     "core_h_if_full_at_p90": 0.0,
+     "n_fragment": 0,
+     "n_full": 0,
+     "wall_h_serial": 0.0
+    },
+    "n_models_upper": 181,
+    "note": "models identical to the initial model (not promoted) share its stability runs",
+    "stability_md_wall_h_upper": 21.733374012271646
+   }
+  },
+  "statement": "costs from measured timings of earlier runs on this machine; repair-run DFT is an upper bound",
+  "stop_conditions": [
+   "qualification stage fails and no further stage -> prerequisite unmet, stop",
+   "development failures absent for a family -> report; the family's repair claim is untestable",
+   "fidelity audit fails for a family -> no local labels for that family",
+   "a stage budget would be exceeded -> the job is not started",
+   "budgets.repair_runs reached -> no further repair run"
+  ],
+  "totals": {
+   "budget_total_core_h": 240.0,
+   "dft_core_h_if_first_qualification_stage_passes": 188.8889461706214,
+   "dft_core_h_upper": 206.42250341078966,
+   "dft_wall_h_serial_upper": 41.28450068215793,
+   "n_planned_runs": 180
+  }
+ },
+ "preflight": {
+  "boxes": {
+   "max_length_A": 44.0,
+   "n": 33
+  },
+  "coverage": {
+   "calibration:ordinary": {
+    "max_angle_deviation_deg": {
+     "max": 8.670863560520047,
+     "min": 5.632842799198983
+    },
+    "max_torsion_deviation_deg": {
+     "max": 22.644060214118667,
+     "min": 16.944243890338498
+    },
+    "n": 3,
+    "segment_contact": {
+     "max": 7.247034166311726,
+     "min": 7.016960136917411
+    }
+   },
+   "development:bend": {
+    "max_angle_deviation_deg": {
+     "max": 18.531196320551004,
+     "min": 18.208641962341545
+    },
+    "max_torsion_deviation_deg": {
+     "max": 17.761370929340075,
+     "min": 16.577328028833733
+    },
+    "n": 2,
+    "segment_contact": {
+     "max": 7.044684877308556,
+     "min": 7.002231190452802
+    }
+   },
+   "development:contact": {
+    "max_angle_deviation_deg": {
+     "max": 9.117263316795928,
+     "min": 7.460361890103741
+    },
+    "max_torsion_deviation_deg": {
+     "max": 132.299342384213,
+     "min": 117.62081614943014
+    },
+    "n": 2,
+    "segment_contact": {
+     "max": 2.451587765635531,
+     "min": 2.13118582571105
+    }
+   },
+   "development:ordinary": {
+    "max_angle_deviation_deg": {
+     "max": 9.12069660776855,
+     "min": 7.981057463208742
+    },
+    "max_torsion_deviation_deg": {
+     "max": 23.340582860673067,
+     "min": 14.748944567011193
+    },
+    "n": 2,
+    "segment_contact": {
+     "max": 7.233855502730833,
+     "min": 6.8657244421012615
+    }
+   },
+   "development:torsion": {
+    "max_angle_deviation_deg": {
+     "max": 6.918180243700633,
+     "min": 5.758115275097239
+    },
+    "max_torsion_deviation_deg": {
+     "max": 128.90607228224653,
+     "min": 113.67342607504507
+    },
+    "n": 2,
+    "segment_contact": {
+     "max": 5.856108298469926,
+     "min": 5.832438407556538
+    }
+   },
+   "final_test:bend": {
+    "max_angle_deviation_deg": {
+     "max": 16.140525441037212,
+     "min": 14.427589787028083
+    },
+    "max_torsion_deviation_deg": {
+     "max": 19.755025368622483,
+     "min": 17.56164469518538
+    },
+    "n": 3,
+    "segment_contact": {
+     "max": 7.340172209581476,
+     "min": 6.714859553359289
+    }
+   },
+   "final_test:contact": {
+    "max_angle_deviation_deg": {
+     "max": 8.539152526952336,
+     "min": 4.520334271971166
+    },
+    "max_torsion_deviation_deg": {
+     "max": 135.33920303833193,
+     "min": 114.4497732287497
+    },
+    "n": 3,
+    "segment_contact": {
+     "max": 2.4891151193992678,
+     "min": 2.1638055884274356
+    }
+   },
+   "final_test:ordinary": {
+    "max_angle_deviation_deg": {
+     "max": 8.826061659304827,
+     "min": 6.22197098652498
+    },
+    "max_torsion_deviation_deg": {
+     "max": 27.175998590852373,
+     "min": 17.694232496119213
+    },
+    "n": 6,
+    "segment_contact": {
+     "max": 7.221817571515624,
+     "min": 7.06137819606966
+    }
+   },
+   "final_test:torsion": {
+    "max_angle_deviation_deg": {
+     "max": 6.881985635198021,
+     "min": 3.999908922703753
+    },
+    "max_torsion_deviation_deg": {
+     "max": 117.14733255873134,
+     "min": 97.31060477552984
+    },
+    "n": 3,
+    "segment_contact": {
+     "max": 6.174191221007369,
+     "min": 5.761297903809602
+    }
+   },
+   "id_train:ordinary": {
+    "max_angle_deviation_deg": {
+     "max": 9.99136678690364,
+     "min": 3.07424875636724
+    },
+    "max_torsion_deviation_deg": {
+     "max": 31.971196511968515,
+     "min": 14.918794844890186
+    },
+    "n": 48,
+    "segment_contact": {
+     "max": 7.22174512250669,
+     "min": 6.505724196572628
+    }
+   },
+   "id_val:ordinary": {
+    "max_angle_deviation_deg": {
+     "max": 9.43882022208318,
+     "min": 5.45713884726797
+    },
+    "max_torsion_deviation_deg": {
+     "max": 22.770435211916578,
+     "min": 14.366314883189858
+    },
+    "n": 6,
+    "segment_contact": {
+     "max": 7.193351543067037,
+     "min": 6.90371714980043
+    }
+   },
+   "repair:bend": {
+    "max_angle_deviation_deg": {
+     "max": 20.063729585430707,
+     "min": 17.689916294845517
+    },
+    "max_torsion_deviation_deg": {
+     "max": 28.290657048510326,
+     "min": 11.18440910728043
+    },
+    "n": 3,
+    "segment_contact": {
+     "max": 7.190768069766939,
+     "min": 6.643254405325725
+    }
+   },
+   "repair:contact": {
+    "max_angle_deviation_deg": {
+     "max": 9.869677647346421,
+     "min": 5.293621922381121
+    },
+    "max_torsion_deviation_deg": {
+     "max": 131.5365636948704,
+     "min": 127.11071342564911
+    },
+    "n": 3,
+    "segment_contact": {
+     "max": 2.4950945331071717,
+     "min": 2.460849272177912
+    }
+   },
+   "repair:torsion": {
+    "max_angle_deviation_deg": {
+     "max": 10.330189525580039,
+     "min": 7.959686825871771
+    },
+    "max_torsion_deviation_deg": {
+     "max": 118.2467003505713,
+     "min": 109.29089154546416
+    },
+    "n": 3,
+    "segment_contact": {
+     "max": 6.257968773330058,
+     "min": 6.116183522895855
+    }
+   },
+   "repair_val:bend": {
+    "max_angle_deviation_deg": {
+     "max": 18.439788681608377,
+     "min": 16.552602394012354
+    },
+    "max_torsion_deviation_deg": {
+     "max": 23.03339673607269,
+     "min": 11.281741706389198
+    },
+    "n": 2,
+    "segment_contact": {
+     "max": 7.080106911250948,
+     "min": 6.892901125622447
+    }
+   },
+   "repair_val:contact": {
+    "max_angle_deviation_deg": {
+     "max": 9.270367110526436,
+     "min": 7.900518752599638
+    },
+    "max_torsion_deviation_deg": {
+     "max": 133.96054732699162,
+     "min": 132.01181033106573
+    },
+    "n": 2,
+    "segment_contact": {
+     "max": 2.49359847351666,
+     "min": 2.145946014452876
+    }
+   },
+   "repair_val:torsion": {
+    "max_angle_deviation_deg": {
+     "max": 7.055033782574583,
+     "min": 6.6711490769414326
+    },
+    "max_torsion_deviation_deg": {
+     "max": 115.06253527013197,
+     "min": 108.2839761976514
+    },
+    "n": 2,
+    "segment_contact": {
+     "max": 6.215510113431382,
+     "min": 6.081656279218712
+    }
+   }
+  },
+  "fragments": {
+   "atoms_range": [
+    29,
+    41
+   ],
+   "caps_range": [
+    1,
+    2
+   ],
+   "n": 60,
+   "n_failed": 0,
+   "n_over_atom_limit": 0
+  },
+  "passed": true
+ },
+ "protocol_freeze": null,
+ "protocol_version": "1.0",
+ "qualification": {
+  "frozen": null,
+  "stages": [],
+  "status": null
+ },
+ "reference_labels": {},
+ "runs": [
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-bend0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-bend0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-bend0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-bend0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-bend0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-contact0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-contact0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-contact0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-contact0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-contact0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-torsion0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-torsion0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-torsion0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-torsion0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r010-torsion0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-bend0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-bend0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-bend0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-bend0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-bend0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-contact0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-contact0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-contact0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-contact0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-contact0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-torsion0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-torsion0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-torsion0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-torsion0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r016-torsion0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-bend0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-bend0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-bend0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-bend0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-bend0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-contact0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-contact0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-contact0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-contact0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-contact0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-torsion0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-torsion0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-torsion0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-torsion0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "B_continued",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "continued_training",
+   "run": "B_continued__C16-r020-torsion0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-bend0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-bend0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-bend0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-bend0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-bend0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-contact0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-contact0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-contact0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-contact0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-contact0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-torsion0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-torsion0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-torsion0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-torsion0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r010-torsion0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-bend0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-bend0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-bend0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-bend0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-bend0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-contact0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-contact0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-contact0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-contact0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-contact0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-torsion0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-torsion0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-torsion0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-torsion0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r016-torsion0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-bend0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-bend0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-bend0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-bend0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-bend0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-contact0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-contact0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-contact0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-contact0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-contact0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-torsion0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-torsion0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-torsion0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-torsion0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "C_committee",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "C_committee__C16-r020-torsion0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-bend0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-bend0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-bend0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-bend0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-bend0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-contact0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-contact0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-contact0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-contact0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-contact0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-torsion0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-torsion0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-torsion0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-torsion0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r010-torsion0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-bend0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-bend0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-bend0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-bend0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-bend0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-contact0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-contact0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-contact0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-contact0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-contact0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-torsion0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-torsion0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-torsion0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-torsion0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r016-torsion0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-bend0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-bend0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-bend0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-bend0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-bend0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-contact0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-contact0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-contact0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-contact0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-contact0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-torsion0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-torsion0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-torsion0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-torsion0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_phal",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_phal__C16-r020-torsion0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-bend0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-bend0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-bend0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-bend0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-bend0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-contact0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-contact0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-contact0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-contact0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-contact0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-torsion0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-torsion0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-torsion0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-torsion0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r010",
+   "case": "C16-r010-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r010-torsion0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-bend0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-bend0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-bend0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-bend0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-bend0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-contact0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-contact0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-contact0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-contact0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-contact0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-torsion0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-torsion0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-torsion0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-torsion0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r016",
+   "case": "C16-r016-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r016-torsion0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-bend0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-bend0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-bend0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-bend0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-bend0",
+   "family": "bend",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-bend0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-contact0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-contact0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-contact0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-contact0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-contact0",
+   "family": "contact",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-contact0__s5",
+   "seed": 5,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-torsion0__s1",
+   "seed": 1,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-torsion0__s2",
+   "seed": 2,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-torsion0__s3",
+   "seed": 3,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-torsion0__s4",
+   "seed": 4,
+   "status": "planned"
+  },
+  {
+   "arm": "D_noLJ",
+   "base_id": "C16-r020",
+   "case": "C16-r020-torsion0",
+   "family": "torsion",
+   "kind": "closed_loop",
+   "run": "D_noLJ__C16-r020-torsion0__s5",
+   "seed": 5,
+   "status": "planned"
+  }
+ ],
+ "sealed_access_log": [],
+ "sealed_evaluation": null,
+ "smoke_only": false,
+ "structures": {
+  "bases": [
+   {
+    "base_id": "C16-r000",
+    "partition": "id_train"
+   },
+   {
+    "base_id": "C16-r001",
+    "partition": "development"
+   },
+   {
+    "base_id": "C16-r002",
+    "partition": "id_train"
+   },
+   {
+    "base_id": "C16-r003",
+    "partition": "repair_val"
+   },
+   {
+    "base_id": "C16-r004",
+    "partition": "id_train"
+   },
+   {
+    "base_id": "C16-r005",
+    "partition": "id_train"
+   },
+   {
+    "base_id": "C16-r006",
+    "partition": "id_train"
+   },
+   {
+    "base_id": "C16-r007",
+    "partition": "calibration"
+   },
+   {
+    "base_id": "C16-r008",
+    "partition": "id_train"
+   },
+   {
+    "base_id": "C16-r009",
+    "partition": "final_test"
+   },
+   {
+    "base_id": "C16-r010",
+    "partition": "repair"
+   },
+   {
+    "base_id": "C16-r011",
+    "partition": "id_train"
+   },
+   {
+    "base_id": "C16-r012",
+    "partition": "id_train"
+   },
+   {
+    "base_id": "C16-r013",
+    "partition": "final_test"
+   },
+   {
+    "base_id": "C16-r014",
+    "partition": "id_train"
+   },
+   {
+    "base_id": "C16-r015",
+    "partition": "id_train"
+   },
+   {
+    "base_id": "C16-r016",
+    "partition": "repair"
+   },
+   {
+    "base_id": "C16-r017",
+    "partition": "calibration"
+   },
+   {
+    "base_id": "C16-r018",
+    "partition": "id_val"
+   },
+   {
+    "base_id": "C16-r019",
+    "partition": "repair_val"
+   },
+   {
+    "base_id": "C16-r020",
+    "partition": "repair"
+   },
+   {
+    "base_id": "C16-r021",
+    "partition": "id_val"
+   },
+   {
+    "base_id": "C16-r022",
+    "partition": "final_test"
+   },
+   {
+    "base_id": "C16-r023",
+    "partition": "development"
+   },
+   {
+    "base_id": "C16-r024",
+    "partition": "id_train"
+   },
+   {
+    "base_id": "C16-r025",
+    "partition": "id_train"
+   },
+   {
+    "base_id": "C16-r026",
+    "partition": "calibration"
+   },
+   {
+    "base_id": "C16-r027",
+    "partition": "id_val"
+   }
+  ],
+  "config_hash": "1bf7e85de0147c22",
+  "counts": {
+   "calibration": {
+    "ordinary": 3
+   },
+   "development": {
+    "bend": 2,
+    "contact": 2,
+    "ordinary": 2,
+    "torsion": 2
+   },
+   "final_test": {
+    "bend": 3,
+    "contact": 3,
+    "ordinary": 6,
+    "torsion": 3
+   },
+   "id_train": {
+    "ordinary": 48
+   },
+   "id_val": {
+    "ordinary": 6
+   },
+   "repair": {
+    "bend": 3,
+    "contact": 3,
+    "torsion": 3
+   },
+   "repair_val": {
+    "bend": 2,
+    "contact": 2,
+    "torsion": 2
+   }
+  },
+  "files": {
+   "public": {
+    "n_structures": 80,
+    "parents_sha256": "0331faf2d105d54601cace900e315cd40cfa591a2c8dcac0fd565ed3435aec1e",
+    "root": "<artifacts_root>"
+   },
+   "sealed": {
+    "n_structures": 15,
+    "parents_sha256": "1f1d549c6c72009000516ed2a673a0f74250dc7df13d83c65d36d506f078d735",
+    "root": "<artifacts_root>/sealed"
+   }
+  },
+  "n_bases": 28,
+  "n_rejected_candidates": 17,
+  "n_structures": 95,
+  "rejection_reasons": {
+   "angle_deviation": 1,
+   "bond_length": 1,
+   "dissociated_bonds:1": 1,
+   "nonbonded_HH": 7,
+   "outside coverage": 8
+  },
+  "structures": [
+   {
+    "also_outside": null,
+    "base_id": "C16-r000",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 4.78,
+    "max_torsion_deviation_deg": 26.05,
+    "parent_id": "C16-r000-ord0",
+    "partition": "id_train",
+    "segment_contact": 6.898
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r000",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.57,
+    "max_torsion_deviation_deg": 26.3,
+    "parent_id": "C16-r000-ord1",
+    "partition": "id_train",
+    "segment_contact": 6.719
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r000",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.83,
+    "max_torsion_deviation_deg": 17.55,
+    "parent_id": "C16-r000-ord2",
+    "partition": "id_train",
+    "segment_contact": 6.946
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r000",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.51,
+    "max_torsion_deviation_deg": 17.22,
+    "parent_id": "C16-r000-ord3",
+    "partition": "id_train",
+    "segment_contact": 7.048
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r001",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 9.12,
+    "max_torsion_deviation_deg": 23.34,
+    "parent_id": "C16-r001-ord0",
+    "partition": "development",
+    "segment_contact": 6.866
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r001",
+    "challenged": {
+     "allowed_max": 135.0,
+     "name": "torsion_deviation_deg",
+     "outside": true,
+     "required_min": 85.0,
+     "value": 128.906
+    },
+    "family": "torsion",
+    "kind": "challenge",
+    "location": 8,
+    "magnitude": 120.0,
+    "max_angle_deviation_deg": 5.76,
+    "max_torsion_deviation_deg": 128.91,
+    "parent_id": "C16-r001-torsion0",
+    "partition": "development",
+    "segment_contact": 5.856
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r001",
+    "challenged": {
+     "name": "angle_deviation_deg",
+     "outside": true,
+     "required_min": 14.0,
+     "value": 18.209
+    },
+    "family": "bend",
+    "kind": "challenge",
+    "location": 10,
+    "magnitude": 20.0,
+    "max_angle_deviation_deg": 18.21,
+    "max_torsion_deviation_deg": 16.58,
+    "parent_id": "C16-r001-bend0",
+    "partition": "development",
+    "segment_contact": 7.002
+   },
+   {
+    "also_outside": [
+     "torsion"
+    ],
+    "base_id": "C16-r001",
+    "challenged": {
+     "name": "segment_contact",
+     "outside": true,
+     "required_max": 2.8,
+     "value": 2.452
+    },
+    "family": "contact",
+    "kind": "challenge",
+    "location": 6,
+    "magnitude": 2.5,
+    "max_angle_deviation_deg": 9.12,
+    "max_torsion_deviation_deg": 117.62,
+    "parent_id": "C16-r001-contact0",
+    "partition": "development",
+    "segment_contact": 2.452
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r002",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.4,
+    "max_torsion_deviation_deg": 16.14,
+    "parent_id": "C16-r002-ord0",
+    "partition": "id_train",
+    "segment_contact": 7.016
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r002",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.87,
+    "max_torsion_deviation_deg": 28.15,
+    "parent_id": "C16-r002-ord1",
+    "partition": "id_train",
+    "segment_contact": 7.125
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r002",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 9.8,
+    "max_torsion_deviation_deg": 25.5,
+    "parent_id": "C16-r002-ord2",
+    "partition": "id_train",
+    "segment_contact": 6.897
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r002",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.47,
+    "max_torsion_deviation_deg": 22.8,
+    "parent_id": "C16-r002-ord3",
+    "partition": "id_train",
+    "segment_contact": 7.162
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r003",
+    "challenged": {
+     "allowed_max": 135.0,
+     "name": "torsion_deviation_deg",
+     "outside": true,
+     "required_min": 85.0,
+     "value": 108.284
+    },
+    "family": "torsion",
+    "kind": "challenge",
+    "location": 8,
+    "magnitude": -120.0,
+    "max_angle_deviation_deg": 6.67,
+    "max_torsion_deviation_deg": 108.28,
+    "parent_id": "C16-r003-torsion0",
+    "partition": "repair_val",
+    "segment_contact": 6.216
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r003",
+    "challenged": {
+     "name": "angle_deviation_deg",
+     "outside": true,
+     "required_min": 14.0,
+     "value": 16.553
+    },
+    "family": "bend",
+    "kind": "challenge",
+    "location": 8,
+    "magnitude": -16.0,
+    "max_angle_deviation_deg": 16.55,
+    "max_torsion_deviation_deg": 23.03,
+    "parent_id": "C16-r003-bend0",
+    "partition": "repair_val",
+    "segment_contact": 6.893
+   },
+   {
+    "also_outside": [
+     "torsion"
+    ],
+    "base_id": "C16-r003",
+    "challenged": {
+     "name": "segment_contact",
+     "outside": true,
+     "required_max": 2.8,
+     "value": 2.146
+    },
+    "family": "contact",
+    "kind": "challenge",
+    "location": 8,
+    "magnitude": 2.2,
+    "max_angle_deviation_deg": 9.27,
+    "max_torsion_deviation_deg": 133.96,
+    "parent_id": "C16-r003-contact0",
+    "partition": "repair_val",
+    "segment_contact": 2.146
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r004",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.28,
+    "max_torsion_deviation_deg": 27.2,
+    "parent_id": "C16-r004-ord0",
+    "partition": "id_train",
+    "segment_contact": 7.146
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r004",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.67,
+    "max_torsion_deviation_deg": 17.94,
+    "parent_id": "C16-r004-ord1",
+    "partition": "id_train",
+    "segment_contact": 7.113
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r004",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.27,
+    "max_torsion_deviation_deg": 20.57,
+    "parent_id": "C16-r004-ord2",
+    "partition": "id_train",
+    "segment_contact": 7.18
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r004",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.61,
+    "max_torsion_deviation_deg": 24.71,
+    "parent_id": "C16-r004-ord3",
+    "partition": "id_train",
+    "segment_contact": 7.14
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r005",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.6,
+    "max_torsion_deviation_deg": 25.51,
+    "parent_id": "C16-r005-ord0",
+    "partition": "id_train",
+    "segment_contact": 7.079
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r005",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 9.99,
+    "max_torsion_deviation_deg": 29.94,
+    "parent_id": "C16-r005-ord1",
+    "partition": "id_train",
+    "segment_contact": 7.222
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r005",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.6,
+    "max_torsion_deviation_deg": 23.23,
+    "parent_id": "C16-r005-ord2",
+    "partition": "id_train",
+    "segment_contact": 7.139
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r005",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.07,
+    "max_torsion_deviation_deg": 17.83,
+    "parent_id": "C16-r005-ord3",
+    "partition": "id_train",
+    "segment_contact": 7.17
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r006",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.99,
+    "max_torsion_deviation_deg": 20.89,
+    "parent_id": "C16-r006-ord0",
+    "partition": "id_train",
+    "segment_contact": 6.704
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r006",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.05,
+    "max_torsion_deviation_deg": 20.93,
+    "parent_id": "C16-r006-ord1",
+    "partition": "id_train",
+    "segment_contact": 6.934
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r006",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.87,
+    "max_torsion_deviation_deg": 22.51,
+    "parent_id": "C16-r006-ord2",
+    "partition": "id_train",
+    "segment_contact": 7.017
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r006",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.04,
+    "max_torsion_deviation_deg": 14.92,
+    "parent_id": "C16-r006-ord3",
+    "partition": "id_train",
+    "segment_contact": 7.142
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r007",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.67,
+    "max_torsion_deviation_deg": 19.63,
+    "parent_id": "C16-r007-ord0",
+    "partition": "calibration",
+    "segment_contact": 7.017
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r008",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.94,
+    "max_torsion_deviation_deg": 31.97,
+    "parent_id": "C16-r008-ord0",
+    "partition": "id_train",
+    "segment_contact": 7.11
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r008",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.04,
+    "max_torsion_deviation_deg": 22.9,
+    "parent_id": "C16-r008-ord1",
+    "partition": "id_train",
+    "segment_contact": 7.179
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r008",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.98,
+    "max_torsion_deviation_deg": 19.98,
+    "parent_id": "C16-r008-ord2",
+    "partition": "id_train",
+    "segment_contact": 7.007
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r008",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 3.07,
+    "max_torsion_deviation_deg": 25.03,
+    "parent_id": "C16-r008-ord3",
+    "partition": "id_train",
+    "segment_contact": 7.176
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r009",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.52,
+    "max_torsion_deviation_deg": 20.22,
+    "parent_id": "C16-r009-ord0",
+    "partition": "final_test",
+    "segment_contact": 7.08
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r009",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.61,
+    "max_torsion_deviation_deg": 18.11,
+    "parent_id": "C16-r009-ord1",
+    "partition": "final_test",
+    "segment_contact": 7.108
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r009",
+    "challenged": {
+     "allowed_max": 135.0,
+     "name": "torsion_deviation_deg",
+     "outside": true,
+     "required_min": 85.0,
+     "value": 105.514
+    },
+    "family": "torsion",
+    "kind": "challenge",
+    "location": 10,
+    "magnitude": 120.0,
+    "max_angle_deviation_deg": 6.87,
+    "max_torsion_deviation_deg": 105.51,
+    "parent_id": "C16-r009-torsion0",
+    "partition": "final_test",
+    "segment_contact": 6.032
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r009",
+    "challenged": {
+     "name": "angle_deviation_deg",
+     "outside": true,
+     "required_min": 14.0,
+     "value": 15.905
+    },
+    "family": "bend",
+    "kind": "challenge",
+    "location": 5,
+    "magnitude": 20.0,
+    "max_angle_deviation_deg": 15.9,
+    "max_torsion_deviation_deg": 19.76,
+    "parent_id": "C16-r009-bend0",
+    "partition": "final_test",
+    "segment_contact": 7.34
+   },
+   {
+    "also_outside": [
+     "torsion"
+    ],
+    "base_id": "C16-r009",
+    "challenged": {
+     "name": "segment_contact",
+     "outside": true,
+     "required_max": 2.8,
+     "value": 2.489
+    },
+    "family": "contact",
+    "kind": "challenge",
+    "location": 8,
+    "magnitude": 2.5,
+    "max_angle_deviation_deg": 4.52,
+    "max_torsion_deviation_deg": 114.45,
+    "parent_id": "C16-r009-contact0",
+    "partition": "final_test",
+    "segment_contact": 2.489
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r010",
+    "challenged": {
+     "allowed_max": 135.0,
+     "name": "torsion_deviation_deg",
+     "outside": true,
+     "required_min": 85.0,
+     "value": 113.394
+    },
+    "family": "torsion",
+    "kind": "challenge",
+    "location": 10,
+    "magnitude": -120.0,
+    "max_angle_deviation_deg": 9.34,
+    "max_torsion_deviation_deg": 113.39,
+    "parent_id": "C16-r010-torsion0",
+    "partition": "repair",
+    "segment_contact": 6.116
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r010",
+    "challenged": {
+     "name": "angle_deviation_deg",
+     "outside": true,
+     "required_min": 14.0,
+     "value": 20.064
+    },
+    "family": "bend",
+    "kind": "challenge",
+    "location": 10,
+    "magnitude": 20.0,
+    "max_angle_deviation_deg": 20.06,
+    "max_torsion_deviation_deg": 11.93,
+    "parent_id": "C16-r010-bend0",
+    "partition": "repair",
+    "segment_contact": 7.191
+   },
+   {
+    "also_outside": [
+     "torsion"
+    ],
+    "base_id": "C16-r010",
+    "challenged": {
+     "name": "segment_contact",
+     "outside": true,
+     "required_max": 2.8,
+     "value": 2.484
+    },
+    "family": "contact",
+    "kind": "challenge",
+    "location": 6,
+    "magnitude": 2.5,
+    "max_angle_deviation_deg": 7.1,
+    "max_torsion_deviation_deg": 131.54,
+    "parent_id": "C16-r010-contact0",
+    "partition": "repair",
+    "segment_contact": 2.484
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r011",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.33,
+    "max_torsion_deviation_deg": 25.01,
+    "parent_id": "C16-r011-ord0",
+    "partition": "id_train",
+    "segment_contact": 7.066
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r011",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 9.79,
+    "max_torsion_deviation_deg": 17.97,
+    "parent_id": "C16-r011-ord1",
+    "partition": "id_train",
+    "segment_contact": 7.0
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r011",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.58,
+    "max_torsion_deviation_deg": 16.41,
+    "parent_id": "C16-r011-ord2",
+    "partition": "id_train",
+    "segment_contact": 6.971
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r011",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.65,
+    "max_torsion_deviation_deg": 19.91,
+    "parent_id": "C16-r011-ord3",
+    "partition": "id_train",
+    "segment_contact": 7.086
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r012",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 5.65,
+    "max_torsion_deviation_deg": 17.27,
+    "parent_id": "C16-r012-ord0",
+    "partition": "id_train",
+    "segment_contact": 7.199
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r012",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.1,
+    "max_torsion_deviation_deg": 18.59,
+    "parent_id": "C16-r012-ord1",
+    "partition": "id_train",
+    "segment_contact": 7.125
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r012",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 5.16,
+    "max_torsion_deviation_deg": 24.19,
+    "parent_id": "C16-r012-ord2",
+    "partition": "id_train",
+    "segment_contact": 7.13
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r012",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.98,
+    "max_torsion_deviation_deg": 16.07,
+    "parent_id": "C16-r012-ord3",
+    "partition": "id_train",
+    "segment_contact": 7.087
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r013",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.78,
+    "max_torsion_deviation_deg": 17.69,
+    "parent_id": "C16-r013-ord0",
+    "partition": "final_test",
+    "segment_contact": 7.199
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r013",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.22,
+    "max_torsion_deviation_deg": 22.47,
+    "parent_id": "C16-r013-ord1",
+    "partition": "final_test",
+    "segment_contact": 7.061
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r013",
+    "challenged": {
+     "allowed_max": 135.0,
+     "name": "torsion_deviation_deg",
+     "outside": true,
+     "required_min": 85.0,
+     "value": 117.147
+    },
+    "family": "torsion",
+    "kind": "challenge",
+    "location": 5,
+    "magnitude": -120.0,
+    "max_angle_deviation_deg": 4.0,
+    "max_torsion_deviation_deg": 117.15,
+    "parent_id": "C16-r013-torsion0",
+    "partition": "final_test",
+    "segment_contact": 6.174
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r013",
+    "challenged": {
+     "name": "angle_deviation_deg",
+     "outside": true,
+     "required_min": 14.0,
+     "value": 14.428
+    },
+    "family": "bend",
+    "kind": "challenge",
+    "location": 10,
+    "magnitude": -16.0,
+    "max_angle_deviation_deg": 14.43,
+    "max_torsion_deviation_deg": 18.81,
+    "parent_id": "C16-r013-bend0",
+    "partition": "final_test",
+    "segment_contact": 6.715
+   },
+   {
+    "also_outside": [
+     "torsion"
+    ],
+    "base_id": "C16-r013",
+    "challenged": {
+     "name": "segment_contact",
+     "outside": true,
+     "required_max": 2.8,
+     "value": 2.329
+    },
+    "family": "contact",
+    "kind": "challenge",
+    "location": 6,
+    "magnitude": 2.2,
+    "max_angle_deviation_deg": 8.54,
+    "max_torsion_deviation_deg": 135.34,
+    "parent_id": "C16-r013-contact0",
+    "partition": "final_test",
+    "segment_contact": 2.329
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r014",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 5.23,
+    "max_torsion_deviation_deg": 22.65,
+    "parent_id": "C16-r014-ord0",
+    "partition": "id_train",
+    "segment_contact": 6.833
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r014",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.99,
+    "max_torsion_deviation_deg": 17.14,
+    "parent_id": "C16-r014-ord1",
+    "partition": "id_train",
+    "segment_contact": 6.931
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r014",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 5.48,
+    "max_torsion_deviation_deg": 20.01,
+    "parent_id": "C16-r014-ord2",
+    "partition": "id_train",
+    "segment_contact": 6.831
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r014",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 9.14,
+    "max_torsion_deviation_deg": 18.54,
+    "parent_id": "C16-r014-ord3",
+    "partition": "id_train",
+    "segment_contact": 6.883
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r015",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.49,
+    "max_torsion_deviation_deg": 23.71,
+    "parent_id": "C16-r015-ord0",
+    "partition": "id_train",
+    "segment_contact": 7.194
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r015",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 5.69,
+    "max_torsion_deviation_deg": 23.29,
+    "parent_id": "C16-r015-ord1",
+    "partition": "id_train",
+    "segment_contact": 6.995
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r015",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.68,
+    "max_torsion_deviation_deg": 19.59,
+    "parent_id": "C16-r015-ord2",
+    "partition": "id_train",
+    "segment_contact": 6.859
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r015",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.56,
+    "max_torsion_deviation_deg": 17.61,
+    "parent_id": "C16-r015-ord3",
+    "partition": "id_train",
+    "segment_contact": 7.013
+   },
+   {
+    "also_outside": [
+     "bend"
+    ],
+    "base_id": "C16-r016",
+    "challenged": {
+     "allowed_max": 135.0,
+     "name": "torsion_deviation_deg",
+     "outside": true,
+     "required_min": 85.0,
+     "value": 109.291
+    },
+    "family": "torsion",
+    "kind": "challenge",
+    "location": 8,
+    "magnitude": -120.0,
+    "max_angle_deviation_deg": 10.33,
+    "max_torsion_deviation_deg": 109.29,
+    "parent_id": "C16-r016-torsion0",
+    "partition": "repair",
+    "segment_contact": 6.153
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r016",
+    "challenged": {
+     "name": "angle_deviation_deg",
+     "outside": true,
+     "required_min": 14.0,
+     "value": 19.29
+    },
+    "family": "bend",
+    "kind": "challenge",
+    "location": 5,
+    "magnitude": 20.0,
+    "max_angle_deviation_deg": 19.29,
+    "max_torsion_deviation_deg": 11.18,
+    "parent_id": "C16-r016-bend0",
+    "partition": "repair",
+    "segment_contact": 6.8
+   },
+   {
+    "also_outside": [
+     "torsion"
+    ],
+    "base_id": "C16-r016",
+    "challenged": {
+     "name": "segment_contact",
+     "outside": true,
+     "required_max": 2.8,
+     "value": 2.495
+    },
+    "family": "contact",
+    "kind": "challenge",
+    "location": 8,
+    "magnitude": 2.5,
+    "max_angle_deviation_deg": 5.29,
+    "max_torsion_deviation_deg": 127.68,
+    "parent_id": "C16-r016-contact0",
+    "partition": "repair",
+    "segment_contact": 2.495
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r017",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.56,
+    "max_torsion_deviation_deg": 16.94,
+    "parent_id": "C16-r017-ord0",
+    "partition": "calibration",
+    "segment_contact": 7.163
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r018",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.28,
+    "max_torsion_deviation_deg": 14.37,
+    "parent_id": "C16-r018-ord0",
+    "partition": "id_val",
+    "segment_contact": 7.025
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r018",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.95,
+    "max_torsion_deviation_deg": 22.64,
+    "parent_id": "C16-r018-ord1",
+    "partition": "id_val",
+    "segment_contact": 6.904
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r019",
+    "challenged": {
+     "allowed_max": 135.0,
+     "name": "torsion_deviation_deg",
+     "outside": true,
+     "required_min": 85.0,
+     "value": 115.063
+    },
+    "family": "torsion",
+    "kind": "challenge",
+    "location": 8,
+    "magnitude": 120.0,
+    "max_angle_deviation_deg": 7.06,
+    "max_torsion_deviation_deg": 115.06,
+    "parent_id": "C16-r019-torsion0",
+    "partition": "repair_val",
+    "segment_contact": 6.082
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r019",
+    "challenged": {
+     "name": "angle_deviation_deg",
+     "outside": true,
+     "required_min": 14.0,
+     "value": 18.44
+    },
+    "family": "bend",
+    "kind": "challenge",
+    "location": 5,
+    "magnitude": 20.0,
+    "max_angle_deviation_deg": 18.44,
+    "max_torsion_deviation_deg": 11.28,
+    "parent_id": "C16-r019-bend0",
+    "partition": "repair_val",
+    "segment_contact": 7.08
+   },
+   {
+    "also_outside": [
+     "torsion"
+    ],
+    "base_id": "C16-r019",
+    "challenged": {
+     "name": "segment_contact",
+     "outside": true,
+     "required_max": 2.8,
+     "value": 2.494
+    },
+    "family": "contact",
+    "kind": "challenge",
+    "location": 8,
+    "magnitude": 2.5,
+    "max_angle_deviation_deg": 7.9,
+    "max_torsion_deviation_deg": 132.01,
+    "parent_id": "C16-r019-contact0",
+    "partition": "repair_val",
+    "segment_contact": 2.494
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r020",
+    "challenged": {
+     "allowed_max": 135.0,
+     "name": "torsion_deviation_deg",
+     "outside": true,
+     "required_min": 85.0,
+     "value": 118.247
+    },
+    "family": "torsion",
+    "kind": "challenge",
+    "location": 10,
+    "magnitude": -120.0,
+    "max_angle_deviation_deg": 7.96,
+    "max_torsion_deviation_deg": 118.25,
+    "parent_id": "C16-r020-torsion0",
+    "partition": "repair",
+    "segment_contact": 6.258
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r020",
+    "challenged": {
+     "name": "angle_deviation_deg",
+     "outside": true,
+     "required_min": 14.0,
+     "value": 17.69
+    },
+    "family": "bend",
+    "kind": "challenge",
+    "location": 10,
+    "magnitude": -16.0,
+    "max_angle_deviation_deg": 17.69,
+    "max_torsion_deviation_deg": 28.29,
+    "parent_id": "C16-r020-bend0",
+    "partition": "repair",
+    "segment_contact": 6.643
+   },
+   {
+    "also_outside": [
+     "torsion"
+    ],
+    "base_id": "C16-r020",
+    "challenged": {
+     "name": "segment_contact",
+     "outside": true,
+     "required_max": 2.8,
+     "value": 2.461
+    },
+    "family": "contact",
+    "kind": "challenge",
+    "location": 6,
+    "magnitude": 2.5,
+    "max_angle_deviation_deg": 9.87,
+    "max_torsion_deviation_deg": 127.11,
+    "parent_id": "C16-r020-contact0",
+    "partition": "repair",
+    "segment_contact": 2.461
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r021",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 9.17,
+    "max_torsion_deviation_deg": 21.24,
+    "parent_id": "C16-r021-ord0",
+    "partition": "id_val",
+    "segment_contact": 6.912
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r021",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 5.46,
+    "max_torsion_deviation_deg": 16.33,
+    "parent_id": "C16-r021-ord1",
+    "partition": "id_val",
+    "segment_contact": 7.096
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r022",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.83,
+    "max_torsion_deviation_deg": 17.7,
+    "parent_id": "C16-r022-ord0",
+    "partition": "final_test",
+    "segment_contact": 7.214
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r022",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 8.29,
+    "max_torsion_deviation_deg": 27.18,
+    "parent_id": "C16-r022-ord1",
+    "partition": "final_test",
+    "segment_contact": 7.222
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r022",
+    "challenged": {
+     "allowed_max": 135.0,
+     "name": "torsion_deviation_deg",
+     "outside": true,
+     "required_min": 85.0,
+     "value": 97.311
+    },
+    "family": "torsion",
+    "kind": "challenge",
+    "location": 10,
+    "magnitude": 120.0,
+    "max_angle_deviation_deg": 6.88,
+    "max_torsion_deviation_deg": 97.31,
+    "parent_id": "C16-r022-torsion0",
+    "partition": "final_test",
+    "segment_contact": 5.761
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r022",
+    "challenged": {
+     "name": "angle_deviation_deg",
+     "outside": true,
+     "required_min": 14.0,
+     "value": 16.141
+    },
+    "family": "bend",
+    "kind": "challenge",
+    "location": 8,
+    "magnitude": 16.0,
+    "max_angle_deviation_deg": 16.14,
+    "max_torsion_deviation_deg": 17.56,
+    "parent_id": "C16-r022-bend0",
+    "partition": "final_test",
+    "segment_contact": 7.188
+   },
+   {
+    "also_outside": [
+     "torsion"
+    ],
+    "base_id": "C16-r022",
+    "challenged": {
+     "name": "segment_contact",
+     "outside": true,
+     "required_max": 2.8,
+     "value": 2.164
+    },
+    "family": "contact",
+    "kind": "challenge",
+    "location": 8,
+    "magnitude": 2.2,
+    "max_angle_deviation_deg": 7.06,
+    "max_torsion_deviation_deg": 133.53,
+    "parent_id": "C16-r022-contact0",
+    "partition": "final_test",
+    "segment_contact": 2.164
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r023",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.98,
+    "max_torsion_deviation_deg": 14.75,
+    "parent_id": "C16-r023-ord0",
+    "partition": "development",
+    "segment_contact": 7.234
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r023",
+    "challenged": {
+     "allowed_max": 135.0,
+     "name": "torsion_deviation_deg",
+     "outside": true,
+     "required_min": 85.0,
+     "value": 113.673
+    },
+    "family": "torsion",
+    "kind": "challenge",
+    "location": 10,
+    "magnitude": -120.0,
+    "max_angle_deviation_deg": 6.92,
+    "max_torsion_deviation_deg": 113.67,
+    "parent_id": "C16-r023-torsion0",
+    "partition": "development",
+    "segment_contact": 5.832
+   },
+   {
+    "also_outside": [],
+    "base_id": "C16-r023",
+    "challenged": {
+     "name": "angle_deviation_deg",
+     "outside": true,
+     "required_min": 14.0,
+     "value": 18.531
+    },
+    "family": "bend",
+    "kind": "challenge",
+    "location": 10,
+    "magnitude": 20.0,
+    "max_angle_deviation_deg": 18.53,
+    "max_torsion_deviation_deg": 17.76,
+    "parent_id": "C16-r023-bend0",
+    "partition": "development",
+    "segment_contact": 7.045
+   },
+   {
+    "also_outside": [
+     "torsion"
+    ],
+    "base_id": "C16-r023",
+    "challenged": {
+     "name": "segment_contact",
+     "outside": true,
+     "required_max": 2.8,
+     "value": 2.131
+    },
+    "family": "contact",
+    "kind": "challenge",
+    "location": 6,
+    "magnitude": 2.2,
+    "max_angle_deviation_deg": 7.46,
+    "max_torsion_deviation_deg": 132.3,
+    "parent_id": "C16-r023-contact0",
+    "partition": "development",
+    "segment_contact": 2.131
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r024",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 4.98,
+    "max_torsion_deviation_deg": 17.7,
+    "parent_id": "C16-r024-ord0",
+    "partition": "id_train",
+    "segment_contact": 7.046
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r024",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.73,
+    "max_torsion_deviation_deg": 19.55,
+    "parent_id": "C16-r024-ord1",
+    "partition": "id_train",
+    "segment_contact": 6.86
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r024",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 9.28,
+    "max_torsion_deviation_deg": 18.26,
+    "parent_id": "C16-r024-ord2",
+    "partition": "id_train",
+    "segment_contact": 6.596
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r024",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 5.54,
+    "max_torsion_deviation_deg": 26.66,
+    "parent_id": "C16-r024-ord3",
+    "partition": "id_train",
+    "segment_contact": 6.506
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r025",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.7,
+    "max_torsion_deviation_deg": 23.68,
+    "parent_id": "C16-r025-ord0",
+    "partition": "id_train",
+    "segment_contact": 7.001
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r025",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 6.04,
+    "max_torsion_deviation_deg": 25.26,
+    "parent_id": "C16-r025-ord1",
+    "partition": "id_train",
+    "segment_contact": 7.041
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r025",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.75,
+    "max_torsion_deviation_deg": 21.67,
+    "parent_id": "C16-r025-ord2",
+    "partition": "id_train",
+    "segment_contact": 6.706
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r025",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 7.07,
+    "max_torsion_deviation_deg": 19.69,
+    "parent_id": "C16-r025-ord3",
+    "partition": "id_train",
+    "segment_contact": 6.995
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r026",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 5.63,
+    "max_torsion_deviation_deg": 22.64,
+    "parent_id": "C16-r026-ord0",
+    "partition": "calibration",
+    "segment_contact": 7.247
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r027",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 5.95,
+    "max_torsion_deviation_deg": 21.21,
+    "parent_id": "C16-r027-ord0",
+    "partition": "id_val",
+    "segment_contact": 7.137
+   },
+   {
+    "also_outside": null,
+    "base_id": "C16-r027",
+    "challenged": null,
+    "family": "normal",
+    "kind": "ordinary",
+    "location": null,
+    "magnitude": 0.0,
+    "max_angle_deviation_deg": 9.44,
+    "max_torsion_deviation_deg": 22.77,
+    "parent_id": "C16-r027-ord1",
+    "partition": "id_val",
+    "segment_contact": 7.193
+   }
+  ]
+ }
+}

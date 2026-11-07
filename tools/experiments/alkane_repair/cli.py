@@ -47,6 +47,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     p = command("freeze-protocol", "hash the protocol, configuration and structure sets")
     p.add_argument("--note", default="")
     command("plan", "costed execution manifest from measured timings (nothing is launched)")
+    command("preflight", "geometry checks: MD boxes, fragment sizes and capping, coverage (no DFT/MD)")
     p = command("label", "full-system CP2K reference labels of one stage (within its budget)")
     p.add_argument("--stage", required=True, choices=["initial_model", "development", "repair_val", "final_test"])
     p.add_argument("--qualification-stage", type=int, default=None)
@@ -91,6 +92,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         text = render_plan(plan)
         (loaded.root / "plan" / "execution_plan.md").write_text(text, encoding="utf-8")
         print(text)
+    elif args.command == "preflight":
+        from .preflight import preflight
+
+        result = preflight(loaded)
+        _print({k: v for k, v in result.items() if k not in ("boxes", "fragments")} | {"boxes": {k: v for k, v in result["boxes"].items() if k != "rows"},
+                                                                                     "fragments": {k: v for k, v in result["fragments"].items() if k != "rows"}})
+        return 0 if result["passed"] else 1
     elif args.command == "label":
         from .references import label_stage
 

@@ -112,6 +112,22 @@ def stage_structures(loaded: LoadedBenchmark, stage: str, *, qualification_stage
     return loaded.alpha, chosen
 
 
+def cost_estimate(loaded: LoadedBenchmark, store: Any, alpha: Any, kind: str, chain_length: int | None) -> tuple[float, str]:
+    """Measured mean of this store; without a measurement yet, the measured mean of ``plan.timing_sources``
+    (never an assumed number); only if neither exists, alpha's conservative upper bound."""
+
+    estimate, source = BudgetLedger(store.all(), alpha.config.budgets, alpha.config.cp2k.cores).estimate(kind, chain_length)
+    if "no measurement" not in source:
+        return estimate, source
+    from .plan import measured_timings
+
+    timings = measured_timings(loaded)
+    key = "full_label_core_s" if kind == "full" else "fragment_label_core_s"
+    if timings[key].get("n"):
+        return float(timings[key]["mean"]), f"measured mean of {timings[key]['n']} {kind} label(s) in plan.timing_sources"
+    return estimate, source
+
+
 def _full_records(store: Any, parent_ids: set[str]) -> list[dict[str, Any]]:
     return [r for r in store.all() if r.get("kind") == "full" and r.get("parent_id") in parent_ids]
 
@@ -149,8 +165,7 @@ def label_stage(loaded: LoadedBenchmark, stage: str, *, qualification_stage: int
         if existing is not None and existing["status"] == "valid":
             outcome["reused"].append(record["parent_id"])
             continue
-        ledger = BudgetLedger(store.all(), alpha.config.budgets, alpha.config.cp2k.cores)
-        estimate, source = ledger.estimate("full", int(record["chain_length"]))
+        estimate, source = cost_estimate(loaded, store, alpha, "full", int(record["chain_length"]))
         spent = stage_spent_core_s(store, ids_budget)
         if spent + estimate > budget_core_s:
             outcome["not_started"].append({"parent_id": record["parent_id"], "reason": f"stage budget: spent {spent / 3600:.3f} + estimate "
@@ -228,7 +243,9 @@ def audit_specs(loaded: LoadedBenchmark, selection: dict[str, Any]) -> list[dict
         _, loop_site = hotspot_site(topology, site, None)
         for shape, atoms in (("gate_site", site), ("closed_loop_site", loop_site))[:per_challenge]:
             region, core = build_fragment(frame, atoms, setting, loaded.alpha.config)
-            specs.append({"parent_id": record["parent_id"], "family": record["family"], "shape": shape, "region": region, "core": core})
+            covers = region.n_atoms == topology.n_atoms and not any(r.value == "h_cap" for r in region.roles)
+            specs.append({"parent_id": record["parent_id"], "family": record["family"], "shape": shape, "region": region, "core": core,
+                          "covers_parent": covers})
     return specs
 
 
@@ -250,7 +267,7 @@ def fidelity_audit(loaded: LoadedBenchmark, *, run_labels: bool = True, max_wall
         record = store.get(label_id)
         if (record is None or record["status"] != "valid") and run_labels:
             spent = stage_spent_core_s(store, dev_ids, kinds=("fragment",))
-            estimate, source = BudgetLedger(store.all(), loaded.alpha.config.budgets, loaded.alpha.config.cp2k.cores).estimate("fragment", None)
+            estimate, source = cost_estimate(loaded, store, loaded.alpha, "fragment", None)
             if spent + estimate <= budget_core_s:
                 fragment = {"policy": setting["policy"], "setting_id": setting["setting_id"], "site_kind": f"audit:{spec['shape']}",
                             "core_parent_ids": spec["core"], "n_atoms": spec["region"].n_atoms, "n_core": len(spec["core"]),
@@ -264,21 +281,8 @@ def fidelity_audit(loaded: LoadedBenchmark, *, run_labels: bool = True, max_wall
                              f"[{source}] > {budget_core_s / 3600:.3f} core-h)"})
                 continue
         rows.append(_audit_row(loaded, store, spec, record))
-    families: dict[str, Any] = {}
     targets = loaded.alpha.config.fidelity
-    for family in loaded.config.challenges.enabled():
-        mine = [r for r in rows if r["family"] == family]
-        evaluated = [r for r in mine if r["status"] == "evaluated"]
-        complete = bool(mine) and len(evaluated) == len(mine)
-        if evaluated:
-            sq = sum(r["sum_squared"] for r in evaluated)
-            n = sum(r["n_components"] for r in evaluated)
-            rmse, worst = float(np.sqrt(sq / n)), max(r["max_core_force_error"] for r in evaluated)
-        else:
-            rmse = worst = None
-        passes = complete and rmse is not None and rmse <= targets.core_force_rmse and worst <= targets.max_core_force_error
-        families[family] = {"n_fragments": len(mine), "n_evaluated": len(evaluated), "complete": complete, "pooled_core_force_rmse": rmse,
-                            "max_core_force_error": worst, "passes": bool(passes)}
+    families = summarize_audit(rows, loaded.config.challenges.enabled(), targets.core_force_rmse, targets.max_core_force_error)
     report = {"created_at": utc_now(), "setting": setting, "targets": {"core_force_rmse": targets.core_force_rmse,
                                                                          "max_core_force_error": targets.max_core_force_error},
               "families": families, "fragments": rows,
@@ -288,9 +292,31 @@ def fidelity_audit(loaded: LoadedBenchmark, *, run_labels: bool = True, max_wall
     return report
 
 
+def summarize_audit(rows: list[dict[str, Any]], families: Sequence[str], rmse_target: float, max_target: float) -> dict[str, Any]:
+    """Per family: pooled core RMSE and maximum over the evaluated, non-trivial fragments; passes only if complete."""
+
+    out: dict[str, Any] = {}
+    for family in families:
+        mine = [r for r in rows if r["family"] == family]
+        trivial = [r for r in mine if r.get("covers_parent")]
+        mine = [r for r in mine if not r.get("covers_parent")]  # a fragment equal to the parent is exact by construction: no evidence
+        evaluated = [r for r in mine if r["status"] == "evaluated"]
+        complete = bool(mine) and len(evaluated) == len(mine)
+        if evaluated:
+            sq = sum(r["sum_squared"] for r in evaluated)
+            n = sum(r["n_components"] for r in evaluated)
+            rmse, worst = float(np.sqrt(sq / n)), max(r["max_core_force_error"] for r in evaluated)
+        else:
+            rmse = worst = None
+        passes = complete and rmse is not None and rmse <= rmse_target and worst <= max_target
+        out[family] = {"n_fragments": len(mine), "n_trivial_whole_parent": len(trivial), "n_evaluated": len(evaluated), "complete": complete,
+                       "pooled_core_force_rmse": rmse, "max_core_force_error": worst, "passes": bool(passes)}
+    return out
+
+
 def _row(spec: dict[str, Any]) -> dict[str, Any]:
     return {"parent_id": spec["parent_id"], "family": spec["family"], "shape": spec["shape"], "n_atoms": spec["region"].n_atoms,
-            "n_core": len(spec["core"])}
+            "n_core": len(spec["core"]), "covers_parent": bool(spec.get("covers_parent"))}
 
 
 def _audit_row(loaded: LoadedBenchmark, store: Any, spec: dict[str, Any], record: dict[str, Any] | None) -> dict[str, Any]:
