@@ -143,6 +143,9 @@ class InitialModelSection(_Strict):
     validation_splits: list[str] = Field(default_factory=lambda: ["validation"])
     train_parents: list[str] | None = Field(None, description="smoke only: explicit parents instead of whole splits")
     validation_parents: list[str] | None = Field(None, description="smoke only: explicit parents instead of whole splits")
+    parents_manifest: str | None = Field(None, description="JSON {train: [...], validation: [...]} of parent ids (e.g. a frozen "
+                                         "initial model's data); every train parent must be in train_splits and every validation parent "
+                                         "in validation_splits")
     seed: int = 11
     train_overrides: dict[str, Any] = Field(default_factory=dict, description="overrides of the study's training.train for the initial "
                                             "model only (empty in the pilot: the study's training budget)")
@@ -725,8 +728,23 @@ def initial_samples(cl: LoadedClosedLoop, settings_hash: str) -> tuple[list[Any]
     root = cl.alpha.artifacts_root
     parents = load_parents(root)
     init = cl.config.initial_model
-    train_parents = _parents_for(cl, parents, init.train_splits, init.train_parents)
-    val_parents = _parents_for(cl, parents, init.validation_splits, init.validation_parents)
+    if init.parents_manifest is not None:
+        if init.train_parents is not None or init.validation_parents is not None:
+            raise ConfigurationError("initial_model.parents_manifest excludes train_parents/validation_parents")
+        listed = json.loads(Path(init.parents_manifest).read_text(encoding="utf-8"))
+        by_id = {p["parent_id"]: dict(p) for p in parents}
+        missing = sorted((set(listed["train"]) | set(listed["validation"])) - set(by_id))
+        if missing:
+            raise ConfigurationError(f"initial_model.parents_manifest lists unknown parents {missing[:5]}")
+        train_parents = [by_id[pid] for pid in listed["train"]]
+        val_parents = [by_id[pid] for pid in listed["validation"]]
+        wrong = [p["parent_id"] for p in train_parents if p["split"] not in init.train_splits]
+        wrong += [p["parent_id"] for p in val_parents if p["split"] not in init.validation_splits]
+        if wrong:
+            raise ConfigurationError(f"initial_model.parents_manifest: parents outside train_splits/validation_splits: {wrong[:5]}")
+    else:
+        train_parents = _parents_for(cl, parents, init.train_splits, init.train_parents)
+        val_parents = _parents_for(cl, parents, init.validation_splits, init.validation_parents)
     if any(p["split"] == "final_eval" for p in train_parents + val_parents):
         raise ConfigurationError("final_eval parents are never used")
     overlap = {p["split_group"] for p in train_parents} & {p["split_group"] for p in val_parents}

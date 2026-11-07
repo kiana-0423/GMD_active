@@ -472,3 +472,35 @@ def test_real_smoke_closed_loop(tmp_path: Path) -> None:
         assert change["kind"] == "model_change" and change["same_coordinates"] and change["jump_ev"] is not None
     for chain in report["provenance"].values():
         assert not chain["unresolved_samples"]
+
+
+def test_initial_parents_from_a_manifest_keep_the_split_rules(tmp_path: Path) -> None:
+    """A frozen initial model's data (a subset of initial_train) can define the closed loop's initial and
+    validation sets; parents outside the configured splits are refused."""
+
+    from types import SimpleNamespace
+
+    from tests.experiments.alkane_hotspots.beta_synthetic import make_labels, make_parents
+    from tools.experiments.alkane_hotspots.closed_loop import InitialModelSection, initial_samples
+    from tools.experiments.alkane_hotspots.training import TrainingConfig
+
+    root = tmp_path / "art"
+    parents = make_parents(root, bases_per_split=2)
+    make_labels(root, parents)
+    train_ids = [p["parent_id"] for p in parents if p["split"] == "initial_train"][:2]
+    val_ids = [p["parent_id"] for p in parents if p["split"] == "validation"][:1]
+    manifest = tmp_path / "parents.json"
+    manifest.write_text(json.dumps({"train": train_ids, "validation": val_ids}))
+
+    def loop(path: Path) -> SimpleNamespace:
+        init = InitialModelSection(parents_manifest=str(path))
+        return SimpleNamespace(alpha=SimpleNamespace(artifacts_root=root, path="x.yaml", config=SimpleNamespace(cp2k=SimpleNamespace(smoke_only=False))),
+                               config=SimpleNamespace(initial_model=init), beta=SimpleNamespace(config=SimpleNamespace(training=TrainingConfig())))
+
+    train, val, record = initial_samples(loop(manifest), "s")
+    assert [item["parent_id"] for item in record["train"]] == train_ids and [item["parent_id"] for item in record["validation"]] == val_ids
+    assert len(train) == 2 and len(val) == 1
+    leaky = tmp_path / "leaky.json"
+    leaky.write_text(json.dumps({"train": train_ids + [p["parent_id"] for p in parents if p["split"] == "final_eval"][:1], "validation": val_ids}))
+    with pytest.raises(ConfigurationError, match="outside train_splits"):
+        initial_samples(loop(leaky), "s")
