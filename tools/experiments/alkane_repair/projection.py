@@ -6,8 +6,9 @@ same numbers the budget ledger charges. A kind with fewer than three measured ta
 falls back to the plan's timing sources (earlier runs on the same machine).
 
 The projection of a stage that needs ``n`` more labels of a kind with measured mean ``m`` and standard
-deviation ``s`` is ``n m`` (expected) and ``n m + 1.2816 s sqrt(n)`` (one-sided 90% upper bound of the sum,
-normal approximation). A stage is started only if its upper bound plus the enforcement margin fits the
+deviation ``s`` is ``n m`` (expected) and ``n m + z s sqrt(n)`` (one-sided upper bound of the sum, normal
+approximation), with ``z`` the normal quantile of the authorization's ``enforcement.estimate_quantile`` (0.9 for C16,
+the same level as the pre-submission estimate). A stage is started only if its upper bound plus the enforcement margin fits the
 stage's remaining allowance and the remaining total; otherwise it is reported as unaffordable under the
 current authorization, with a concrete redistribution proposal that keeps the total unchanged. No allowance
 is moved automatically.
@@ -16,6 +17,7 @@ is moved automatically.
 from __future__ import annotations
 
 import math
+from statistics import NormalDist
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -28,7 +30,6 @@ from .budget import STAGES, ComputeLedger, _is_fragment, load_authorization
 from .common import write_json
 from .config import LoadedBenchmark
 
-Z90 = 1.2816
 
 
 def _stats(values: list[float]) -> dict[str, Any]:
@@ -63,19 +64,19 @@ def measured_costs(loaded: LoadedBenchmark) -> dict[str, Any]:
             out[kind] = {**own, "source": "this execution (all attempts per task)"}
         else:
             fb = fallback[key]
-            sd = (fb["p90"] - fb["mean"]) / Z90 if fb.get("n") else 0.0
+            sd = (fb["p90"] - fb["mean"]) / NormalDist().inv_cdf(0.9) if fb.get("n") else 0.0  # the timing sources report a p90
             out[kind] = {"n": fb.get("n", 0), "mean": fb.get("mean"), "sd": max(sd, 0.0), "p90": fb.get("p90"), "max": fb.get("max"),
                          "source": f"plan timing sources (only {own['n']} measured in this execution)", "own": own}
     return out
 
 
-def _sum_projection(n: float, stats: dict[str, Any]) -> dict[str, float]:
+def _sum_projection(n: float, stats: dict[str, Any], z: float) -> dict[str, float]:
     if n <= 0:
         return {"n": 0, "expected_core_h": 0.0, "upper90_core_h": 0.0}
     if stats.get("mean") is None:
         raise ValueError("no measured cost to project from")
     expected = n * stats["mean"]
-    upper = expected + Z90 * stats["sd"] * math.sqrt(n)
+    upper = expected + z * stats["sd"] * math.sqrt(n)
     return {"n": n, "expected_core_h": expected / 3600.0, "upper90_core_h": upper / 3600.0}
 
 
@@ -117,18 +118,19 @@ def project(loaded: LoadedBenchmark, stage: str, *, qualification_stage: int | N
     costs = measured_costs(loaded)
     need = stage_need(loaded, stage, qualification_stage=qualification_stage, closed_loop_runs=closed_loop_runs)
     margin_h = auth.enforcement.margin_core_s / 3600.0
+    z = NormalDist().inv_cdf(auth.enforcement.estimate_quantile)
     parts = {}
     if stage == "development":
-        parts["development"] = {"full": _sum_projection(need["full"], costs["full"])}
-        parts["fidelity_audit"] = {"fragment": _sum_projection(need["fragment_audit"], costs["fragment"])}
+        parts["development"] = {"full": _sum_projection(need["full"], costs["full"], z)}
+        parts["fidelity_audit"] = {"fragment": _sum_projection(need["fragment_audit"], costs["fragment"], z)}
     elif stage == "repair_runs":
-        frag = _sum_projection(need["fragment"], costs["fragment"])
+        frag = _sum_projection(need["fragment"], costs["fragment"], z)
         cap = need["runs"] * auth.per_run_core_h
         frag = {**frag, "expected_core_h": min(frag["expected_core_h"], cap), "upper90_core_h": min(frag["upper90_core_h"], cap),
                 "per_run_cap_bound_core_h": cap}
         parts["repair_runs"] = {"fragment": frag}
     else:
-        parts[stage] = {"full": _sum_projection(need["full"], costs["full"])}
+        parts[stage] = {"full": _sum_projection(need["full"], costs["full"], z)}
     scopes = []
     for scope, kinds in parts.items():
         expected = sum(k["expected_core_h"] for k in kinds.values())
@@ -141,7 +143,8 @@ def project(loaded: LoadedBenchmark, stage: str, *, qualification_stage: int | N
     result = {"at": utc_now(), "stage": stage, "qualification_stage": qualification_stage, "need": need, "costs_core_s": costs,
               "scopes": scopes, "remaining_total_core_h": remaining["total_core_h"], "fits_total": total_ok,
               "fits": total_ok and all(s["fits"] for s in scopes), "margin_core_h": margin_h,
-              "rule": "start only if the one-sided 90% upper bound of the stage's DFT plus the enforcement margin fits every remaining allowance"}
+              "upper_quantile": auth.enforcement.estimate_quantile,
+              "rule": "start only if the one-sided upper bound (enforcement.estimate_quantile) of the stage's DFT plus the enforcement margin fits every remaining allowance"}
     return result
 
 

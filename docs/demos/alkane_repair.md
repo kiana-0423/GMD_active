@@ -201,7 +201,7 @@ The execution authorization (`configs/demos/alkane_repair/repair_c16_authorizati
 | Scope | Limit |
 |---|---|
 | Total DFT | 240 core-h |
-| Initial model (both qualification attempts) | 45 core-h, of which q0 at most 30 |
+| Initial model (both qualification attempts) | 45 core-h, of which q0 at most 30 (34 after amendment A1, below) |
 | Development | 7 core-h |
 | Fidelity audit | 3 core-h |
 | Repair validation | 6 core-h |
@@ -233,6 +233,53 @@ the authorization hash.
   SIGXCPU and hung in its backtrace handler while spinning, and macOS did not escalate to SIGKILL. The
   `timeout` backstop is tested with a process that ignores SIGTERM and with real CP2K attempts.
 - **What `--max-wall-s` is not.** It only stops waiting for jobs and is never used as a compute cap.
+
+**Amendments.** The original authorization file is never edited. A change of an allowance is an
+entry in `configs/demos/alkane_repair/repair_c16_authorization_amendments.yaml`, an append-only list.
+Each entry records the time of the grant, the statement as given, the rationale and the changes. Each
+change names its `from` value, which must equal the current allowance, so amendments chain. The
+allowances the grant keeps are listed with their values and verified. On every load, the loader
+re-checks four things: stage allowances against the protocol budgets, q0 at most the initial-model
+allowance, the stage sum at most the total, and the launcher backstop. On every start the executor
+checks that the original file still has the hash recorded at the execution start. It journals each new
+amendment once, with the code commit and the effective allowances. It refuses to continue if a recorded
+amendment is later edited, removed or reordered.
+
+| Amendment | Granted (UTC) | Change | Kept | Rationale |
+|---|---|---|---|---|
+| A1-q0-34 | 2026-11-07 09:58 | q0 sub-allowance 30 -> 34 core-h | initial model 45, total 240, window 120 h | Measured q0 labels cost about 1.07 core-h each, against about 0.73 in the plan's timing sources. That projects q0 (30 labels) to about 32 core-h. |
+
+**Re-estimation before each expensive stage.** Before each of these stages starts, the executor
+re-projects its DFT cost from this execution's own measurements:
+
+- the q1 expansion;
+- development references together with the fragment-fidelity audit;
+- repair-validation references;
+- the repair runs;
+- the sealed final-test references.
+
+Full-system and fragment labels are costed separately. A task's cost is the sum of all its attempts,
+failures and retries included. A kind with fewer than three measured tasks falls back to the timing
+sources. The projection is the expected sum and a one-sided upper bound at the enforcement quantile
+(0.9). A stage starts only if that upper bound plus the margin fits the stage's remaining allowance and
+the remaining total.
+
+Otherwise the stage is recorded as `unaffordable` and execution stops. The projection and a
+redistribution proposal that keeps the total unchanged are written to `execution/projections/`. The
+proposal draws only on slack:
+
+- a finished stage's unused allowance;
+- a future stage's allowance above its own projection;
+- for the repair runs, the allowance above runs x per-run cap.
+
+No allowance is moved without a new amendment. A partial expansion is never started: q1 runs only if
+the whole expansion is projected to fit.
+
+**Restarts.** A restarted driver reconciles existing jobs: it charges no room check for a task that
+already has an attempt. The CP2K job of a running label survives the driver only if the driver alone is
+stopped (a plain `kill` of its Python process). Stopping the whole process tree also ends the job. The
+attempt then counts as failed (VANISHED) and is retried once by the labeling retry ladder. This happened
+once, at the amendment restart (label-568d366efbfd2ed7, about 8 min x 5 cores lost, charged to q0).
 
 **Order of stages.** Freeze (after the geometry preflight and the plan's budget check), then:
 
