@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from gmd_active_learning.contracts import UNITS, ModelArtifact, stable_id
 from gmd_active_learning.contracts.ids import file_sha256
@@ -29,6 +29,29 @@ from gmd_active_learning.utils.logging import get_logger
 from gmd_active_learning.workflow.store import WorkflowStore, utc_now
 
 LOGGER = get_logger(__name__)
+
+
+class MetricGate(BaseModel):
+    """A gate on one named metric of the candidate (e.g. a per-subset force RMSE from the trainer).
+
+    ``max``: absolute upper bound. ``max_relative_regression``: the candidate may exceed the active
+    model's value by at most this fraction. ``min_relative_improvement``: the candidate must undercut the
+    active model's value by at least this fraction. A missing metric (candidate, or the active model's
+    for a relative bound) fails the gate: evidence is never assumed.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    metric: str = Field(..., min_length=1)
+    max: float | None = Field(None, gt=0.0)
+    max_relative_regression: float | None = Field(None, ge=0.0)
+    min_relative_improvement: float | None = Field(None, ge=0.0, lt=1.0)
+
+    @model_validator(mode="after")
+    def _some_bound(self) -> MetricGate:
+        if self.max is None and self.max_relative_regression is None and self.min_relative_improvement is None:
+            raise ValueError(f"metric gate {self.metric!r} sets no bound")
+        return self
 
 
 class PromotionGateConfig(BaseModel):
@@ -43,6 +66,7 @@ class PromotionGateConfig(BaseModel):
     require_export_validation: bool = True
     export_max_force_deviation: float = Field(1.0e-4, gt=0.0, description="eV/A, export vs checkpoint")
     require_engine_smoke_test: bool = True
+    metric_gates: list[MetricGate] = Field(default_factory=list, description="gates on named metrics (empty: none)")
 
 
 @dataclass(slots=True)
@@ -84,6 +108,19 @@ def evaluate_gates(
         check("export_matches_checkpoint", deviation is not None and float(deviation) <= config.export_max_force_deviation, value=deviation, limit=config.export_max_force_deviation)
     if config.require_engine_smoke_test:
         check("engine_smoke_test", bool(engine_smoke and engine_smoke.get("passed")), detail=engine_smoke)
+    for gate in config.metric_gates:
+        value = metrics.get(gate.metric)
+        parent = None if parent_metrics is None else parent_metrics.get(gate.metric)
+        if gate.max is not None:
+            check(f"{gate.metric}:max", value is not None and float(value) <= gate.max, value=value, limit=gate.max)
+        if gate.max_relative_regression is not None:
+            limit = None if parent is None else float(parent) * (1.0 + gate.max_relative_regression)
+            check(f"{gate.metric}:no_regression", value is not None and limit is not None and float(value) <= limit,
+                  value=value, limit=limit, parent=parent)
+        if gate.min_relative_improvement is not None:
+            limit = None if parent is None else float(parent) * (1.0 - gate.min_relative_improvement)
+            check(f"{gate.metric}:improvement", value is not None and limit is not None and float(value) <= limit,
+                  value=value, limit=limit, parent=parent)
     return GateReport(passed=all(item["passed"] for item in checks.values()), checks=checks)
 
 

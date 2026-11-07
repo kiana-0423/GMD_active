@@ -117,6 +117,30 @@ def test_gates_fail_closed_on_missing_evidence() -> None:
     assert evaluate_gates(relaxed, metrics=good, parent_metrics=None, export_check=None, engine_smoke=None).passed
 
 
+def test_metric_gates_bound_named_metrics_and_fail_closed() -> None:
+    from gmd_active_learning.retraining.registry import MetricGate
+
+    config = PromotionGateConfig(max_force_rmse=1.0, require_export_validation=False, require_engine_smoke_test=False, metric_gates=[
+        MetricGate(metric="force_rmse.challenge", max=0.3, min_relative_improvement=0.2),
+        MetricGate(metric="force_rmse.in_domain", max_relative_regression=0.1)])
+    base = {"force_rmse": 0.5, "n_validation": 4}
+    parent = {"force_rmse": 0.6, "force_rmse.challenge": 0.5, "force_rmse.in_domain": 0.10}
+    good = evaluate_gates(config, metrics={**base, "force_rmse.challenge": 0.25, "force_rmse.in_domain": 0.105}, parent_metrics=parent,
+                          export_check=None, engine_smoke=None)
+    assert good.passed and {"force_rmse.challenge:max", "force_rmse.challenge:improvement", "force_rmse.in_domain:no_regression"} <= set(good.checks)
+    small = evaluate_gates(config, metrics={**base, "force_rmse.challenge": 0.29, "force_rmse.in_domain": 0.1}, parent_metrics={**parent, "force_rmse.challenge": 0.3},
+                           export_check=None, engine_smoke=None)
+    assert not small.passed and not small.checks["force_rmse.challenge:improvement"]["passed"]  # 0.29 > 0.3 * 0.8
+    regress = evaluate_gates(config, metrics={**base, "force_rmse.challenge": 0.2, "force_rmse.in_domain": 0.12}, parent_metrics=parent,
+                             export_check=None, engine_smoke=None)
+    assert not regress.passed and not regress.checks["force_rmse.in_domain:no_regression"]["passed"]
+    missing = evaluate_gates(config, metrics={**base, "force_rmse.challenge": 0.2}, parent_metrics=None, export_check=None, engine_smoke=None)
+    assert not missing.passed and not missing.checks["force_rmse.in_domain:no_regression"]["passed"]  # no evidence, no pass
+    with pytest.raises(ValueError, match="sets no bound"):
+        MetricGate(metric="force_rmse.x")
+    assert PromotionGateConfig().metric_gates == []
+
+
 def test_retrain_trigger_rules() -> None:
     config = RetrainTriggerConfig(min_new_samples=5, interval_hours=2.0)
     assert evaluate_trigger(config, new_samples=1, pending_tasks=0, last_trained_at=None).reason == "below_min_new_samples"  # F-13 fixed
