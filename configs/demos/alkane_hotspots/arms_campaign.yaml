@@ -4,6 +4,10 @@
 #   python -m tools.experiments.alkane_hotspots <command> --config configs/demos/alkane_hotspots/campaign.yaml \
 #       --study configs/demos/alkane_hotspots/arms_campaign.yaml
 # Artifacts: <artifacts_root of pilot.yaml>/model_study (outside git).
+# Changed before any campaign data, after the pilot: the PHAL arms evaluate every monitor stage on the static pool
+# (arms.monitor_overrides). In pilot v2 the staged light stage scored 0 on every static configuration, so the
+# pre-registered PHAL arms acquired nothing; the staged, lazily fitted monitor is exercised in the closed loop (MD).
+# no_event_buffering on a static pool only changes which configuration of a group's stream joins an event.
 name: campaign
 base_config: campaign.yaml
 inputs: {parents: parents.jsonl, labels: labels.jsonl}
@@ -114,7 +118,9 @@ arms:
     splits: [calibration]           # never final_eval; validation is kept for early stopping
     stride: 2
   selection: {max_per_cycle: 1000000, max_per_event: 2, min_score: null, diversity_threshold: 0.1}
-  monitor_overrides: {}
+  monitor_overrides:               # full PHAL score on the static pool (pilot v2/v2b finding, docs): staging and the
+    stages: {physics_interval: always, full_interval: always}   # lazy LJ fit save MD compute; on a fixed pool the light
+    metrics: {lj_residual: {lazy_threshold: 0.0}}               # stage scored 0 and hid every later signal. Thresholds unchanged.
   events: {pre_trigger_frames: 0, post_trigger_frames: 1, cooldown_steps: 0}
   hotspots: {merge_radius: 3.0}
   calibration_splits: [calibration]

@@ -133,7 +133,7 @@ def test_commands_register_on_alphas_cli() -> None:
     assert args.only == ["phal_local"] and args.repetitions == [0]
 
 
-@pytest.mark.parametrize("profile", ["smoke", "pilot", "pilot_v2", "campaign"])
+@pytest.mark.parametrize("profile", ["smoke", "pilot", "pilot_v2", "pilot_v2b", "campaign"])
 def test_committed_study_configs_validate(profile: str, tmp_path: Path) -> None:
     from .beta_synthetic import REPO_ROOT
 
@@ -143,6 +143,27 @@ def test_committed_study_configs_validate(profile: str, tmp_path: Path) -> None:
     assert loaded.artifacts_root == loaded.alpha.artifacts_root
     assert loaded.config.arms is not None and loaded.config.training.model["long_range_type"] == "none"
     assert "final_eval" not in loaded.config.arms.pool.splits + loaded.config.training.validation_splits
+
+
+def test_pilot_v2b_differs_from_v2_only_in_the_phal_monitor_protocol() -> None:
+    """v2b is v2 with the full PHAL score on static pools; everything that defines labels, models and
+    thresholds is identical, so the v2 round-0 models are reused."""
+    from .beta_synthetic import REPO_ROOT
+
+    configs = REPO_ROOT / "configs" / "demos" / "alkane_hotspots"
+    v2 = yaml.safe_load((configs / "arms_pilot_v2.yaml").read_text())
+    v2b = yaml.safe_load((configs / "arms_pilot_v2b.yaml").read_text())
+    assert v2b["arms"].pop("monitor_overrides") == {"stages": {"physics_interval": "always", "full_interval": "always"},
+                                                     "metrics": {"lj_residual": {"lazy_threshold": 0.0}}}
+    assert v2b["arms"].pop("ablations") == [{"name": "no_lj", "kind": "phal_local", "lj": False}]
+    for key in ("receptive_field", "ground_truth"):
+        assert v2b[key].pop("enabled") is False
+    v2["arms"].pop("monitor_overrides"), v2["arms"].pop("ablations")
+    for key in ("name", "output_subdir"):
+        v2.pop(key), v2b.pop(key)
+    assert v2b == v2
+    loaded = load_beta_config(configs / "arms_pilot_v2b.yaml")
+    assert loaded.config.monitor == load_beta_config(configs / "arms_pilot_v2.yaml").config.monitor
 
 
 @pytest.mark.integration
