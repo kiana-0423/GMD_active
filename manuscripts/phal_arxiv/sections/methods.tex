@@ -1,0 +1,157 @@
+\section{Methods and implementation}
+\subsection{Interfaces and persistent execution}
+Figure~\ref{fig:workflow} summarizes the separation of responsibilities.
+The MD interface supplies positions, forces, species, stable atom identities,
+cell information, and step indices. Segmented execution provides explicit
+restart boundaries at which an accepted model can replace the active model.
+Simulation state and model identity are recorded together so that a resumed
+segment can be traced to the potential that generated it.
+
+The controller persists its stage and records intended external actions,
+their execution, and their outcomes. On restart, unresolved actions are
+reconciled against the relevant backend before a new job is submitted.
+Event, label, dataset, and model identities link the corresponding records.
+The SQLite store uses write-ahead logging and uniqueness constraints.
+These mechanisms support the recovery experiments reported below; their
+presence alone is not evidence of correctness under every scheduler or
+distributed failure mode.
+
+Reference calculations are collected and validated before they enter a
+dataset. Model promotion is separate from model training: a candidate must
+pass the configured validation, export-consistency, and engine checks.
+A rejected candidate leaves the accepted model available. The pilot uses
+permissive promotion thresholds, stated in Section~\ref{sec:protocol};
+passing those checks is not interpreted as proof of an accurate force field.
+
+\subsection{Monitoring, events, and hotspot selection}
+The monitoring interface supports force magnitude, force change,
+nearest-neighbor distance, displacement, coordination change, local
+Lennard--Jones (LJ) compatibility, and committee force dispersion.
+Metrics are scheduled in a light stage, a physics stage, and a full stage.
+For atom $i$ and stage $s$, the configured aggregate has the form
+\begin{equation}
+ S_i^{(s)}=\sum_{k\in\mathcal{K}_s}w_k g_k(x_{ik}),
+ \label{eq:score}
+\end{equation}
+where $g_k$ is a metric-specific transformation and $w_k$ is a configured
+weight. Several transformations use gated absolute standardized deviations
+from running statistics. Other metrics retain raw-value contributions.
+Unavailable metrics contribute zero and are excluded from the associated
+statistics. Consequently, these aggregates are heuristic trigger scores,
+not calibrated probabilities of reference-force error.
+
+The pilot stage thresholds are 4, 5, and 6, with one atom sufficient to
+trigger a stage. Under triggered scheduling, a lower-stage decision
+controls whether the next stage is evaluated. The implementation can instead
+evaluate stages unconditionally; the exploratory static-pool experiment
+uses this option. The executed online pilot disables force-change,
+displacement, coordination-change, and separate reference-model-deviation
+metrics. It therefore does not validate every temporal feature available
+in the platform.
+
+For a committee of $M$ models, the force-dispersion feature is
+\begin{equation}
+ u_i=\left[\frac{1}{M}\sum_{m=1}^{M}
+ \left\|\mathbf{F}^{(m)}_i-\overline{\mathbf{F}}_i\right\|^2\right]^{1/2},
+ \qquad
+ \overline{\mathbf{F}}_i=\frac{1}{M}\sum_{m=1}^{M}\mathbf{F}^{(m)}_i .
+ \label{eq:committee}
+\end{equation}
+It is a population dispersion of force vectors, without an additional
+factor of three.
+
+The LJ feature fits the current predicted force to two local geometric
+basis vectors. With $\mathbf{d}_{ij}=\mathbf{r}_j-\mathbf{r}_i$ and
+$r_{ij}=\|\mathbf{d}_{ij}\|$,
+\begin{align}
+ \mathbf{a}_i&=-2\sum_j\frac{\mathbf{d}_{ij}}{r_{ij}^{14}},
+ & \mathbf{b}_i&=\sum_j\frac{\mathbf{d}_{ij}}{r_{ij}^{8}},\\
+ \widehat{\mathbf{F}}^{\rm LJ}_i&=\alpha_i\mathbf{a}_i+\beta_i\mathbf{b}_i,
+ & \rho_i&=\frac{\|\widehat{\mathbf{F}}^{\rm LJ}_i-\mathbf{F}_i\|}
+ {\|\mathbf{F}_i\|+\delta}.
+ \label{eq:lj}
+\end{align}
+Here $\alpha=24\epsilon\sigma^{12}$ and
+$\beta=24\epsilon\sigma^6$ for the conventional LJ potential, and the force
+sign follows $\mathbf{F}=-\nabla E$. The pilot fits each atom separately
+using neighbors within 6~\AA, including covalently bonded neighbors.
+Rank, conditioning, positivity, and length-scale checks reject unsuitable
+fits (Appendix~\ref{app:settings}). This is a compatibility feature for a
+simple pair-force form. It is not a physicality certificate for a covalent
+force field. Two fitted coefficients span a plane in three-dimensional
+force space, and a positive uniform force rescaling can be absorbed into
+the fitted energy scale.
+
+Triggered frames are retained with configured pre- and post-trigger
+context. Additional triggers within a pending event merge reasons,
+scores, and hotspot identities; incomplete events are marked explicitly.
+Trigger-frame identities are retained separately from later event members.
+Hotspot atoms are clustered by a 3~\AA\ single-linkage distance.
+Candidates are ranked by score, then filtered against selected and
+previously labeled geometric fingerprints. The pilot uses a fingerprint
+distance threshold of 0.1. These filters can determine the acquired
+labels even when many frames trigger.
+
+\subsection{Extraction, capping, and a fragment-fidelity gate}
+The implementation offers graph, radial-cluster, block, and slab extraction.
+The molecular experiments here assess graph and radial extraction only.
+Whole carbon--hydrogen units are retained so that terminal hydrogens
+follow their bonded carbon. Every severed carbon--carbon bond is
+terminated by a hydrogen at 1.09~\AA\ along the cut-bond direction.
+Caps are not relaxed in these experiments.
+
+The calibration compares graph neighborhoods of two, three, and four
+carbon--carbon bond hops with radial neighborhoods having a
+1.5~\AA\ core and buffers of 3, 4, or 5~\AA.
+For a perturbation site consisting of several atoms, the radial
+neighborhood is the union of their neighborhoods; it is not necessarily
+a sphere about a single atom. Parent identities, retained-atom identities,
+region roles, and cap records are preserved.
+
+Each candidate extraction setting is checked against parent DFT forces
+computed with the same electronic-structure settings. Over the evaluated
+core atoms $\mathcal{C}$, the gate measures the component root-mean-square
+error (RMSE) and maximum atomwise vector error:
+\begin{align}
+ R_{\rm core}&=
+ \left[\frac{1}{3|\mathcal{C}|}
+ \sum_{i\in\mathcal{C}}\|\mathbf{F}^{\rm frag}_i-
+                         \mathbf{F}^{\rm parent}_i\|^2\right]^{1/2},\\
+ E_{\max}&=\max_{i\in\mathcal{C}}
+ \|\mathbf{F}^{\rm frag}_i-\mathbf{F}^{\rm parent}_i\|.
+ \label{eq:fidelity}
+\end{align}
+Acceptance requires $R_{\rm core}\leq0.03$~\forceunit,
+$E_{\max}\leq0.10$~\forceunit, complete evaluation, and no failed
+fragment. The lowest measured mean-cost passing setting is selected;
+a fixed order resolves a cost tie. The settings and acceptance criteria
+were recorded before the fidelity sweep. This local protocol record
+is not an external preregistration.
+
+\subsection{Force supervision and model updates}
+Local datasets distinguish core, inner-buffer, outer-buffer, boundary,
+and cap atoms. In the executed study, force weights are 1 for the core,
+0.3 for the inner buffer, and zero for the outer buffer, boundary,
+caps, and unassigned atoms. Full-system force labels have unit weights.
+The weighted force root-mean-square loss is
+\begin{equation}
+ L_F=\left[
+ \frac{\sum_i w_i\sum_{\mu\in\{x,y,z\}}
+ (F_{i\mu}^{\theta}-F_{i\mu}^{\rm ref})^2}
+ {3\sum_i w_i}\right]^{1/2}.
+ \label{eq:loss}
+\end{equation}
+The implementation handles a zero-weight batch explicitly and uses a
+numerical floor for a finite derivative at zero error. Zero-weight targets
+contribute neither a force-loss term nor a force gradient.
+Capped-fragment energies are excluded from energy supervision: a fragment
+energy is not a parent energy or an additive parent-energy contribution.
+Full-system labels retain their own energy targets.
+
+Local DFT fidelity and learned-model context are separate constraints.
+Equation~\eqref{eq:fidelity} tests whether the reference forces survive
+fragmentation. It does not test whether the trained model predicts the
+same core force on the fragment and its parent. We report the completed
+model-context diagnostic as a limitation rather than treating a DFT gate
+pass as evidence that the learned representation is insensitive to
+removed neighbors.

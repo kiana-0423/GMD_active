@@ -1,0 +1,8 @@
+{
+  "python": "3.11.16",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "numpy": "2.2.6",
+  "matplotlib": "3.11.2",
+  "PyYAML": "6.0.3",
+  "latex_compiled": false
+}

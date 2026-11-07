@@ -1,0 +1,109 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[numbers,sort&compress,square]{natbib}
+\usepackage[colorlinks=true,citecolor=blue,linkcolor=blue,urlcolor=blue]{hyperref}
+\usepackage{caption}
+\usepackage{placeins}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\emergencystretch}{2em}
+\newcommand{\forceunit}{\ensuremath{\mathrm{eV}\,\text{\AA}^{-1}}}
+\newcommand{\coreh}{\ensuremath{\mathrm{core\!-\!h}}}
+\input{metadata}
+\title{PHAL: Physics-Aware Hotspot Active Learning\\
+for Local Reference Labeling of Machine-Learned Force Fields}
+\author{\PaperAuthors\\[0.4em]\small \PaperAffiliations\\\small \PaperContact}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Local reference calculations can reduce the cost of extending a machine-learned
+force field, but their use requires control of fragment-boundary errors and a
+reliable path from molecular dynamics to model updates. We present the
+Physics-aware Hotspot Active Learning Platform (PHAL), implemented in
+GMD\_active and connected to the GMD dynamics engine, CP2K reference calculations,
+and GMD\_SGT training. The workflow combines staged heuristic monitoring,
+event-based hotspot selection, hydrogen-capped extraction, weighted force
+supervision, and persistent execution with model-promotion checks.
+Completed exploratory experiments use hexadecane and dotriacontane configurations
+with torsional, bending, and nonbonded-contact perturbations. A fragment setting
+selected on hexadecane reproduces held-out parent core forces with a
+Cartesian-component root-mean-square error of 0.0100~\forceunit; unchanged
+transfer to two dotriacontane configurations gives 0.0146~\forceunit.
+An exploratory four-label comparison gives mean force errors of
+0.479 and 0.502~\forceunit\ for local and full-system PHAL labeling, with
+an attributed reference-cost ratio of 0.19; two repetitions and incompletely
+paired acquisitions preclude an equivalence claim.
+A separate real-program closed loop adds three local labels and reduces
+validation error from 0.506 to 0.398~\forceunit. In short frozen-model
+trajectories, the fraction of sampled frames retaining the parent bond topology
+increases from 36.6\% to 98.7\%.
+These results establish an operational framework and pilot-scale label fidelity,
+while leaving acquisition superiority, the incremental value of physical
+signals, and repair of an initially qualified force field unresolved.
+\end{abstract}
+
+\noindent\textbf{Keywords:} active learning; machine-learned interatomic potentials;
+local reference labeling; molecular dynamics; fragment fidelity; reproducibility
+
+\input{sections/introduction}
+\input{sections/methods}
+\input{sections/experiments}
+\input{sections/results}
+\input{sections/discussion}
+
+\section{Conclusions}
+PHAL integrates local reference labeling with a persistent active-learning
+workflow in the GMD ecosystem. Completed alkane experiments show that
+hydrogen-capped fragments of approximately thirty atoms can reproduce parent
+core forces within explicitly checked tolerances, including a small
+transfer from C16 to C32. Real dynamics, reference calculations, training,
+model replacement, interruption recovery, and rollback have been exercised
+in the same implementation. The short closed-loop example also shows
+improved validation error and topology retention after three local labels.
+The evidence remains exploratory: it does not establish superior acquisition,
+equilibrium accuracy, or reliable extrapolation repair.
+The contribution is a documented integration and validation of the local-label
+workflow, together with explicit tests of where its present evidence stops.
+
+\section*{Code and data availability}
+The accompanying manuscript source package contains frozen result summaries,
+per-atom fragment-error tables, acquisition records, molecular coordinates
+used in the illustrations, configuration snapshots, and scripts that regenerate
+all figures and numerical tables. A provenance manifest records the source
+paths and SHA-256 hashes. Figure regeneration uses only these bundled data.
+The package does not include the complete CP2K output archive, all dynamics
+trajectories, or trained model checkpoints. No public repository or archival
+identifier is asserted in this draft.
+
+\section*{Use of generative AI tools}
+Generative AI tools assisted manuscript drafting, source inspection,
+reference checking, and preparation of plotting and validation scripts.
+The reported numerical measurements come from recorded simulation and
+training artifacts; no generative model supplied simulation measurements.
+
+\section*{Acknowledgments}
+\PaperAcknowledgments
+
+\section*{Author contributions}
+[CRediT contributions to be supplied and approved by the authors.]
+
+\section*{Competing interests}
+[Competing-interest declaration to be supplied by the authors.]
+
+\section*{Ethics declaration}
+The reported work concerns computational molecular systems and does not
+involve human participants, personal data, or animal experiments.
+
+\FloatBarrier
+\input{references}
+\appendix
+\input{sections/appendix}
+\end{document}

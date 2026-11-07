@@ -1,0 +1,113 @@
+{
+  "created_at": "2026-11-07T00:54:29+00:00",
+  "evaluation": [
+    {
+      "complete": true,
+      "error_vs_graph_distance_to_cut": {
+        "[2,3)": {
+          "max": 0.09626856150972765,
+          "mean": 0.07459709514690151,
+          "n": 2
+        },
+        "[3,4)": {
+          "max": 0.043454257941957404,
+          "mean": 0.03860625516767822,
+          "n": 6
+        },
+        "[4,6)": {
+          "max": 0.04380309510353569,
+          "mean": 0.010039722764521723,
+          "n": 26
+        },
+        "[6,100)": {
+          "max": 0.03289552852337866,
+          "mean": 0.0064416398155283236,
+          "n": 12
+        }
+      },
+      "failures": [],
+      "max_core_force_error": 0.09626856150972765,
+      "mean_fragment_cost_core_s": 473.9829412102699,
+      "mean_n_atoms": 33.25,
+      "mean_n_caps": 1.75,
+      "mean_parent_cost_core_s": 38726.41942381859,
+      "n_evaluated": 4,
+      "n_failed": 0,
+      "n_pending": 0,
+      "n_specs": 4,
+      "passes": true,
+      "per_spec_rmse_max": 0.023959980834256062,
+      "pooled_core_force_rmse": 0.014642537423857705,
+      "rmse_by_site_kind": {
+        "normal_control": 0.011531393784682138,
+        "perturbation_site": 0.019463817667873633
+      },
+      "setting_id": "cluster-c1.5-b3"
+    }
+  ],
+  "n_specs": 4,
+  "preregistration_hash": "640c118dacba8b23c302cf1610af0216cc09e78a3f391351109ed923e2a04728",
+  "selection_setting_id": "cluster-c1.5-b3",
+  "settings": [
+    {
+      "complete": true,
+      "error_vs_graph_distance_to_cut": {
+        "[2,3)": {
+          "max": 0.09626856150972765,
+          "mean": 0.07459709514690151,
+          "n": 2
+        },
+        "[3,4)": {
+          "max": 0.043454257941957404,
+          "mean": 0.03860625516767822,
+          "n": 6
+        },
+        "[4,6)": {
+          "max": 0.04380309510353569,
+          "mean": 0.010039722764521723,
+          "n": 26
+        },
+        "[6,100)": {
+          "max": 0.03289552852337866,
+          "mean": 0.0064416398155283236,
+          "n": 12
+        }
+      },
+      "failures": [],
+      "max_core_force_error": 0.09626856150972765,
+      "mean_fragment_cost_core_s": 473.9829412102699,
+      "mean_n_atoms": 33.25,
+      "mean_n_caps": 1.75,
+      "mean_parent_cost_core_s": 38726.41942381859,
+      "n_evaluated": 4,
+      "n_failed": 0,
+      "n_pending": 0,
+      "n_specs": 4,
+      "passes": true,
+      "per_spec_rmse_max": 0.023959980834256062,
+      "pooled_core_force_rmse": 0.014642537423857705,
+      "rmse_by_site_kind": {
+        "normal_control": 0.011531393784682138,
+        "perturbation_site": 0.019463817667873633
+      },
+      "setting_id": "cluster-c1.5-b3"
+    }
+  ],
+  "split": "final_eval",
+  "targets": {
+    "core_force_rmse": 0.03,
+    "distance_bins": [
+      0.0,
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      6.0,
+      100.0
+    ],
+    "environment_radius": 4.0,
+    "max_core_force_error": 0.1,
+    "max_failures": 0,
+    "selection_objective": "min_measured_cost"
+  }
+}

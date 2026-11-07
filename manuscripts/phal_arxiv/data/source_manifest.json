@@ -1,0 +1,244 @@
+{
+  "excluded": [
+    "ongoing alkane_repair",
+    "campaign",
+    "C64/C128",
+    "unexecuted panels"
+  ],
+  "plot_data_sha256": "feb250e3e4a6afb3ffd47c3145a3a25f08ec57564e1558cd76360eeffcd43a41",
+  "records": [
+    {
+      "snapshot": "data/evidence/fidelity_calibration.json",
+      "snapshot_sha256": "95a59d44a294df56fe6f7b4a81b2f4b99cacfdcf4d8bfa1234b4bfad18b279c2",
+      "source": "docs/demos/alkane_hotspots/results/fidelity_pilot/report_calibration.json",
+      "source_sha256": "a3b391f6cc196856c0c60a65e335033de30ff01fae2e4ba2b044e0360212b365",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/fidelity_c16.json",
+      "snapshot_sha256": "c27781477a0aef2b0acd5417dc8ed4f22ee064b13fa878eecc43da3329b18bcd",
+      "source": "docs/demos/alkane_hotspots/results/fidelity_pilot/report_final_eval.json",
+      "source_sha256": "7496dd082535fb3cbe866ee669a1cbc4bf84dfd816da20efd58d4b61f2698f2c",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/fidelity_c32.json",
+      "snapshot_sha256": "5745c59eff327d8a57b777d244e2ade765c7c903e7f247c614a5db1012c47ce8",
+      "source": "docs/demos/alkane_hotspots/results/fidelity_pilot_c32/report_final_eval.json",
+      "source_sha256": "b9a114c861b97019f011c458b7e9107b43f1f9469b8e1d1f2413ca7d1c1138f4",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/c32_costs.json",
+      "snapshot_sha256": "e49adf90133062da71ccb8e95a1b56f9ace5a61c661462d4621f16f1f47fde9d",
+      "source": "docs/demos/alkane_hotspots/results/fidelity_pilot_c32/label_costs.json",
+      "source_sha256": "953f1ef799e1154c05fbdee5137e31e54bf29e4b9490e40f297a640ef76c1f4f",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/closed_loop.json",
+      "snapshot_sha256": "e7d41242192172af9cae8007eb6ece9696979aa333c073870b7d6dfdda5dac84",
+      "source": "docs/demos/alkane_hotspots/results/closed_loop_pilot_v2/closed_loop_report.json",
+      "source_sha256": "1272b7ae6c1271f3127a3787e6016d30dbf784aef242e8da7c368810f7044da0",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/frozen_eval.json",
+      "snapshot_sha256": "f7f5e7da5208cc7d4d335fdffdc3f5690f532142d0ac3bc9af6aecd2f18f0b9a",
+      "source": "docs/demos/alkane_hotspots/results/closed_loop_pilot_v2/frozen_eval.json",
+      "source_sha256": "62358958c536c25e02e4a1defae9a3b3049d6160ca16d44a5f6c0d2f50231998",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/recovery.json",
+      "snapshot_sha256": "172804655c501b2673a34387930532f1e94e2a3f5ee8c803dda839deb9009547",
+      "source": "docs/demos/alkane_hotspots/results/closed_loop_pilot_v2/recovery_report.json",
+      "source_sha256": "236abe4e129f919e95aa5bf889ed04085c6a6ead3d0c1c786124863a9454c4a4",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/model_study_v2.json",
+      "snapshot_sha256": "a1059632eba84156a977829132d9fa0fd26ae570426193bffaf5ffb185ba41b3",
+      "source": "docs/demos/alkane_hotspots/results/model_study_pilot_v2/report.json",
+      "source_sha256": "703974a4ee8f9981f7fa1b5ce4b1b194ed0059b742611071590d3b9500de80c0",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/model_study_v2c.json",
+      "snapshot_sha256": "72382a850ee8f4d9585c8f05471676fcf014c8d031d93d177c92a7d0b1145283",
+      "source": "docs/demos/alkane_hotspots/results/model_study_pilot_v2c/report.json",
+      "source_sha256": "44fde04ab09868c94a47d1eb2831746b0393bf90431c53d6352799b36de06f67",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/timing_probe.json",
+      "snapshot_sha256": "dbf63e609d886a74f06f89c56b2056861d1b476893ad597cbc9c7745ae38115b",
+      "source": "docs/demos/alkane_hotspots/results/timing_probe.json",
+      "source_sha256": "dd701fc8100607d4500495cb401662cf49304d759d809501d817587b673df4f3",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/configs/pilot.yaml",
+      "snapshot_sha256": "b60990b22172c509f25190d9e4c87320651656893fd1710e35699b1e5d08ef5d",
+      "source": "configs/demos/alkane_hotspots/pilot.yaml",
+      "source_sha256": "b60990b22172c509f25190d9e4c87320651656893fd1710e35699b1e5d08ef5d",
+      "transformation": "byte-identical configuration snapshot; provenance, not a relocated runnable config"
+    },
+    {
+      "snapshot": "data/configs/pilot_c32.yaml",
+      "snapshot_sha256": "3cfaba66a47638e8977b9ed31e608242c7bdcb85e66854829fc3705a573c9423",
+      "source": "configs/demos/alkane_hotspots/pilot_c32.yaml",
+      "source_sha256": "3cfaba66a47638e8977b9ed31e608242c7bdcb85e66854829fc3705a573c9423",
+      "transformation": "byte-identical configuration snapshot; provenance, not a relocated runnable config"
+    },
+    {
+      "snapshot": "data/configs/arms_pilot_v2.yaml",
+      "snapshot_sha256": "c2bebcbaf32b22267cf584251763c2d27a4849a14449c7b9309105e5ea917e4a",
+      "source": "configs/demos/alkane_hotspots/arms_pilot_v2.yaml",
+      "source_sha256": "c2bebcbaf32b22267cf584251763c2d27a4849a14449c7b9309105e5ea917e4a",
+      "transformation": "byte-identical configuration snapshot; provenance, not a relocated runnable config"
+    },
+    {
+      "snapshot": "data/configs/arms_pilot_v2c.yaml",
+      "snapshot_sha256": "c9fa4382e45da412a0f911d50397f7ea692aa0c1439a1cb3786d1714c3a480b8",
+      "source": "configs/demos/alkane_hotspots/arms_pilot_v2c.yaml",
+      "source_sha256": "c9fa4382e45da412a0f911d50397f7ea692aa0c1439a1cb3786d1714c3a480b8",
+      "transformation": "byte-identical configuration snapshot; provenance, not a relocated runnable config"
+    },
+    {
+      "snapshot": "data/configs/closed_loop_pilot_v2.yaml",
+      "snapshot_sha256": "f23b4b3fa103181516470ad14768d20ec5b7f14adda75c5de7402ba6cc50ed7e",
+      "source": "configs/demos/alkane_hotspots/closed_loop_pilot_v2.yaml",
+      "source_sha256": "f23b4b3fa103181516470ad14768d20ec5b7f14adda75c5de7402ba6cc50ed7e",
+      "transformation": "byte-identical configuration snapshot; provenance, not a relocated runnable config"
+    },
+    {
+      "snapshot": "data/evidence/arms/random_local_rep0.json",
+      "snapshot_sha256": "8360b02f8319afb9427d093df13061d3d63dc9cb85c4e7fec64a269c196fd7e2",
+      "source": "../alkane_artifacts/pilot/model_study_v2c/arms/random_local/rep0/progress.json",
+      "source_sha256": "6f9fe4af4170dc50d7d9aac904355c285c005a9a6fc18a8d55e647ce56df56c7",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/arms/random_local_rep1.json",
+      "snapshot_sha256": "55753c679cd5762b7038365e347a55504306709bb81d0961c33e624ae1b78faa",
+      "source": "../alkane_artifacts/pilot/model_study_v2c/arms/random_local/rep1/progress.json",
+      "source_sha256": "c470f98381049f5aad2a0f74a959f68e51fe9089e5b1a8fa979dbb96174226bc",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/arms/committee_local_rep0.json",
+      "snapshot_sha256": "f27fa82fbf957970fff634854a6b64dc490bcad060ad021451fe6d314a811ceb",
+      "source": "../alkane_artifacts/pilot/model_study_v2c/arms/committee_local/rep0/progress.json",
+      "source_sha256": "61fd0668f27a3982541d49a5d25234c3eb9930243f380ad33f65f8ab2b8b6ffb",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/arms/committee_local_rep1.json",
+      "snapshot_sha256": "9360b4d2f17ad5c44bf495bc196eb8fd2264aec5015f162561af81357ff1f727",
+      "source": "../alkane_artifacts/pilot/model_study_v2c/arms/committee_local/rep1/progress.json",
+      "source_sha256": "4cba4c2e432212b46ff7f234ac8aacd671cb18116aaacdc9079c41681f3fab0c",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/arms/phal_local_rep0.json",
+      "snapshot_sha256": "36b4834ac6fb1c6ba2835c9d0b000974100bba47dc8031496801507ae4a02032",
+      "source": "../alkane_artifacts/pilot/model_study_v2c/arms/phal_local/rep0/progress.json",
+      "source_sha256": "4726b7acdff705ec43c06ad766b65b29d0260fd9e438c940316148ce13c1181e",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/arms/phal_local_rep1.json",
+      "snapshot_sha256": "ffaa68712418783dd9f48544a81e367bd23ca3ebddece5f4291fa8686fbc0bb9",
+      "source": "../alkane_artifacts/pilot/model_study_v2c/arms/phal_local/rep1/progress.json",
+      "source_sha256": "d17bab41e6d3c606e28bbb00a3146a831f81bba7fcdf224150025bd50a9e7f51",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/arms/phal_full_system_rep0.json",
+      "snapshot_sha256": "24fdd48abcd9d16d1fa979ecb776fe8cf389bcbae22b95113c419ad653481d93",
+      "source": "../alkane_artifacts/pilot/model_study_v2c/arms/phal_full_system/rep0/progress.json",
+      "source_sha256": "cd883df4e1bfd31fa857f5b813cd06e9b208e1eb8255e57c3514766ebbf78444",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/arms/phal_full_system_rep1.json",
+      "snapshot_sha256": "a70f90cc62450e60c3b2b2db55b41eacd422fc2a7f5022472f33dcef89bf5ff7",
+      "source": "../alkane_artifacts/pilot/model_study_v2c/arms/phal_full_system/rep1/progress.json",
+      "source_sha256": "0a37c5973da103ff0d7ac3bef20bd0591622323377adf44452e714a6b9635f45",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/arms/no_lj_rep0.json",
+      "snapshot_sha256": "e6bba5ed06cb8e08c533b2c47f64411b8927e1429ba297b113bc1865faf743ab",
+      "source": "../alkane_artifacts/pilot/model_study_v2c/arms/no_lj/rep0/progress.json",
+      "source_sha256": "c8cad1c97ce28b75d7e061c2704dfe8924844b1e6c7e5a5adfbfa56e1b91754d",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/arms/no_lj_rep1.json",
+      "snapshot_sha256": "44b4eed22e0d5e95d0796c7a5e61de64deaecb63db1bd21a2fb6255928e4800c",
+      "source": "../alkane_artifacts/pilot/model_study_v2c/arms/no_lj/rep1/progress.json",
+      "source_sha256": "0c5847eabef3d272e8e3f1c50d92d8bc18dd85a0cf4f2bf3a09a4a56a573d754",
+      "transformation": "JSON formatting and replacement of workstation paths"
+    },
+    {
+      "snapshot": "data/evidence/c16_calibration.csv",
+      "snapshot_sha256": "9c9e8b8569e507bd4c82f413509ab5cc1b010e42e3dc522202c9a0f5c5215030",
+      "source": "../alkane_artifacts/pilot/fidelity/per_atom_calibration.csv",
+      "source_sha256": "9c9e8b8569e507bd4c82f413509ab5cc1b010e42e3dc522202c9a0f5c5215030",
+      "transformation": "byte-identical per-atom metrics"
+    },
+    {
+      "snapshot": "data/evidence/c16_held-out.csv",
+      "snapshot_sha256": "ce3d0da6daac05ab67c7dd1fe4cedb100921b14f3b05d51d4a942e4538e72bb2",
+      "source": "../alkane_artifacts/pilot/fidelity/per_atom_final_eval.csv",
+      "source_sha256": "ce3d0da6daac05ab67c7dd1fe4cedb100921b14f3b05d51d4a942e4538e72bb2",
+      "transformation": "byte-identical per-atom metrics"
+    },
+    {
+      "snapshot": "data/evidence/c32_transfer.csv",
+      "snapshot_sha256": "574a4f033b61d9bdea3eaa24169bdcafa15aba94479e14a0b9779d7faeb5b895",
+      "source": "../alkane_artifacts/pilot_c32/fidelity/per_atom_final_eval.csv",
+      "source_sha256": "574a4f033b61d9bdea3eaa24169bdcafa15aba94479e14a0b9779d7faeb5b895",
+      "transformation": "byte-identical per-atom metrics"
+    },
+    {
+      "snapshot": "data/plot_data.json#geometries",
+      "source": "../alkane_artifacts/pilot/structures/C16-b02-normal0.extxyz",
+      "source_sha256": "b765fbabb6280e16ae7750917e81b24664ebb2b2b83dae4c98efe119af1addb8",
+      "transformation": "coordinates and symbols parsed from extxyz; fixed alkane connectivity"
+    },
+    {
+      "snapshot": "data/plot_data.json#geometries",
+      "source": "../alkane_artifacts/pilot/structures/C16-b02-torsion0.extxyz",
+      "source_sha256": "714121ee22783712f574ed70fccabbf144fc1ffcfdeba2d338a2a89f5368a9f3",
+      "transformation": "coordinates and symbols parsed from extxyz; fixed alkane connectivity"
+    },
+    {
+      "snapshot": "data/plot_data.json#geometries",
+      "source": "../alkane_artifacts/pilot/structures/C16-b02-bend0.extxyz",
+      "source_sha256": "4ba2af53b4cbaaeb454bd1409c1e7c115251c23d161e15220372bc87aa4830da",
+      "transformation": "coordinates and symbols parsed from extxyz; fixed alkane connectivity"
+    },
+    {
+      "snapshot": "data/plot_data.json#geometries",
+      "source": "../alkane_artifacts/pilot/structures/C16-b02-contact0.extxyz",
+      "source_sha256": "6054015db86f58aaaddb09b1419f75d332dacf2a30b33d017c23c01d870f3747",
+      "transformation": "coordinates and symbols parsed from extxyz; fixed alkane connectivity"
+    },
+    {
+      "snapshot": "data/plot_data.json#geometries",
+      "source": "../alkane_artifacts/pilot/parents.jsonl",
+      "source_sha256": "530dae88c62097adc4e869431e7a445fe8ce361a012227a20d0b1858a665377e",
+      "transformation": "held-out parent metadata selection"
+    }
+  ],
+  "repository_commit": "394f991ed6b48dba9420868164817982acd65c20",
+  "source_experiments": [
+    "fidelity_pilot",
+    "fidelity_pilot_c32",
+    "model_study_pilot_v2c",
+    "closed_loop_pilot_v2"
+  ]
+}

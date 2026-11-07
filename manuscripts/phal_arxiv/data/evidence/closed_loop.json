@@ -1,0 +1,1085 @@
+{
+  "budget": {
+    "ledger": [
+      {
+        "allowed": true,
+        "estimate_core_s": 670.1404206142869,
+        "estimate_source": "measured mean of 43 fragment label(s)",
+        "inflight_core_s": 0.0,
+        "kind": "fragment",
+        "limit_core_s": 21600.0,
+        "n_atoms": 44,
+        "projected_core_s": 670.1404206142869,
+        "spent_core_s": 0.0
+      },
+      {
+        "allowed": true,
+        "estimate_core_s": 670.1404206142869,
+        "estimate_source": "measured mean of 43 fragment label(s)",
+        "inflight_core_s": 670.1404206142869,
+        "kind": "fragment",
+        "limit_core_s": 21600.0,
+        "n_atoms": 26,
+        "projected_core_s": 1340.2808412285738,
+        "spent_core_s": 0.0
+      },
+      {
+        "allowed": true,
+        "estimate_core_s": 670.1404206142869,
+        "estimate_source": "measured mean of 43 fragment label(s)",
+        "inflight_core_s": 0.0,
+        "kind": "fragment",
+        "limit_core_s": 21600.0,
+        "n_atoms": 29,
+        "projected_core_s": 3969.4542757854906,
+        "spent_core_s": 3299.3138551712036
+      }
+    ],
+    "max_cpu_core_hours": 6.0
+  },
+  "config": "<GMD_active>/configs/demos/alkane_hotspots/closed_loop_pilot_v2.yaml",
+  "config_hash": "335f47171add3ecb",
+  "cp2k_settings_hash": "27635ef6611590c4",
+  "created_at": "2026-11-07T01:10:42+00:00",
+  "event_steps": [
+    170,
+    980,
+    1260,
+    2050,
+    2270,
+    2540,
+    2840,
+    3110,
+    3320,
+    3540
+  ],
+  "events": [
+    {
+      "cycle": 0,
+      "event_id": "evt-df6aaf54d1dea7c4",
+      "max_score": 10.402970273270295,
+      "n_hotspot_atoms": 1,
+      "state": "extracted",
+      "trigger_reasons": [
+        "force_large",
+        "committee_deviation",
+        "lj_residual"
+      ],
+      "trigger_step": 170
+    },
+    {
+      "cycle": 0,
+      "event_id": "evt-feffff95e0c8e76d",
+      "max_score": 9.594589994490443,
+      "n_hotspot_atoms": 2,
+      "state": "extracted",
+      "trigger_reasons": [
+        "force_large",
+        "committee_deviation",
+        "lj_residual"
+      ],
+      "trigger_step": 980
+    },
+    {
+      "cycle": 0,
+      "event_id": "evt-bf9fe29245320e80",
+      "max_score": 13.965773653819248,
+      "n_hotspot_atoms": 3,
+      "state": "extracted",
+      "trigger_reasons": [
+        "force_large",
+        "lj_residual",
+        "committee_deviation"
+      ],
+      "trigger_step": 1260
+    },
+    {
+      "cycle": 1,
+      "event_id": "evt-ddc541f90f1001f9",
+      "max_score": 11.298245180612312,
+      "n_hotspot_atoms": 1,
+      "state": "extracted",
+      "trigger_reasons": [
+        "force_large",
+        "lj_residual",
+        "committee_deviation"
+      ],
+      "trigger_step": 2050
+    },
+    {
+      "cycle": 1,
+      "event_id": "evt-f112ceeaf710b90c",
+      "max_score": 6.327318898347503,
+      "n_hotspot_atoms": 1,
+      "state": "extracted",
+      "trigger_reasons": [
+        "force_large",
+        "committee_deviation",
+        "lj_residual"
+      ],
+      "trigger_step": 2270
+    },
+    {
+      "cycle": 1,
+      "event_id": "evt-0475bbfd6d9b5f37",
+      "max_score": 7.73151182122057,
+      "n_hotspot_atoms": 1,
+      "state": "extracted",
+      "trigger_reasons": [
+        "force_large",
+        "lj_residual",
+        "committee_deviation"
+      ],
+      "trigger_step": 2540
+    },
+    {
+      "cycle": 1,
+      "event_id": "evt-e18d15324798bdc0",
+      "max_score": 6.737471588524123,
+      "n_hotspot_atoms": 1,
+      "state": "extracted",
+      "trigger_reasons": [
+        "force_large",
+        "lj_residual",
+        "committee_deviation"
+      ],
+      "trigger_step": 2840
+    },
+    {
+      "cycle": 1,
+      "event_id": "evt-29bbcf6d24511e71",
+      "max_score": 9.740698266516912,
+      "n_hotspot_atoms": 2,
+      "state": "extracted",
+      "trigger_reasons": [
+        "force_large",
+        "lj_residual",
+        "committee_deviation"
+      ],
+      "trigger_step": 3110
+    },
+    {
+      "cycle": 1,
+      "event_id": "evt-6ad90c47d0c34fc9",
+      "max_score": 7.411161974652928,
+      "n_hotspot_atoms": 2,
+      "state": "extracted",
+      "trigger_reasons": [
+        "force_large",
+        "lj_residual",
+        "committee_deviation"
+      ],
+      "trigger_step": 3320
+    },
+    {
+      "cycle": 1,
+      "event_id": "evt-8fd23e75bdb3751f",
+      "max_score": 6.477817107896787,
+      "n_hotspot_atoms": 1,
+      "state": "extracted",
+      "trigger_reasons": [
+        "force_large",
+        "lj_residual",
+        "committee_deviation"
+      ],
+      "trigger_step": 3540
+    }
+  ],
+  "events_rejected_before_labeling": [],
+  "final_model_id": "model-4dca9443212f3431",
+  "final_stage": "done",
+  "gate_reports": [
+    {
+      "dataset_version": "dsv-528209781fd8b3f6",
+      "gate_report": {
+        "checks": {
+          "engine_smoke_test": {
+            "detail": {
+              "detail": {
+                "decisions": []
+              },
+              "frames": 2,
+              "passed": true,
+              "status": "completed"
+            },
+            "passed": true
+          },
+          "export_matches_checkpoint": {
+            "limit": 0.0001,
+            "passed": true,
+            "value": 1.1026859283447266e-06
+          },
+          "force_rmse": {
+            "limit": 1.0,
+            "passed": true,
+            "value": 0.46002452284418405
+          },
+          "no_regression_vs_active": {
+            "limit": 0.5312047209302474,
+            "parent": 0.505909258028807,
+            "passed": true,
+            "value": 0.46002452284418405
+          },
+          "validation_samples": {
+            "passed": true,
+            "required": 1,
+            "value": 4
+          }
+        },
+        "passed": true
+      },
+      "metrics": {
+        "energy_rmse_per_atom": 0.04142693457212,
+        "force_rmse": 0.46002452284418405,
+        "n_validation": 4.0
+      },
+      "model_id": "model-d74fda0502a19d42",
+      "parent_metrics": {
+        "energy_rmse_per_atom": 0.020343811423008878,
+        "force_rmse": 0.505909258028807,
+        "n_validation": 4.0
+      },
+      "parent_model_id": "model-314c099fc32fc306",
+      "state": "retired"
+    },
+    {
+      "dataset_version": "dsv-fc4748bdecb03435",
+      "gate_report": {
+        "checks": {
+          "engine_smoke_test": {
+            "detail": {
+              "detail": {
+                "decisions": []
+              },
+              "frames": 2,
+              "passed": true,
+              "status": "completed"
+            },
+            "passed": true
+          },
+          "export_matches_checkpoint": {
+            "limit": 0.0001,
+            "passed": true,
+            "value": 1.1920928955078125e-06
+          },
+          "force_rmse": {
+            "limit": 1.0,
+            "passed": true,
+            "value": 0.3975479560001054
+          },
+          "no_regression_vs_active": {
+            "limit": 0.4830257489863933,
+            "parent": 0.46002452284418405,
+            "passed": true,
+            "value": 0.3975479560001054
+          },
+          "validation_samples": {
+            "passed": true,
+            "required": 1,
+            "value": 4
+          }
+        },
+        "passed": true
+      },
+      "metrics": {
+        "energy_rmse_per_atom": 0.013288341283320279,
+        "force_rmse": 0.3975479560001054,
+        "n_validation": 4.0
+      },
+      "model_id": "model-4dca9443212f3431",
+      "parent_metrics": {
+        "energy_rmse_per_atom": 0.04142693457212,
+        "force_rmse": 0.46002452284418405,
+        "n_validation": 4.0
+      },
+      "parent_model_id": "model-d74fda0502a19d42",
+      "state": "promoted"
+    }
+  ],
+  "image_check": {
+    "below_margin": [],
+    "enabled": true,
+    "force_receptive_field": 16.0,
+    "margin": 4.0,
+    "min_at": {
+      "model_version": "model-314c099fc32fc306",
+      "run_id": "alkane-cl-pilot-v2",
+      "step": 30
+    },
+    "min_image_distance": 20.71306508854734,
+    "n_frames_checked": 401
+  },
+  "initial_model": {
+    "best_val": null,
+    "dataset_version": "dsv-2a30f423f4eaf1cb",
+    "engine_smoke": {
+      "detail": {
+        "decisions": []
+      },
+      "frames": 2,
+      "passed": true,
+      "status": "completed"
+    },
+    "export_check": {
+      "cutoff": 4.0,
+      "max_force_deviation": 9.5367431640625e-07,
+      "n_structures": 4,
+      "species": [
+        1,
+        6
+      ]
+    },
+    "gates_recorded_not_enforced": {
+      "checks": {
+        "engine_smoke_test": {
+          "detail": {
+            "detail": {
+              "decisions": []
+            },
+            "frames": 2,
+            "passed": true,
+            "status": "completed"
+          },
+          "passed": true
+        },
+        "export_matches_checkpoint": {
+          "limit": 0.0001,
+          "passed": true,
+          "value": 9.5367431640625e-07
+        },
+        "force_rmse": {
+          "limit": 1.0,
+          "passed": true,
+          "value": 0.505909258028807
+        },
+        "validation_samples": {
+          "passed": true,
+          "required": 1,
+          "value": 4
+        }
+      },
+      "passed": true
+    },
+    "metrics_validation": {
+      "energy_rmse_per_atom": 0.020343811423008878,
+      "force_rmse": 0.505909258028807,
+      "n_validation": 4.0
+    },
+    "validation_version": "dsv-956a17d899638894"
+  },
+  "initial_model_id": "model-314c099fc32fc306",
+  "label_tasks": [
+    {
+      "attempts": 1,
+      "complete": true,
+      "cpu_core_s": 494.32304978370667,
+      "cycle": 1,
+      "execution": "completed",
+      "job_ids": [
+        "49762"
+      ],
+      "n_atoms": 29,
+      "state": "ingested",
+      "task_id": "label-20ee6fe9c1a42f36",
+      "validation": "valid",
+      "wall_s": 98.86460995674133
+    },
+    {
+      "attempts": 1,
+      "complete": true,
+      "cpu_core_s": 847.3229265213013,
+      "cycle": 0,
+      "execution": "completed",
+      "job_ids": [
+        "49024"
+      ],
+      "n_atoms": 26,
+      "state": "ingested",
+      "task_id": "label-8fd8a7e78d4c48e5",
+      "validation": "valid",
+      "wall_s": 169.46458530426025
+    },
+    {
+      "attempts": 1,
+      "complete": true,
+      "cpu_core_s": 2451.9909286499023,
+      "cycle": 0,
+      "execution": "completed",
+      "job_ids": [
+        "49022"
+      ],
+      "n_atoms": 44,
+      "state": "ingested",
+      "task_id": "label-910a9a6f8c689967",
+      "validation": "valid",
+      "wall_s": 490.39818572998047
+    }
+  ],
+  "labeling": {
+    "gate_status": "passed",
+    "mode": "local",
+    "reason": "fidelity gate passed; frozen setting cluster-c1.5-b3",
+    "requested": "auto",
+    "setting": {
+      "buffer": "3 A",
+      "buffer_radius": 3.0,
+      "core_radius": 1.5,
+      "policy": "cluster",
+      "setting_id": "cluster-c1.5-b3"
+    }
+  },
+  "md_box": {
+    "boundary_conditions": {
+      "md": "periodic orthorhombic, vacuum padded (images non-interacting for the model)",
+      "reference": "isolated (CP2K PERIODIC NONE, WAVELET); unchanged"
+    },
+    "criterion": "L - D >= R_force + margin (any rigid rotation/translation) and exact min image distance > R_force + margin",
+    "diameter": 20.460291330991733,
+    "lengths": [
+      41.5,
+      41.5,
+      41.5
+    ],
+    "margin": 4.0,
+    "min_image_distance": 21.045304156432437,
+    "receptive_field": {
+      "energy_radius": 8.0,
+      "force_radius": 16.0,
+      "local_cutoff": 4.0,
+      "n_blocks": 2,
+      "source": "nominal 2 x n_blocks x local_cutoff (training.model)"
+    },
+    "required_distance": 20.0,
+    "rotation_invariant_bound": 21.039708669008267,
+    "stretch_allowance": 1.0
+  },
+  "md_parent": {
+    "chain_length": 16,
+    "family": "normal",
+    "parent_id": "C16-b01-normal0",
+    "split": "initial_train",
+    "structure_path": "structures/C16-b01-normal0.extxyz"
+  },
+  "measured_dft_cpu_core_hours": 1.0537880291541417,
+  "model_changes": [
+    {
+      "boundary_step": 2000,
+      "energy_new_model_ev": -3026.732666015625,
+      "energy_old_model_ev": -3028.97900390625,
+      "jump_ev": 2.246337890625,
+      "jump_ev_per_atom": 0.0449267578125,
+      "kind": "model_change",
+      "max_position_difference": 0.0,
+      "new_first_step": 2000,
+      "new_model_id": "model-d74fda0502a19d42",
+      "new_segment": 1,
+      "note": "potential-energy jump from replacing the model at fixed coordinates (restart boundary); not integration drift",
+      "old_model_id": "model-314c099fc32fc306",
+      "old_segment": 0,
+      "reevaluated": {
+        "configuration_step": 2000,
+        "energy_new_model_ev": -3026.732666015625,
+        "energy_old_model_ev": -3028.97900390625,
+        "jump_ev": 2.246337890625,
+        "source": "both exports re-evaluated on the old segment's last frame"
+      },
+      "same_coordinates": true
+    }
+  ],
+  "provenance": {
+    "model-314c099fc32fc306": {
+      "dataset_version": "dsv-2a30f423f4eaf1cb",
+      "model_id": "model-314c099fc32fc306",
+      "n_samples": 4,
+      "parent_model_id": null,
+      "samples": [
+        {
+          "label_id": "label-35d1d71d4ad5d9ab",
+          "origin": "initial_train_full_dft",
+          "parent_id": "C16-b01-torsion0",
+          "sample_id": "sample-00d0aa0c374ffdc6",
+          "split": "initial_train",
+          "split_group": "C16-b01"
+        },
+        {
+          "label_id": "label-f1106bd1f97c3c79",
+          "origin": "initial_train_full_dft",
+          "parent_id": "C16-b01-bend0",
+          "sample_id": "sample-6be52a198358748b",
+          "split": "initial_train",
+          "split_group": "C16-b01"
+        },
+        {
+          "label_id": "label-93c0c5a5242afa91",
+          "origin": "initial_train_full_dft",
+          "parent_id": "C16-b01-contact0",
+          "sample_id": "sample-addea174cdae3f08",
+          "split": "initial_train",
+          "split_group": "C16-b01"
+        },
+        {
+          "label_id": "label-012ab0557e373065",
+          "origin": "initial_train_full_dft",
+          "parent_id": "C16-b01-normal0",
+          "sample_id": "sample-d760ea4ee166842d",
+          "split": "initial_train",
+          "split_group": "C16-b01"
+        }
+      ],
+      "state": "retired",
+      "unresolved_samples": []
+    },
+    "model-4dca9443212f3431": {
+      "dataset_version": "dsv-fc4748bdecb03435",
+      "model_id": "model-4dca9443212f3431",
+      "n_samples": 7,
+      "parent_model_id": "model-d74fda0502a19d42",
+      "samples": [
+        {
+          "label_id": "label-35d1d71d4ad5d9ab",
+          "origin": "initial_train_full_dft",
+          "parent_id": "C16-b01-torsion0",
+          "sample_id": "sample-00d0aa0c374ffdc6",
+          "split": "initial_train",
+          "split_group": "C16-b01"
+        },
+        {
+          "label_id": "label-f1106bd1f97c3c79",
+          "origin": "initial_train_full_dft",
+          "parent_id": "C16-b01-bend0",
+          "sample_id": "sample-6be52a198358748b",
+          "split": "initial_train",
+          "split_group": "C16-b01"
+        },
+        {
+          "label_id": "label-93c0c5a5242afa91",
+          "origin": "initial_train_full_dft",
+          "parent_id": "C16-b01-contact0",
+          "sample_id": "sample-addea174cdae3f08",
+          "split": "initial_train",
+          "split_group": "C16-b01"
+        },
+        {
+          "label_id": "label-012ab0557e373065",
+          "origin": "initial_train_full_dft",
+          "parent_id": "C16-b01-normal0",
+          "sample_id": "sample-d760ea4ee166842d",
+          "split": "initial_train",
+          "split_group": "C16-b01"
+        },
+        {
+          "cycle": 0,
+          "event_frames_path": "<artifacts_root>/closed_loop_v2/pilot_v2/run/events/evt-df6aaf54d1dea7c4",
+          "event_id": "evt-df6aaf54d1dea7c4",
+          "event_trigger_step": 170,
+          "job_id": "49024",
+          "model_version_at_event": "model-314c099fc32fc306",
+          "origin": "closed_loop",
+          "parent_frame_steps": [
+            160,
+            170,
+            180
+          ],
+          "parent_step": 170,
+          "parent_structure": {
+            "parent_id": "C16-b01-normal0",
+            "split": "initial_train",
+            "structure_path": "structures/C16-b01-normal0.extxyz"
+          },
+          "region_id": "alkane-cl-frag-e1f930e0fab8e056",
+          "region_kind": "fragment",
+          "region_mode": "cluster",
+          "region_n_atoms": 26,
+          "sample_id": "sample-a9b23ebc8e36da98",
+          "task_id": "label-8fd8a7e78d4c48e5",
+          "task_state": "ingested",
+          "task_work_dir": "<artifacts_root>/closed_loop_v2/pilot_v2/run/cp2k_tasks/label-8fd8a7e78d4c48e5"
+        },
+        {
+          "cycle": 0,
+          "event_frames_path": "<artifacts_root>/closed_loop_v2/pilot_v2/run/events/evt-bf9fe29245320e80",
+          "event_id": "evt-bf9fe29245320e80",
+          "event_trigger_step": 1260,
+          "job_id": "49022",
+          "model_version_at_event": "model-314c099fc32fc306",
+          "origin": "closed_loop",
+          "parent_frame_steps": [
+            1250,
+            1260,
+            1270
+          ],
+          "parent_step": 1260,
+          "parent_structure": {
+            "parent_id": "C16-b01-normal0",
+            "split": "initial_train",
+            "structure_path": "structures/C16-b01-normal0.extxyz"
+          },
+          "region_id": "alkane-cl-frag-51d5424b2c36815f",
+          "region_kind": "fragment",
+          "region_mode": "cluster",
+          "region_n_atoms": 44,
+          "sample_id": "sample-fed6181dbd0600a6",
+          "task_id": "label-910a9a6f8c689967",
+          "task_state": "ingested",
+          "task_work_dir": "<artifacts_root>/closed_loop_v2/pilot_v2/run/cp2k_tasks/label-910a9a6f8c689967"
+        },
+        {
+          "cycle": 1,
+          "event_frames_path": "<artifacts_root>/closed_loop_v2/pilot_v2/run/events/evt-8fd23e75bdb3751f",
+          "event_id": "evt-8fd23e75bdb3751f",
+          "event_trigger_step": 3540,
+          "job_id": "49762",
+          "model_version_at_event": "model-d74fda0502a19d42",
+          "origin": "closed_loop",
+          "parent_frame_steps": [
+            3530,
+            3540,
+            3550
+          ],
+          "parent_step": 3540,
+          "parent_structure": {
+            "parent_id": "C16-b01-normal0",
+            "split": "initial_train",
+            "structure_path": "structures/C16-b01-normal0.extxyz"
+          },
+          "region_id": "alkane-cl-frag-5b84b8064d41420c",
+          "region_kind": "fragment",
+          "region_mode": "cluster",
+          "region_n_atoms": 29,
+          "sample_id": "sample-feff2c82e59fb3cd",
+          "task_id": "label-20ee6fe9c1a42f36",
+          "task_state": "ingested",
+          "task_work_dir": "<artifacts_root>/closed_loop_v2/pilot_v2/run/cp2k_tasks/label-20ee6fe9c1a42f36"
+        }
+      ],
+      "state": "promoted",
+      "unresolved_samples": []
+    },
+    "model-d74fda0502a19d42": {
+      "dataset_version": "dsv-528209781fd8b3f6",
+      "model_id": "model-d74fda0502a19d42",
+      "n_samples": 6,
+      "parent_model_id": "model-314c099fc32fc306",
+      "samples": [
+        {
+          "label_id": "label-35d1d71d4ad5d9ab",
+          "origin": "initial_train_full_dft",
+          "parent_id": "C16-b01-torsion0",
+          "sample_id": "sample-00d0aa0c374ffdc6",
+          "split": "initial_train",
+          "split_group": "C16-b01"
+        },
+        {
+          "label_id": "label-f1106bd1f97c3c79",
+          "origin": "initial_train_full_dft",
+          "parent_id": "C16-b01-bend0",
+          "sample_id": "sample-6be52a198358748b",
+          "split": "initial_train",
+          "split_group": "C16-b01"
+        },
+        {
+          "label_id": "label-93c0c5a5242afa91",
+          "origin": "initial_train_full_dft",
+          "parent_id": "C16-b01-contact0",
+          "sample_id": "sample-addea174cdae3f08",
+          "split": "initial_train",
+          "split_group": "C16-b01"
+        },
+        {
+          "label_id": "label-012ab0557e373065",
+          "origin": "initial_train_full_dft",
+          "parent_id": "C16-b01-normal0",
+          "sample_id": "sample-d760ea4ee166842d",
+          "split": "initial_train",
+          "split_group": "C16-b01"
+        },
+        {
+          "cycle": 0,
+          "event_frames_path": "<artifacts_root>/closed_loop_v2/pilot_v2/run/events/evt-df6aaf54d1dea7c4",
+          "event_id": "evt-df6aaf54d1dea7c4",
+          "event_trigger_step": 170,
+          "job_id": "49024",
+          "model_version_at_event": "model-314c099fc32fc306",
+          "origin": "closed_loop",
+          "parent_frame_steps": [
+            160,
+            170,
+            180
+          ],
+          "parent_step": 170,
+          "parent_structure": {
+            "parent_id": "C16-b01-normal0",
+            "split": "initial_train",
+            "structure_path": "structures/C16-b01-normal0.extxyz"
+          },
+          "region_id": "alkane-cl-frag-e1f930e0fab8e056",
+          "region_kind": "fragment",
+          "region_mode": "cluster",
+          "region_n_atoms": 26,
+          "sample_id": "sample-a9b23ebc8e36da98",
+          "task_id": "label-8fd8a7e78d4c48e5",
+          "task_state": "ingested",
+          "task_work_dir": "<artifacts_root>/closed_loop_v2/pilot_v2/run/cp2k_tasks/label-8fd8a7e78d4c48e5"
+        },
+        {
+          "cycle": 0,
+          "event_frames_path": "<artifacts_root>/closed_loop_v2/pilot_v2/run/events/evt-bf9fe29245320e80",
+          "event_id": "evt-bf9fe29245320e80",
+          "event_trigger_step": 1260,
+          "job_id": "49022",
+          "model_version_at_event": "model-314c099fc32fc306",
+          "origin": "closed_loop",
+          "parent_frame_steps": [
+            1250,
+            1260,
+            1270
+          ],
+          "parent_step": 1260,
+          "parent_structure": {
+            "parent_id": "C16-b01-normal0",
+            "split": "initial_train",
+            "structure_path": "structures/C16-b01-normal0.extxyz"
+          },
+          "region_id": "alkane-cl-frag-51d5424b2c36815f",
+          "region_kind": "fragment",
+          "region_mode": "cluster",
+          "region_n_atoms": 44,
+          "sample_id": "sample-fed6181dbd0600a6",
+          "task_id": "label-910a9a6f8c689967",
+          "task_state": "ingested",
+          "task_work_dir": "<artifacts_root>/closed_loop_v2/pilot_v2/run/cp2k_tasks/label-910a9a6f8c689967"
+        }
+      ],
+      "state": "retired",
+      "unresolved_samples": []
+    }
+  },
+  "run_kind": "main",
+  "smoke_only": false,
+  "summary": {
+    "active_dataset_version": "dsv-fc4748bdecb03435",
+    "active_model_id": "model-4dca9443212f3431",
+    "candidates": {
+      "failed": 0,
+      "invalid": 0,
+      "labeled": 3,
+      "labeling": 0,
+      "pending": 0,
+      "rejected": 7,
+      "selected": 0
+    },
+    "cycle": 1,
+    "events": 10,
+    "models": [
+      {
+        "metrics": {
+          "energy_rmse_per_atom": 0.020343811423008878,
+          "force_rmse": 0.505909258028807,
+          "n_validation": 4.0
+        },
+        "model_id": "model-314c099fc32fc306",
+        "state": "retired"
+      },
+      {
+        "metrics": {
+          "energy_rmse_per_atom": 0.04142693457212,
+          "force_rmse": 0.46002452284418405,
+          "n_validation": 4.0
+        },
+        "model_id": "model-d74fda0502a19d42",
+        "state": "retired"
+      },
+      {
+        "metrics": {
+          "energy_rmse_per_atom": 0.013288341283320279,
+          "force_rmse": 0.3975479560001054,
+          "n_validation": 4.0
+        },
+        "model_id": "model-4dca9443212f3431",
+        "state": "promoted"
+      }
+    ],
+    "promotions": [
+      {
+        "action": "promote",
+        "model_id": "model-314c099fc32fc306",
+        "previous_model_id": null,
+        "reason": "initial model"
+      },
+      {
+        "action": "promote",
+        "model_id": "model-d74fda0502a19d42",
+        "previous_model_id": "model-314c099fc32fc306",
+        "reason": "cycle 0 gates passed"
+      },
+      {
+        "action": "promote",
+        "model_id": "model-4dca9443212f3431",
+        "previous_model_id": "model-d74fda0502a19d42",
+        "reason": "cycle 1 gates passed"
+      }
+    ],
+    "rounds": [
+      {
+        "n_candidates": 3,
+        "n_events": 3,
+        "n_rejected": 1,
+        "n_selected": 2,
+        "rejected_reasons": {
+          "cycle_budget": 1
+        },
+        "round_id": 0
+      },
+      {
+        "n_candidates": 7,
+        "n_events": 7,
+        "n_rejected": 6,
+        "n_selected": 1,
+        "rejected_reasons": {
+          "duplicate": 6
+        },
+        "round_id": 1
+      }
+    ],
+    "run_id": "alkane-cl-pilot-v2",
+    "samples": 3,
+    "segments": [
+      {
+        "cycle": 0,
+        "end_step": 2000,
+        "model_id": "model-314c099fc32fc306",
+        "segment_index": 0,
+        "status": "completed"
+      },
+      {
+        "cycle": 1,
+        "end_step": 4000,
+        "model_id": "model-d74fda0502a19d42",
+        "segment_index": 1,
+        "status": "completed"
+      }
+    ],
+    "stage": "done",
+    "tasks": {
+      "collected": 0,
+      "failed": 0,
+      "ingested": 3,
+      "invalid": 0,
+      "submitted": 0,
+      "submitting": 0,
+      "unknown": 0
+    }
+  },
+  "trainings": [
+    {
+      "at": 1794013686.9695349,
+      "best_val": null,
+      "checkpoint": "<artifacts_root>/closed_loop_v2/pilot_v2/run/training/train-843ed256453fbcef/member_0/ckpt_best.pt",
+      "dataset": "dsv-528209781fd8b3f6",
+      "kind": "train",
+      "mode": "finetune",
+      "parent": "model-314c099fc32fc306",
+      "wall_s": 16.036056375014596,
+      "work_dir": "<artifacts_root>/closed_loop_v2/pilot_v2/run/training/train-843ed256453fbcef"
+    },
+    {
+      "at": 1794013838.359935,
+      "best_val": null,
+      "checkpoint": "<artifacts_root>/closed_loop_v2/pilot_v2/run/training/train-5386d11c1d0fe33b/member_0/ckpt_best.pt",
+      "dataset": "dsv-fc4748bdecb03435",
+      "kind": "train",
+      "mode": "finetune",
+      "parent": "model-d74fda0502a19d42",
+      "wall_s": 29.02333404205274,
+      "work_dir": "<artifacts_root>/closed_loop_v2/pilot_v2/run/training/train-5386d11c1d0fe33b"
+    }
+  ],
+  "transitions": [
+    {
+      "at": "2026-11-07T00:55:01.877797+00:00",
+      "cycle": 0,
+      "stage_from": null,
+      "stage_to": "sampling"
+    },
+    {
+      "at": "2026-11-07T00:59:21.696574+00:00",
+      "cycle": 0,
+      "stage_from": "sampling",
+      "stage_to": "sampling"
+    },
+    {
+      "at": "2026-11-07T00:59:21.696680+00:00",
+      "cycle": 0,
+      "stage_from": "sampling",
+      "stage_to": "sampling"
+    },
+    {
+      "at": "2026-11-07T00:59:40.237554+00:00",
+      "cycle": 0,
+      "stage_from": "sampling",
+      "stage_to": "sampling"
+    },
+    {
+      "at": "2026-11-07T00:59:40.237770+00:00",
+      "cycle": 0,
+      "stage_from": "sampling",
+      "stage_to": "extraction"
+    },
+    {
+      "at": "2026-11-07T00:59:40.255165+00:00",
+      "cycle": 0,
+      "stage_from": "extraction",
+      "stage_to": "selection"
+    },
+    {
+      "at": "2026-11-07T00:59:40.256233+00:00",
+      "cycle": 0,
+      "stage_from": "selection",
+      "stage_to": "submission"
+    },
+    {
+      "at": "2026-11-07T00:59:40.289200+00:00",
+      "cycle": 0,
+      "stage_from": "submission",
+      "stage_to": "polling"
+    },
+    {
+      "at": "2026-11-07T01:07:50.912483+00:00",
+      "cycle": 0,
+      "stage_from": "polling",
+      "stage_to": "ingestion"
+    },
+    {
+      "at": "2026-11-07T01:07:50.917380+00:00",
+      "cycle": 0,
+      "stage_from": "ingestion",
+      "stage_to": "training_decision"
+    },
+    {
+      "at": "2026-11-07T01:07:50.917659+00:00",
+      "cycle": 0,
+      "stage_from": "training_decision",
+      "stage_to": "publication"
+    },
+    {
+      "at": "2026-11-07T01:07:50.932346+00:00",
+      "cycle": 0,
+      "stage_from": "publication",
+      "stage_to": "training"
+    },
+    {
+      "at": "2026-11-07T01:08:06.970358+00:00",
+      "cycle": 0,
+      "stage_from": "training",
+      "stage_to": "evaluation"
+    },
+    {
+      "at": "2026-11-07T01:08:09.713841+00:00",
+      "cycle": 0,
+      "stage_from": "evaluation",
+      "stage_to": "promotion"
+    },
+    {
+      "at": "2026-11-07T01:08:09.719763+00:00",
+      "cycle": 0,
+      "stage_from": "promotion",
+      "stage_to": "promotion"
+    },
+    {
+      "at": "2026-11-07T01:08:09.719870+00:00",
+      "cycle": 0,
+      "stage_from": "promotion",
+      "stage_to": "promotion"
+    },
+    {
+      "at": "2026-11-07T01:08:09.719960+00:00",
+      "cycle": 1,
+      "stage_from": "promotion",
+      "stage_to": "sampling"
+    },
+    {
+      "at": "2026-11-07T01:08:29.117068+00:00",
+      "cycle": 1,
+      "stage_from": "sampling",
+      "stage_to": "sampling"
+    },
+    {
+      "at": "2026-11-07T01:08:29.117312+00:00",
+      "cycle": 1,
+      "stage_from": "sampling",
+      "stage_to": "extraction"
+    },
+    {
+      "at": "2026-11-07T01:08:29.155973+00:00",
+      "cycle": 1,
+      "stage_from": "extraction",
+      "stage_to": "selection"
+    },
+    {
+      "at": "2026-11-07T01:08:29.158219+00:00",
+      "cycle": 1,
+      "stage_from": "selection",
+      "stage_to": "submission"
+    },
+    {
+      "at": "2026-11-07T01:08:29.175888+00:00",
+      "cycle": 1,
+      "stage_from": "submission",
+      "stage_to": "polling"
+    },
+    {
+      "at": "2026-11-07T01:10:09.317411+00:00",
+      "cycle": 1,
+      "stage_from": "polling",
+      "stage_to": "ingestion"
+    },
+    {
+      "at": "2026-11-07T01:10:09.320027+00:00",
+      "cycle": 1,
+      "stage_from": "ingestion",
+      "stage_to": "training_decision"
+    },
+    {
+      "at": "2026-11-07T01:10:09.320236+00:00",
+      "cycle": 1,
+      "stage_from": "training_decision",
+      "stage_to": "publication"
+    },
+    {
+      "at": "2026-11-07T01:10:09.335041+00:00",
+      "cycle": 1,
+      "stage_from": "publication",
+      "stage_to": "training"
+    },
+    {
+      "at": "2026-11-07T01:10:38.360287+00:00",
+      "cycle": 1,
+      "stage_from": "training",
+      "stage_to": "evaluation"
+    },
+    {
+      "at": "2026-11-07T01:10:41.180745+00:00",
+      "cycle": 1,
+      "stage_from": "evaluation",
+      "stage_to": "promotion"
+    },
+    {
+      "at": "2026-11-07T01:10:41.188588+00:00",
+      "cycle": 1,
+      "stage_from": "promotion",
+      "stage_to": "promotion"
+    },
+    {
+      "at": "2026-11-07T01:10:41.188696+00:00",
+      "cycle": 1,
+      "stage_from": "promotion",
+      "stage_to": "promotion"
+    },
+    {
+      "at": "2026-11-07T01:10:41.188795+00:00",
+      "cycle": 1,
+      "stage_from": "promotion",
+      "stage_to": "done"
+    }
+  ]
+}

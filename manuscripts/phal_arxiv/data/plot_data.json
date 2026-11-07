@@ -1,0 +1,5499 @@
+{
+  "accuracy_targets": [
+    0.15,
+    0.1
+  ],
+  "arms": {
+    "committee_local": [
+      {
+        "rounds": [
+          {
+            "acquisitions": [],
+            "cumulative_cpu_core_s": 0.0,
+            "force_rmse": 0.6453778007700818,
+            "n_labels": 0,
+            "round": 0
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-a0c44206b6bf826b",
+                "cpu_core_s": 340.58565378189087,
+                "kind": "fragment",
+                "label_id": "label-3fb94c2b7aa8cece",
+                "parent_id": "C16-b03-contact0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-0a1cb941d46917f1",
+                "cpu_core_s": 334.2397212982178,
+                "kind": "fragment",
+                "label_id": "label-ac2739e45958710b",
+                "parent_id": "C16-b03-contact0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-6ffe858f1ca9de9d",
+                "cpu_core_s": 347.2920846939087,
+                "kind": "fragment",
+                "label_id": "label-4ffab31e66d7c162",
+                "parent_id": "C16-b03-contact0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-3bc03c1634624343",
+                "cpu_core_s": 632.0924043655396,
+                "kind": "fragment",
+                "label_id": "label-a36f86f0bbe220c1",
+                "parent_id": "C16-b03-normal0",
+                "round": 1,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 1654.2098641395569,
+            "force_rmse": 0.4704235643578928,
+            "n_labels": 4,
+            "round": 1
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-182f390f2e200f46",
+                "cpu_core_s": 914.0423619747162,
+                "kind": "fragment",
+                "label_id": "label-79158e3b58cfe1d7",
+                "parent_id": "C16-b03-bend0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-a90e25d3331ee114",
+                "cpu_core_s": 289.85620498657227,
+                "kind": "fragment",
+                "label_id": "label-1b1cadd4cd8b8783",
+                "parent_id": "C16-b03-normal0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-2274bfeedf630bf5",
+                "cpu_core_s": 457.2272312641144,
+                "kind": "fragment",
+                "label_id": "label-7aab6dd9e0d5bcb7",
+                "parent_id": "C16-b03-contact0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-486cb551093d91b5",
+                "cpu_core_s": 290.7076168060303,
+                "kind": "fragment",
+                "label_id": "label-35a472732f2846a3",
+                "parent_id": "C16-b03-bend0",
+                "round": 2,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 3606.04327917099,
+            "force_rmse": 0.4551604856299138,
+            "n_labels": 8,
+            "round": 2
+          }
+        ],
+        "seed": 11
+      },
+      {
+        "rounds": [
+          {
+            "acquisitions": [],
+            "cumulative_cpu_core_s": 0.0,
+            "force_rmse": 0.7490398469364609,
+            "n_labels": 0,
+            "round": 0
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-6ffe858f1ca9de9d",
+                "cpu_core_s": 347.2920846939087,
+                "kind": "fragment",
+                "label_id": "label-4ffab31e66d7c162",
+                "parent_id": "C16-b03-contact0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-75aefd37743c7610",
+                "cpu_core_s": 478.9161968231201,
+                "kind": "fragment",
+                "label_id": "label-c32f6f004e4daea1",
+                "parent_id": "C16-b03-torsion0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-9b841ccb7b06e9b2",
+                "cpu_core_s": 294.0636146068573,
+                "kind": "fragment",
+                "label_id": "label-108666b9a0e3542b",
+                "parent_id": "C16-b03-torsion0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-0a1cb941d46917f1",
+                "cpu_core_s": 334.2397212982178,
+                "kind": "fragment",
+                "label_id": "label-ac2739e45958710b",
+                "parent_id": "C16-b03-contact0",
+                "round": 1,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 1454.5116174221039,
+            "force_rmse": 0.41319433045829357,
+            "n_labels": 4,
+            "round": 1
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-182f390f2e200f46",
+                "cpu_core_s": 914.0423619747162,
+                "kind": "fragment",
+                "label_id": "label-79158e3b58cfe1d7",
+                "parent_id": "C16-b03-bend0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-2acd425c7d44b164",
+                "cpu_core_s": 647.1561467647552,
+                "kind": "fragment",
+                "label_id": "label-103932a50ed29ba6",
+                "parent_id": "C16-b03-bend0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-0ff31b84699ced63",
+                "cpu_core_s": 217.4398636817932,
+                "kind": "fragment",
+                "label_id": "label-9e42dd864b550f57",
+                "parent_id": "C16-b03-torsion0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-38b7772b5dd22a45",
+                "cpu_core_s": 234.36645030975342,
+                "kind": "fragment",
+                "label_id": "label-54670e511e8a6834",
+                "parent_id": "C16-b03-normal0",
+                "round": 2,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 3467.516440153122,
+            "force_rmse": 0.4108224927546567,
+            "n_labels": 8,
+            "round": 2
+          }
+        ],
+        "seed": 23
+      }
+    ],
+    "no_lj": [
+      {
+        "rounds": [
+          {
+            "acquisitions": [],
+            "cumulative_cpu_core_s": 0.0,
+            "force_rmse": 0.6453778007700818,
+            "n_labels": 0,
+            "round": 0
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-a0c44206b6bf826b",
+                "cpu_core_s": 340.58565378189087,
+                "kind": "fragment",
+                "label_id": "label-3fb94c2b7aa8cece",
+                "parent_id": "C16-b03-contact0",
+                "round": 1,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 340.58565378189087,
+            "force_rmse": 0.498968752632346,
+            "n_labels": 1,
+            "round": 1
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-182f390f2e200f46",
+                "cpu_core_s": 914.0423619747162,
+                "kind": "fragment",
+                "label_id": "label-79158e3b58cfe1d7",
+                "parent_id": "C16-b03-bend0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-3bc03c1634624343",
+                "cpu_core_s": 632.0924043655396,
+                "kind": "fragment",
+                "label_id": "label-a36f86f0bbe220c1",
+                "parent_id": "C16-b03-normal0",
+                "round": 2,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 1886.7204201221466,
+            "force_rmse": 0.52480873841519,
+            "n_labels": 3,
+            "round": 2
+          }
+        ],
+        "seed": 11
+      },
+      {
+        "rounds": [
+          {
+            "acquisitions": [],
+            "cumulative_cpu_core_s": 0.0,
+            "force_rmse": 0.7490398469364609,
+            "n_labels": 0,
+            "round": 0
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-6ffe858f1ca9de9d",
+                "cpu_core_s": 347.2920846939087,
+                "kind": "fragment",
+                "label_id": "label-4ffab31e66d7c162",
+                "parent_id": "C16-b03-contact0",
+                "round": 1,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 347.2920846939087,
+            "force_rmse": 0.47204512534945764,
+            "n_labels": 1,
+            "round": 1
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-3bc03c1634624343",
+                "cpu_core_s": 632.0924043655396,
+                "kind": "fragment",
+                "label_id": "label-a36f86f0bbe220c1",
+                "parent_id": "C16-b03-normal0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-182f390f2e200f46",
+                "cpu_core_s": 914.0423619747162,
+                "kind": "fragment",
+                "label_id": "label-79158e3b58cfe1d7",
+                "parent_id": "C16-b03-bend0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-a0c44206b6bf826b",
+                "cpu_core_s": 340.58565378189087,
+                "kind": "fragment",
+                "label_id": "label-3fb94c2b7aa8cece",
+                "parent_id": "C16-b03-contact0",
+                "round": 2,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 2234.0125048160553,
+            "force_rmse": 0.38852793008869285,
+            "n_labels": 4,
+            "round": 2
+          }
+        ],
+        "seed": 23
+      }
+    ],
+    "phal_full_system": [
+      {
+        "rounds": [
+          {
+            "acquisitions": [],
+            "cumulative_cpu_core_s": 0.0,
+            "force_rmse": 0.6453778007700818,
+            "n_labels": 0,
+            "round": 0
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-3bc03c1634624343",
+                "cpu_core_s": 3484.4490492343903,
+                "kind": "full",
+                "label_id": "label-2de7b3a8bbf4d0b8",
+                "parent_id": "C16-b03-normal0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-a0c44206b6bf826b",
+                "cpu_core_s": 1028.5374164581299,
+                "kind": "full",
+                "label_id": "label-0e83c228708c0956",
+                "parent_id": "C16-b03-contact0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-182f390f2e200f46",
+                "cpu_core_s": 3967.0621621608734,
+                "kind": "full",
+                "label_id": "label-1ec6cd2ab077a1b4",
+                "parent_id": "C16-b03-bend0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-75aefd37743c7610",
+                "cpu_core_s": 1556.5195643901825,
+                "kind": "full",
+                "label_id": "label-2785034e5999a72c",
+                "parent_id": "C16-b03-torsion0",
+                "round": 1,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 10036.568192243576,
+            "force_rmse": 0.5109563502955029,
+            "n_labels": 4,
+            "round": 1
+          },
+          {
+            "acquisitions": [],
+            "cumulative_cpu_core_s": 10036.568192243576,
+            "force_rmse": 0.5109563502955029,
+            "n_labels": 4,
+            "round": 2
+          }
+        ],
+        "seed": 11
+      },
+      {
+        "rounds": [
+          {
+            "acquisitions": [],
+            "cumulative_cpu_core_s": 0.0,
+            "force_rmse": 0.7490398469364609,
+            "n_labels": 0,
+            "round": 0
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-6ffe858f1ca9de9d",
+                "cpu_core_s": 1028.5374164581299,
+                "kind": "full",
+                "label_id": "label-0e83c228708c0956",
+                "parent_id": "C16-b03-contact0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-75aefd37743c7610",
+                "cpu_core_s": 1556.5195643901825,
+                "kind": "full",
+                "label_id": "label-2785034e5999a72c",
+                "parent_id": "C16-b03-torsion0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-38b7772b5dd22a45",
+                "cpu_core_s": 3484.4490492343903,
+                "kind": "full",
+                "label_id": "label-2de7b3a8bbf4d0b8",
+                "parent_id": "C16-b03-normal0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-2acd425c7d44b164",
+                "cpu_core_s": 3967.0621621608734,
+                "kind": "full",
+                "label_id": "label-1ec6cd2ab077a1b4",
+                "parent_id": "C16-b03-bend0",
+                "round": 1,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 10036.568192243576,
+            "force_rmse": 0.49374272158247334,
+            "n_labels": 4,
+            "round": 1
+          },
+          {
+            "acquisitions": [],
+            "cumulative_cpu_core_s": 10036.568192243576,
+            "force_rmse": 0.49374272158247334,
+            "n_labels": 4,
+            "round": 2
+          }
+        ],
+        "seed": 23
+      }
+    ],
+    "phal_local": [
+      {
+        "rounds": [
+          {
+            "acquisitions": [],
+            "cumulative_cpu_core_s": 0.0,
+            "force_rmse": 0.6453778007700818,
+            "n_labels": 0,
+            "round": 0
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-3bc03c1634624343",
+                "cpu_core_s": 632.0924043655396,
+                "kind": "fragment",
+                "label_id": "label-a36f86f0bbe220c1",
+                "parent_id": "C16-b03-normal0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-a0c44206b6bf826b",
+                "cpu_core_s": 340.58565378189087,
+                "kind": "fragment",
+                "label_id": "label-3fb94c2b7aa8cece",
+                "parent_id": "C16-b03-contact0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-182f390f2e200f46",
+                "cpu_core_s": 914.0423619747162,
+                "kind": "fragment",
+                "label_id": "label-79158e3b58cfe1d7",
+                "parent_id": "C16-b03-bend0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-75aefd37743c7610",
+                "cpu_core_s": 478.9161968231201,
+                "kind": "fragment",
+                "label_id": "label-c32f6f004e4daea1",
+                "parent_id": "C16-b03-torsion0",
+                "round": 1,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 2365.6366169452667,
+            "force_rmse": 0.48964652123916763,
+            "n_labels": 4,
+            "round": 1
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-2274bfeedf630bf5",
+                "cpu_core_s": 457.2272312641144,
+                "kind": "fragment",
+                "label_id": "label-7aab6dd9e0d5bcb7",
+                "parent_id": "C16-b03-contact0",
+                "round": 2,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 2822.863848209381,
+            "force_rmse": 0.5461976069648683,
+            "n_labels": 5,
+            "round": 2
+          }
+        ],
+        "seed": 11
+      },
+      {
+        "rounds": [
+          {
+            "acquisitions": [],
+            "cumulative_cpu_core_s": 0.0,
+            "force_rmse": 0.7490398469364609,
+            "n_labels": 0,
+            "round": 0
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-6ffe858f1ca9de9d",
+                "cpu_core_s": 347.2920846939087,
+                "kind": "fragment",
+                "label_id": "label-4ffab31e66d7c162",
+                "parent_id": "C16-b03-contact0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-75aefd37743c7610",
+                "cpu_core_s": 478.9161968231201,
+                "kind": "fragment",
+                "label_id": "label-c32f6f004e4daea1",
+                "parent_id": "C16-b03-torsion0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-38b7772b5dd22a45",
+                "cpu_core_s": 234.36645030975342,
+                "kind": "fragment",
+                "label_id": "label-54670e511e8a6834",
+                "parent_id": "C16-b03-normal0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-3af3ab53cc4ddd3b",
+                "cpu_core_s": 469.3581032752991,
+                "kind": "fragment",
+                "label_id": "label-9e952e584cd8fcf6",
+                "parent_id": "C16-b03-normal0",
+                "round": 1,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 1529.9328351020813,
+            "force_rmse": 0.46833021646440476,
+            "n_labels": 4,
+            "round": 1
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-2acd425c7d44b164",
+                "cpu_core_s": 647.1561467647552,
+                "kind": "fragment",
+                "label_id": "label-103932a50ed29ba6",
+                "parent_id": "C16-b03-bend0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-0ea8157cf01c96d7",
+                "cpu_core_s": 289.85620498657227,
+                "kind": "fragment",
+                "label_id": "label-1b1cadd4cd8b8783",
+                "parent_id": "C16-b03-bend0",
+                "round": 2,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 2466.945186853409,
+            "force_rmse": 0.4377371795904475,
+            "n_labels": 6,
+            "round": 2
+          }
+        ],
+        "seed": 23
+      }
+    ],
+    "random_local": [
+      {
+        "rounds": [
+          {
+            "acquisitions": [],
+            "cumulative_cpu_core_s": 0.0,
+            "force_rmse": 0.6453778007700818,
+            "n_labels": 0,
+            "round": 0
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-9b841ccb7b06e9b2",
+                "cpu_core_s": 294.0636146068573,
+                "kind": "fragment",
+                "label_id": "label-108666b9a0e3542b",
+                "parent_id": "C16-b03-torsion0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-c5fe81b356f8124f",
+                "cpu_core_s": 457.0841419696808,
+                "kind": "fragment",
+                "label_id": "label-ff631bb31209fa8f",
+                "parent_id": "C16-b03-normal0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-a90e25d3331ee114",
+                "cpu_core_s": 289.85620498657227,
+                "kind": "fragment",
+                "label_id": "label-1b1cadd4cd8b8783",
+                "parent_id": "C16-b03-normal0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-182f390f2e200f46",
+                "cpu_core_s": 914.0423619747162,
+                "kind": "fragment",
+                "label_id": "label-79158e3b58cfe1d7",
+                "parent_id": "C16-b03-bend0",
+                "round": 1,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 1955.0463235378265,
+            "force_rmse": 0.5736418196511237,
+            "n_labels": 4,
+            "round": 1
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-38b7772b5dd22a45",
+                "cpu_core_s": 234.36645030975342,
+                "kind": "fragment",
+                "label_id": "label-54670e511e8a6834",
+                "parent_id": "C16-b03-normal0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-bc9ec2ea14c69b74",
+                "cpu_core_s": 415.8807647228241,
+                "kind": "fragment",
+                "label_id": "label-9500e97d4d4e26dd",
+                "parent_id": "C16-b03-bend0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-ac9c3269ae3bbb0c",
+                "cpu_core_s": 211.23575091362,
+                "kind": "fragment",
+                "label_id": "label-d5e5bb052466b4cb",
+                "parent_id": "C16-b03-torsion0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-5f27886590341999",
+                "cpu_core_s": 576.3770031929016,
+                "kind": "fragment",
+                "label_id": "label-258c618c46c47307",
+                "parent_id": "C16-b03-bend0",
+                "round": 2,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 3392.9062926769257,
+            "force_rmse": 0.3902944589577865,
+            "n_labels": 8,
+            "round": 2
+          }
+        ],
+        "seed": 11
+      },
+      {
+        "rounds": [
+          {
+            "acquisitions": [],
+            "cumulative_cpu_core_s": 0.0,
+            "force_rmse": 0.7490398469364609,
+            "n_labels": 0,
+            "round": 0
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-db8d43f55d2fddc6",
+                "cpu_core_s": 211.23575091362,
+                "kind": "fragment",
+                "label_id": "label-d5e5bb052466b4cb",
+                "parent_id": "C16-b03-normal0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-3af3ab53cc4ddd3b",
+                "cpu_core_s": 469.3581032752991,
+                "kind": "fragment",
+                "label_id": "label-9e952e584cd8fcf6",
+                "parent_id": "C16-b03-normal0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-38b7772b5dd22a45",
+                "cpu_core_s": 234.36645030975342,
+                "kind": "fragment",
+                "label_id": "label-54670e511e8a6834",
+                "parent_id": "C16-b03-normal0",
+                "round": 1,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-0ea8157cf01c96d7",
+                "cpu_core_s": 289.85620498657227,
+                "kind": "fragment",
+                "label_id": "label-1b1cadd4cd8b8783",
+                "parent_id": "C16-b03-bend0",
+                "round": 1,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 1204.8165094852448,
+            "force_rmse": 0.41744949302287865,
+            "n_labels": 4,
+            "round": 1
+          },
+          {
+            "acquisitions": [
+              {
+                "candidate_id": "region-2274bfeedf630bf5",
+                "cpu_core_s": 457.2272312641144,
+                "kind": "fragment",
+                "label_id": "label-7aab6dd9e0d5bcb7",
+                "parent_id": "C16-b03-contact0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-832934ded41f7a58",
+                "cpu_core_s": 354.8521637916565,
+                "kind": "fragment",
+                "label_id": "label-1d2e8a3ed99d6f29",
+                "parent_id": "C16-b03-contact0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-b3f623c3710ebaa0",
+                "cpu_core_s": 423.65320563316345,
+                "kind": "fragment",
+                "label_id": "label-6fec07652b2ae12c",
+                "parent_id": "C16-b03-normal0",
+                "round": 2,
+                "status": "valid"
+              },
+              {
+                "candidate_id": "region-3bc03c1634624343",
+                "cpu_core_s": 632.0924043655396,
+                "kind": "fragment",
+                "label_id": "label-a36f86f0bbe220c1",
+                "parent_id": "C16-b03-normal0",
+                "round": 2,
+                "status": "valid"
+              }
+            ],
+            "cumulative_cpu_core_s": 3072.6415145397186,
+            "force_rmse": 0.3278899110128185,
+            "n_labels": 8,
+            "round": 2
+          }
+        ],
+        "seed": 23
+      }
+    ]
+  },
+  "boundary": [
+    {
+      "atom_id": 8,
+      "distance": 2.0,
+      "element": "C",
+      "error": 0.07472397129847128,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-11891726581ce30d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 9,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.03632172729746352,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-11891726581ce30d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 10,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.013109452761495699,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-11891726581ce30d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 11,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.052147576293244145,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-11891726581ce30d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 12,
+      "distance": 2.0,
+      "element": "C",
+      "error": 0.035654899397976315,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-11891726581ce30d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 35,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004269315787682469,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-11891726581ce30d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 36,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.0035724260720969223,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-11891726581ce30d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 37,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0009068039979002596,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-11891726581ce30d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 38,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0015645030889347685,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-11891726581ce30d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 39,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004190399536569911,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-11891726581ce30d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 40,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004394703960560695,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-11891726581ce30d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 7,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.024630735321151936,
+      "parent_id": "C16-b03-normal0",
+      "spec_id": "frag-492367653f99406d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 8,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.026610869930617863,
+      "parent_id": "C16-b03-normal0",
+      "spec_id": "frag-492367653f99406d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 9,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.012923100550136265,
+      "parent_id": "C16-b03-normal0",
+      "spec_id": "frag-492367653f99406d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 10,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.010978228379440236,
+      "parent_id": "C16-b03-normal0",
+      "spec_id": "frag-492367653f99406d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 31,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.005527530697809336,
+      "parent_id": "C16-b03-normal0",
+      "spec_id": "frag-492367653f99406d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 32,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.005069964328967689,
+      "parent_id": "C16-b03-normal0",
+      "spec_id": "frag-492367653f99406d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 33,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0012324104278551979,
+      "parent_id": "C16-b03-normal0",
+      "spec_id": "frag-492367653f99406d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 34,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0011821788908761262,
+      "parent_id": "C16-b03-normal0",
+      "spec_id": "frag-492367653f99406d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 35,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.001556123246172365,
+      "parent_id": "C16-b03-normal0",
+      "spec_id": "frag-492367653f99406d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 36,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0013247747425549645,
+      "parent_id": "C16-b03-normal0",
+      "spec_id": "frag-492367653f99406d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 37,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004351741908959036,
+      "parent_id": "C16-b03-normal0",
+      "spec_id": "frag-492367653f99406d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 38,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.0046140639484324,
+      "parent_id": "C16-b03-normal0",
+      "spec_id": "frag-492367653f99406d",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 7,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.02623583721988595,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-5b1686c4581f96f5",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 13,
+      "distance": 9.0,
+      "element": "C",
+      "error": 0.005121599663756368,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-5b1686c4581f96f5",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 14,
+      "distance": 10.0,
+      "element": "C",
+      "error": 0.004619933429113962,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-5b1686c4581f96f5",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 31,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.0057378638988106415,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-5b1686c4581f96f5",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 32,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.005059262058116561,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-5b1686c4581f96f5",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 45,
+      "distance": 11.0,
+      "element": "H",
+      "error": 0.0008984474907246002,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-5b1686c4581f96f5",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 46,
+      "distance": 11.0,
+      "element": "H",
+      "error": 0.0014264310423940036,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-5b1686c4581f96f5",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 0,
+      "distance": 6.0,
+      "element": "C",
+      "error": 0.033850946524214616,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 1,
+      "distance": 5.0,
+      "element": "C",
+      "error": 0.02702380419443519,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 2,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.04206942120744939,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 3,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.03217547391972135,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 16,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0014116348856414588,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 17,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.001350179847994815,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 18,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0013255286782623199,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 19,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0014755059346745845,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 20,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0016588424364255918,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 21,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0008907757386644847,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 22,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0008905961581764195,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 23,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.005300115580660138,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 24,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.00545213665528355,
+      "parent_id": "C16-b03-bend0",
+      "spec_id": "frag-a6822acbae4da5b0",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 7,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.043351615354458944,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-c5ab6b33226b19ce",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 8,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.048303622117091424,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-c5ab6b33226b19ce",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 9,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.04029969055810563,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-c5ab6b33226b19ce",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 10,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.035500760931251936,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-c5ab6b33226b19ce",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 31,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.005316389510415278,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-c5ab6b33226b19ce",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 32,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.005865047285266961,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-c5ab6b33226b19ce",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 33,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0010055158405620007,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-c5ab6b33226b19ce",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 34,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0013424415850709463,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-c5ab6b33226b19ce",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 35,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.003436518791855435,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-c5ab6b33226b19ce",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 36,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0006336962380664546,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-c5ab6b33226b19ce",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 37,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004850109195876563,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-c5ab6b33226b19ce",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 38,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.002304641628203321,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-c5ab6b33226b19ce",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 0,
+      "distance": 6.0,
+      "element": "C",
+      "error": 0.04605182798900639,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 1,
+      "distance": 5.0,
+      "element": "C",
+      "error": 0.023750685806861706,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 2,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.02618162468339411,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 3,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.03551972491785867,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 16,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0013022800775766247,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 17,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.002928492650383904,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 18,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0032353847158611585,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 19,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0016662343984646733,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 20,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.001027092013631619,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 21,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0023244845897907214,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 22,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0022965623197872894,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 23,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.007716059279361318,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 24,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.006118921265793022,
+      "parent_id": "C16-b03-contact0",
+      "spec_id": "frag-dd6b752a3f115a1a",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 0,
+      "distance": 6.0,
+      "element": "C",
+      "error": 0.0032963193372909875,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 1,
+      "distance": 5.0,
+      "element": "C",
+      "error": 0.01921733312839681,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 2,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.02995235214076937,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 3,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.047530935810057504,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 16,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0017903849531243517,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 17,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0013131646952200579,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 18,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0009641638928155078,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 19,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.002474674802394847,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 20,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0011024450924591522,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 21,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0020837295203559422,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 22,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0019609377855906813,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 23,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.007034925458767135,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 24,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.006591116030304182,
+      "parent_id": "C16-b03-torsion0",
+      "spec_id": "frag-fa9de6448da8cbfd",
+      "system": "C16 calibration"
+    },
+    {
+      "atom_id": 4,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.023567938574932293,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-1ba2989c693ca00f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 5,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.02674824692556473,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-1ba2989c693ca00f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 6,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.048521026460566115,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-1ba2989c693ca00f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 25,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.002892401589164581,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-1ba2989c693ca00f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 26,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.003138252269696256,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-1ba2989c693ca00f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 27,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0023427235634965126,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-1ba2989c693ca00f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 28,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0016993578463459138,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-1ba2989c693ca00f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 29,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.0034013102596494454,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-1ba2989c693ca00f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 30,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004001780114917198,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-1ba2989c693ca00f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 9,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.04421360619896819,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-287c1822adfc61a8",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 10,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.026584107532787966,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-287c1822adfc61a8",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 11,
+      "distance": 5.0,
+      "element": "C",
+      "error": 0.015594168460684604,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-287c1822adfc61a8",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 12,
+      "distance": 6.0,
+      "element": "C",
+      "error": 0.013958588834745895,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-287c1822adfc61a8",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 35,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.005405353121019232,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-287c1822adfc61a8",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 36,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.0045384970903159395,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-287c1822adfc61a8",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 37,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0010172019277063654,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-287c1822adfc61a8",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 38,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0010982689535216914,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-287c1822adfc61a8",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 39,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0021067034680263153,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-287c1822adfc61a8",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 40,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0008016811161487518,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-287c1822adfc61a8",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 41,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0005545566005002937,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-287c1822adfc61a8",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 42,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.00028902679715780874,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-287c1822adfc61a8",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 7,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.02177310438717288,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-7d2cdb21c1bbd85f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 14,
+      "distance": 10.0,
+      "element": "C",
+      "error": 0.012168095648311433,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-7d2cdb21c1bbd85f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 31,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.0036061438512385627,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-7d2cdb21c1bbd85f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 32,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.003553693442231202,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-7d2cdb21c1bbd85f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 45,
+      "distance": 11.0,
+      "element": "H",
+      "error": 0.0005123523932924228,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-7d2cdb21c1bbd85f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 46,
+      "distance": 11.0,
+      "element": "H",
+      "error": 0.0006225597338055436,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-7d2cdb21c1bbd85f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 7,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.007511076509145438,
+      "parent_id": "C16-b02-normal0",
+      "spec_id": "frag-b4961ca9d1a3e40f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 8,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.005116408546517742,
+      "parent_id": "C16-b02-normal0",
+      "spec_id": "frag-b4961ca9d1a3e40f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 9,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.022598649439484392,
+      "parent_id": "C16-b02-normal0",
+      "spec_id": "frag-b4961ca9d1a3e40f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 10,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.03553746277465891,
+      "parent_id": "C16-b02-normal0",
+      "spec_id": "frag-b4961ca9d1a3e40f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 31,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004524256532225235,
+      "parent_id": "C16-b02-normal0",
+      "spec_id": "frag-b4961ca9d1a3e40f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 32,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.003137239339673248,
+      "parent_id": "C16-b02-normal0",
+      "spec_id": "frag-b4961ca9d1a3e40f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 33,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0004497152225933834,
+      "parent_id": "C16-b02-normal0",
+      "spec_id": "frag-b4961ca9d1a3e40f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 34,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0009926898481293573,
+      "parent_id": "C16-b02-normal0",
+      "spec_id": "frag-b4961ca9d1a3e40f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 35,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0011244961318442974,
+      "parent_id": "C16-b02-normal0",
+      "spec_id": "frag-b4961ca9d1a3e40f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 36,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0010053188303747109,
+      "parent_id": "C16-b02-normal0",
+      "spec_id": "frag-b4961ca9d1a3e40f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 37,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.005259360898107771,
+      "parent_id": "C16-b02-normal0",
+      "spec_id": "frag-b4961ca9d1a3e40f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 38,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.0050199639276002385,
+      "parent_id": "C16-b02-normal0",
+      "spec_id": "frag-b4961ca9d1a3e40f",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 0,
+      "distance": 6.0,
+      "element": "C",
+      "error": 0.04774525713730106,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 1,
+      "distance": 5.0,
+      "element": "C",
+      "error": 0.028182375646811364,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 2,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.030402716527207555,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 3,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.04924649385012063,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 16,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0026138362757384187,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 17,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0026281580709557966,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 18,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0023799746208459697,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 19,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.001141904343382415,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 20,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0012193240735077857,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 21,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0024588947274416166,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 22,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0022196238273015623,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 23,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.005855913310628913,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 24,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.006319003561940862,
+      "parent_id": "C16-b02-torsion0",
+      "spec_id": "frag-caf575f37d143a09",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 0,
+      "distance": 6.0,
+      "element": "C",
+      "error": 0.03822318968753544,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 1,
+      "distance": 5.0,
+      "element": "C",
+      "error": 0.01592514129334561,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 2,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.03141617574751061,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 3,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.023867084147170595,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 16,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0012571116210313604,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 17,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0020603680656143633,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 18,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0013027887780540429,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 19,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0008791246618175731,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 20,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.001656005906213771,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 21,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0015269372807019525,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 22,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0024247146640139963,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 23,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.007277860061703638,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 24,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.006545063303350369,
+      "parent_id": "C16-b02-contact0",
+      "spec_id": "frag-d638a2b2a5473fd4",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 11,
+      "distance": 2.0,
+      "element": "C",
+      "error": 0.028948463966259812,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 12,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.032381200040871125,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 13,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.031262257884948345,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 14,
+      "distance": 5.0,
+      "element": "C",
+      "error": 0.027299831909735398,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 15,
+      "distance": 6.0,
+      "element": "C",
+      "error": 0.02621157477848453,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 41,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.0040076674819230105,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 42,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.0042499650955114,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 43,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0008457319122410338,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 44,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0009721364495225263,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 45,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0012875017253446794,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 46,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0006530690847395814,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 47,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.001886035241087064,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 48,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0008940096714697502,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 49,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0005753339722966818,
+      "parent_id": "C16-b02-bend0",
+      "spec_id": "frag-db027bf16e9676c0",
+      "system": "C16 held-out"
+    },
+    {
+      "atom_id": 19,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.03678877019642629,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-1c57fc458dab6df3",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 20,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.036802844705894226,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-1c57fc458dab6df3",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 21,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.04380309510353569,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-1c57fc458dab6df3",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 22,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.043454257941957404,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-1c57fc458dab6df3",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 71,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004083647835470651,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-1c57fc458dab6df3",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 72,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004348044414052589,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-1c57fc458dab6df3",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 73,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0011858749782069286,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-1c57fc458dab6df3",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 74,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0014751881091055862,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-1c57fc458dab6df3",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 75,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.004235874712625953,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-1c57fc458dab6df3",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 76,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0027779193029298793,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-1c57fc458dab6df3",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 77,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.0035801665286087202,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-1c57fc458dab6df3",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 78,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.00413543919568206,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-1c57fc458dab6df3",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 28,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.036752731216632584,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 29,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.028031923045428134,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 30,
+      "distance": 5.0,
+      "element": "C",
+      "error": 0.021609859871477278,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 31,
+      "distance": 6.0,
+      "element": "C",
+      "error": 0.023294087082117446,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 89,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004567380473482998,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 90,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.0033926952234840653,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 91,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0033940666436212278,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 92,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0028238518587680715,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 93,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.002157840153611869,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 94,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0014146308257432976,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 95,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0008322552021569513,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 96,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0018269521392540007,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 97,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0024390698769217573,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-3b6eed8c6e6f67cd",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 0,
+      "distance": 6.0,
+      "element": "C",
+      "error": 0.03289552852337866,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 1,
+      "distance": 5.0,
+      "element": "C",
+      "error": 0.037033058385376814,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 2,
+      "distance": 4.0,
+      "element": "C",
+      "error": 0.023908060649321602,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 3,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.042485660486539935,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 4,
+      "distance": 2.0,
+      "element": "C",
+      "error": 0.052925628784075356,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 32,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0021006404506001765,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 33,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.0030510826978033295,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 34,
+      "distance": 7.0,
+      "element": "H",
+      "error": 0.003432132083058131,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 35,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0012149247528889606,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 36,
+      "distance": 6.0,
+      "element": "H",
+      "error": 0.0026405339988053037,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 37,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.001639380660358103,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 38,
+      "distance": 5.0,
+      "element": "H",
+      "error": 0.0021378808700986277,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 39,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004132082241377559,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 40,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004266821776091205,
+      "parent_id": "C32-b00-torsion0",
+      "spec_id": "frag-5d49eeab3af24121",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 11,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.02890624197198236,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-68e1acb5181ea51e",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 18,
+      "distance": 3.0,
+      "element": "C",
+      "error": 0.04324986919253074,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-68e1acb5181ea51e",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 19,
+      "distance": 2.0,
+      "element": "C",
+      "error": 0.09626856150972765,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-68e1acb5181ea51e",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 55,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004882866748049628,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-68e1acb5181ea51e",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 56,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.005455749289887984,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-68e1acb5181ea51e",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 69,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.004522273656508663,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-68e1acb5181ea51e",
+      "system": "C32 transfer"
+    },
+    {
+      "atom_id": 70,
+      "distance": 4.0,
+      "element": "H",
+      "error": 0.0028067455981205898,
+      "parent_id": "C32-b00-contact0",
+      "spec_id": "frag-68e1acb5181ea51e",
+      "system": "C32 transfer"
+    }
+  ],
+  "c16": {
+    "complete": true,
+    "error_vs_graph_distance_to_cut": {
+      "[2,3)": {
+        "max": 0.028948463966259812,
+        "mean": 0.028948463966259812,
+        "n": 1
+      },
+      "[3,4)": {
+        "max": 0.04924649385012063,
+        "mean": 0.0318465547715118,
+        "n": 9
+      },
+      "[4,6)": {
+        "max": 0.03141617574751061,
+        "mean": 0.008466084101179775,
+        "n": 43
+      },
+      "[6,100)": {
+        "max": 0.04774525713730106,
+        "mean": 0.006370312781054183,
+        "n": 26
+      }
+    },
+    "failures": [],
+    "max_core_force_error": 0.04924649385012063,
+    "mean_fragment_cost_core_s": 561.1145784173693,
+    "mean_n_atoms": 28.571428571428573,
+    "mean_n_caps": 1.2857142857142858,
+    "mean_parent_cost_core_s": 2535.0384874003275,
+    "n_evaluated": 7,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_specs": 7,
+    "passes": true,
+    "per_spec_rmse_max": 0.012940482053939936,
+    "pooled_core_force_rmse": 0.009996536141197193,
+    "rmse_by_site_kind": {
+      "normal_control": 0.01014341855675237,
+      "perturbation_site": 0.009309381299909481
+    },
+    "setting_id": "cluster-c1.5-b3"
+  },
+  "c32": {
+    "complete": true,
+    "error_vs_graph_distance_to_cut": {
+      "[2,3)": {
+        "max": 0.09626856150972765,
+        "mean": 0.07459709514690151,
+        "n": 2
+      },
+      "[3,4)": {
+        "max": 0.043454257941957404,
+        "mean": 0.03860625516767822,
+        "n": 6
+      },
+      "[4,6)": {
+        "max": 0.04380309510353569,
+        "mean": 0.010039722764521723,
+        "n": 26
+      },
+      "[6,100)": {
+        "max": 0.03289552852337866,
+        "mean": 0.0064416398155283236,
+        "n": 12
+      }
+    },
+    "failures": [],
+    "max_core_force_error": 0.09626856150972765,
+    "mean_fragment_cost_core_s": 473.9829412102699,
+    "mean_n_atoms": 33.25,
+    "mean_n_caps": 1.75,
+    "mean_parent_cost_core_s": 38726.41942381859,
+    "n_evaluated": 4,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_specs": 4,
+    "passes": true,
+    "per_spec_rmse_max": 0.023959980834256062,
+    "pooled_core_force_rmse": 0.014642537423857705,
+    "rmse_by_site_kind": {
+      "normal_control": 0.011531393784682138,
+      "perturbation_site": 0.019463817667873633
+    },
+    "setting_id": "cluster-c1.5-b3"
+  },
+  "c32_costs": [
+    {
+      "attempts": 2,
+      "core_s": 69498.0,
+      "cores": 5,
+      "first_attempt_wall_s": 6981.9,
+      "kind": "full",
+      "label_id": "label-47e8f896a02ac250",
+      "n_atoms": 98,
+      "parent_id": "C32-b00-torsion0",
+      "retry_attempt_wall_s": 6917.7,
+      "scf_steps_final": 24,
+      "status": "valid",
+      "wall_s": 13899.6
+    },
+    {
+      "attempts": 2,
+      "core_s": 7954.8,
+      "cores": 5,
+      "first_attempt_wall_s": 1215.1,
+      "kind": "full",
+      "label_id": "label-1d4882b8f1021e3e",
+      "n_atoms": 98,
+      "parent_id": "C32-b00-contact0",
+      "retry_attempt_wall_s": 375.9,
+      "scf_steps_final": 24,
+      "status": "valid",
+      "wall_s": 1591.0
+    },
+    {
+      "attempts": 1,
+      "core_s": 403.9,
+      "cores": 5,
+      "kind": "fragment",
+      "label_id": "label-b374f2c201464da7",
+      "n_atoms": 34,
+      "parent_id": "C32-b00-contact0",
+      "scf_steps_final": 31,
+      "status": "valid",
+      "wall_s": 80.8
+    },
+    {
+      "attempts": 1,
+      "core_s": 439.1,
+      "cores": 5,
+      "kind": "fragment",
+      "label_id": "label-95ae9ce74f79edd0",
+      "n_atoms": 44,
+      "parent_id": "C32-b00-contact0",
+      "scf_steps_final": 37,
+      "status": "valid",
+      "wall_s": 87.8
+    },
+    {
+      "attempts": 1,
+      "core_s": 587.4,
+      "cores": 5,
+      "kind": "fragment",
+      "label_id": "label-fead1aa62650c8c1",
+      "n_atoms": 23,
+      "parent_id": "C32-b00-torsion0",
+      "scf_steps_final": 47,
+      "status": "valid",
+      "wall_s": 117.5
+    },
+    {
+      "attempts": 1,
+      "core_s": 465.5,
+      "cores": 5,
+      "kind": "fragment",
+      "label_id": "label-74f829f7e6b54221",
+      "n_atoms": 32,
+      "parent_id": "C32-b00-torsion0",
+      "scf_steps_final": 30,
+      "status": "valid",
+      "wall_s": 93.1
+    }
+  ],
+  "calibration": [
+    {
+      "complete": true,
+      "error_vs_graph_distance_to_cut": {
+        "[2,3)": {
+          "max": 0.07472397129847128,
+          "mean": 0.05518943534822379,
+          "n": 2
+        },
+        "[3,4)": {
+          "max": 0.052147576293244145,
+          "mean": 0.03443926154445342,
+          "n": 10
+        },
+        "[4,6)": {
+          "max": 0.048303622117091424,
+          "mean": 0.009306611577210737,
+          "n": 47
+        },
+        "[6,100)": {
+          "max": 0.04605182798900639,
+          "mean": 0.005467796115974163,
+          "n": 22
+        }
+      },
+      "failures": [],
+      "max_core_force_error": 0.07472397129847128,
+      "mean_fragment_cost_core_s": 691.7459208624704,
+      "mean_n_atoms": 28.571428571428573,
+      "mean_n_caps": 1.4285714285714286,
+      "mean_parent_cost_core_s": 2369.8124764646805,
+      "n_evaluated": 7,
+      "n_failed": 0,
+      "n_pending": 0,
+      "n_specs": 7,
+      "passes": true,
+      "per_spec_rmse_max": 0.018370407029727955,
+      "pooled_core_force_rmse": 0.011830326196649907,
+      "rmse_by_site_kind": {
+        "normal_control": 0.009810479165084526,
+        "perturbation_site": 0.013850793219515458
+      },
+      "setting_id": "cluster-c1.5-b3"
+    },
+    {
+      "complete": true,
+      "error_vs_graph_distance_to_cut": {
+        "[3,4)": {
+          "max": 0.042384959915409276,
+          "mean": 0.042384959915409276,
+          "n": 1
+        },
+        "[4,6)": {
+          "max": 0.05524096137583826,
+          "mean": 0.0175392984993273,
+          "n": 35
+        },
+        "[6,100)": {
+          "max": 0.050271492858979326,
+          "mean": 0.006258398722352284,
+          "n": 45
+        }
+      },
+      "failures": [],
+      "max_core_force_error": 0.05524096137583826,
+      "mean_fragment_cost_core_s": 879.0201572009495,
+      "mean_n_atoms": 33.57142857142857,
+      "mean_n_caps": 1.4285714285714286,
+      "mean_parent_cost_core_s": 2369.8124764646805,
+      "n_evaluated": 7,
+      "n_failed": 0,
+      "n_pending": 0,
+      "n_specs": 7,
+      "passes": true,
+      "per_spec_rmse_max": 0.015379675186864448,
+      "pooled_core_force_rmse": 0.01132415504290911,
+      "rmse_by_site_kind": {
+        "normal_control": 0.010520297560946157,
+        "perturbation_site": 0.012731262912459384
+      },
+      "setting_id": "cluster-c1.5-b4"
+    },
+    {
+      "complete": true,
+      "error_vs_graph_distance_to_cut": {
+        "[4,6)": {
+          "max": 0.04741401762071147,
+          "mean": 0.025652386028347275,
+          "n": 8
+        },
+        "[6,100)": {
+          "max": 0.051501537087538296,
+          "mean": 0.008219341546462268,
+          "n": 73
+        }
+      },
+      "failures": [],
+      "max_core_force_error": 0.051501537087538296,
+      "mean_fragment_cost_core_s": 1094.5245465210505,
+      "mean_n_atoms": 37.857142857142854,
+      "mean_n_caps": 1.1428571428571428,
+      "mean_parent_cost_core_s": 2369.8124764646805,
+      "n_evaluated": 7,
+      "n_failed": 0,
+      "n_pending": 0,
+      "n_specs": 7,
+      "passes": true,
+      "per_spec_rmse_max": 0.015061668664591833,
+      "pooled_core_force_rmse": 0.009539163949810218,
+      "rmse_by_site_kind": {
+        "normal_control": 0.00926431779230239,
+        "perturbation_site": 0.010721722412795918
+      },
+      "setting_id": "cluster-c1.5-b5"
+    },
+    {
+      "complete": true,
+      "error_vs_graph_distance_to_cut": {
+        "[2,3)": {
+          "max": 0.14507580032963038,
+          "mean": 0.06730338542457683,
+          "n": 11
+        },
+        "[3,4)": {
+          "max": 0.21249587244967802,
+          "mean": 0.03648685562695857,
+          "n": 30
+        },
+        "[4,6)": {
+          "max": 0.04623593411371848,
+          "mean": 0.0079865903169482,
+          "n": 28
+        },
+        "[6,100)": {
+          "max": 0.0024784151747395925,
+          "mean": 0.0013976675328013493,
+          "n": 9
+        }
+      },
+      "failures": [],
+      "max_core_force_error": 0.21249587244967802,
+      "mean_fragment_cost_core_s": 508.48108325685774,
+      "mean_n_atoms": 23.714285714285715,
+      "mean_n_caps": 1.7142857142857142,
+      "mean_parent_cost_core_s": 2369.8124764646805,
+      "n_evaluated": 7,
+      "n_failed": 0,
+      "n_pending": 0,
+      "n_specs": 7,
+      "passes": false,
+      "per_spec_rmse_max": 0.08136531182762166,
+      "pooled_core_force_rmse": 0.027793238034509365,
+      "rmse_by_site_kind": {
+        "normal_control": 0.014637245702631077,
+        "perturbation_site": 0.050112092756563587
+      },
+      "setting_id": "graph-h2"
+    },
+    {
+      "complete": true,
+      "error_vs_graph_distance_to_cut": {
+        "[3,4)": {
+          "max": 0.052147576293244145,
+          "mean": 0.03443926154445341,
+          "n": 10
+        },
+        "[4,6)": {
+          "max": 0.048303622117091424,
+          "mean": 0.009306611577210739,
+          "n": 47
+        },
+        "[6,100)": {
+          "max": 0.04605182798900639,
+          "mean": 0.0054842816613178665,
+          "n": 21
+        }
+      },
+      "failures": [],
+      "max_core_force_error": 0.052147576293244145,
+      "mean_fragment_cost_core_s": 691.7459208624704,
+      "mean_n_atoms": 28.571428571428573,
+      "mean_n_caps": 1.4285714285714286,
+      "mean_parent_cost_core_s": 2369.8124764646805,
+      "n_evaluated": 7,
+      "n_failed": 0,
+      "n_pending": 0,
+      "n_specs": 7,
+      "passes": true,
+      "per_spec_rmse_max": 0.014145566347430213,
+      "pooled_core_force_rmse": 0.010767211154276356,
+      "rmse_by_site_kind": {
+        "normal_control": 0.009810479165084526,
+        "perturbation_site": 0.01156878720929479
+      },
+      "setting_id": "graph-h3"
+    },
+    {
+      "complete": true,
+      "error_vs_graph_distance_to_cut": {
+        "[4,6)": {
+          "max": 0.05524096137583826,
+          "mean": 0.017847638387766485,
+          "n": 35
+        },
+        "[6,100)": {
+          "max": 0.050271492858979326,
+          "mean": 0.006308460626565198,
+          "n": 43
+        }
+      },
+      "failures": [],
+      "max_core_force_error": 0.05524096137583826,
+      "mean_fragment_cost_core_s": 904.4688052790506,
+      "mean_n_atoms": 32.857142857142854,
+      "mean_n_caps": 1.2857142857142858,
+      "mean_parent_cost_core_s": 2369.8124764646805,
+      "n_evaluated": 7,
+      "n_failed": 0,
+      "n_pending": 0,
+      "n_specs": 7,
+      "passes": true,
+      "per_spec_rmse_max": 0.015379675186864448,
+      "pooled_core_force_rmse": 0.01132745193374829,
+      "rmse_by_site_kind": {
+        "normal_control": 0.010948499896569914,
+        "perturbation_site": 0.012035039426548875
+      },
+      "setting_id": "graph-h4"
+    }
+  ],
+  "closed_loop": {
+    "cancellation_passed": true,
+    "cumulative_new_labels": [
+      0,
+      2,
+      3
+    ],
+    "dft_core_h": 1.0537880291541417,
+    "energy_jump_ev": 2.246337890625,
+    "event_steps": [
+      170,
+      980,
+      1260,
+      2050,
+      2270,
+      2540,
+      2840,
+      3110,
+      3320,
+      3540
+    ],
+    "events": [
+      {
+        "cycle": 0,
+        "event_id": "evt-df6aaf54d1dea7c4",
+        "max_score": 10.402970273270295,
+        "n_hotspot_atoms": 1,
+        "state": "extracted",
+        "trigger_reasons": [
+          "force_large",
+          "committee_deviation",
+          "lj_residual"
+        ],
+        "trigger_step": 170
+      },
+      {
+        "cycle": 0,
+        "event_id": "evt-feffff95e0c8e76d",
+        "max_score": 9.594589994490443,
+        "n_hotspot_atoms": 2,
+        "state": "extracted",
+        "trigger_reasons": [
+          "force_large",
+          "committee_deviation",
+          "lj_residual"
+        ],
+        "trigger_step": 980
+      },
+      {
+        "cycle": 0,
+        "event_id": "evt-bf9fe29245320e80",
+        "max_score": 13.965773653819248,
+        "n_hotspot_atoms": 3,
+        "state": "extracted",
+        "trigger_reasons": [
+          "force_large",
+          "lj_residual",
+          "committee_deviation"
+        ],
+        "trigger_step": 1260
+      },
+      {
+        "cycle": 1,
+        "event_id": "evt-ddc541f90f1001f9",
+        "max_score": 11.298245180612312,
+        "n_hotspot_atoms": 1,
+        "state": "extracted",
+        "trigger_reasons": [
+          "force_large",
+          "lj_residual",
+          "committee_deviation"
+        ],
+        "trigger_step": 2050
+      },
+      {
+        "cycle": 1,
+        "event_id": "evt-f112ceeaf710b90c",
+        "max_score": 6.327318898347503,
+        "n_hotspot_atoms": 1,
+        "state": "extracted",
+        "trigger_reasons": [
+          "force_large",
+          "committee_deviation",
+          "lj_residual"
+        ],
+        "trigger_step": 2270
+      },
+      {
+        "cycle": 1,
+        "event_id": "evt-0475bbfd6d9b5f37",
+        "max_score": 7.73151182122057,
+        "n_hotspot_atoms": 1,
+        "state": "extracted",
+        "trigger_reasons": [
+          "force_large",
+          "lj_residual",
+          "committee_deviation"
+        ],
+        "trigger_step": 2540
+      },
+      {
+        "cycle": 1,
+        "event_id": "evt-e18d15324798bdc0",
+        "max_score": 6.737471588524123,
+        "n_hotspot_atoms": 1,
+        "state": "extracted",
+        "trigger_reasons": [
+          "force_large",
+          "lj_residual",
+          "committee_deviation"
+        ],
+        "trigger_step": 2840
+      },
+      {
+        "cycle": 1,
+        "event_id": "evt-29bbcf6d24511e71",
+        "max_score": 9.740698266516912,
+        "n_hotspot_atoms": 2,
+        "state": "extracted",
+        "trigger_reasons": [
+          "force_large",
+          "lj_residual",
+          "committee_deviation"
+        ],
+        "trigger_step": 3110
+      },
+      {
+        "cycle": 1,
+        "event_id": "evt-6ad90c47d0c34fc9",
+        "max_score": 7.411161974652928,
+        "n_hotspot_atoms": 2,
+        "state": "extracted",
+        "trigger_reasons": [
+          "force_large",
+          "lj_residual",
+          "committee_deviation"
+        ],
+        "trigger_step": 3320
+      },
+      {
+        "cycle": 1,
+        "event_id": "evt-8fd23e75bdb3751f",
+        "max_score": 6.477817107896787,
+        "n_hotspot_atoms": 1,
+        "state": "extracted",
+        "trigger_reasons": [
+          "force_large",
+          "lj_residual",
+          "committee_deviation"
+        ],
+        "trigger_step": 3540
+      }
+    ],
+    "frozen_evaluation": {
+      "final": {
+        "n_frames": 453,
+        "n_intact": 447,
+        "per_seed": [
+          {
+            "n_frames": 151,
+            "n_intact": 148,
+            "seed": 1
+          },
+          {
+            "n_frames": 151,
+            "n_intact": 148,
+            "seed": 2
+          },
+          {
+            "n_frames": 151,
+            "n_intact": 151,
+            "seed": 3
+          }
+        ]
+      },
+      "initial": {
+        "n_frames": 453,
+        "n_intact": 166,
+        "per_seed": [
+          {
+            "n_frames": 151,
+            "n_intact": 15,
+            "seed": 1
+          },
+          {
+            "n_frames": 151,
+            "n_intact": 151,
+            "seed": 2
+          },
+          {
+            "n_frames": 151,
+            "n_intact": 0,
+            "seed": 3
+          }
+        ]
+      }
+    },
+    "labels": [
+      {
+        "attempts": 1,
+        "complete": true,
+        "cpu_core_s": 494.32304978370667,
+        "cycle": 1,
+        "execution": "completed",
+        "job_ids": [
+          "49762"
+        ],
+        "n_atoms": 29,
+        "state": "ingested",
+        "task_id": "label-20ee6fe9c1a42f36",
+        "validation": "valid",
+        "wall_s": 98.86460995674133
+      },
+      {
+        "attempts": 1,
+        "complete": true,
+        "cpu_core_s": 847.3229265213013,
+        "cycle": 0,
+        "execution": "completed",
+        "job_ids": [
+          "49024"
+        ],
+        "n_atoms": 26,
+        "state": "ingested",
+        "task_id": "label-8fd8a7e78d4c48e5",
+        "validation": "valid",
+        "wall_s": 169.46458530426025
+      },
+      {
+        "attempts": 1,
+        "complete": true,
+        "cpu_core_s": 2451.9909286499023,
+        "cycle": 0,
+        "execution": "completed",
+        "job_ids": [
+          "49022"
+        ],
+        "n_atoms": 44,
+        "state": "ingested",
+        "task_id": "label-910a9a6f8c689967",
+        "validation": "valid",
+        "wall_s": 490.39818572998047
+      }
+    ],
+    "recovery_adopted": true,
+    "validation_force_rmse": [
+      0.505909258028807,
+      0.46002452284418405,
+      0.3975479560001054
+    ]
+  },
+  "geometries": [
+    {
+      "bonds": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          7,
+          8
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          9,
+          10
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          11,
+          12
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          13,
+          14
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          0,
+          16
+        ],
+        [
+          0,
+          17
+        ],
+        [
+          0,
+          18
+        ],
+        [
+          1,
+          19
+        ],
+        [
+          1,
+          20
+        ],
+        [
+          2,
+          21
+        ],
+        [
+          2,
+          22
+        ],
+        [
+          3,
+          23
+        ],
+        [
+          3,
+          24
+        ],
+        [
+          4,
+          25
+        ],
+        [
+          4,
+          26
+        ],
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          28
+        ],
+        [
+          6,
+          29
+        ],
+        [
+          6,
+          30
+        ],
+        [
+          7,
+          31
+        ],
+        [
+          7,
+          32
+        ],
+        [
+          8,
+          33
+        ],
+        [
+          8,
+          34
+        ],
+        [
+          9,
+          35
+        ],
+        [
+          9,
+          36
+        ],
+        [
+          10,
+          37
+        ],
+        [
+          10,
+          38
+        ],
+        [
+          11,
+          39
+        ],
+        [
+          11,
+          40
+        ],
+        [
+          12,
+          41
+        ],
+        [
+          12,
+          42
+        ],
+        [
+          13,
+          43
+        ],
+        [
+          13,
+          44
+        ],
+        [
+          14,
+          45
+        ],
+        [
+          14,
+          46
+        ],
+        [
+          15,
+          47
+        ],
+        [
+          15,
+          48
+        ],
+        [
+          15,
+          49
+        ]
+      ],
+      "family": "normal",
+      "parent_id": "C16-b02-normal0",
+      "perturbation": {
+        "atoms": [],
+        "kind": "none",
+        "location": null,
+        "magnitude": 0.0,
+        "units": null
+      },
+      "positions": [
+        [
+          -0.015941235765,
+          0.063936718557,
+          0.022448620438
+        ],
+        [
+          1.218994661355,
+          0.881531898087,
+          -0.005806597305
+        ],
+        [
+          2.447849186735,
+          0.032938945198,
+          -0.036016122873
+        ],
+        [
+          3.760329465168,
+          0.86522868909,
+          0.018346533247
+        ],
+        [
+          5.042826249566,
+          0.031567214647,
+          -0.059104526854
+        ],
+        [
+          6.257849356838,
+          0.8862018465,
+          -0.014810547281
+        ],
+        [
+          7.508617135759,
+          -0.020371687143,
+          -0.031540492136
+        ],
+        [
+          8.73567898726,
+          0.915546279208,
+          -0.008091245022
+        ],
+        [
+          10.005802825793,
+          0.006142004571,
+          0.01799227255
+        ],
+        [
+          11.290424813409,
+          0.862963152083,
+          0.006096872033
+        ],
+        [
+          12.497218685518,
+          -0.019824864253,
+          -0.009062536237
+        ],
+        [
+          13.774707343842,
+          0.901187324663,
+          0.025822996648
+        ],
+        [
+          14.950672219507,
+          0.005535172302,
+          0.020180523687
+        ],
+        [
+          16.243397445721,
+          0.914788773889,
+          -0.0232161108
+        ],
+        [
+          17.529241110351,
+          0.019561783276,
+          -0.016575245652
+        ],
+        [
+          18.725888768211,
+          0.900739230064,
+          0.006274679146
+        ],
+        [
+          -0.892684337503,
+          0.703203728905,
+          0.01309401418
+        ],
+        [
+          -0.009383570327,
+          -0.592745058895,
+          0.959575577434
+        ],
+        [
+          0.007987057936,
+          -0.659568413625,
+          -0.925453443594
+        ],
+        [
+          1.251543502672,
+          1.490070354108,
+          0.87744242643
+        ],
+        [
+          1.231664468653,
+          1.510121250494,
+          -0.89530467024
+        ],
+        [
+          2.498487024109,
+          -0.621334464509,
+          0.879388940975
+        ],
+        [
+          2.517928868762,
+          -0.59149129726,
+          -0.85357034825
+        ],
+        [
+          3.739125826751,
+          1.485280001937,
+          0.889678709409
+        ],
+        [
+          3.760594259123,
+          1.534306164215,
+          -0.948906661978
+        ],
+        [
+          4.995010199222,
+          -0.650709121564,
+          0.934161454002
+        ],
+        [
+          5.023101486462,
+          -0.693870944429,
+          -0.930692006084
+        ],
+        [
+          6.28700479668,
+          1.518200207109,
+          0.897785587977
+        ],
+        [
+          6.266130285033,
+          1.485971926569,
+          -0.854392579171
+        ],
+        [
+          7.454763801139,
+          -0.608639671537,
+          0.879727085749
+        ],
+        [
+          7.456624525295,
+          -0.626488349086,
+          -0.893834194183
+        ],
+        [
+          8.796556466041,
+          1.509526686878,
+          0.899646357714
+        ],
+        [
+          8.724999139884,
+          1.532888042522,
+          -0.860924087489
+        ],
+        [
+          9.999268929032,
+          -0.554956771894,
+          0.831044132708
+        ],
+        [
+          9.995775805987,
+          -0.629805326692,
+          -0.852701222284
+        ],
+        [
+          11.276786864868,
+          1.467082915329,
+          0.937916877093
+        ],
+        [
+          11.224177090917,
+          1.459258540256,
+          -0.933967686885
+        ],
+        [
+          12.491094766663,
+          -0.665856174551,
+          0.854296751813
+        ],
+        [
+          12.485459991644,
+          -0.628328390094,
+          -0.897060117267
+        ],
+        [
+          13.733269425345,
+          1.467428532027,
+          0.876879450812
+        ],
+        [
+          13.743592633581,
+          1.541890968465,
+          -0.946255614462
+        ],
+        [
+          14.989753469579,
+          -0.608111221314,
+          0.879126094623
+        ],
+        [
+          14.966943614637,
+          -0.564617614783,
+          -0.900128929957
+        ],
+        [
+          16.243074196146,
+          1.515560212154,
+          0.907799794296
+        ],
+        [
+          16.263551351399,
+          1.522270206008,
+          -0.846466473352
+        ],
+        [
+          17.438097526274,
+          -0.629489392504,
+          0.858553418686
+        ],
+        [
+          17.499922635658,
+          -0.597518538742,
+          -0.8701794382
+        ],
+        [
+          19.584293265635,
+          0.24503195346,
+          -0.006458688076
+        ],
+        [
+          18.744021182061,
+          1.530738223628,
+          0.873388208994
+        ],
+        [
+          18.780271156466,
+          1.498976910115,
+          -0.961315667747
+        ]
+      ],
+      "symbols": [
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H"
+      ]
+    },
+    {
+      "bonds": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          7,
+          8
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          9,
+          10
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          11,
+          12
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          13,
+          14
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          0,
+          16
+        ],
+        [
+          0,
+          17
+        ],
+        [
+          0,
+          18
+        ],
+        [
+          1,
+          19
+        ],
+        [
+          1,
+          20
+        ],
+        [
+          2,
+          21
+        ],
+        [
+          2,
+          22
+        ],
+        [
+          3,
+          23
+        ],
+        [
+          3,
+          24
+        ],
+        [
+          4,
+          25
+        ],
+        [
+          4,
+          26
+        ],
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          28
+        ],
+        [
+          6,
+          29
+        ],
+        [
+          6,
+          30
+        ],
+        [
+          7,
+          31
+        ],
+        [
+          7,
+          32
+        ],
+        [
+          8,
+          33
+        ],
+        [
+          8,
+          34
+        ],
+        [
+          9,
+          35
+        ],
+        [
+          9,
+          36
+        ],
+        [
+          10,
+          37
+        ],
+        [
+          10,
+          38
+        ],
+        [
+          11,
+          39
+        ],
+        [
+          11,
+          40
+        ],
+        [
+          12,
+          41
+        ],
+        [
+          12,
+          42
+        ],
+        [
+          13,
+          43
+        ],
+        [
+          13,
+          44
+        ],
+        [
+          14,
+          45
+        ],
+        [
+          14,
+          46
+        ],
+        [
+          15,
+          47
+        ],
+        [
+          15,
+          48
+        ],
+        [
+          15,
+          49
+        ]
+      ],
+      "family": "torsion",
+      "parent_id": "C16-b02-torsion0",
+      "perturbation": {
+        "atoms": [
+          9,
+          10,
+          11,
+          12,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42
+        ],
+        "bond": [
+          10,
+          11
+        ],
+        "dihedral_after_deg": -60.00000000000002,
+        "dihedral_atoms": [
+          9,
+          10,
+          11,
+          12
+        ],
+        "dihedral_before_deg": 180.0,
+        "dihedral_change_deg": 120.0,
+        "kind": "torsion",
+        "location": 10,
+        "magnitude": 120.0,
+        "n_moved_atoms": 16,
+        "units": "deg"
+      },
+      "positions": [
+        [
+          -0.015941235765,
+          0.063936718557,
+          0.022448620438
+        ],
+        [
+          1.218994661355,
+          0.881531898087,
+          -0.005806597305
+        ],
+        [
+          2.447849186735,
+          0.032938945198,
+          -0.036016122873
+        ],
+        [
+          3.760329465168,
+          0.86522868909,
+          0.018346533247
+        ],
+        [
+          5.042826249566,
+          0.031567214647,
+          -0.059104526854
+        ],
+        [
+          6.257849356838,
+          0.8862018465,
+          -0.014810547281
+        ],
+        [
+          7.508617135759,
+          -0.020371687143,
+          -0.031540492136
+        ],
+        [
+          8.73567898726,
+          0.915546279208,
+          -0.008091245022
+        ],
+        [
+          10.005802825793,
+          0.006142004571,
+          0.01799227255
+        ],
+        [
+          11.290424813409,
+          0.862963152083,
+          0.006096872033
+        ],
+        [
+          12.497218685518,
+          -0.019824864253,
+          -0.009062536237
+        ],
+        [
+          13.774707343842,
+          0.901187324663,
+          0.025822996648
+        ],
+        [
+          13.701432450688,
+          1.772226996023,
+          -1.229059245132
+        ],
+        [
+          14.994157676902,
+          2.68148059761,
+          -1.27245587962
+        ],
+        [
+          15.030761572712,
+          3.552945430716,
+          -2.515054783291
+        ],
+        [
+          16.227409230572,
+          4.434122877504,
+          -2.492204858493
+        ],
+        [
+          -0.892684337503,
+          0.703203728905,
+          0.01309401418
+        ],
+        [
+          -0.009383570327,
+          -0.592745058895,
+          0.959575577434
+        ],
+        [
+          0.007987057936,
+          -0.659568413625,
+          -0.925453443594
+        ],
+        [
+          1.251543502672,
+          1.490070354108,
+          0.87744242643
+        ],
+        [
+          1.231664468653,
+          1.510121250494,
+          -0.89530467024
+        ],
+        [
+          2.498487024109,
+          -0.621334464509,
+          0.879388940975
+        ],
+        [
+          2.517928868762,
+          -0.59149129726,
+          -0.85357034825
+        ],
+        [
+          3.739125826751,
+          1.485280001937,
+          0.889678709409
+        ],
+        [
+          3.760594259123,
+          1.534306164215,
+          -0.948906661978
+        ],
+        [
+          4.995010199222,
+          -0.650709121564,
+          0.934161454002
+        ],
+        [
+          5.023101486462,
+          -0.693870944429,
+          -0.930692006084
+        ],
+        [
+          6.28700479668,
+          1.518200207109,
+          0.897785587977
+        ],
+        [
+          6.266130285033,
+          1.485971926569,
+          -0.854392579171
+        ],
+        [
+          7.454763801139,
+          -0.608639671537,
+          0.879727085749
+        ],
+        [
+          7.456624525295,
+          -0.626488349086,
+          -0.893834194183
+        ],
+        [
+          8.796556466041,
+          1.509526686878,
+          0.899646357714
+        ],
+        [
+          8.724999139884,
+          1.532888042522,
+          -0.860924087489
+        ],
+        [
+          9.999268929032,
+          -0.554956771894,
+          0.831044132708
+        ],
+        [
+          9.995775805987,
+          -0.629805326692,
+          -0.852701222284
+        ],
+        [
+          11.276786864868,
+          1.467082915329,
+          0.937916877093
+        ],
+        [
+          11.224177090917,
+          1.459258540256,
+          -0.933967686885
+        ],
+        [
+          12.491094766663,
+          -0.665856174551,
+          0.854296751813
+        ],
+        [
+          12.485459991644,
+          -0.628328390094,
+          -0.897060117267
+        ],
+        [
+          14.623250698556,
+          0.208804945194,
+          -0.013101822399
+        ],
+        [
+          13.743592633581,
+          1.541890968465,
+          0.83370693196
+        ],
+        [
+          13.74051370076,
+          1.158580602406,
+          -2.150076220619
+        ],
+        [
+          12.827722572607,
+          2.460697795771,
+          -1.259387425565
+        ],
+        [
+          15.883815700538,
+          2.023628449041,
+          -1.231421247734
+        ],
+        [
+          15.01431158258,
+          3.288962029728,
+          -0.315743695748
+        ],
+        [
+          14.939617988636,
+          2.903894254937,
+          -3.419888665375
+        ],
+        [
+          14.111461824808,
+          4.194488695532,
+          -2.478677702628
+        ],
+        [
+          16.195832454785,
+          5.037039187734,
+          -3.394919498926
+        ],
+        [
+          17.135522917634,
+          3.805498284235,
+          -2.515072601856
+        ],
+        [
+          16.281791618827,
+          5.032360557555,
+          -1.679832658963
+        ]
+      ],
+      "symbols": [
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H"
+      ]
+    },
+    {
+      "bonds": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          7,
+          8
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          9,
+          10
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          11,
+          12
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          13,
+          14
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          0,
+          16
+        ],
+        [
+          0,
+          17
+        ],
+        [
+          0,
+          18
+        ],
+        [
+          1,
+          19
+        ],
+        [
+          1,
+          20
+        ],
+        [
+          2,
+          21
+        ],
+        [
+          2,
+          22
+        ],
+        [
+          3,
+          23
+        ],
+        [
+          3,
+          24
+        ],
+        [
+          4,
+          25
+        ],
+        [
+          4,
+          26
+        ],
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          28
+        ],
+        [
+          6,
+          29
+        ],
+        [
+          6,
+          30
+        ],
+        [
+          7,
+          31
+        ],
+        [
+          7,
+          32
+        ],
+        [
+          8,
+          33
+        ],
+        [
+          8,
+          34
+        ],
+        [
+          9,
+          35
+        ],
+        [
+          9,
+          36
+        ],
+        [
+          10,
+          37
+        ],
+        [
+          10,
+          38
+        ],
+        [
+          11,
+          39
+        ],
+        [
+          11,
+          40
+        ],
+        [
+          12,
+          41
+        ],
+        [
+          12,
+          42
+        ],
+        [
+          13,
+          43
+        ],
+        [
+          13,
+          44
+        ],
+        [
+          14,
+          45
+        ],
+        [
+          14,
+          46
+        ],
+        [
+          15,
+          47
+        ],
+        [
+          15,
+          48
+        ],
+        [
+          15,
+          49
+        ]
+      ],
+      "family": "bend",
+      "parent_id": "C16-b02-bend0",
+      "perturbation": {
+        "angle_after_deg": 121.4712206344907,
+        "angle_atoms": [
+          4,
+          5,
+          6
+        ],
+        "angle_before_deg": 109.47122063449069,
+        "atoms": [
+          4,
+          5,
+          6,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30
+        ],
+        "changed_angles": [
+          [
+            4,
+            5,
+            6
+          ],
+          [
+            27,
+            5,
+            6
+          ],
+          [
+            28,
+            5,
+            6
+          ]
+        ],
+        "kind": "bend",
+        "location": 5,
+        "magnitude": 12.0,
+        "n_moved_atoms": 31,
+        "units": "deg"
+      },
+      "positions": [
+        [
+          -0.015941235765,
+          0.063936718557,
+          0.022448620438
+        ],
+        [
+          1.218994661355,
+          0.881531898087,
+          -0.005806597305
+        ],
+        [
+          2.447849186735,
+          0.032938945198,
+          -0.036016122873
+        ],
+        [
+          3.760329465168,
+          0.86522868909,
+          0.018346533247
+        ],
+        [
+          5.042826249566,
+          0.031567214647,
+          -0.059104526854
+        ],
+        [
+          6.257849356838,
+          0.8862018465,
+          -0.014810547281
+        ],
+        [
+          7.664976191663,
+          0.258663092985,
+          -0.031540492136
+        ],
+        [
+          8.681081214845,
+          1.435009384352,
+          -0.008091245022
+        ],
+        [
+          10.107564109282,
+          0.804639889843,
+          0.01799227255
+        ],
+        [
+          11.181229268579,
+          1.901889362371,
+          0.006096872033
+        ],
+        [
+          12.544382196592,
+          1.298136126163,
+          -0.009062536237
+        ],
+        [
+          13.610914026597,
+          2.459576640096,
+          0.025822996648
+        ],
+        [
+          14.943237958167,
+          1.842959267863,
+          0.020180523687
+        ],
+        [
+          16.025006356062,
+          2.992641194466,
+          -0.0232161108
+        ],
+        [
+          17.467209076596,
+          2.37644898398,
+          -0.016575245652
+        ],
+        [
+          18.452899906136,
+          3.498054755784,
+          0.006274679146
+        ],
+        [
+          -0.892684337503,
+          0.703203728905,
+          0.01309401418
+        ],
+        [
+          -0.009383570327,
+          -0.592745058895,
+          0.959575577434
+        ],
+        [
+          0.007987057936,
+          -0.659568413625,
+          -0.925453443594
+        ],
+        [
+          1.251543502672,
+          1.490070354108,
+          0.87744242643
+        ],
+        [
+          1.231664468653,
+          1.510121250494,
+          -0.89530467024
+        ],
+        [
+          2.498487024109,
+          -0.621334464509,
+          0.879388940975
+        ],
+        [
+          2.517928868762,
+          -0.59149129726,
+          -0.85357034825
+        ],
+        [
+          3.739125826751,
+          1.485280001937,
+          0.889678709409
+        ],
+        [
+          3.760594259123,
+          1.534306164215,
+          -0.948906661978
+        ],
+        [
+          4.995010199222,
+          -0.650709121564,
+          0.934161454002
+        ],
+        [
+          5.023101486462,
+          -0.693870944429,
+          -0.930692006084
+        ],
+        [
+          6.28700479668,
+          1.518200207109,
+          0.897785587977
+        ],
+        [
+          6.266130285033,
+          1.485971926569,
+          -0.854392579171
+        ],
+        [
+          7.741964136064,
+          -0.315852918836,
+          0.879727085749
+        ],
+        [
+          7.74382486022,
+          -0.333701596385,
+          -0.893834194183
+        ],
+        [
+          8.611117414606,
+          2.015237819449,
+          0.899646357714
+        ],
+        [
+          8.539560088448,
+          2.038599175094,
+          -0.860924087489
+        ],
+        [
+          10.231871491542,
+          0.257293085951,
+          0.831044132708
+        ],
+        [
+          10.228378368497,
+          0.182444531153,
+          -0.852701222284
+        ],
+        [
+          11.036750041018,
+          2.492257153044,
+          0.937916877093
+        ],
+        [
+          10.984140267067,
+          2.484432777971,
+          -0.933967686885
+        ],
+        [
+          12.669099556759,
+          0.665856788438,
+          0.854296751813
+        ],
+        [
+          12.663464781739,
+          0.703384572894,
+          -0.897060117267
+        ],
+        [
+          13.43863482908,
+          3.012065874887,
+          0.876879450812
+        ],
+        [
+          13.448958037316,
+          3.086528311325,
+          -0.946255614462
+        ],
+        [
+          15.11316048726,
+          1.243064846819,
+          0.879126094623
+        ],
+        [
+          15.090350632318,
+          1.28655845335,
+          -0.900128929957
+        ],
+        [
+          15.893841827466,
+          3.579660660158,
+          0.907799794296
+        ],
+        [
+          15.914318982719,
+          3.586370654012,
+          -0.846466473352
+        ],
+        [
+          17.50690677154,
+          1.741149780773,
+          0.858553418686
+        ],
+        [
+          17.568731880924,
+          1.773120634535,
+          -0.8701794382
+        ],
+        [
+          19.42269745646,
+          3.041136963063,
+          -0.006458688076
+        ],
+        [
+          18.340191040966,
+          4.114301776776,
+          0.873388208994
+        ],
+        [
+          18.376441015371,
+          4.082540463263,
+          -0.961315667747
+        ]
+      ],
+      "symbols": [
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H"
+      ]
+    },
+    {
+      "bonds": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          7,
+          8
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          9,
+          10
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          11,
+          12
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          13,
+          14
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          0,
+          16
+        ],
+        [
+          0,
+          17
+        ],
+        [
+          0,
+          18
+        ],
+        [
+          1,
+          19
+        ],
+        [
+          1,
+          20
+        ],
+        [
+          2,
+          21
+        ],
+        [
+          2,
+          22
+        ],
+        [
+          3,
+          23
+        ],
+        [
+          3,
+          24
+        ],
+        [
+          4,
+          25
+        ],
+        [
+          4,
+          26
+        ],
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          28
+        ],
+        [
+          6,
+          29
+        ],
+        [
+          6,
+          30
+        ],
+        [
+          7,
+          31
+        ],
+        [
+          7,
+          32
+        ],
+        [
+          8,
+          33
+        ],
+        [
+          8,
+          34
+        ],
+        [
+          9,
+          35
+        ],
+        [
+          9,
+          36
+        ],
+        [
+          10,
+          37
+        ],
+        [
+          10,
+          38
+        ],
+        [
+          11,
+          39
+        ],
+        [
+          11,
+          40
+        ],
+        [
+          12,
+          41
+        ],
+        [
+          12,
+          42
+        ],
+        [
+          13,
+          43
+        ],
+        [
+          13,
+          44
+        ],
+        [
+          14,
+          45
+        ],
+        [
+          14,
+          46
+        ],
+        [
+          15,
+          47
+        ],
+        [
+          15,
+          48
+        ],
+        [
+          15,
+          49
+        ]
+      ],
+      "family": "contact",
+      "parent_id": "C16-b02-contact0",
+      "perturbation": {
+        "atoms": [
+          7,
+          14,
+          31,
+          32,
+          45,
+          46
+        ],
+        "contact_carbons": [
+          7,
+          14
+        ],
+        "contact_distance_noise_free": 2.300000000000031,
+        "contact_pair": [
+          31,
+          45
+        ],
+        "fold_bonds": [
+          [
+            8,
+            9
+          ],
+          [
+            9,
+            10
+          ],
+          [
+            10,
+            11
+          ],
+          [
+            11,
+            12
+          ],
+          [
+            12,
+            13
+          ]
+        ],
+        "fold_torsion_deltas_deg": [
+          -115.97899201302518,
+          -115.40641859881731,
+          0.021279466884294607,
+          -120.00003410765929,
+          -119.99999999981223
+        ],
+        "kind": "contact",
+        "location": 8,
+        "magnitude": 2.3,
+        "target_tolerance": 0.02,
+        "units": "angstrom"
+      },
+      "positions": [
+        [
+          -0.015941235765,
+          0.063936718557,
+          0.022448620438
+        ],
+        [
+          1.218994661355,
+          0.881531898087,
+          -0.005806597305
+        ],
+        [
+          2.447849186735,
+          0.032938945198,
+          -0.036016122873
+        ],
+        [
+          3.760329465168,
+          0.86522868909,
+          0.018346533247
+        ],
+        [
+          5.042826249566,
+          0.031567214647,
+          -0.059104526854
+        ],
+        [
+          6.257849356838,
+          0.8862018465,
+          -0.014810547281
+        ],
+        [
+          7.508617135759,
+          -0.020371687143,
+          -0.031540492136
+        ],
+        [
+          8.73567898726,
+          0.915546279208,
+          -0.008091245022
+        ],
+        [
+          10.005802825793,
+          0.006142004571,
+          0.01799227255
+        ],
+        [
+          11.290424813409,
+          0.862963152083,
+          0.006096872033
+        ],
+        [
+          11.299579542531,
+          1.673892654588,
+          1.287677697585
+        ],
+        [
+          11.492705968686,
+          0.762202224722,
+          2.511023259638
+        ],
+        [
+          11.470499083869,
+          1.560230500511,
+          3.802165283127
+        ],
+        [
+          10.215119751541,
+          2.37931493221,
+          3.91599750735
+        ],
+        [
+          9.066667532241,
+          1.400919312641,
+          3.971542834777
+        ],
+        [
+          7.715210631557,
+          2.191927589541,
+          4.151621618287
+        ],
+        [
+          -0.892684337503,
+          0.703203728905,
+          0.01309401418
+        ],
+        [
+          -0.009383570327,
+          -0.592745058895,
+          0.959575577434
+        ],
+        [
+          0.007987057936,
+          -0.659568413625,
+          -0.925453443594
+        ],
+        [
+          1.251543502672,
+          1.490070354108,
+          0.87744242643
+        ],
+        [
+          1.231664468653,
+          1.510121250494,
+          -0.89530467024
+        ],
+        [
+          2.498487024109,
+          -0.621334464509,
+          0.879388940975
+        ],
+        [
+          2.517928868762,
+          -0.59149129726,
+          -0.85357034825
+        ],
+        [
+          3.739125826751,
+          1.485280001937,
+          0.889678709409
+        ],
+        [
+          3.760594259123,
+          1.534306164215,
+          -0.948906661978
+        ],
+        [
+          4.995010199222,
+          -0.650709121564,
+          0.934161454002
+        ],
+        [
+          5.023101486462,
+          -0.693870944429,
+          -0.930692006084
+        ],
+        [
+          6.28700479668,
+          1.518200207109,
+          0.897785587977
+        ],
+        [
+          6.266130285033,
+          1.485971926569,
+          -0.854392579171
+        ],
+        [
+          7.454763801139,
+          -0.608639671537,
+          0.879727085749
+        ],
+        [
+          7.456624525295,
+          -0.626488349086,
+          -0.893834194183
+        ],
+        [
+          8.796556466041,
+          1.509526686878,
+          0.899646357714
+        ],
+        [
+          8.724999139884,
+          1.532888042522,
+          -0.860924087489
+        ],
+        [
+          9.999268929032,
+          -0.554956771894,
+          0.831044132708
+        ],
+        [
+          9.995775805987,
+          -0.629805326692,
+          -0.852701222284
+        ],
+        [
+          11.241486149506,
+          1.517005665756,
+          -0.803823924356
+        ],
+        [
+          12.112697849323,
+          0.202700433268,
+          -0.116048359204
+        ],
+        [
+          12.137901482814,
+          2.345491225245,
+          1.225992892331
+        ],
+        [
+          10.36267444521,
+          2.260045489629,
+          1.401865009253
+        ],
+        [
+          12.376603346256,
+          0.13405848114,
+          2.360085421282
+        ],
+        [
+          10.61733595312,
+          0.085031001719,
+          2.463766608145
+        ],
+        [
+          11.627041500225,
+          0.899556766009,
+          4.617810305698
+        ],
+        [
+          12.331026142705,
+          2.307952153567,
+          3.736996668786
+        ],
+        [
+          10.09733533568,
+          3.027113711358,
+          3.110351414387
+        ],
+        [
+          10.271655440937,
+          2.934781709971,
+          4.906581425283
+        ],
+        [
+          8.939142164445,
+          0.803882791219,
+          3.032837218631
+        ],
+        [
+          9.154810223833,
+          0.73681164974,
+          4.854600640289
+        ],
+        [
+          6.839378192065,
+          1.476969459629,
+          4.173728684976
+        ],
+        [
+          7.615881879122,
+          2.868953923988,
+          3.282073150076
+        ],
+        [
+          7.805974803531,
+          2.738150615234,
+          4.997865551879
+        ]
+      ],
+      "symbols": [
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "C",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H",
+        "H"
+      ]
+    }
+  ],
+  "schema": 1,
+  "scope": "completed alkane_hotspots pilot only; no alkane_repair inputs",
+  "targets": {
+    "core_force_rmse": 0.03,
+    "distance_bins": [
+      0.0,
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      6.0,
+      100.0
+    ],
+    "environment_radius": 4.0,
+    "max_core_force_error": 0.1,
+    "max_failures": 0,
+    "selection_objective": "min_measured_cost"
+  }
+}

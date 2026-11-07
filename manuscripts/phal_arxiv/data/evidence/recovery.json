@@ -1,0 +1,460 @@
+{
+  "cancellation": {
+    "attempt": {
+      "exit_code": null,
+      "failure_class": "cancelled",
+      "raw_state": "CANCELLED",
+      "reasons": [
+        "job ended cancelled (exit code None)",
+        "no SCF convergence marker in the output",
+        "no total energy (ENERGY| Total FORCE_EVAL) in the output",
+        "no force block in the output",
+        "CP2K did not terminate normally (no 'PROGRAM ENDED'; output truncated or killed)"
+      ],
+      "retry_decision": "cancelled jobs are never retried automatically",
+      "state": "cancelled"
+    },
+    "cancel_latency_s": 0.053038917016237974,
+    "checks": {
+      "cancel_marker_written": true,
+      "failure_class_cancelled": true,
+      "no_live_process_in_job_group": true,
+      "poll_after_cancel_no_resubmission": true,
+      "single_attempt_no_retry": true,
+      "task_execution_cancelled": true,
+      "task_finished": true,
+      "workflow_bridge_reports_cancelled": true
+    },
+    "cp2k_output_bytes_at_cancel": 31891,
+    "execution_after_cancel": "cancelled",
+    "failure_reasons": [
+      "attempt 1 (sp): cancelled: job ended cancelled (exit code None); no SCF convergence marker in the output; no total energy (ENERGY| Total FORCE_EVAL) in the output; no force block in the output; CP2K did not terminate normally (no 'PROGRAM ENDED'; output truncated or killed)",
+      "cancelled jobs are never retried automatically"
+    ],
+    "job_id": "51657",
+    "passed": true,
+    "pgid": 51657,
+    "processes_after_cancel": [],
+    "processes_before_cancel": [
+      {
+        "command": "/bin/sh <artifacts_root>/closed_loop_v2/pilot_v2/recovery/cancellation_tasks/label-920bb7c901bf08ed/attempts/01-",
+        "pid": 51657,
+        "stat": "Ss"
+      },
+      {
+        "command": "cp2k.psmp -i sp.inp -o sp.out",
+        "pid": 51659,
+        "stat": "R"
+      }
+    ],
+    "settle_s": 3.0,
+    "task_id": "label-920bb7c901bf08ed"
+  },
+  "config": "<GMD_active>/configs/demos/alkane_hotspots/closed_loop_pilot_v2.yaml",
+  "created_at": "2026-11-07T01:13:46+00:00",
+  "final_summary": {
+    "active_dataset_version": "dsv-3a19994e859756c2",
+    "active_model_id": "model-314c099fc32fc306",
+    "candidates": {
+      "failed": 0,
+      "invalid": 0,
+      "labeled": 1,
+      "labeling": 0,
+      "pending": 0,
+      "rejected": 2,
+      "selected": 0
+    },
+    "cycle": 0,
+    "events": 3,
+    "models": [
+      {
+        "metrics": {
+          "energy_rmse_per_atom": 0.020343811423008878,
+          "force_rmse": 0.505909258028807,
+          "n_validation": 4.0
+        },
+        "model_id": "model-314c099fc32fc306",
+        "state": "promoted"
+      },
+      {
+        "metrics": {
+          "energy_rmse_per_atom": 0.007122195113931874,
+          "force_rmse": 0.49099132660981426,
+          "n_validation": 4.0
+        },
+        "model_id": "model-265a4764b6d11e5d",
+        "state": "rejected"
+      }
+    ],
+    "promotions": [
+      {
+        "action": "promote",
+        "model_id": "model-314c099fc32fc306",
+        "previous_model_id": null,
+        "reason": "initial model"
+      },
+      {
+        "action": "promote",
+        "model_id": "model-265a4764b6d11e5d",
+        "previous_model_id": "model-314c099fc32fc306",
+        "reason": "cycle 0 gates passed"
+      },
+      {
+        "action": "rollback",
+        "model_id": "model-314c099fc32fc306",
+        "previous_model_id": "model-265a4764b6d11e5d",
+        "reason": "strict gate audit failed ['force_rmse'] on real validation metrics"
+      }
+    ],
+    "rounds": [
+      {
+        "n_candidates": 3,
+        "n_events": 3,
+        "n_rejected": 2,
+        "n_selected": 1,
+        "rejected_reasons": {
+          "cycle_budget": 2
+        },
+        "round_id": 0
+      }
+    ],
+    "run_id": "alkane-recovery-pilot",
+    "samples": 1,
+    "segments": [
+      {
+        "cycle": 0,
+        "end_step": 2000,
+        "model_id": "model-314c099fc32fc306",
+        "segment_index": 0,
+        "status": "completed"
+      },
+      {
+        "cycle": 0,
+        "end_step": 2200,
+        "model_id": "model-265a4764b6d11e5d",
+        "segment_index": 1,
+        "status": "completed"
+      },
+      {
+        "cycle": 0,
+        "end_step": 2400,
+        "model_id": "model-314c099fc32fc306",
+        "segment_index": 2,
+        "status": "completed"
+      }
+    ],
+    "stage": "done",
+    "tasks": {
+      "collected": 0,
+      "failed": 0,
+      "ingested": 1,
+      "invalid": 0,
+      "submitted": 0,
+      "submitting": 0,
+      "unknown": 0
+    }
+  },
+  "image_check": {
+    "below_margin": [],
+    "enabled": true,
+    "force_receptive_field": 16.0,
+    "margin": 4.0,
+    "min_at": {
+      "model_version": "model-314c099fc32fc306",
+      "run_id": "alkane-recovery-pilot",
+      "step": 30
+    },
+    "min_image_distance": 20.71306508854734,
+    "n_frames_checked": 242
+  },
+  "interruption": {
+    "controller_pid": 50405,
+    "cp2k_jobs_alive_after_kill": {
+      "label-af6d1ae77ba4c71c:1": true
+    },
+    "killed_after_s": 22.103047500015236,
+    "note": "local CP2K jobs run in their own session and survive the controller by design, so a restart can adopt them",
+    "returncode": -9,
+    "signal": "SIGKILL",
+    "snapshot_after_kill": {
+      "attempts": {
+        "label-af6d1ae77ba4c71c": [
+          {
+            "index": 1,
+            "job_id": "50520",
+            "kind": "initial",
+            "pgid": 50520,
+            "stage": "sp",
+            "state": "running",
+            "submitted_at": "2026-11-07T01:14:06+00:00"
+          }
+        ]
+      },
+      "task_dirs": [
+        "label-af6d1ae77ba4c71c"
+      ],
+      "tasks": [
+        {
+          "attempt": 1,
+          "cycle": 0,
+          "job_id": "50520",
+          "state": "submitted",
+          "task_id": "label-af6d1ae77ba4c71c"
+        }
+      ]
+    }
+  },
+  "restart_after_rollback": {
+    "end_step": 2400,
+    "gmd_status": {
+      "model_changed_from": "0d7026f3a0eb653a1061b0de21b8673578deda3c51d3940b7529f476077bb635",
+      "start_step": 2200,
+      "state": "completed",
+      "step": 2400
+    },
+    "model_change": [
+      {
+        "boundary_step": 2200,
+        "energy_new_model_ev": -3027.9453125,
+        "energy_old_model_ev": -3028.81396484375,
+        "jump_ev": 0.86865234375,
+        "jump_ev_per_atom": 0.017373046875,
+        "kind": "model_change",
+        "max_position_difference": 0.0,
+        "new_first_step": 2200,
+        "new_model_id": "model-314c099fc32fc306",
+        "new_segment": 2,
+        "note": "potential-energy jump from replacing the model at fixed coordinates (restart boundary); not integration drift",
+        "old_model_id": "model-265a4764b6d11e5d",
+        "old_segment": 1,
+        "reevaluated": {
+          "configuration_step": 2200,
+          "energy_new_model_ev": -3027.9453125,
+          "energy_old_model_ev": -3028.81396484375,
+          "jump_ev": 0.86865234375,
+          "source": "both exports re-evaluated on the old segment's last frame"
+        },
+        "same_coordinates": true
+      }
+    ],
+    "model_id": "model-314c099fc32fc306",
+    "previous_model_id": "model-265a4764b6d11e5d",
+    "reason": "restart after rollback",
+    "segment_index": 2,
+    "start_step": 2200,
+    "status": "completed"
+  },
+  "resume": {
+    "final_stage": "done",
+    "summary": {
+      "active_dataset_version": "dsv-3a19994e859756c2",
+      "active_model_id": "model-265a4764b6d11e5d",
+      "candidates": {
+        "failed": 0,
+        "invalid": 0,
+        "labeled": 1,
+        "labeling": 0,
+        "pending": 0,
+        "rejected": 2,
+        "selected": 0
+      },
+      "cycle": 0,
+      "events": 3,
+      "models": [
+        {
+          "metrics": {
+            "energy_rmse_per_atom": 0.020343811423008878,
+            "force_rmse": 0.505909258028807,
+            "n_validation": 4.0
+          },
+          "model_id": "model-314c099fc32fc306",
+          "state": "retired"
+        },
+        {
+          "metrics": {
+            "energy_rmse_per_atom": 0.007122195113931874,
+            "force_rmse": 0.49099132660981426,
+            "n_validation": 4.0
+          },
+          "model_id": "model-265a4764b6d11e5d",
+          "state": "promoted"
+        }
+      ],
+      "promotions": [
+        {
+          "action": "promote",
+          "model_id": "model-314c099fc32fc306",
+          "previous_model_id": null,
+          "reason": "initial model"
+        },
+        {
+          "action": "promote",
+          "model_id": "model-265a4764b6d11e5d",
+          "previous_model_id": "model-314c099fc32fc306",
+          "reason": "cycle 0 gates passed"
+        }
+      ],
+      "rounds": [
+        {
+          "n_candidates": 3,
+          "n_events": 3,
+          "n_rejected": 2,
+          "n_selected": 1,
+          "rejected_reasons": {
+            "cycle_budget": 2
+          },
+          "round_id": 0
+        }
+      ],
+      "run_id": "alkane-recovery-pilot",
+      "samples": 1,
+      "segments": [
+        {
+          "cycle": 0,
+          "end_step": 2000,
+          "model_id": "model-314c099fc32fc306",
+          "segment_index": 0,
+          "status": "completed"
+        }
+      ],
+      "stage": "done",
+      "tasks": {
+        "collected": 0,
+        "failed": 0,
+        "ingested": 1,
+        "invalid": 0,
+        "submitted": 0,
+        "submitting": 0,
+        "unknown": 0
+      }
+    },
+    "verification": {
+      "adopted": [
+        {
+          "job_id": "50520",
+          "later_attempts": [],
+          "n_initial_attempts": 1,
+          "same_job_after_resume": true,
+          "task_id": "label-af6d1ae77ba4c71c"
+        }
+      ],
+      "n_dataset_versions": 2,
+      "n_label_files": 1,
+      "n_samples": 1,
+      "n_tasks": 1,
+      "new_task_dirs_after_resume": [],
+      "passed": true,
+      "problems": []
+    }
+  },
+  "run_id": "alkane-recovery-pilot",
+  "segment_with_promoted_model": {
+    "end_step": 2200,
+    "gmd_status": {
+      "model_changed_from": "39c3cf34fb8a20d2ed5545288aa0c06ba55b2bcc847de09e69d54d82971717ba",
+      "start_step": 2000,
+      "state": "completed",
+      "step": 2200
+    },
+    "model_change": [
+      {
+        "boundary_step": 2000,
+        "energy_new_model_ev": -3028.4833984375,
+        "energy_old_model_ev": -3028.97900390625,
+        "jump_ev": 0.49560546875,
+        "jump_ev_per_atom": 0.009912109375,
+        "kind": "model_change",
+        "max_position_difference": 0.0,
+        "new_first_step": 2000,
+        "new_model_id": "model-265a4764b6d11e5d",
+        "new_segment": 1,
+        "note": "potential-energy jump from replacing the model at fixed coordinates (restart boundary); not integration drift",
+        "old_model_id": "model-314c099fc32fc306",
+        "old_segment": 0,
+        "reevaluated": {
+          "configuration_step": 2000,
+          "energy_new_model_ev": -3028.4833984375,
+          "energy_old_model_ev": -3028.97900390625,
+          "jump_ev": 0.49560546875,
+          "source": "both exports re-evaluated on the old segment's last frame"
+        },
+        "same_coordinates": true
+      }
+    ],
+    "model_id": "model-265a4764b6d11e5d",
+    "previous_model_id": "model-314c099fc32fc306",
+    "reason": "promoted model drives the MD",
+    "segment_index": 1,
+    "start_step": 2000,
+    "status": "completed"
+  },
+  "smoke_only": false,
+  "strict_gate_audit": {
+    "failed_checks": [
+      "force_rmse"
+    ],
+    "metrics": {
+      "energy_rmse_per_atom": 0.007122195113931874,
+      "force_rmse": 0.49099132660981426,
+      "n_validation": 4.0
+    },
+    "model_id": "model-265a4764b6d11e5d",
+    "outcome": "rolled_back",
+    "parent_metrics": {
+      "energy_rmse_per_atom": 0.020343811423008878,
+      "force_rmse": 0.5059092593977997,
+      "n_validation": 4.0
+    },
+    "rejected_model_id": "model-265a4764b6d11e5d",
+    "rejected_state": "rejected",
+    "restored_model_id": "model-314c099fc32fc306",
+    "restored_state": "promoted",
+    "rolled_back": true,
+    "strict_gates": {
+      "export_max_force_deviation": 0.0001,
+      "max_energy_rmse_per_atom": null,
+      "max_force_rmse": 0.05,
+      "max_relative_regression": 0.0,
+      "require_engine_smoke_test": true,
+      "require_export_validation": true,
+      "require_validation_samples": 1
+    },
+    "strict_report": {
+      "checks": {
+        "engine_smoke_test": {
+          "detail": {
+            "detail": {
+              "decisions": []
+            },
+            "frames": 2,
+            "passed": true,
+            "status": "completed"
+          },
+          "passed": true
+        },
+        "export_matches_checkpoint": {
+          "limit": 0.0001,
+          "passed": true,
+          "value": 9.5367431640625e-07
+        },
+        "force_rmse": {
+          "limit": 0.05,
+          "passed": false,
+          "value": 0.49099132660981426
+        },
+        "no_regression_vs_active": {
+          "limit": 0.5059092593977997,
+          "parent": 0.5059092593977997,
+          "passed": true,
+          "value": 0.49099132660981426
+        },
+        "validation_samples": {
+          "passed": true,
+          "required": 1,
+          "value": 4
+        }
+      },
+      "passed": false
+    }
+  }
+}

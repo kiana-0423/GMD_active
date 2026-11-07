@@ -1,0 +1,61 @@
+\section{Discussion and limitations}
+The strongest scientific result in this pilot is the measured fidelity
+of selected local DFT labels. The cost reduction is useful only because
+the retained core forces are compared directly with full-parent
+references. The failed two-hop setting illustrates why a pooled average
+alone is insufficient. The C32 transfer further shows that a setting
+chosen on a smaller molecule can remain useful on a larger parent,
+although its near-threshold maximum error calls for caution.
+
+The strongest systems result is that those labels can pass through
+the complete dynamics--monitoring--reference--training cycle with
+recorded provenance, weighted supervision, promotion, and recovery.
+This integration complements prior local active-learning methods;
+it does not establish priority for local selection or closed-loop
+learning. The platform's physics-aware features are candidate
+diagnostics. Their value must be measured against reference-force
+errors and simpler acquisition rules, rather than inferred from
+their physical motivation.
+
+Several observations limit that interpretation here. The static
+comparison contains only two repetitions and a small, repeatedly
+examined final-evaluation set. Its PHAL thresholds trigger every
+available static frame, and the no-LJ comparison does not reveal
+a consistent advantage from the LJ feature. An earlier reference-error
+audit labels all 64 evaluated regions positive at each of the
+0.1, 0.2, and 0.4~\forceunit\ thresholds. The audit accordingly
+does not report average precision as an informative discrimination
+metric. With no negative regions, the experiment cannot assess
+specificity in distinguishing acceptable from erroneous environments.
+Event buffering also has no demonstrated benefit from the static-pool
+comparison, which scores unrelated configurations independently.
+
+There is a further distinction between electronic locality and model
+locality. A completed diagnostic on one central carbon of one C16
+structure finds trained-model force sensitivity extending to roughly
+7.6~\AA; truncation to 3~\AA\ can alter that force, whereas
+truncation at 8~\AA\ falls below the diagnostic's
+$10^{-4}$~\forceunit\ tolerance. The random model has a much smaller
+effective range in the same probe. These observations show that a
+single-layer cutoff or an untrained-model probe does not determine
+the context needed by a trained force prediction. The selected
+fragment's DFT-fidelity pass therefore does not eliminate a possible
+parent--fragment representation mismatch. This diagnostic is limited
+to one model, structure, atom, and perturbation procedure.
+
+The closed-loop topology improvement is encouraging but its initial
+model is not a sound baseline for claiming extrapolation repair.
+Nor can 2~ps trajectories establish equilibrium conformational
+statistics, rare-event kinetics, or long-time stability. An energy
+jump of 2.246~eV occurs at a fixed-coordinate model replacement;
+this is a change of potential-energy function, not integrator drift.
+Energy conservation across model switches is therefore not claimed.
+The periodic-box checks support the short trajectories actually
+run, not arbitrary later molecular extension.
+
+The evidence supports a platform and an exploratory local-label study.
+A stronger repair claim requires an initially qualified force field,
+independent confirmation of out-of-domain failures, paired controls
+for extra training and acquisition, and a separate final assessment
+of both repair and retention of in-domain accuracy. No outcomes
+from such an unfinished experiment are included here.

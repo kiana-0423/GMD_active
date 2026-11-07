@@ -1,0 +1,475 @@
+{
+  "config_hash": "e6ecfaf162155ef4b8cdb36ded3516b525aee932b6f324b820bc44c7116805d1",
+  "repetition": 0,
+  "rounds": [
+    {
+      "acquisitions": [],
+      "atom_error_p99": 2.4471747473544228,
+      "core_rmse": 0.6804041679471088,
+      "cumulative_cpu_core_s": 0.0,
+      "diagnostics": {},
+      "evaluation": {
+        "core": {
+          "atom_error_max": 2.6467530203906646,
+          "atom_error_mean": 1.0397185171424443,
+          "atom_error_p95": 2.2488113596536885,
+          "atom_error_p99": 2.625503077071442,
+          "definition": "perturbation-site region, 1 bond hop(s)",
+          "force_rmse": 0.6804041679471088,
+          "n_atoms": 52,
+          "n_configurations": 3
+        },
+        "n_configurations": 4,
+        "overall": {
+          "atom_error_max": 2.6467530203906646,
+          "atom_error_mean": 0.9944855849580344,
+          "atom_error_p95": 2.0388396275969702,
+          "atom_error_p99": 2.4471747473544228,
+          "force_rmse": 0.6453778007700818,
+          "n_atoms": 200
+        },
+        "parent_ids": [
+          "C16-b02-bend0",
+          "C16-b02-contact0",
+          "C16-b02-normal0",
+          "C16-b02-torsion0"
+        ],
+        "per_family": {
+          "bend": {
+            "atom_error_max": 2.6467530203906646,
+            "atom_error_mean": 1.0233589482434662,
+            "atom_error_p95": 1.9446216247773984,
+            "atom_error_p99": 2.378218418523046,
+            "core": {
+              "atom_error_max": 2.6467530203906646,
+              "atom_error_mean": 1.0258859082928626,
+              "atom_error_p95": 2.1011398655436895,
+              "atom_error_p99": 2.5376303894212695,
+              "force_rmse": 0.6842193269837243,
+              "n_atoms": 15
+            },
+            "force_rmse": 0.6611558839036632,
+            "n_atoms": 50,
+            "n_configurations": 1
+          },
+          "contact": {
+            "atom_error_max": 2.6050864648627763,
+            "atom_error_mean": 0.9733187156858455,
+            "atom_error_p95": 2.1008550520871396,
+            "atom_error_p99": 2.5269281400354098,
+            "core": {
+              "atom_error_max": 2.6050864648627763,
+              "atom_error_mean": 1.0778738542562645,
+              "atom_error_p95": 2.461530358037001,
+              "atom_error_p99": 2.5763752434976213,
+              "force_rmse": 0.7119853099223311,
+              "n_atoms": 19
+            },
+            "force_rmse": 0.6460838775444435,
+            "n_atoms": 50,
+            "n_configurations": 1
+          },
+          "normal": {
+            "atom_error_max": 2.19878548986766,
+            "atom_error_mean": 0.9791714839629742,
+            "atom_error_p95": 1.9991678344360513,
+            "atom_error_p99": 2.155950158542919,
+            "core": {
+              "n_atoms": 0
+            },
+            "force_rmse": 0.6284876382275111,
+            "n_atoms": 50,
+            "n_configurations": 1
+          },
+          "torsion": {
+            "atom_error_max": 2.2211931708081014,
+            "atom_error_mean": 1.002093191939852,
+            "atom_error_p95": 2.015732470469595,
+            "atom_error_p99": 2.1558398751128234,
+            "core": {
+              "atom_error_max": 2.087819097960596,
+              "atom_error_mean": 1.010970613119175,
+              "atom_error_p95": 1.995574873077473,
+              "atom_error_p99": 2.0693702529839713,
+              "force_rmse": 0.642024203025945,
+              "n_atoms": 18
+            },
+            "force_rmse": 0.6453695312448652,
+            "n_atoms": 50,
+            "n_configurations": 1
+          }
+        },
+        "status": "executed"
+      },
+      "force_rmse": 0.6453778007700818,
+      "model": {
+        "checkpoints": [
+          "<alkane_artifacts>/pilot/model_study_v2/models/79df41ad14f5387e1724/train/member_0/ckpt_best.pt",
+          "<alkane_artifacts>/pilot/model_study_v2/models/79df41ad14f5387e1724/train/member_1/ckpt_best.pt",
+          "<alkane_artifacts>/pilot/model_study_v2/models/79df41ad14f5387e1724/train/member_2/ckpt_best.pt"
+        ],
+        "key": "79df41ad14f5387e1724"
+      },
+      "n_labels": 0,
+      "n_valid_labels": 0,
+      "round": 0
+    },
+    {
+      "acquisitions": [
+        {
+          "candidate_id": "region-3bc03c1634624343",
+          "cpu_core_s": 3484.4490492343903,
+          "kind": "full",
+          "label_id": "label-2de7b3a8bbf4d0b8",
+          "parent_id": "C16-b03-normal0",
+          "round": 1,
+          "status": "valid"
+        },
+        {
+          "candidate_id": "region-a0c44206b6bf826b",
+          "cpu_core_s": 1028.5374164581299,
+          "kind": "full",
+          "label_id": "label-0e83c228708c0956",
+          "parent_id": "C16-b03-contact0",
+          "round": 1,
+          "status": "valid"
+        },
+        {
+          "candidate_id": "region-182f390f2e200f46",
+          "cpu_core_s": 3967.0621621608734,
+          "kind": "full",
+          "label_id": "label-1ec6cd2ab077a1b4",
+          "parent_id": "C16-b03-bend0",
+          "round": 1,
+          "status": "valid"
+        },
+        {
+          "candidate_id": "region-75aefd37743c7610",
+          "cpu_core_s": 1556.5195643901825,
+          "kind": "full",
+          "label_id": "label-2785034e5999a72c",
+          "parent_id": "C16-b03-torsion0",
+          "round": 1,
+          "status": "valid"
+        }
+      ],
+      "atom_error_p99": 2.2377993230372093,
+      "core_rmse": 0.5612991952289602,
+      "cumulative_cpu_core_s": 10036.568192243576,
+      "diagnostics": {
+        "accounting": {
+          "n_charged": 4,
+          "overshoot_cpu_core_s": null,
+          "skipped": {},
+          "spent_cpu_core_s": 10036.568192243576
+        },
+        "events": [
+          {
+            "candidates": [
+              "region-182f390f2e200f46",
+              "region-377087b62a3292e5"
+            ],
+            "event_id": "evt-b756580cc4e739c2",
+            "max_score": 9.558713595681892,
+            "n_hotspots": 2,
+            "parent_id": "C16-b03-bend0",
+            "trigger_steps": [
+              0
+            ]
+          },
+          {
+            "candidates": [
+              "region-a0c44206b6bf826b"
+            ],
+            "event_id": "evt-e5ec188b10778a2a",
+            "max_score": 10.056164694799216,
+            "n_hotspots": 1,
+            "parent_id": "C16-b03-contact0",
+            "trigger_steps": [
+              0
+            ]
+          },
+          {
+            "candidates": [
+              "region-3bc03c1634624343",
+              "region-b3f623c3710ebaa0"
+            ],
+            "event_id": "evt-d69e9c9041b9ff1d",
+            "max_score": 10.496266159348698,
+            "n_hotspots": 2,
+            "parent_id": "C16-b03-normal0",
+            "trigger_steps": [
+              0
+            ]
+          },
+          {
+            "candidates": [
+              "region-75aefd37743c7610",
+              "region-9b841ccb7b06e9b2",
+              "region-0ff31b84699ced63"
+            ],
+            "event_id": "evt-304955b0b964e59c",
+            "max_score": 7.841052252613464,
+            "n_hotspots": 3,
+            "parent_id": "C16-b03-torsion0",
+            "trigger_steps": [
+              0
+            ]
+          }
+        ],
+        "n_event_candidates": 8,
+        "n_frames": 4,
+        "n_hotspots_mapped_to_nearest": 1,
+        "n_hotspots_unmapped": 0,
+        "n_triggered_frames": 4,
+        "rejected": {
+          "region-377087b62a3292e5": "duplicate",
+          "region-9b841ccb7b06e9b2": "duplicate",
+          "region-b3f623c3710ebaa0": "duplicate"
+        }
+      },
+      "evaluation": {
+        "core": {
+          "atom_error_max": 2.6744370470035164,
+          "atom_error_mean": 0.7820913919255281,
+          "atom_error_p95": 1.8555460849971608,
+          "atom_error_p99": 2.432898107887634,
+          "definition": "perturbation-site region, 1 bond hop(s)",
+          "force_rmse": 0.5612991952289602,
+          "n_atoms": 52,
+          "n_configurations": 3
+        },
+        "n_configurations": 4,
+        "overall": {
+          "atom_error_max": 2.6744370470035164,
+          "atom_error_mean": 0.7077352613093285,
+          "atom_error_p95": 1.8217449026811559,
+          "atom_error_p99": 2.2377993230372093,
+          "force_rmse": 0.5109563502955029,
+          "n_atoms": 200
+        },
+        "parent_ids": [
+          "C16-b02-bend0",
+          "C16-b02-contact0",
+          "C16-b02-normal0",
+          "C16-b02-torsion0"
+        ],
+        "per_family": {
+          "bend": {
+            "atom_error_max": 2.6744370470035164,
+            "atom_error_mean": 0.6827186128247152,
+            "atom_error_p95": 1.7244756459496202,
+            "atom_error_p99": 2.2865606854833813,
+            "core": {
+              "atom_error_max": 2.6744370470035164,
+              "atom_error_mean": 0.8293088907538242,
+              "atom_error_p95": 2.1203279591176107,
+              "atom_error_p99": 2.563615229426335,
+              "force_rmse": 0.6042523188996521,
+              "n_atoms": 15
+            },
+            "force_rmse": 0.5028223316602762,
+            "n_atoms": 50,
+            "n_configurations": 1
+          },
+          "contact": {
+            "atom_error_max": 2.237704241352635,
+            "atom_error_mean": 0.7655209101536751,
+            "atom_error_p95": 1.8280233345838641,
+            "atom_error_p99": 2.21963649226513,
+            "core": {
+              "atom_error_max": 2.2008312840311963,
+              "atom_error_mean": 0.801660534141264,
+              "atom_error_p95": 1.8699670539005369,
+              "atom_error_p99": 2.1346584380050646,
+              "force_rmse": 0.5731062559673382,
+              "n_atoms": 19
+            },
+            "force_rmse": 0.54429594652818,
+            "n_atoms": 50,
+            "n_configurations": 1
+          },
+          "normal": {
+            "atom_error_max": 2.226049021335549,
+            "atom_error_mean": 0.6499829799920162,
+            "atom_error_p95": 1.7323655746892777,
+            "atom_error_p99": 2.033448432430138,
+            "core": {
+              "n_atoms": 0
+            },
+            "force_rmse": 0.4761868944157194,
+            "n_atoms": 50,
+            "n_configurations": 1
+          },
+          "torsion": {
+            "atom_error_max": 2.2472124098100665,
+            "atom_error_mean": 0.7327185422669078,
+            "atom_error_p95": 1.8023383494847405,
+            "atom_error_p99": 2.0740414868979054,
+            "core": {
+              "atom_error_max": 1.7773667493092005,
+              "atom_error_mean": 0.7220871594520044,
+              "atom_error_p95": 1.638384897870814,
+              "atom_error_p99": 1.749570379021523,
+              "force_rmse": 0.509115523671531,
+              "n_atoms": 18
+            },
+            "force_rmse": 0.5181343788947335,
+            "n_atoms": 50,
+            "n_configurations": 1
+          }
+        },
+        "status": "executed"
+      },
+      "force_rmse": 0.5109563502955029,
+      "model": {
+        "checkpoints": [
+          "<alkane_artifacts>/pilot/model_study_v2c/models/dbee99bfd8339b8bbfe7/train/member_0/ckpt_best.pt",
+          "<alkane_artifacts>/pilot/model_study_v2c/models/dbee99bfd8339b8bbfe7/train/member_1/ckpt_best.pt",
+          "<alkane_artifacts>/pilot/model_study_v2c/models/dbee99bfd8339b8bbfe7/train/member_2/ckpt_best.pt"
+        ],
+        "key": "dbee99bfd8339b8bbfe7"
+      },
+      "n_labels": 4,
+      "n_valid_labels": 4,
+      "round": 1
+    },
+    {
+      "acquisitions": [],
+      "atom_error_p99": 2.2377993230372093,
+      "core_rmse": 0.5612991952289602,
+      "cumulative_cpu_core_s": 10036.568192243576,
+      "diagnostics": {
+        "accounting": {
+          "n_charged": 0,
+          "overshoot_cpu_core_s": null,
+          "skipped": {},
+          "spent_cpu_core_s": 0.0
+        },
+        "events": [],
+        "n_event_candidates": 0,
+        "n_frames": 0,
+        "n_hotspots_mapped_to_nearest": 0,
+        "n_hotspots_unmapped": 0,
+        "n_triggered_frames": 0,
+        "rejected": {}
+      },
+      "evaluation": {
+        "core": {
+          "atom_error_max": 2.6744370470035164,
+          "atom_error_mean": 0.7820913919255281,
+          "atom_error_p95": 1.8555460849971608,
+          "atom_error_p99": 2.432898107887634,
+          "definition": "perturbation-site region, 1 bond hop(s)",
+          "force_rmse": 0.5612991952289602,
+          "n_atoms": 52,
+          "n_configurations": 3
+        },
+        "n_configurations": 4,
+        "overall": {
+          "atom_error_max": 2.6744370470035164,
+          "atom_error_mean": 0.7077352613093285,
+          "atom_error_p95": 1.8217449026811559,
+          "atom_error_p99": 2.2377993230372093,
+          "force_rmse": 0.5109563502955029,
+          "n_atoms": 200
+        },
+        "parent_ids": [
+          "C16-b02-bend0",
+          "C16-b02-contact0",
+          "C16-b02-normal0",
+          "C16-b02-torsion0"
+        ],
+        "per_family": {
+          "bend": {
+            "atom_error_max": 2.6744370470035164,
+            "atom_error_mean": 0.6827186128247152,
+            "atom_error_p95": 1.7244756459496202,
+            "atom_error_p99": 2.2865606854833813,
+            "core": {
+              "atom_error_max": 2.6744370470035164,
+              "atom_error_mean": 0.8293088907538242,
+              "atom_error_p95": 2.1203279591176107,
+              "atom_error_p99": 2.563615229426335,
+              "force_rmse": 0.6042523188996521,
+              "n_atoms": 15
+            },
+            "force_rmse": 0.5028223316602762,
+            "n_atoms": 50,
+            "n_configurations": 1
+          },
+          "contact": {
+            "atom_error_max": 2.237704241352635,
+            "atom_error_mean": 0.7655209101536751,
+            "atom_error_p95": 1.8280233345838641,
+            "atom_error_p99": 2.21963649226513,
+            "core": {
+              "atom_error_max": 2.2008312840311963,
+              "atom_error_mean": 0.801660534141264,
+              "atom_error_p95": 1.8699670539005369,
+              "atom_error_p99": 2.1346584380050646,
+              "force_rmse": 0.5731062559673382,
+              "n_atoms": 19
+            },
+            "force_rmse": 0.54429594652818,
+            "n_atoms": 50,
+            "n_configurations": 1
+          },
+          "normal": {
+            "atom_error_max": 2.226049021335549,
+            "atom_error_mean": 0.6499829799920162,
+            "atom_error_p95": 1.7323655746892777,
+            "atom_error_p99": 2.033448432430138,
+            "core": {
+              "n_atoms": 0
+            },
+            "force_rmse": 0.4761868944157194,
+            "n_atoms": 50,
+            "n_configurations": 1
+          },
+          "torsion": {
+            "atom_error_max": 2.2472124098100665,
+            "atom_error_mean": 0.7327185422669078,
+            "atom_error_p95": 1.8023383494847405,
+            "atom_error_p99": 2.0740414868979054,
+            "core": {
+              "atom_error_max": 1.7773667493092005,
+              "atom_error_mean": 0.7220871594520044,
+              "atom_error_p95": 1.638384897870814,
+              "atom_error_p99": 1.749570379021523,
+              "force_rmse": 0.509115523671531,
+              "n_atoms": 18
+            },
+            "force_rmse": 0.5181343788947335,
+            "n_atoms": 50,
+            "n_configurations": 1
+          }
+        },
+        "status": "executed"
+      },
+      "force_rmse": 0.5109563502955029,
+      "model": {
+        "checkpoints": [
+          "<alkane_artifacts>/pilot/model_study_v2c/models/dbee99bfd8339b8bbfe7/train/member_0/ckpt_best.pt",
+          "<alkane_artifacts>/pilot/model_study_v2c/models/dbee99bfd8339b8bbfe7/train/member_1/ckpt_best.pt",
+          "<alkane_artifacts>/pilot/model_study_v2c/models/dbee99bfd8339b8bbfe7/train/member_2/ckpt_best.pt"
+        ],
+        "key": "dbee99bfd8339b8bbfe7"
+      },
+      "n_labels": 4,
+      "n_valid_labels": 4,
+      "round": 2
+    }
+  ],
+  "seed": 11,
+  "status": "complete",
+  "variant": {
+    "event_buffering": null,
+    "extraction": null,
+    "force_weights": null,
+    "kind": "phal_full_system",
+    "lj": null,
+    "name": "phal_full_system",
+    "physical_signals": null
+  }
+}

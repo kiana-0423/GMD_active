@@ -1,0 +1,70 @@
+\section{Additional implementation and evaluation details}
+\label{app:settings}
+\subsection{Monitoring and geometry}
+The LJ fit uses column-normalized least squares on a $3\times2$
+matrix. It requires rank two, a normalized condition number no greater
+than $10^4$, positive fitted coefficients, and a fitted
+$\sigma=(\alpha/\beta)^{1/6}$ between 0.2 and 10~\AA.
+The residual denominator uses $\delta=10^{-8}$ in the force units
+of Eq.~\eqref{eq:lj}; invalid fits receive residual one.
+The check concerns compatibility of one force vector with a local
+pair-force basis. It does not test energy conservation, a full force
+Jacobian, or a transferable LJ parameterization across atoms.
+
+The diversity fingerprint comprises 16-bin geometric summaries of
+pair-distance density, atomic-number-weighted density, and weighted
+bin means, giving 48 components with an 8~\AA\ cutoff.
+The selector compares fingerprint distances against the configured
+0.1 threshold. In a pending event, later triggers merge hotspot and
+reason records without repeatedly extending the original post-event
+window. Both completed and truncated events preserve completeness
+information. These details describe the implementation; the pilot
+does not separately estimate each design choice's causal contribution.
+
+\subsection{Training and evaluation conventions}
+The static study uses a minimum learning rate of $2\times10^{-5}$,
+50 warm-up optimizer steps, one attention head, maximum angular momentum one,
+and an average-neighbor setting of 12. Closed-loop fine-tuning uses
+five warm-up optimizer steps. The bundled configuration snapshots contain
+the remaining recorded settings and their inheritance references.
+They are provenance records, not standalone configurations for
+launching new calculations from this manuscript directory.
+
+Reported model force errors pool Cartesian components across the
+evaluated atoms. Fragment maximum errors instead use the Euclidean
+norm of each atom's three-component error. Local-label force weights
+apply during training, not as a way to hide atoms in the full-parent
+evaluation metric. The atomwise fidelity data retain repeated
+atom--fragment observations, since a parent atom can appear in
+more than one independently extracted site.
+
+For the closed-loop trajectory, all 401 saved frames have nearest-image
+separation above 20.7~\AA. Across the initial/final frozen-model runs,
+the 1206 checked frames have minimum separation approximately
+18.76~\AA. None violates the nominal 16~\AA\ force-dependence bound,
+although 82 frames fall within a further 4~\AA\ caution margin.
+These checks assess the recorded finite trajectories only.
+
+\subsection{Exploratory protocol history}
+Earlier static-pool configurations did not exercise the intended
+PHAL acquisition path. The archived v2 run records zero PHAL-local
+and PHAL-full acquisitions because the light-stage trigger does not
+activate the higher stages. Its zero-acquisition ablations therefore
+do not measure the benefit of local learning. The executed v2c
+comparison follows corrections to static-frame event handling and
+candidate mapping and explicitly evaluates every stage. We report
+that configuration as an exploratory comparison, not as a
+prospectively fixed experiment. Figures contain directly evaluated
+rounds; interpolated budget metrics in the archived reports are not
+presented as observations.
+
+\section{Artifact contents and reproduction}
+The source package supplies six figures in vector PDF and SVG formats
+and PNG previews. Their inputs are frozen in
+\texttt{data/plot\_data.json}; source records, configuration snapshots,
+and hashes accompany them. The plotting script regenerates the figures
+and two numerical tables without invoking GMD, CP2K, or GMD\_SGT.
+A separate bundle validator checks file references, citation keys,
+snapshot hashes, and numerical consistency against the per-atom
+and per-run records. These checks do not replace author review of
+the scientific interpretation or a final typesetting inspection.

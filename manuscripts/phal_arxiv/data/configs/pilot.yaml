@@ -1,0 +1,109 @@
+# Alkane hotspot demonstration: real pilot (part alpha: structures, labels, fragment fidelity).
+# Every grid, threshold and budget of the pilot is here. Thresholds under `fidelity` are pre-registered:
+# they are frozen at the first `fidelity-prepare` and must not be changed afterwards.
+# Generated artifacts go to ../alkane_artifacts/pilot (relative to the GMD_active root), outside git.
+name: pilot
+description: >-
+  C16H34 and C32H66, 24 parents (6 base conformations x {normal, torsion, bend, contact}),
+  PBE-D3(BJ)/DZVP-MOLOPT-SR-GTH/GTH-PBE, 400 Ry, isolated cubic WAVELET box.
+artifacts_root: ../alkane_artifacts/pilot
+seeds:
+  generation: 20261107
+  split: 7
+systems:
+  chain_lengths: [16]   # C32H66 runs as a separately budgeted size-transfer check (pilot_c32.yaml); see results/timing_probe.json
+  allow_long_chains: false
+  long_chain_threshold: 32
+geometry:
+  cc_bond: 1.53
+  ch_bond: 1.09
+  angle_deg: 109.47122063449069   # tetrahedral, arccos(-1/3)
+  covalent_scale: 1.2
+generation:
+  n_parents: 16
+  per_base: {normal: 1, torsion: 1, bend: 1, contact: 1}
+  max_candidates_per_slot: 50
+families:
+  thermal:
+    amplitude: 0.03          # A, Gaussian standard deviation per component, same field for every parent of a base
+  torsion:
+    enabled: true
+    deltas_deg: [120.0, -120.0, 60.0, -60.0]   # change of the trans dihedral (120 = gauche)
+    locations: [0.35, 0.5, 0.65]               # fraction along the chain
+  bend:
+    enabled: true
+    deltas_deg: [-12.0, 12.0, 20.0]            # change of one C-C-C angle
+    locations: [0.35, 0.5, 0.65]
+  contact:
+    enabled: true
+    target_distances: [2.0, 2.3, 2.6]          # A, min distance between two chain segments >= 6 carbons apart
+    target_tolerance: 0.02
+    locations: [0.4, 0.5]
+    fold_bonds: 5
+    min_segment_separation: 6
+    n_starts: 4
+    clash_margin: 0.05
+    max_evaluations: 4000
+checks:
+  bond_tolerance: 0.25        # A vs covalent-radius sum; thermal noise (0.03 A per component) reaches ~0.17
+  exact_tolerance: 1.0e-8
+  exact_angle_tolerance_deg: 1.0e-6
+  max_angle_deviation_deg: 15.0
+  nonbonded_min_bond_separation: 3
+  min_nonbonded_hh: 1.8
+  min_nonbonded_ch: 2.2
+  min_nonbonded_cc: 2.5
+  contact_window: [1.8, 2.9]
+splits:
+  fractions: {initial_train: 0.2, calibration: 0.3, validation: 0.2, final_eval: 0.3}
+  group_key: base_conformation
+  stratify_by: chain_length
+  assignment_order: [calibration, final_eval, initial_train, validation]
+cp2k:
+  executable: cp2k.psmp
+  data_dir: null             # $CP2K_DATA_DIR, else <prefix>/share/cp2k/data next to the executable
+  launcher: []               # e.g. [mpirun, -np, "{ntasks}"] with mpi_ranks > 1
+  omp_threads: 5
+  mpi_ranks: 1
+  functional: PBE
+  basis: DZVP-MOLOPT-SR-GTH
+  potential: GTH-PBE
+  dispersion: true           # DFT-D3(BJ)
+  charge: 0
+  multiplicity: 1
+  cutoff: 300.0      # converged vs 400 Ry: 0.006 eV/A RMS, 0.021 eV/A max on C16H34 (results/timing_probe.json)
+  rel_cutoff: 50.0
+  eps_scf: 1.0e-6
+  max_scf: 100
+  poisson_solver: WAVELET
+  box_padding: 6.0
+  h_only_opt:
+    enabled: false           # caps sit at 1.09 A along the cut C-C bond; relaxing them costs a GEO_OPT per fragment
+    max_iter: 50
+  smoke_only: false
+labels:
+  full_splits: [initial_train, calibration, validation, final_eval]
+  poll_interval_s: 10.0
+  max_concurrent_jobs: 1
+fragments:
+  sites: [perturbation_site, normal_control]
+  normal_location: 0.5
+  graph_hops: [2, 3, 4]
+  cluster:
+    core_radii: [1.5]
+    buffer_radii: [3.0, 4.0, 5.0]
+  vacuum_padding: 4.0
+  cap_clash_distance: 1.5
+fidelity:
+  core_force_rmse: 0.03        # eV/A, pooled over all calibration core atoms of a setting
+  max_core_force_error: 0.10   # eV/A, max |F_frag - F_parent| over calibration core atoms
+  max_failures: 0
+  selection_objective: min_measured_cost
+  distance_bins: [0, 1, 2, 3, 4, 6, 100]
+budgets:
+  max_full_labels: 16
+  max_fragment_labels: 120
+  max_total_cpu_core_hours: 40.0
+  per_job_walltime_s: 10800
+  max_atoms_per_fragment: 80
+  max_atoms_full: 100

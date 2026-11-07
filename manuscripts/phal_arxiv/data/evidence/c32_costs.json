@@ -1,0 +1,95 @@
+{
+  "cubic_box_edge_A_by_cp2k_task": {
+    "label-2b63611ee111195c": 32.40441331,
+    "label-69ec9d4c42f2c9db": 20.23734531,
+    "label-818ede171e57b89b": 22.49347889,
+    "label-bd7d442626c658a9": 21.21843702,
+    "label-ced0894078d0a603": 21.22189273,
+    "label-f6d34238f0ca9cd2": 46.22305124
+  },
+  "description": "Measured CP2K costs of the C32H66 size-transfer labels (pilot_c32.yaml); core_s = wall_s x cores (local scheduler job records); wall_s is the sum over attempts.",
+  "labels": [
+    {
+      "attempts": 2,
+      "core_s": 69498.0,
+      "cores": 5,
+      "first_attempt_wall_s": 6981.9,
+      "kind": "full",
+      "label_id": "label-47e8f896a02ac250",
+      "n_atoms": 98,
+      "parent_id": "C32-b00-torsion0",
+      "retry_attempt_wall_s": 6917.7,
+      "scf_steps_final": 24,
+      "status": "valid",
+      "wall_s": 13899.6
+    },
+    {
+      "attempts": 2,
+      "core_s": 7954.8,
+      "cores": 5,
+      "first_attempt_wall_s": 1215.1,
+      "kind": "full",
+      "label_id": "label-1d4882b8f1021e3e",
+      "n_atoms": 98,
+      "parent_id": "C32-b00-contact0",
+      "retry_attempt_wall_s": 375.9,
+      "scf_steps_final": 24,
+      "status": "valid",
+      "wall_s": 1591.0
+    },
+    {
+      "attempts": 1,
+      "core_s": 403.9,
+      "cores": 5,
+      "kind": "fragment",
+      "label_id": "label-b374f2c201464da7",
+      "n_atoms": 34,
+      "parent_id": "C32-b00-contact0",
+      "scf_steps_final": 31,
+      "status": "valid",
+      "wall_s": 80.8
+    },
+    {
+      "attempts": 1,
+      "core_s": 439.1,
+      "cores": 5,
+      "kind": "fragment",
+      "label_id": "label-95ae9ce74f79edd0",
+      "n_atoms": 44,
+      "parent_id": "C32-b00-contact0",
+      "scf_steps_final": 37,
+      "status": "valid",
+      "wall_s": 87.8
+    },
+    {
+      "attempts": 1,
+      "core_s": 587.4,
+      "cores": 5,
+      "kind": "fragment",
+      "label_id": "label-fead1aa62650c8c1",
+      "n_atoms": 23,
+      "parent_id": "C32-b00-torsion0",
+      "scf_steps_final": 47,
+      "status": "valid",
+      "wall_s": 117.5
+    },
+    {
+      "attempts": 1,
+      "core_s": 465.5,
+      "cores": 5,
+      "kind": "fragment",
+      "label_id": "label-74f829f7e6b54221",
+      "n_atoms": 32,
+      "parent_id": "C32-b00-torsion0",
+      "scf_steps_final": 30,
+      "status": "valid",
+      "wall_s": 93.1
+    }
+  ],
+  "notes": [
+    "Both full labels failed the first attempt (OT/DIIS, SCF not converged within MAX_SCF 100) and converged in 24 steps on the configured retry (Broyden mixing, ALPHA 0.4).",
+    "Per SCF step: torsion parent (46.2 A cubic box) ~70 s (OT, first attempt) and ~288 s (Broyden retry); contact parent (folded, 32.4 A box) ~12 s (OT) and ~16 s (Broyden retry). Box edge, not atom count, sets the cost of the isolated wavelet solver.",
+    "Fragments (20-23 A boxes) took 81-118 s wall each, 404-587 core-s."
+  ],
+  "total_core_h": 22.04
+}

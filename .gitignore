@@ -20,3 +20,5 @@ gmd_example_run/
 cp2k_jobs/
 dataset_store/
 sgt_tiny_h2o_smoke/
+# macOS Finder metadata
+.DS_Store

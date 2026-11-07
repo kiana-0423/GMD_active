@@ -1,0 +1,24 @@
+test_acquisitions_not_fully_paired (__main__.BundleChecks.test_acquisitions_not_fully_paired) ... ok
+test_author_placeholders_are_preserved (__main__.BundleChecks.test_author_placeholders_are_preserved) ... ok
+test_calibration_from_per_atom_errors (__main__.BundleChecks.test_calibration_from_per_atom_errors) ... ok
+test_citations_and_bibtex_keys_match (__main__.BundleChecks.test_citations_and_bibtex_keys_match) ... ok
+test_closed_loop_accounting (__main__.BundleChecks.test_closed_loop_accounting) ... ok
+test_completed_sources_only (__main__.BundleChecks.test_completed_sources_only) ... ok
+test_costs_are_sums_of_acquisitions (__main__.BundleChecks.test_costs_are_sums_of_acquisitions) ... ok
+test_cross_references_resolve (__main__.BundleChecks.test_cross_references_resolve) ... ok
+test_four_label_comparison_and_cost_ratio (__main__.BundleChecks.test_four_label_comparison_and_cost_ratio) ... ok
+test_gate_preserves_failure_and_transfer_margin (__main__.BundleChecks.test_gate_preserves_failure_and_transfer_margin) ... ok
+test_generated_tables_reproduce (__main__.BundleChecks.test_generated_tables_reproduce) ... ok
+test_geometry_illustrations_are_actual_held_out_c16 (__main__.BundleChecks.test_geometry_illustrations_are_actual_held_out_c16) ... ok
+test_latex_inputs_and_graphics_exist (__main__.BundleChecks.test_latex_inputs_and_graphics_exist) ... ok
+test_latex_structure_without_compilation (__main__.BundleChecks.test_latex_structure_without_compilation) ... ok
+test_snapshot_hashes (__main__.BundleChecks.test_snapshot_hashes) ... ok
+test_snapshot_json_helpers_and_nonfinite_rejection (__main__.BundleChecks.test_snapshot_json_helpers_and_nonfinite_rejection) ... ok
+test_targets_are_configured_and_unreached (__main__.BundleChecks.test_targets_are_configured_and_unreached) ... ok
+test_topology_fractions_preserve_seed_denominators (__main__.BundleChecks.test_topology_fractions_preserve_seed_denominators) ... ok
+test_transfer_from_per_atom_errors (__main__.BundleChecks.test_transfer_from_per_atom_errors) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.352s
+
+OK

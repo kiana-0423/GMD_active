@@ -1,0 +1,24 @@
+# Software/platform names; components are described by responsibility in the text.
+GMD
+SGT
+CP2K
+DP
+GEN
+MLIP
+SQLite
+OpenMP
+# Basis/pseudopotential identifiers and solver keyword; full setup is specified.
+DZVP
+MOLOPT
+SR
+GTH
+PBE
+WAVELET
+# Standard file formats, computational hardware term, and unit glyph.
+PDF
+SVG
+PNG
+JSON
+YAML
+CPU
+AA

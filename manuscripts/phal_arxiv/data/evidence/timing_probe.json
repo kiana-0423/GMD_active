@@ -1,0 +1,69 @@
+{
+  "cutoff_convergence_C16H34": {
+    "compared": "300/50 Ry vs 400/60 Ry, same geometry",
+    "energy_difference_eV": -0.00118,
+    "max_atom_force_difference_eV_per_A": 0.0207,
+    "rms_force_difference_eV_per_A": 0.00585,
+    "rms_force_eV_per_A": 0.739
+  },
+  "decisions": [
+    "Pilot uses 300/50 Ry for parent and fragment calculations alike (difference below the predefined 0.03 eV/A fidelity target).",
+    "DFT jobs run serially (concurrency gave no throughput).",
+    "C32H66 is limited to a separately budgeted size-transfer check; C64/C128 isolated boxes are infeasible on this machine."
+  ],
+  "description": "Real CP2K 2026.2 timing/convergence probe (2026-11-06/07) on this machine (11 cores, 5 performance; 36 GB). All-trans chains built by a quick probe script (not the demo generator; geometry not relaxed, max force ~3.5 eV/A). PBE-D3, DZVP-MOLOPT-SR-GTH/GTH-PBE, isolated WAVELET cubic box (padding as in GMD_active's CP2K adapter), EPS_SCF 1e-6, OT/DIIS, local scheduler.",
+  "runs": [
+    {
+      "atoms": 50,
+      "box_A": 33.08,
+      "concurrent_jobs": 0,
+      "cutoff_Ry": 400,
+      "parallel": "5 OpenMP threads",
+      "rel_cutoff_Ry": 60,
+      "scf_steps": 44,
+      "system": "C16H34",
+      "valid": true,
+      "wall_s": 801.0
+    },
+    {
+      "atoms": 50,
+      "box_A": 33.08,
+      "cutoff_Ry": 400,
+      "note": "stopped after 3 steps: no faster than 5 OpenMP threads (~17 s/step)",
+      "parallel": "5 MPI ranks x 1 thread",
+      "rel_cutoff_Ry": 60,
+      "seconds_per_scf_step": [
+        26.5,
+        20.9,
+        18.1
+      ],
+      "system": "C16H34"
+    },
+    {
+      "atoms": 50,
+      "box_A": 33.08,
+      "concurrent_jobs": 1,
+      "cutoff_Ry": 300,
+      "note": "ran concurrently with the C32 probe; wall time inflated by memory-bandwidth contention",
+      "parallel": "5 OpenMP threads",
+      "rel_cutoff_Ry": 50,
+      "scf_steps": 44,
+      "system": "C16H34",
+      "valid": true,
+      "wall_s": 1441.7
+    },
+    {
+      "atoms": 98,
+      "box_A": 53.38,
+      "cutoff_Ry": 300,
+      "note": "stopped after 5 SCF steps; extrapolated ~45 steps -> ~2.7 h wall (~13.5 core-h) per full label",
+      "parallel": "5 OpenMP threads",
+      "rel_cutoff_Ry": 50,
+      "seconds_per_scf_step_alone": [
+        230.5,
+        215.0
+      ],
+      "system": "C32H66"
+    }
+  ]
+}

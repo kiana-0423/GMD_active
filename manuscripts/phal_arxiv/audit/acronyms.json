@@ -1,0 +1,167 @@
+{
+  "checker": "ars-acronym-check/1.0",
+  "input": "audit/draft_text.md",
+  "input_sha256": "d96df765546325f7063a806fbec3d51473a865e0bade15b5ac9284d25f6f550c",
+  "status": "partial",
+  "allowlist": {
+    "default": 29,
+    "user": [
+      "AA",
+      "CP2K",
+      "CPU",
+      "DP",
+      "DZVP",
+      "GEN",
+      "GMD",
+      "GTH",
+      "JSON",
+      "MLIP",
+      "MOLOPT",
+      "OpenMP",
+      "PBE",
+      "PDF",
+      "PNG",
+      "SGT",
+      "SQLite",
+      "SR",
+      "SVG",
+      "WAVELET",
+      "YAML"
+    ]
+  },
+  "coverage": {
+    "body": "checked",
+    "abstract_en": "checked",
+    "abstract_zh": "not_requested"
+  },
+  "scope_lines": {
+    "body": [
+      [
+        31,
+        32
+      ],
+      [
+        34,
+        91
+      ],
+      [
+        93,
+        94
+      ],
+      [
+        96,
+        120
+      ],
+      [
+        122,
+        175
+      ],
+      [
+        177,
+        205
+      ],
+      [
+        207,
+        230
+      ],
+      [
+        232,
+        234
+      ],
+      [
+        236,
+        269
+      ],
+      [
+        271,
+        298
+      ],
+      [
+        300,
+        329
+      ],
+      [
+        331,
+        359
+      ],
+      [
+        361,
+        362
+      ],
+      [
+        364,
+        417
+      ],
+      [
+        419,
+        456
+      ],
+      [
+        458,
+        490
+      ],
+      [
+        492,
+        507
+      ],
+      [
+        509,
+        572
+      ],
+      [
+        574,
+        576
+      ],
+      [
+        578,
+        599
+      ],
+      [
+        601,
+        625
+      ],
+      [
+        627,
+        640
+      ],
+      [
+        642,
+        651
+      ]
+    ],
+    "abstract_en": [
+      [
+        2,
+        29
+      ]
+    ]
+  },
+  "unread_sections": [],
+  "coverage_limits": [
+    {
+      "scope": "body",
+      "line": 71,
+      "acronym": "DFT",
+      "reason": "unconfirmed_definition"
+    },
+    {
+      "scope": "body",
+      "line": 125,
+      "acronym": "LJ",
+      "reason": "unconfirmed_definition"
+    },
+    {
+      "scope": "body",
+      "line": 196,
+      "acronym": "RMSE",
+      "reason": "unconfirmed_definition"
+    },
+    {
+      "scope": "body",
+      "line": 280,
+      "acronym": "SCF",
+      "reason": "unconfirmed_definition"
+    }
+  ],
+  "findings": []
+}
