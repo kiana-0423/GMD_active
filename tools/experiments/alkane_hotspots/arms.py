@@ -20,17 +20,20 @@ Arms:
 * ``random_local``: uniformly random order of unlabeled candidates (seeded per repetition and round).
 * ``committee_local``: candidates ranked by the max committee force deviation over their core atoms
   (``committee_force_deviation``); no physical signals, no events, no diversity filter.
-* ``phal_local``: each split_group's pool configurations are streamed through GMD_active's
-  ``OnlineMonitorDriver`` (staged monitor with physical signals + committee, event buffering, hotspot
-  clustering); every event's trigger-frame hotspot groups map to the best-scoring candidate whose core
-  holds a hotspot atom; ``CandidateSelector`` applies the diversity filter (also against labeled
+* ``phal_local``: every pool configuration is a one-frame stream through GMD_active's
+  ``OnlineMonitorDriver`` (staged monitor with physical signals + committee, hotspot clustering),
+  scored against the calibrated running statistics only; every event's hotspot groups map to the
+  best-scoring candidate whose core holds a hotspot atom (or, for a hotspot between the pool's
+  candidate centres, the candidates with the nearest core); ``CandidateSelector`` applies the diversity filter (also against labeled
   fingerprints) and the per-event budget; only labels from a fidelity-gate-approved fragment setting
   with status ``valid`` enter training (validated local labeling).
 * ``phal_full_system``: the same acquisition as ``phal_local``; each selected candidate's parent is
   labeled as a full system (one charge per parent).
 
 Ablations (variants of ``phal_local``): ``physical_signals: false`` (committee only, every frame
-escalated), ``lj: false``, ``event_buffering: false`` (every triggered frame is its own event),
+escalated), ``lj: false``, ``event_buffering: false`` (no pre/post-trigger frames or cooldown; on the static pool
+every configuration is already its own stream, so this ablation equals ``phal_local`` by construction
+and is meaningful only along a trajectory),
 ``force_weights`` overrides (core/buffer/boundary weighting) and ``extraction`` overrides (a separate
 pool, e.g. another buffer size). Combinations that do not apply raise ``ConfigurationError``.
 
@@ -536,6 +539,18 @@ def rank_committee(candidates: Sequence[PoolCandidate], frames: PoolFrames) -> t
     return [c for _, c in scored], {"scores": {c.candidate_id: s for s, c in scored}}
 
 
+def _nearest_candidates(candidates: Sequence[PoolCandidate], members: set[int], positions: np.ndarray) -> list[PoolCandidate]:
+    """Candidates whose core comes closest (minimum atom-atom distance) to the hotspot atoms; ties all kept."""
+
+    if not candidates:
+        return []
+    hot = positions[sorted(members)]
+    distance = [float(np.min(np.linalg.norm(positions[sorted(c.core_ids)][:, None, :] - hot[None, :, :], axis=-1)))
+                for c in candidates]
+    best = min(distance)
+    return [c for c, d in zip(candidates, distance) if d <= best + 1e-9]
+
+
 def rank_phal(candidates: Sequence[PoolCandidate], frames: PoolFrames, *, monitor_cfg: MonitorConfig, events: Mapping[str, Any],
               hotspots: Mapping[str, Any], selection: CandidateConfig, labeled: Sequence[PoolCandidate],
               event_buffering: bool) -> tuple[list[PoolCandidate], dict[str, Any]]:
@@ -549,29 +564,24 @@ def rank_phal(candidates: Sequence[PoolCandidate], frames: PoolFrames, *, monito
     by_parent: dict[str, list[PoolCandidate]] = defaultdict(list)
     for candidate in candidates:
         by_parent[candidate.parent_id].append(candidate)
-    groups: dict[str, list[str]] = defaultdict(list)
-    for candidate in candidates:
-        if candidate.parent_id not in groups[candidate.split_group]:
-            groups[candidate.split_group].append(candidate.parent_id)
     selector = CandidateSelector(selection)
     pool_candidates = []
-    diagnostics: dict[str, Any] = {"events": [], "n_triggered_frames": 0, "n_frames": 0}
-    for group in sorted(groups):
-        parents = sorted(groups[group])
+    diagnostics: dict[str, Any] = {"events": [], "n_triggered_frames": 0, "n_frames": 0, "n_hotspots_mapped_to_nearest": 0,
+                                   "n_hotspots_unmapped": 0}
+    # Each pool configuration is its own one-frame stream, scored against the calibrated state only: the pool is a
+    # set of unrelated structures, not a trajectory, so event buffering must not merge one configuration's trigger
+    # into another's event, and the running statistics must not absorb other pool configurations (order dependence).
+    for parent_id in sorted(by_parent):
         monitor = StagedOODMonitor(monitor_cfg)
         monitor.load_state(state)
         found: list[Any] = []
-        results: dict[int, Any] = {}
         driver = OnlineMonitorDriver(monitor_cfg, events_cfg, hotspots_cfg, monitor=monitor, on_event=found.append)
-        for step, parent_id in enumerate(parents):
-            result, _ = driver.process(_frame_for(frames.items[parent_id], run_id=group, step=step))
-            results[step] = result
-            diagnostics["n_frames"] += 1
-            diagnostics["n_triggered_frames"] += int(result.triggered)
+        result, _ = driver.process(_frame_for(frames.items[parent_id], run_id=parent_id, step=0))
+        diagnostics["n_frames"] += 1
+        diagnostics["n_triggered_frames"] += int(result.triggered)
         driver.finish("end_of_stream")
+        positions = np.asarray(frames.items[parent_id].positions, dtype=float)
         for event in found:
-            parent_id = parents[event.trigger_frame.step]
-            result = results[event.trigger_frame.step]
             ids = (event.metadata or {}).get("trigger_hotspot_atom_ids") or event.hotspot_atom_ids
             scores = np.asarray(result.atom_scores, dtype=float)
             clusters = cluster_atom_ids(event.trigger_frame, list(ids), scores, merge_radius=hotspots_cfg.merge_radius)
@@ -579,6 +589,9 @@ def rank_phal(candidates: Sequence[PoolCandidate], frames: PoolFrames, *, monito
             for hotspot in clusters:
                 members = set(hotspot.atom_ids)
                 options = [c for c in by_parent[parent_id] if c.core_ids & members]
+                if not options:  # the hotspot lies between the pool's candidate centres (pool.stride): nearest core
+                    options = _nearest_candidates(by_parent[parent_id], members, positions)
+                    diagnostics["n_hotspots_mapped_to_nearest" if options else "n_hotspots_unmapped"] += 1
                 if not options:
                     continue
                 best = max(options, key=lambda c: (float(np.max(scores[sorted(c.core_ids)])), -abs(c.center - min(members)), c.candidate_id))
@@ -590,7 +603,7 @@ def rank_phal(candidates: Sequence[PoolCandidate], frames: PoolFrames, *, monito
                 region_for_selection = ExtractedRegion.from_dict({**region.to_dict(), "event_id": event.event_id})
                 pool_candidates.append(selector.make_candidate(region_for_selection, score=score,
                                                                metadata={"candidate_id": candidate.candidate_id}))
-            diagnostics["events"].append({"event_id": event.event_id, "group": group, "parent_id": parent_id,
+            diagnostics["events"].append({"event_id": event.event_id, "parent_id": parent_id,
                                           "trigger_steps": list(event.trigger_steps), "n_hotspots": len(clusters),
                                           "candidates": [c.candidate_id for c, _ in chosen], "max_score": event.max_score})
     labeled_fps = [fingerprint_region(c.region, selection) for c in labeled]

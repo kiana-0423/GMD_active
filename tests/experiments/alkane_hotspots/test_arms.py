@@ -303,3 +303,75 @@ def test_phal_arms_refuse_a_monitor_that_cannot_leave_warm_up(world) -> None:
         runner.run(only=["random_local", "phal_local"])
     assert not (root / "study" / "arms").exists()  # refused before any arm (or training) started
     assert set(runner.run(only=["random_local"], repetitions=[0])) == {"random_local"}  # non-PHAL arms are unaffected
+
+
+# ---------------------------------------------------------------------------------------------- PHAL on a static pool
+
+
+def _static_pool_frames(world, *, stride: int, hot: dict[str, int]):
+    """Pool + frames where the committee disagrees strongly on one atom per configuration (hot[parent_id])."""
+
+    from ase.io import read
+
+    from tools.experiments.alkane_hotspots.arms import PoolFrames
+    from tools.experiments.alkane_hotspots.ground_truth import GTFrame
+
+    root, parents, _, _ = world
+    pool = build_pool(parents, PoolConfig.model_validate({**POOL, "stride": stride}), [root])
+    by_id = {p["parent_id"]: p for p in parents}
+
+    def frame(parent: dict, hot_atom: int | None) -> GTFrame:
+        atoms = read(root / parent["structure_path"])
+        numbers, positions = atoms.get_atomic_numbers(), atoms.get_positions()
+        forces = np.zeros((len(numbers), 3))
+        members = np.stack([forces.copy() for _ in range(3)])
+        if hot_atom is not None:
+            members[0, hot_atom, 0], members[2, hot_atom, 0] = -3.0, 3.0
+        return GTFrame(parent_id=parent["parent_id"], family=parent["family"], split=parent["split"], split_group=parent["split_group"],
+                       numbers=numbers, positions=positions, model_forces=forces, dft_forces=None, committee_forces=members)
+
+    items = {pid: frame(by_id[pid], hot.get(pid)) for pid in sorted({c.parent_id for c in pool})}
+    calibration = [frame(p, None) for p in parents if p["split"] == "calibration" and p["family"] == "normal"]
+    return pool, PoolFrames(items, calibration)
+
+
+def _rank(pool, frames, events: dict):
+    from tools.experiments.alkane_hotspots.arms import CandidateConfig as Selection, rank_phal
+
+    cfg = arm_monitor_config(MONITOR, {}, ArmVariant(name="phal_local", kind="phal_local"))
+    selection = Selection.model_validate({"max_per_cycle": 1000, "max_per_event": 2, "min_score": None, "diversity_threshold": 0.0})
+    return rank_phal(pool, frames, monitor_cfg=cfg, events=events, hotspots={"merge_radius": 2.0}, selection=selection, labeled=[],
+                     event_buffering=True)
+
+
+def test_phal_static_pool_scores_every_configuration_separately(world) -> None:
+    """Event buffering must not merge one configuration's trigger into another configuration's event."""
+
+    root, parents, _, _ = world
+    pool_ids = sorted({c.parent_id for c in build_pool(parents, PoolConfig.model_validate(POOL), [root])})
+    hot = {pid: 1 for pid in pool_ids}  # every pool configuration triggers on its carbon 1
+    pool, frames = _static_pool_frames(world, stride=1, hot=hot)
+    ordered, diagnostics = _rank(pool, frames, {"pre_trigger_frames": 0, "post_trigger_frames": 1, "cooldown_steps": 0})
+    assert diagnostics["n_frames"] == len(pool_ids) and diagnostics["n_triggered_frames"] == len(pool_ids)
+    assert sorted(e["parent_id"] for e in diagnostics["events"]) == pool_ids  # one event per configuration
+    assert {c.parent_id for c in ordered} == set(pool_ids)
+    reversed_frames = type(frames)(dict(reversed(list(frames.items.items()))), frames.calibration)
+    again, _ = _rank(pool, reversed_frames, {"pre_trigger_frames": 0, "post_trigger_frames": 1, "cooldown_steps": 0})
+    assert [c.candidate_id for c in again] == [c.candidate_id for c in ordered]  # independent of pool order
+
+
+def test_phal_hotspot_between_candidate_centres_maps_to_the_nearest_core(world) -> None:
+    root, parents, _, _ = world
+    pool, frames = _static_pool_frames(world, stride=2, hot={})
+    parent_id = sorted({c.parent_id for c in pool})[0]
+    centres = {c.center for c in pool if c.parent_id == parent_id}
+    cores = set().union(*(c.core_ids for c in pool if c.parent_id == parent_id))
+    hot_atom = next(i for i in range(len(frames.items[parent_id].numbers))
+                    if frames.items[parent_id].numbers[i] == 6 and i not in centres and i not in cores)
+    pool, frames = _static_pool_frames(world, stride=2, hot={parent_id: hot_atom})
+    ordered, diagnostics = _rank(pool, frames, {"pre_trigger_frames": 0, "post_trigger_frames": 0, "cooldown_steps": 0})
+    assert diagnostics["n_hotspots_mapped_to_nearest"] >= 1 and diagnostics["n_hotspots_unmapped"] == 0
+    assert ordered and all(c.parent_id == parent_id for c in ordered)
+    positions = frames.items[parent_id].positions
+    nearest = min(np.linalg.norm(positions[sorted(c.core_ids)] - positions[hot_atom], axis=1).min() for c in pool if c.parent_id == parent_id)
+    assert np.linalg.norm(positions[sorted(ordered[0].core_ids)] - positions[hot_atom], axis=1).min() == pytest.approx(nearest)
