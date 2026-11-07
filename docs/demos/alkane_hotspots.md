@@ -19,9 +19,11 @@ under `docs/demos/alkane_hotspots/results/`.
 - the CP2K timing and cutoff-convergence probe (`results/timing_probe.json`);
 - the C16 pilot: 16 parents, all 16 full-system DFT labels, and the fragment-fidelity gate on
   calibration and on final_eval (`results/fidelity_pilot/`);
-- the real-CP2K smoke run (C8H18 at smoke-only settings).
+- the real-CP2K smoke run (C8H18 at smoke-only settings);
+- the C32H66 size transfer of the frozen fragment setting: 2 parents, 2 full and 4 fragment labels
+  (`results/fidelity_pilot_c32/`).
 
-The model study, the closed loop and the C32 transfer are reported in their own sections, marked
+The model study and the closed loop are reported in their own sections, marked
 executed or planned. *Planned, not executed:* the campaign. No number appears on this page unless it
 was measured.
 
@@ -81,7 +83,7 @@ done
 # 3. diagnostics (no DFT)
 python examples/alkane_hotspot_demo/initial_model_diagnostic.py --study $D/arms_pilot.yaml
 python examples/alkane_hotspot_demo/md_stability_check.py --closed-loop $D/closed_loop_pilot.yaml --model NAME=PATH ...
-# 4. C32H66 size transfer of the frozen C16 setting (~2.7 h wall per full label)
+# 4. C32H66 size transfer of the frozen C16 setting (measured: 22 core-h; full labels 0.4-3.9 h wall)
 $M generate --config $D/pilot_c32.yaml
 mkdir -p ../alkane_artifacts/pilot_c32/fidelity
 cp ../alkane_artifacts/pilot/fidelity/{preregistration,selection}.json ../alkane_artifacts/pilot_c32/fidelity/
@@ -414,8 +416,8 @@ to about 0.01 eV/A RMS. It costs about a quarter of the full single point: 0.22-
 
 **What it does not support.**
 
-- Larger savings for longer chains. They are expected, because fragment cost does not grow with
-  chain length, but they are not measured here; see the C32 transfer below.
+- Savings for longer chains. C16 alone cannot show them; the C32 transfer below measures them on
+  two parents.
 - Fidelity for atoms near the boundary. Fragments are scored on their core only. Buffer atoms near
   the cut carry errors of 0.03-0.2 eV/A and must get zero or small training weight
   (`training.force_weights`).
@@ -424,6 +426,52 @@ to about 0.01 eV/A RMS. It costs about a quarter of the full single point: 0.22-
 
 Total measured DFT for the pilot labels (16 full + 28 calibration and final_eval fragments): 17.9
 core-h.
+
+### Executed: C32H66 size transfer of the frozen setting (2026-11-07)
+
+Copies: `results/fidelity_pilot_c32/`. These are the report, the selection and the pre-registration,
+the provenance note, the measured label costs, and the sha256 of the labels and per-atom table. The
+selection and pre-registration were copied unchanged from the C16 calibration (byte-identical JSON,
+pre-registration hash `640c118d…`). Nothing was re-selected: this is an evaluation of the C16-frozen
+setting (cluster c1.5 b3) on two final_eval C32H66 parents of one base, a torsion parent and a
+contact parent (`pilot_c32.yaml`).
+
+**Fidelity** (4 specs, 4 CP2K fragment calculations, 46 scored core atoms):
+
+- pooled core RMSE **0.0146 eV/A**; max core error **0.096 eV/A**; 0 failures. The frozen setting
+  **passes** the 0.03/0.10 targets on C32, with little margin on the maximum;
+- perturbation sites 0.0195, normal controls 0.0115 eV/A;
+- carbon core atoms: n 16, RMSE 0.025, max 0.096; hydrogen: n 30, RMSE 0.002, max 0.006 (not
+  pre-registered; computed from `per_atom_final_eval.csv` as for C16);
+- the maximum is a carbon of the contact site two bonds from a cut (3.5 A from the cap). By bond
+  distance to the cut: [2,3) n 2, mean 0.075; [3,4) n 6, mean 0.039; [4,6) n 26, mean 0.010;
+  [6,∞) n 12, mean 0.006 eV/A. This is the same boundary pattern as on C16.
+- mean fragment 33.3 atoms (23-44); C32H66 has 98.
+
+**Measured cost** (`label_costs.json`; core-s = wall x 5 cores):
+
+| Label | Atoms | Cubic box (A) | Attempts | Wall (s) | Core-s |
+|---|---|---|---|---|---|
+| full torsion parent | 98 | 46.2 | 2 (6982 + 6918) | 13900 | 69498 |
+| full contact parent | 98 | 32.4 | 2 (1215 + 376) | 1591 | 7955 |
+| 4 fragments | 23-44 | 20-23 | 1 each | 81-118 | 404-587 (mean 474) |
+
+- Both full labels failed the first attempt (OT/DIIS, SCF not converged in 100 steps). Both
+  converged in 24 steps on the configured retry (Broyden mixing). No C16 label needed a retry.
+- The cost is set by the cubic box edge of the isolated wavelet solver, not by the atom count. The
+  folded contact parent fits the same 32 A box as an all-trans C16 chain and costs about as much per
+  SCF step (12-16 s). The extended torsion parent needs a 46 A box and took 70 s per OT step and
+  288 s per Broyden step.
+- Fragment cost does not grow with chain length: 474 core-s mean on C32, 561 on C16. Measured on
+  these two parents, a fragment costs 0.05-0.06 of the contact parent's full label and 0.007-0.008
+  of the torsion parent's (failed attempts included, as they are real cost).
+- Total C32 DFT: 22.0 core-h, of which the torsion parent's full label is 19.3.
+
+**What this supports.** On two C32H66 parents, the fragment setting frozen on C16 transfers without
+re-selection: core-force error stays within the pre-registered targets, the per-fragment cost stays
+flat, and the full-parent cost grows with the molecule's extent. **What it does not support:** a
+statistical statement (2 parents, 1 base); a general cost ratio, since the ratio depends on
+conformation and SCF behaviour (about 9x between these two parents); anything about C64/C128.
 
 **Smoke result (smoke-only settings, not a scientific result).** C8H18 torsion parent, perturbation
 site, graph hops 2, one cap at two bonds from the nearest core atom:

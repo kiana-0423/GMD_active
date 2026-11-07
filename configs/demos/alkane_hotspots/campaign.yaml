@@ -5,6 +5,10 @@
 #   from measured SCF steps), fragments (14-41 atoms) 0.06-0.3 core-h.
 #   Full labels: 32 x C16 (~23 core-h) + 32 x C32 (~430 core-h); fidelity + acquisition fragments ~50 core-h.
 #   => budget 550 core-h, ~110 h wall serially on the development workstation (or a cluster partition).
+# The executed C32 transfer (results/fidelity_pilot_c32/label_costs.json) measured 2.2 core-h (folded
+# contact parent, 32 A box) and 19.3 core-h (extended torsion parent, 46 A box) per full label, both with
+# one failed OT attempt before the Broyden retry. The 13.5 core-h planning figure lies inside that range;
+# if C32 labels average above it, the budget ledger stops the campaign before the last full labels.
 # C64H130/C128H258 are NOT part of stage 1: the goal admits them only after validation passes and if
 # the budget permits, and their isolated cubic boxes (~95 A / ~170 A) make each full label cost far
 # more than a C32 label (not measured). A stage-2 file sets chain_lengths [64, 128] with
@@ -117,6 +121,6 @@ budgets:
   max_full_labels: 64
   max_fragment_labels: 600
   max_total_cpu_core_hours: 550.0   # from measured per-label costs (header)
-  per_job_walltime_s: 14400     # C32H66 measured ~2.7 h
+  per_job_walltime_s: 14400     # longest measured C32H66 attempt 1.94 h
   max_atoms_per_fragment: 80
   max_atoms_full: 400

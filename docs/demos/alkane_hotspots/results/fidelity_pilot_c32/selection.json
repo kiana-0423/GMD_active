@@ -1,0 +1,117 @@
+{
+  "status": "selected",
+  "created_at": "2026-11-06T17:49:57+00:00",
+  "setting": {
+    "buffer": "3 A",
+    "buffer_radius": 3.0,
+    "core_radius": 1.5,
+    "policy": "cluster",
+    "setting_id": "cluster-c1.5-b3"
+  },
+  "summary": {
+    "setting_id": "cluster-c1.5-b3",
+    "n_specs": 7,
+    "n_evaluated": 7,
+    "n_failed": 0,
+    "n_pending": 0,
+    "complete": true,
+    "pooled_core_force_rmse": 0.011830326196649907,
+    "max_core_force_error": 0.07472397129847128,
+    "per_spec_rmse_max": 0.018370407029727955,
+    "rmse_by_site_kind": {
+      "perturbation_site": 0.013850793219515458,
+      "normal_control": 0.009810479165084526
+    },
+    "error_vs_graph_distance_to_cut": {
+      "[2,3)": {
+        "n": 2,
+        "mean": 0.05518943534822379,
+        "max": 0.07472397129847128
+      },
+      "[3,4)": {
+        "n": 10,
+        "mean": 0.03443926154445342,
+        "max": 0.052147576293244145
+      },
+      "[4,6)": {
+        "n": 47,
+        "mean": 0.009306611577210737,
+        "max": 0.048303622117091424
+      },
+      "[6,100)": {
+        "n": 22,
+        "mean": 0.005467796115974163,
+        "max": 0.04605182798900639
+      }
+    },
+    "mean_n_atoms": 28.571428571428573,
+    "mean_n_caps": 1.4285714285714286,
+    "mean_fragment_cost_core_s": 691.7459208624704,
+    "mean_parent_cost_core_s": 2369.8124764646805,
+    "failures": [],
+    "passes": true
+  },
+  "objective": "min_measured_cost",
+  "targets": {
+    "core_force_rmse": 0.03,
+    "max_core_force_error": 0.1,
+    "max_failures": 0,
+    "selection_objective": "min_measured_cost",
+    "distance_bins": [
+      0.0,
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      6.0,
+      100.0
+    ],
+    "environment_radius": 4.0
+  },
+  "preregistration_hash": "640c118dacba8b23c302cf1610af0216cc09e78a3f391351109ed923e2a04728",
+  "incomplete_settings_at_selection": [],
+  "calibration_spec_ids": [
+    "frag-0c84f21af63c59a0",
+    "frag-11891726581ce30d",
+    "frag-1dc90e964c84f184",
+    "frag-213000c5508f400d",
+    "frag-235380344f8c76f0",
+    "frag-29de163a6074511e",
+    "frag-32912f92b762cb9d",
+    "frag-43fb5342634ffd30",
+    "frag-485885de6aaff856",
+    "frag-492367653f99406d",
+    "frag-4d54bef465c689b0",
+    "frag-52ad9234f0cb402e",
+    "frag-5b1686c4581f96f5",
+    "frag-61f7fa62d841db58",
+    "frag-659efbf82b12c180",
+    "frag-755fd340564587cc",
+    "frag-7d48b6c9ce8f614a",
+    "frag-838c4f4e0446a7e8",
+    "frag-8632a5e99ee5e159",
+    "frag-9b078b8cb8cb60c6",
+    "frag-a46952061e7029e3",
+    "frag-a6822acbae4da5b0",
+    "frag-af47fa752662993d",
+    "frag-b1480a9d2ae0be1f",
+    "frag-b186aa2f52b0875a",
+    "frag-b1980d2bcc9904e3",
+    "frag-b29a6d5052cd7664",
+    "frag-b5cd80fae82ee528",
+    "frag-c5ab6b33226b19ce",
+    "frag-c8ec0180a73e3380",
+    "frag-ca66800e213aa921",
+    "frag-d0680ef73b60d272",
+    "frag-d41bfefa89b4c774",
+    "frag-d677bd831bc1e988",
+    "frag-dd268981a0ec4e68",
+    "frag-dd6b752a3f115a1a",
+    "frag-e3c8a89971b9643f",
+    "frag-e5a7976bea83fb5e",
+    "frag-f5f776e314ea6639",
+    "frag-f78176b66ad5e1e5",
+    "frag-fa9de6448da8cbfd",
+    "frag-ff41110e51156c12"
+  ]
+}

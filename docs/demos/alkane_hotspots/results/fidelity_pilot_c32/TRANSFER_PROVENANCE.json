@@ -1,0 +1,4 @@
+{
+  "note": "selection.json and preregistration.json copied unchanged from the C16 pilot calibration (artifacts pilot/fidelity); the C32H66 parents are a size-transfer evaluation of that frozen setting, not a new calibration.",
+  "source": "<artifacts_root>/pilot/fidelity"
+}
