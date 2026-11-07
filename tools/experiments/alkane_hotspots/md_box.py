@@ -255,7 +255,7 @@ class ImageGuard:
                 f"frame {frame.run_id}:{frame.step}: minimum image distance {distance:.3f} A <= force receptive field "
                 f"{self.receptive_field.radius:.3f} A; periodic images interact through the model")
         if distance <= self.receptive_field.radius + self.margin:
-            self.stats["below_margin"].append({"step": int(frame.step), "distance": distance})
+            self.stats["below_margin"].append({"run_id": frame.run_id, "step": int(frame.step), "distance": distance})
             LOGGER.warning("frame %s: image distance %.3f A is inside the safety margin", frame.step, distance)
         if self.stats["n_frames_checked"] % self.write_every == 0:
             self._write()

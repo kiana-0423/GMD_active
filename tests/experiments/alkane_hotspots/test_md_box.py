@@ -130,6 +130,18 @@ def test_image_guard_refuses_interacting_images(tmp_path: Path) -> None:
     assert inner.calls == 1
 
 
+def test_image_guard_records_margin_warnings_with_run_id(tmp_path: Path) -> None:
+    topology, positions = _chain(16)
+    rf = force_receptive_field(MODEL)
+    centred = positions - positions.mean(0)
+    length = next(L for L in np.arange(20.0, 60.0, 0.25)
+                  if rf.radius < min_image_distance(centred + L / 2, np.array([L, L, L])) <= rf.radius + 4.0)
+    guard = ImageGuard(None, bonds=topology.bonds, receptive_field=rf, margin=4.0, stats_path=tmp_path / "s.json")
+    distance = guard.check(_frame(centred + length / 2, float(length), topology, step=40))
+    stats = guard.flush()
+    assert stats["below_margin"] == [{"run_id": "r", "step": 40, "distance": distance}]
+
+
 def test_gmd_xyz_format(tmp_path: Path) -> None:
     topology, positions = _chain(4)
     path = write_gmd_xyz(tmp_path / "in.xyz", topology.numbers, positions, (30.0, 30.0, 30.0))
