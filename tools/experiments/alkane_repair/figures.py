@@ -176,4 +176,104 @@ def fig_qualification(reports: Sequence[Mapping[str, Any]] | None, *, target: fl
     return fig
 
 
-__all__ = ["arm_style", "fig_failures", "fig_qualification", "fig_region_errors", "fig_retention", "fig_stability", "save"]
+def fig_qualification_md(reports: Sequence[Mapping[str, Any]] | None, *, steps: int) -> Any:
+    """Per qualification MD trajectory: the step of the first broken covalent bond (hollow marker at the top: intact)."""
+
+    plt = _plt()
+    fig, ax = plt.subplots(figsize=(6.4, 3.2))
+    rows = [(r["qualification_stage"], t) for r in (reports or []) for t in r["md_trajectories"]]
+    if not rows:
+        mark_missing(ax, "no qualification MD executed")
+        return fig
+    _axes(ax)
+    starts = list(dict.fromkeys((stage, t["partition"], t["start"]) for stage, t in rows))
+    seeds = sorted({t["seed"] for _, t in rows})
+    for k, seed in enumerate(seeds):
+        style = {"color": CATEGORICAL[k % len(CATEGORICAL)], "marker": MARKERS[k % len(MARKERS)]}
+        for stage, t in rows:
+            if t["seed"] != seed:
+                continue
+            x = starts.index((stage, t["partition"], t["start"])) + (k - (len(seeds) - 1) / 2) * 0.18
+            broken = t.get("first_broken_step")
+            if broken is None:
+                ax.scatter([x], [steps], s=40, marker=style["marker"], facecolors="none", edgecolors=style["color"], linewidths=1.2, zorder=3)
+            else:
+                ax.scatter([x], [broken], s=40, marker=style["marker"], color=style["color"], edgecolors="white", linewidths=0.6, zorder=3)
+        ax.scatter([], [], marker=style["marker"], color=style["color"], label=f"seed {seed}")
+    ax.scatter([], [], marker="o", facecolors="none", edgecolors=MUTED, label=f"intact through {steps} steps")
+    ax.axhline(steps, color=INK, linewidth=0.8, linestyle=":")
+    ax.set_xticks(range(len(starts)))
+    ax.set_xticklabels([f"{start.replace('C16-', '')}\n{part}" + (f"\nstage {stage}" if len({s for s, _, _ in starts}) > 1 else "")
+                        for stage, part, start in starts], fontsize=6)
+    ax.set_ylim(0, steps * 1.12)
+    ax.set_ylabel("MD step of the first broken bond", fontsize=7, color=INK)
+    ax.legend(fontsize=7, frameon=False, ncol=len(seeds) + 1, loc="upper center", bbox_to_anchor=(0.5, 1.16))
+    fig.tight_layout()
+    return fig
+
+
+def fig_training_curves(curves: Mapping[str, Mapping[str, Any]] | None, *, target: float) -> Any:
+    """Training (solid) and validation (dashed) force RMSE per ensemble member; a dot marks the selected epoch."""
+
+    plt = _plt()
+    fig, ax = plt.subplots(figsize=(5.6, 4.0))
+    members = {f"{stage} {name}": c for stage, by_member in (curves or {}).items() for name, c in by_member.items()}
+    if not members:
+        mark_missing(ax, "no training log")
+        return fig
+    _axes(ax)
+    for i, (name, c) in enumerate(members.items()):
+        color = CATEGORICAL[i % len(CATEGORICAL)]
+        ax.plot(c["epoch"], c["train_force"], color=color, linewidth=1.4, label=f"{name.replace('_', ' ')} train")
+        ax.plot(c["epoch"], c["val_force"], color=color, linewidth=1.4, linestyle="--", label=f"{name.replace('_', ' ')} validation")
+        ax.scatter([c["best_epoch"]], [c["best_val_force"]], s=36, color=color, edgecolors="white", linewidths=0.8, zorder=4)
+    ax.axhline(target, color=INK, linewidth=0.8, linestyle=":", label=f"acceptance target {target} eV/A")
+    ax.set_yscale("log")
+    ax.set_xlabel("epoch", fontsize=7, color=INK)
+    ax.set_ylabel("force RMSE (eV/A)", fontsize=7, color=INK)
+    ax.legend(fontsize=6, frameon=False, ncol=2, loc="upper center", bbox_to_anchor=(0.5, -0.16))
+    fig.tight_layout()
+    return fig
+
+
+def fig_compute(ledger: Mapping[str, Any] | None, projections: Mapping[str, Mapping[str, Any]] | None = None) -> Any:
+    """Per stage: allowance (track), measured consumption (bar), and the projected upper bound of a blocked stage (tick)."""
+
+    plt = _plt()
+    fig, ax = plt.subplots(figsize=(5.6, 3.0))
+    if not ledger or "allowances" not in ledger:
+        mark_missing(ax, "no ledger")
+        return fig
+    ax.grid(axis="x", color=GRID, linewidth=0.6)
+    ax.set_axisbelow(True)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    ax.tick_params(colors=MUTED, labelsize=7)
+    allow = ledger["allowances"]["stages_core_h"]
+    used = ledger["consumed_core_h"]["stages"]
+    names = list(allow)[::-1]
+    y = np.arange(len(names))
+    ax.barh(y, [allow[n] for n in names], height=0.6, color=GRID, label="allowance")
+    ax.barh(y, [used.get(n, 0.0) for n in names], height=0.6, color=CATEGORICAL[0], label="measured consumption")
+    for i, n in enumerate(names):
+        if used.get(n):
+            ax.text(used[n] + 1.0, i, f"{used[n]:.1f} of {allow[n]:.0f}", va="center", fontsize=6, color=INK)
+    shown = False
+    for proj in (projections or {}).values():
+        for sc in proj.get("scopes", []):
+            if not sc.get("fits") and sc["scope"] in names:
+                i = names.index(sc["scope"])
+                at = allow[sc["scope"]] - sc["remaining_core_h"] + sc["upper90_core_h"]
+                ax.plot([at, at], [i - 0.4, i + 0.4], color=CATEGORICAL[1], linewidth=2.0, label=None if shown else "consumed + projected next stage (upper)")
+                ax.text(at + 1.5, i, (f"q{proj['qualification_stage']} " if proj.get("qualification_stage") is not None else "") + f"upper {at:.1f}",
+                        fontsize=6, color=INK, va="center")
+                shown = True
+    ax.set_yticks(y)
+    ax.set_yticklabels([n.replace("_", " ") for n in names], fontsize=7)
+    ax.set_xlabel("CPU core-hours", fontsize=7, color=INK)
+    ax.legend(fontsize=6, frameon=False, loc="center right")
+    fig.tight_layout()
+    return fig
+
+
+__all__ = ["arm_style", "fig_compute", "fig_failures", "fig_qualification", "fig_qualification_md", "fig_training_curves", "fig_region_errors", "fig_retention", "fig_stability", "save"]

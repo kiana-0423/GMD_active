@@ -10,6 +10,8 @@ if a protocol file changed):
     calibrate-monitor --arm <each closed-loop arm>
     repair-run [--arm/--case/--seed]
     evaluate -> report [--publish]
+
+``execute`` runs this order under the authorization; ``close`` ends a stopped execution by decision.
 """
 
 from __future__ import annotations
@@ -73,6 +75,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     command("status", "what exists and what is next")
     p = command("execute", "resumable execution of every eligible stage under the authorization (journal in execution/)")
     p.add_argument("--max-runs", type=int, default=None, help="pause after this many repair runs (resumable)")
+    p = command("close", "record a decision to end a stopped execution (execute then launches nothing)")
+    p.add_argument("--decision", required=True)
+    p.add_argument("--granted-by", required=True)
+    p.add_argument("--statement", required=True)
     command("ledger", "measured DFT consumption and remaining allowances (from the attempt records on disk)")
     args = parser.parse_args(argv)
     logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO), format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -148,6 +154,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         state = execute(loaded, max_runs=args.max_runs)
         _print({"terminal": state.get("terminal"), "next_action": state.get("next_action"), "ledger": state.get("ledger"),
                 "stages": {k: v.get("status") for k, v in state.get("stages", {}).items()}})
+    elif args.command == "close":
+        from .execute import close_execution
+
+        record = close_execution(loaded, decision=args.decision, granted_by=args.granted_by, statement=args.statement)
+        _print({k: v for k, v in record.items() if k != "ledger"} | {"consumed_core_h": record["ledger"]["consumed_core_h"]})
     elif args.command == "ledger":
         from .budget import build_guard
 

@@ -103,8 +103,11 @@ def collect(loaded: LoadedBenchmark) -> dict[str, Any]:
     out["development_failures"] = _maybe(root / "development" / "failures.json")
     out["monitor_calibration"] = {p.stem: {k: v for k, v in read_json(p).items() if k != "state"} for p in sorted((root / "monitor_calibration").glob("*.json"))}
     state = _maybe(root / "execution" / "state.json")
-    out["execution"] = None if state is None else {k: state.get(k) for k in ("start", "stages", "terminal", "next_action", "run_order_fixed_at",
+    out["execution"] = None if state is None else {k: state.get(k) for k in ("start", "stages", "terminal", "closed", "next_action", "run_order_fixed_at",
                                                                               "protocol_sha256")}
+    out["projections"] = {p.stem: read_json(p) for p in sorted((root / "execution" / "projections").glob("*.json"))}
+    out["qualification_training"] = {stage.name: training_curves(stage / "train") for stage in sorted((root / "initial_model").glob("stage*"))
+                                     if (stage / "train").is_dir()}
     if state is not None:
         out["execution"]["run_status_counts"] = {}
         for item in (state.get("runs") or {}).values():
@@ -127,7 +130,8 @@ def collect(loaded: LoadedBenchmark) -> dict[str, Any]:
                 continue
             record = _maybe(root / RUNS_SUBDIR / spec.name / "repair_run.json")
             journal_status = ((state or {}).get("runs") or {}).get(spec.name, {}).get("status")
-            row = {"run": spec.name, **spec.__dict__, "status": journal_status or ("planned" if record is None else record.get("final_stage"))}
+            unstarted = "not started (execution closed)" if (state or {}).get("closed") else "planned"
+            row = {"run": spec.name, **spec.__dict__, "status": journal_status or (unstarted if record is None else record.get("final_stage"))}
             if record is not None:
                 row["dft_core_h"] = record.get("measured_dft_cpu_core_hours")
                 row["final_model_promoted"] = not (record.get("final_model") or {}).get("initial", True)
@@ -141,8 +145,63 @@ def collect(loaded: LoadedBenchmark) -> dict[str, Any]:
     out["sealed_access_log"] = [json.loads(line) for line in (root / "sealed_access.jsonl").read_text().splitlines() if line.strip()] \
         if (root / "sealed_access.jsonl").is_file() else []
     out["compute"] = compute_accounting(out)
+    out["label_cost_reconciliation"] = label_cost_reconciliation(loaded)
     out["assessment"] = assess(loaded, out)
     return out
+
+
+def training_curves(train_dir: Path) -> dict[str, Any]:
+    """Per ensemble member: train and validation force loss (RMSE, eV/A) by epoch, and the selected (best) epoch."""
+
+    import csv
+
+    out = {}
+    for log in sorted(train_dir.glob("member_*/training_log.csv")):
+        with log.open(encoding="utf-8") as handle:
+            rows = list(csv.DictReader(handle))
+        if not rows:
+            continue
+        best = min(rows, key=lambda r: float(r["val_force"]))
+        out[log.parent.name] = {"epoch": [int(r["epoch"]) for r in rows], "train_force": [float(r["train_force"]) for r in rows],
+                                "val_force": [float(r["val_force"]) for r in rows], "best_epoch": int(best["epoch"]),
+                                "best_val_force": float(best["val_force"]), "train_force_at_best": float(best["train_force"]),
+                                "final_train_force": float(rows[-1]["train_force"])}
+    return out
+
+
+def label_cost_reconciliation(loaded: LoadedBenchmark) -> dict[str, Any]:
+    """Label provenance cost (``cost.cpu_core_s``) against the enforced ledger (attempt files), per task.
+
+    They differ when an attempt died without an exit record: the label record charges it the wall-clock time
+    until the failure was detected, the ledger only until the attempt's last file write.
+    """
+
+    from tools.experiments.alkane_hotspots.labels import LabelStore
+
+    from .budget import ComputeLedger, load_authorization
+
+    try:
+        auth = load_authorization(loaded)
+        attempts = ComputeLedger(loaded, auth).attempts()
+    except Exception as exc:  # noqa: BLE001 - no authorization (smoke copies)
+        return {"unavailable": f"{type(exc).__name__}: {exc}"}
+    ledger: dict[str, float] = {}
+    for attempt in attempts:
+        ledger[attempt.task_dir.name] = ledger.get(attempt.task_dir.name, 0.0) + attempt.core_s
+    rows, label_total, ledger_total = [], 0.0, 0.0
+    for record in LabelStore(loaded.root).all():
+        cost = (record.get("cost") or {}).get("cpu_core_s")
+        task = record.get("task_id")
+        if cost is None or task not in ledger:
+            continue
+        label_total += cost
+        ledger_total += ledger[task]
+        if abs(cost - ledger[task]) > auth.enforcement.margin_core_s:  # differences within the enforcement margin are not listed
+            rows.append({"task_id": task, "parent_id": record.get("parent_id"), "label_record_core_h": cost / 3600.0, "ledger_core_h": ledger[task] / 3600.0,
+                         "attempts": (record.get("cost") or {}).get("attempts")})
+    return {"label_records_core_h": label_total / 3600.0, "ledger_core_h": ledger_total / 3600.0, "differing_tasks": rows,
+            "listed_above_core_s": auth.enforcement.margin_core_s,
+            "basis": "the ledger (attempt files, charged to each attempt's last file write) is the enforcement basis"}
 
 
 def compute_accounting(data: dict[str, Any]) -> dict[str, Any]:
@@ -166,6 +225,17 @@ def assess(loaded: LoadedBenchmark, data: dict[str, Any]) -> dict[str, Any]:
         f = q["frozen"]
         answers["1_initial_model_reliable_in_domain"] = (f"qualified at stage {f['qualification_stage']}: id_val force RMSE {f['id_val_force_rmse']:.3f} eV/A "
                                                          f"(validation set; sealed in-domain test: {'see evaluation' if ev else 'not yet evaluated'})")
+    elif q["stages"]:
+        parts = []
+        for stage in q["stages"]:
+            acc, md = stage["id_val_accuracy"], stage["md_trajectories"]
+            parts.append(f"stage {stage['qualification_stage']} ({stage['n_train']} train structures): {'accepted' if stage['accepted'] else 'not accepted'}; "
+                         f"id_val force RMSE {acc['force_rmse']:.3f} eV/A, atom-error p95 {acc['atom_error_p95']:.3f} eV/A, "
+                         f"{sum(1 for t in md if t['intact_fraction'] >= 1.0)}/{len(md)} MD trajectories intact; failed criteria "
+                         f"{[k for k, v in stage['criteria'].items() if not v]}")
+        unaffordable = [k for k, v in ((data.get("execution") or {}).get("stages") or {}).items() if v.get("status") == "unaffordable"]
+        answers["1_initial_model_reliable_in_domain"] = (f"no: {'; '.join(parts)}"
+                                                         + (f"; {', '.join(unaffordable)} unaffordable under the authorization" if unaffordable else ""))
     else:
         answers["1_initial_model_reliable_in_domain"] = f"not established ({status})"
     if ev:
@@ -211,8 +281,20 @@ def assess(loaded: LoadedBenchmark, data: dict[str, Any]) -> dict[str, Any]:
     implementation = {"structures": data["structures"] is not None, "protocol_frozen": data["protocol_freeze"] is not None,
                       "plan": data["plan"] is not None, "qualification_run": bool(q["stages"]), "repair_runs": sum(1 for r in data["runs"] if r["status"] == "done"),
                       "planned_runs": len(data["runs"]), "sealed_evaluation": ev is not None}
+    closed = (data.get("execution") or {}).get("closed")
+    if closed:
+        missing = "no qualified initial model" if not q.get("frozen") else "the stages after the stop"
+        for key, value in list(answers.items()):
+            if isinstance(value, str) and value.startswith("not yet tested"):
+                answers[key] = value.replace("not yet tested", f"not tested (execution closed: {missing})", 1)
+        if not q.get("frozen"):
+            answers["7_unsupported"] = ["any claim about local repair, the arms or PHAL: no repair run was executed", *answers["7_unsupported"]]
+    implementation["closed"] = closed is not None
     if loaded.config.smoke_only:
         scientific = "smoke profile: mechanics only, no scientific result"
+    elif closed:
+        scientific = (f"terminated before the scientific question ({closed['terminal']['status']}: {closed['terminal']['message'].split(';')[0]}); "
+                      f"closed by {closed['granted_by']}: {closed['decision']}")
     else:
         scientific = "no confirmatory result yet" if not ev or ev.get("partial") else "sealed evaluation complete"
     return {"implementation": implementation, "answers": answers, "scientific_status": scientific}
@@ -232,6 +314,23 @@ def render_markdown(data: dict[str, Any]) -> str:
         for name, item in (ex.get("stages") or {}).items():
             detail = {k: v for k, v in item.items() if k not in ("status", "started_at", "finished_at", "id_val", "traceback")}
             lines.append(f"| {name} | {item.get('status')} | {json.dumps(detail, default=str)[:400]} |")
+        lines.append("")
+        closed = ex.get("closed")
+        if closed:
+            lines += ["## Closure", "", f"- closed at {closed['at']} by {closed['granted_by']} after {closed['elapsed_h']:.2f} h of the window: {closed['decision']}",
+                      f"- statement: {closed['statement']}", f"- terminal stop: {closed['terminal']['status']}: {closed['terminal']['message']}", ""]
+    for name, proj in (data.get("projections") or {}).items():
+        lines += [f"## Pre-stage projection: {name}", "", f"- rule: {proj.get('rule')}; fits: **{proj.get('fits')}**; need: {json.dumps(proj.get('need'))}"]
+        for kind, c in (proj.get("costs_core_s") or {}).items():
+            if c.get("mean") is not None:
+                lines.append(f"- {kind} label cost: n {c['n']}, mean {c['mean'] / 3600:.3f} core-h, sd {c['sd'] / 3600:.3f}, max {c['max'] / 3600:.3f} ({c['source']})")
+        for sc in proj.get("scopes", []):
+            lines.append(f"- {sc['scope']}: expected {sc['expected_core_h']:.2f}, upper {sc['upper90_core_h']:.2f} (+ margin {proj['margin_core_h']:.2f}) "
+                         f"vs remaining {sc['remaining_core_h']:.2f} core-h -> fits {sc['fits']}")
+        prop = proj.get("redistribution_proposal")
+        if prop:
+            lines.append(f"- redistribution (total kept): feasible {prop['feasible']}; deficits {json.dumps(prop['deficits'])}; transfers {json.dumps(prop['transfers'])}"
+                         + (f"; uncovered {prop['uncovered_core_h']} core-h" if not prop["feasible"] else "") + f"; {prop['statement']}")
         lines.append("")
     led = data.get("ledger") or {}
     if "consumed_core_h" in led:
@@ -256,7 +355,11 @@ def render_markdown(data: dict[str, Any]) -> str:
                      f"{acc['force_rmse']:.4f} eV/A, atom-error p95 {acc['atom_error_p95']:.4f}; MD trajectories intact "
                      f"{sum(1 for t in stage['md_trajectories'] if t['intact_fraction'] >= 1.0)}/{len(stage['md_trajectories'])}; "
                      f"criteria {stage['criteria']}; **{'accepted' if stage['accepted'] else 'not accepted'}**")
-    lines += [f"- prerequisite: {(q.get('status') or {}).get('prerequisite', 'pending')}", ""]
+    closed = (data.get("execution") or {}).get("closed")
+    prerequisite = (q.get("status") or {}).get("prerequisite", "pending")
+    if closed and not q.get("frozen") and prerequisite == "pending":
+        prerequisite = "unmet: the execution was closed before a later qualification stage (initial_model/status.json still says pending)"
+    lines += [f"- prerequisite: {prerequisite}", ""]
     if data.get("fidelity_audit"):
         lines += ["## Fragment-fidelity audit (development challenges, DFT)", "", "| Family | Fragments | RMSE | Max | Passes |", "|---|---|---|---|---|"]
         for fam, v in data["fidelity_audit"]["families"].items():
@@ -300,6 +403,11 @@ def render_markdown(data: dict[str, Any]) -> str:
             lines += ["Per sealed structure and run (a repaired failure needs a confirmed initial failure):", "", "| Arm | Family | Categories |", "|---|---|---|"]
             lines += [f"| {arm} | {fam} | {json.dumps(c, sort_keys=True)} |" for (arm, fam), c in sorted(counts.items())] + [""]
     lines += ["## Assessment (from recorded evidence only)", ""] + [f"- **{k}**: {json.dumps(v, default=str)}" for k, v in a["answers"].items()] + [""]
+    rec = data.get("label_cost_reconciliation") or {}
+    if "ledger_core_h" in rec:
+        lines += ["## Label records against the ledger", "", f"- label provenance records {rec['label_records_core_h']:.2f} core-h; ledger {rec['ledger_core_h']:.2f} core-h ({rec['basis']})"]
+        lines += [f"- {r['task_id']} ({r['parent_id']}, {r['attempts']} attempts): label record {r['label_record_core_h']:.2f}, ledger {r['ledger_core_h']:.2f} core-h"
+                  for r in rec["differing_tasks"]] + [""]
     c = data["compute"]
     lines += ["## Measured compute", "", f"- reference labels by stage (core-h): {json.dumps(c['reference_label_stages_core_h'])}",
               f"- fidelity audit: {c['fidelity_audit_core_h']:.3f} core-h; repair runs: {c['repair_runs_core_h']:.3f} core-h", f"- {c['note']}", ""]
@@ -316,6 +424,11 @@ def write_figures(loaded: LoadedBenchmark, data: dict[str, Any]) -> dict[str, li
     made = {}
     made["qualification"] = fg.save(fg.fig_qualification(data["qualification"]["stages"], target=loaded.config.initial_model.acceptance.id_val_force_rmse_max),
                                     out, "qualification")
+    made["qualification_md"] = fg.save(fg.fig_qualification_md(data["qualification"]["stages"], steps=loaded.config.initial_model.acceptance.md.steps),
+                                       out, "qualification_md")
+    made["training_curves"] = fg.save(fg.fig_training_curves(data.get("qualification_training"),
+                                                             target=loaded.config.initial_model.acceptance.id_val_force_rmse_max), out, "training_curves")
+    made["compute"] = fg.save(fg.fig_compute(data.get("ledger"), data.get("projections")), out, "compute")
     failure_rows = (ev or {}).get("initial_model", {}).get("failures") or (data.get("development_failures") or {}).get("rows")
     made["failures"] = fg.save(fg.fig_failures(failure_rows, families=families), out, "failures")
     made["region_errors"] = fg.save(fg.fig_region_errors(ev, arms=arms, families=families, threshold=loaded.config.evaluation.success.challenge_region_rmse_max),
@@ -326,8 +439,9 @@ def write_figures(loaded: LoadedBenchmark, data: dict[str, Any]) -> dict[str, li
 
 
 def _portable(text: str, loaded: LoadedBenchmark) -> str:
-    text = text.replace(str(loaded.root), "<artifacts_root>").replace(str(loaded.repo_path(".")), "<GMD_active>")
-    return text.replace(str(loaded.path.parent), "<config_dir>")
+    text = text.replace(str(loaded.root), "<artifacts_root>").replace(str(loaded.path.parent), "<config_dir>")
+    text = text.replace(str(loaded.repo_path(".")), "<GMD_active>")
+    return text.replace(str(loaded.repo_path(".").parent), "<workspace>")
 
 
 def write_report(loaded: LoadedBenchmark, *, publish: bool = False) -> dict[str, Any]:
@@ -346,6 +460,9 @@ def write_report(loaded: LoadedBenchmark, *, publish: bool = False) -> dict[str,
         for paths in figures.values():
             for path in paths:
                 shutil.copyfile(path, target / "figures" / Path(path).name)
+        start = (data.get("execution") or {}).get("start")
+        if start:  # commands are in the docs; this is the environment, repositories and executables recorded at the execution start
+            (target / "environment.json").write_text(_portable(json.dumps(start, indent=1, sort_keys=True, default=str), loaded) + "\n", encoding="utf-8")
         if data.get("plan"):
             from .plan import render_plan
 

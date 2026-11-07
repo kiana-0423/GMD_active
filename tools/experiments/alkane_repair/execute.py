@@ -342,6 +342,11 @@ def execute(loaded: LoadedBenchmark, *, echo: Callable[[str], None] = print, max
         journal.log("stop", status=stop.status, message=str(stop))
         echo(f"STOP {stop.status}: {stop}")
         return journal.state
+    if journal.state.get("closed"):
+        message = f"the execution was closed at {journal.state['closed']['at']} ({journal.state['closed']['decision']}); nothing is launched"
+        journal.log("stop", status="closed", message=message)
+        echo(f"STOP closed: {message}")
+        return journal.state
     journal.log("resume", elapsed_h=_elapsed_h(journal), ledger=build_guard(loaded).ledger.snapshot())
     try:
         _run_stages(loaded, journal, auth, echo=echo, max_runs=max_runs)
@@ -358,6 +363,34 @@ def execute(loaded: LoadedBenchmark, *, echo: Callable[[str], None] = print, max
     journal.state["ledger"] = build_guard(loaded).ledger.snapshot()
     journal.save()
     return journal.state
+
+
+def close_execution(loaded: LoadedBenchmark, *, decision: str, granted_by: str, statement: str) -> dict[str, Any]:
+    """Record a decision to end a stopped execution: `execute` then launches nothing (journaled, not reversible here).
+
+    Only a stopped execution with no running DFT attempt can be closed; the closure keeps the terminal stop,
+    the stage states and the ledger at that moment.
+    """
+
+    from .budget import build_guard
+
+    journal = Journal(loaded)
+    if "start" not in journal.state:
+        raise ValueError("no execution to close")
+    if journal.state.get("closed"):
+        raise ValueError(f"already closed at {journal.state['closed']['at']}")
+    if not journal.state.get("terminal"):
+        raise ValueError("the execution has not stopped (no terminal status); stop the driver first")
+    ledger = build_guard(loaded).ledger.snapshot()
+    if ledger["running"]:
+        raise ValueError(f"DFT attempts are still running: {ledger['running']}")
+    record = {"at": utc_now(), "decision": decision, "granted_by": granted_by, "statement": statement, "terminal": journal.state["terminal"],
+              "elapsed_h": _elapsed_h(journal), "stages": {k: v.get("status") for k, v in journal.state["stages"].items()}, "ledger": ledger}
+    journal.state["closed"] = record
+    journal.state["next_action"] = "none: closed (report only)"
+    journal.save()
+    journal.log("closed", **{k: v for k, v in record.items() if k != "ledger"}, consumed_core_h=ledger["consumed_core_h"])
+    return record
 
 
 def _run_stages(loaded: LoadedBenchmark, journal: Journal, auth: Any, *, echo: Callable[[str], None], max_runs: int | None) -> None:
@@ -584,4 +617,4 @@ def freeze_outcomes(loaded: LoadedBenchmark, journal: Journal) -> dict[str, Any]
     return payload
 
 
-__all__ = ["ExecutionStop", "Journal", "eligibility", "execute", "fixed_run_order", "freeze_outcomes", "gate", "reserve_check", "start_record", "verify_authorization_record"]
+__all__ = ["ExecutionStop", "Journal", "close_execution", "eligibility", "execute", "fixed_run_order", "freeze_outcomes", "gate", "reserve_check", "start_record", "verify_authorization_record"]

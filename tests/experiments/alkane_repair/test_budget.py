@@ -316,3 +316,40 @@ def test_time_reserve_stops_new_repair_runs_and_hands_over_to_the_final_test(ben
     _amend(bench, _entry(changes={"final_reserve_h": {"from": 0.0, "to": auth.max_elapsed_h}}, unchanged={}))
     with pytest.raises(BudgetRefused, match="shorter than the elapsed window"):
         load_authorization(bench)
+
+
+def test_close_needs_a_stopped_execution_and_makes_execute_launch_nothing(bench) -> None:
+    from gmd_active_learning.contracts.ids import file_sha256
+
+    from tools.experiments.alkane_repair.budget import authorization_path
+    from tools.experiments.alkane_repair.execute import Journal, close_execution, execute
+    from tools.experiments.alkane_repair.report import collect, render_markdown
+
+    kwargs = {"decision": "close out", "granted_by": "user", "statement": "proceed with option 1"}
+    with pytest.raises(ValueError, match="no execution"):
+        close_execution(bench, **kwargs)
+    journal = Journal(bench)
+    journal.state["start"] = {"authorization": {"sha256": file_sha256(authorization_path(bench))}, "execution_start_epoch": time.time() - 60.0}
+    journal.save()
+    with pytest.raises(ValueError, match="has not stopped"):
+        close_execution(bench, **kwargs)
+    journal.state["terminal"] = {"status": "unaffordable", "message": "qualification_q1 is projected not to fit; no allowance was moved", "at": "t"}
+    journal.state["stages"] = {"qualification_q0": {"status": "done"}, "qualification_q1": {"status": "unaffordable"}}
+    journal.save()
+    task = _task(bench.root / "cp2k_tasks", "label-running", "p-run")
+    _attempt(task, "01-sp", started=time.time() - 30.0, pid=os.getpid())
+    with pytest.raises(ValueError, match="still running"):
+        close_execution(bench, **kwargs)
+    (task / "attempts" / "01-sp" / ".gmd_exit_code").write_text("0\n")
+    record = close_execution(bench, **kwargs)
+    assert record["terminal"]["status"] == "unaffordable" and record["stages"]["qualification_q1"] == "unaffordable"
+    with pytest.raises(ValueError, match="already closed"):
+        close_execution(bench, **kwargs)
+    lines = []
+    state = execute(bench, echo=lines.append)
+    assert lines and lines[0].startswith("STOP closed") and state["stages"] == journal.state["stages"]
+    events = [json.loads(line)["event"] for line in Journal(bench).journal_path.read_text().splitlines()]
+    assert events[-2:] == ["closed", "stop"] and "resume" not in events
+    data = collect(bench)
+    assert data["assessment"]["answers"]["4_local_labels_improved_independent_predictions"].startswith("not tested (execution closed")
+    assert data["assessment"]["implementation"]["closed"] and "## Closure" in render_markdown(data)
