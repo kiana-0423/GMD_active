@@ -269,7 +269,7 @@
    "stability.png"
   ]
  },
- "generated_at": "2026-11-07T05:50:28+00:00",
+ "generated_at": "2026-11-07T06:21:06+00:00",
  "monitor_calibration": {
   "C_committee": {
    "alarm_fraction": 1.0,
@@ -572,6 +572,7 @@
    "n_planned_runs": 6
   }
  },
+ "preflight": null,
  "protocol_freeze": {
   "benchmark": "repair_smoke",
   "frozen_at": "2026-11-07T05:34:08+00:00",
@@ -1040,16 +1041,39 @@
    "final_model_promoted": true,
    "kind": "closed_loop",
    "localisation": {
+    "all_label_weights_match_config": true,
     "dft_core_h": 0.02876407848464118,
+    "end_to_end_wall_s": 68.424622,
     "events_rejected_before_labeling": 0,
     "first_event_step": 0,
     "labels": [
      {
+      "attempts": 2,
       "covers_challenged_region": true,
       "cycle": 0,
+      "force_weights_by_role": {
+       "boundary": [
+        0.0
+       ],
+       "core": [
+        1.0
+       ],
+       "h_cap": [
+        0.0
+       ],
+       "inner_buffer": [
+        0.3
+       ],
+       "outer_buffer": [
+        0.0
+       ]
+      },
+      "mismatched_roles": [],
+      "n_atoms": 23,
       "n_core": 13,
       "task_id": "label-1c8da11cf11e94a5",
-      "validation": "valid"
+      "validation": "valid",
+      "weights_match_config": true
      }
     ],
     "model_changes": [],
@@ -1057,6 +1081,12 @@
     "n_labels": 1,
     "n_labels_covering_challenged_region": 1,
     "n_valid_labels": 1,
+    "per_cycle": {
+     "0": {
+      "events": 4,
+      "labels": 1
+     }
+    },
     "promotions": [
      {
       "action": "promote",
@@ -1066,6 +1096,7 @@
      }
     ],
     "status": "evaluated",
+    "train_wall_s": 6.730745333014056,
     "trigger_reasons": [
      "committee_deviation"
     ]
@@ -1083,16 +1114,36 @@
    "final_model_promoted": true,
    "kind": "closed_loop",
    "localisation": {
+    "all_label_weights_match_config": true,
     "dft_core_h": 0.023716878096262613,
+    "end_to_end_wall_s": 59.425942,
     "events_rejected_before_labeling": 0,
     "first_event_step": 0,
     "labels": [
      {
+      "attempts": 1,
       "covers_challenged_region": true,
       "cycle": 0,
+      "force_weights_by_role": {
+       "boundary": [
+        0.0
+       ],
+       "core": [
+        1.0
+       ],
+       "inner_buffer": [
+        0.3
+       ],
+       "outer_buffer": [
+        0.0
+       ]
+      },
+      "mismatched_roles": [],
+      "n_atoms": 26,
       "n_core": 12,
       "task_id": "label-33a846261d29b682",
-      "validation": "valid"
+      "validation": "valid",
+      "weights_match_config": true
      }
     ],
     "model_changes": [],
@@ -1100,6 +1151,12 @@
     "n_labels": 1,
     "n_labels_covering_challenged_region": 1,
     "n_valid_labels": 1,
+    "per_cycle": {
+     "0": {
+      "events": 4,
+      "labels": 1
+     }
+    },
     "promotions": [
      {
       "action": "promote",
@@ -1109,6 +1166,7 @@
      }
     ],
     "status": "evaluated",
+    "train_wall_s": 7.938368959003128,
     "trigger_reasons": [
      "committee_deviation"
     ]
@@ -1126,16 +1184,39 @@
    "final_model_promoted": true,
    "kind": "closed_loop",
    "localisation": {
+    "all_label_weights_match_config": true,
     "dft_core_h": 0.027334124512142604,
+    "end_to_end_wall_s": 63.961859,
     "events_rejected_before_labeling": 0,
     "first_event_step": 5,
     "labels": [
      {
+      "attempts": 2,
       "covers_challenged_region": true,
       "cycle": 0,
+      "force_weights_by_role": {
+       "boundary": [
+        0.0
+       ],
+       "core": [
+        1.0
+       ],
+       "h_cap": [
+        0.0
+       ],
+       "inner_buffer": [
+        0.3
+       ],
+       "outer_buffer": [
+        0.0
+       ]
+      },
+      "mismatched_roles": [],
+      "n_atoms": 23,
       "n_core": 13,
       "task_id": "label-bb2bf4ccce247e5d",
-      "validation": "valid"
+      "validation": "valid",
+      "weights_match_config": true
      }
     ],
     "model_changes": [],
@@ -1143,6 +1224,12 @@
     "n_labels": 1,
     "n_labels_covering_challenged_region": 1,
     "n_valid_labels": 1,
+    "per_cycle": {
+     "0": {
+      "events": 4,
+      "labels": 1
+     }
+    },
     "promotions": [
      {
       "action": "promote",
@@ -1152,6 +1239,7 @@
      }
     ],
     "status": "evaluated",
+    "train_wall_s": 6.21009866707027,
     "trigger_reasons": [
      "committee_deviation",
      "coordination_change",
@@ -1171,16 +1259,39 @@
    "final_model_promoted": true,
    "kind": "closed_loop",
    "localisation": {
+    "all_label_weights_match_config": true,
     "dft_core_h": 0.045517652564578584,
+    "end_to_end_wall_s": 100.52195,
     "events_rejected_before_labeling": 0,
     "first_event_step": 5,
     "labels": [
      {
+      "attempts": 2,
       "covers_challenged_region": true,
       "cycle": 0,
+      "force_weights_by_role": {
+       "boundary": [
+        0.0
+       ],
+       "core": [
+        1.0
+       ],
+       "h_cap": [
+        0.0
+       ],
+       "inner_buffer": [
+        0.3
+       ],
+       "outer_buffer": [
+        0.0
+       ]
+      },
+      "mismatched_roles": [],
+      "n_atoms": 23,
       "n_core": 13,
       "task_id": "label-53887dbe7ab42104",
-      "validation": "valid"
+      "validation": "valid",
+      "weights_match_config": true
      }
     ],
     "model_changes": [],
@@ -1188,6 +1299,12 @@
     "n_labels": 1,
     "n_labels_covering_challenged_region": 1,
     "n_valid_labels": 1,
+    "per_cycle": {
+     "0": {
+      "events": 4,
+      "labels": 1
+     }
+    },
     "promotions": [
      {
       "action": "promote",
@@ -1197,6 +1314,7 @@
      }
     ],
     "status": "evaluated",
+    "train_wall_s": 8.410800083074719,
     "trigger_reasons": [
      "committee_deviation",
      "coordination_change",
