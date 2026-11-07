@@ -450,6 +450,9 @@ def run_closed_loop_arm(loaded: LoadedBenchmark, spec: RunSpec, frozen: dict[str
         raise WorkflowError(f"no repair-validation structures of family {spec.family}: the promotion gate would have no evidence")
     subsets = {name: subset_version(samples, asm.work_dir / "subset_store", name) for name, samples in groups.items()}
     asm.controller.trainer = SubsetTrainer(asm.trainer, subsets)
+    from .budget import GuardedLabeler, build_guard
+
+    asm.controller.labeler = GuardedLabeler(asm.controller.labeler, build_guard(loaded), spec.name)
     register_frozen_initial(cl, asm, frozen)
     blob = f"{asm.run_id}:monitor"
     seeded = False

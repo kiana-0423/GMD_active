@@ -267,6 +267,7 @@ class StabilityConfig(_Strict):
     frame_interval: int = Field(10, ge=1)
     covalent_scale: float = Field(1.3, gt=0.0)
     min_intact_fraction: float = Field(1.0, gt=0.0, le=1.0)
+    parallel_workers: int = Field(1, ge=1, description="concurrent single-thread GMD stability runs (evaluation happens after all CP2K work)")
 
 
 class EvaluationConfig(_Strict):

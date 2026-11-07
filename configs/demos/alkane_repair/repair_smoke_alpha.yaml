@@ -31,7 +31,9 @@ splits:
 cp2k:
   executable: cp2k.psmp
   data_dir: null
-  launcher: []
+  # wall-clock cap of every CP2K attempt (SIGTERM, then SIGKILL after the grace): the hard backstop of the
+  # compute allowance even if no supervising process is alive (tools/experiments/alkane_repair/budget.py)
+  launcher: [/usr/bin/timeout, -k, '10', '300']   # at most (300 + 10) s x cores per attempt
   omp_threads: 2
   mpi_ranks: 1
   functional: PBE

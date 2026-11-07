@@ -1,0 +1,22 @@
+# Execution authorization of the repair_c16 benchmark (operational limits, not protocol settings).
+# Granted by the user's goal of 2026-11-07 ("Complete the controlled C16 alkane force-field repair benchmark ...").
+# Allowances, not targets. Enforced by tools/experiments/alkane_repair/budget.py from the attempt records on disk.
+authorization:
+  granted: "2026-11-07"
+  statement: >-
+    Authorized additional DFT expenditure: total 240 CPU core-hours; initial-model qualification 45 (q0 at most 30 of it);
+    development references 7; fragment-fidelity audit 3; repair-validation references 6; sealed final-test references 14;
+    closed-loop repair runs 165; each repair run at most its configured 1.2 core-hours. At most 120 hours elapsed from the
+    recorded execution start; one CP2K job at a time, five cores per job; local hardware only.
+  total_core_h: 240.0
+  stages: {initial_model: 45.0, development: 7.0, fidelity_audit: 3.0, repair_val: 6.0, final_test: 14.0, repair_runs: 165.0}
+  initial_model_q0_core_h: 30.0
+  per_run_core_h: 1.2
+  max_elapsed_h: 120.0
+  cp2k_max_concurrent_jobs: 1
+  cores_per_job: 5
+  enforcement:
+    margin_core_s: 300.0                # 5 core-min kept free in every scope (10 s polls x 5 cores + cancellation)
+    estimate_quantile: 0.9              # pre-submission estimate: p90 of measured costs of the same job kind
+    attempt_wall_cap_s: 1800.0      # = timeout of the CP2K launcher; an attempt consumes at most (wall + grace) x 5 core-s
+    kill_grace_s: 30.0

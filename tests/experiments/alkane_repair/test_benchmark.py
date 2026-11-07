@@ -323,3 +323,63 @@ def test_cost_estimate_falls_back_to_measured_sources(smoke, tmp_path: Path) -> 
     smoke.config.plan.timing_sources = [str(source)]
     estimate, origin = cost_estimate(smoke, LabelStore(smoke.root), smoke.alpha, "full", 8)
     assert estimate == pytest.approx(123.0) and "timing_sources" in origin
+
+
+def test_fixed_run_order_is_seed_major_interleaved_and_rotated(tmp_path: Path) -> None:
+    from tools.experiments.alkane_repair.execute import fixed_run_order
+
+    loaded = load_benchmark(copy_profile(tmp_path, "repair_c16"))
+    write_structures(loaded, generate(loaded))
+    arms = ["B_continued", "C_committee", "D_phal", "D_noLJ"]
+    order = fixed_run_order(loaded, ["torsion", "bend", "contact"], arms)
+    assert len(order) == 4 * 9 * 5 and len({o["run"] for o in order}) == len(order)
+    seeds = [o["seed"] for o in order]
+    assert seeds == sorted(seeds)  # seed-major: an interruption leaves complete seeds
+    first_cases = [o["family"] for o in order[: 4 * 3 : 4]]
+    assert first_cases == ["torsion", "bend", "contact"]  # families interleaved
+    last_arm = [order[i + 3]["arm"] for i in range(0, len(order), 4)]
+    assert max(last_arm.count(a) for a in arms) - min(last_arm.count(a) for a in arms) <= 1  # no arm is systematically last
+    restricted = fixed_run_order(loaded, ["bend"], arms)
+    assert {o["family"] for o in restricted} == {"bend"} and len(restricted) == 4 * 3 * 5
+
+
+def test_eligibility_needs_a_failure_and_a_passed_audit(smoke) -> None:
+    from tools.experiments.alkane_repair.execute import eligibility
+
+    (smoke.root / "development").mkdir(parents=True)
+    (smoke.root / "fidelity").mkdir(parents=True)
+    (smoke.root / "development" / "failures.json").write_text(json.dumps({"rows": [{"family": "torsion", "region": {}, "failure": False}]}))
+    (smoke.root / "fidelity" / "audit.json").write_text(json.dumps({"families": {"torsion": {"passes": True}}}))
+    verdict = eligibility(smoke)["torsion"]
+    assert not verdict["eligible"] and "no reference-confirmed failure" in verdict["reasons"][0]
+    (smoke.root / "development" / "failures.json").write_text(json.dumps({"rows": [{"family": "torsion", "region": {}, "failure": True}]}))
+    assert eligibility(smoke)["torsion"]["eligible"]
+
+
+def test_outcomes_are_frozen_before_final_test_labels(smoke) -> None:
+    from tools.experiments.alkane_repair.execute import ExecutionStop, Journal, freeze_outcomes
+
+    write_structures(smoke, generate(smoke))
+    journal = Journal(smoke)
+    journal.state["run_order"] = [{"run": "B_continued__x__s1", "arm": "B_continued", "case": "x", "family": "torsion", "seed": 1, "kind": "continued_training"}]
+    journal.state["runs"] = {"B_continued__x__s1": {"status": "failed_terminal"}}
+    frozen = freeze_outcomes(smoke, journal)
+    assert frozen["runs"] == [] and frozen["not_evaluated"][0]["run"] == "B_continued__x__s1"
+    (smoke.sealed_root / "labels.jsonl").write_text('{"label_id": "x"}\n')
+    with pytest.raises(ExecutionStop, match="before the outcomes were frozen"):
+        freeze_outcomes(smoke, journal)
+
+
+def test_structure_categories_never_count_an_initial_success_as_repair() -> None:
+    from tools.experiments.alkane_repair.evaluate import structure_categories
+
+    config = load_benchmark(CONFIGS / "repair_c16.yaml").config
+    failures = {"ok": {"failure": False, "region": {"force_rmse": 0.1}}, "f1": {"failure": True, "region": {"force_rmse": 0.6}},
+                "f2": {"failure": True, "region": {"force_rmse": 0.6}}, "f3": {"failure": True, "region": {"force_rmse": 0.6}}}
+    after = {"ok": {"region": {"force_rmse": 0.05}}, "f1": {"region": {"force_rmse": 0.15}}, "f2": {"region": {"force_rmse": 0.5}},
+             "f3": {"region": {"force_rmse": 0.7}}}
+    rows = {r["parent_id"]: r["category"] for r in structure_categories(config, failures, after, {"retention": True, "stability": True})}
+    assert rows == {"ok": "improvement_without_established_failure", "f1": "confirmed_failure_repaired",
+                    "f2": "confirmed_failure_partially_improved", "f3": "confirmed_failure_not_repaired"}
+    unstable = {r["parent_id"]: r["category"] for r in structure_categories(config, failures, after, {"retention": True, "stability": False})}
+    assert unstable["f1"] == "confirmed_failure_partially_improved"

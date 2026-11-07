@@ -71,6 +71,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     p = command("report", "report.json/report.md and figures")
     p.add_argument("--publish", action="store_true", help="copy the report and figures to docs/demos/alkane_repair/results/<name>")
     command("status", "what exists and what is next")
+    p = command("execute", "resumable execution of every eligible stage under the authorization (journal in execution/)")
+    p.add_argument("--max-runs", type=int, default=None, help="pause after this many repair runs (resumable)")
+    command("ledger", "measured DFT consumption and remaining allowances (from the attempt records on disk)")
     args = parser.parse_args(argv)
     logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO), format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
@@ -139,6 +142,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         from .report import write_report
 
         _print(write_report(loaded, publish=args.publish))
+    elif args.command == "execute":
+        from .execute import execute
+
+        state = execute(loaded, max_runs=args.max_runs)
+        _print({"terminal": state.get("terminal"), "next_action": state.get("next_action"), "ledger": state.get("ledger"),
+                "stages": {k: v.get("status") for k, v in state.get("stages", {}).items()}})
+    elif args.command == "ledger":
+        from .budget import build_guard
+
+        _print(build_guard(loaded).ledger.snapshot())
     elif args.command == "status":
         from .report import status
 

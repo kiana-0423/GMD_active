@@ -1,0 +1,16 @@
+# Execution authorization of the repair_smoke profile (mechanics only; tiny allowances).
+authorization:
+  granted: "2026-11-07"
+  statement: smoke-only mechanics runs
+  total_core_h: 4.0
+  stages: {initial_model: 1.0, development: 0.5, fidelity_audit: 0.5, repair_val: 0.5, final_test: 0.5, repair_runs: 1.0}
+  initial_model_q0_core_h: 1.0
+  per_run_core_h: 0.3
+  max_elapsed_h: 6.0
+  cp2k_max_concurrent_jobs: 1
+  cores_per_job: 2
+  enforcement:
+    margin_core_s: 20.0
+    estimate_quantile: 0.9
+    attempt_wall_cap_s: 300.0      # = timeout of the CP2K launcher; an attempt consumes at most (wall + grace) x 5 core-s
+    kill_grace_s: 10.0

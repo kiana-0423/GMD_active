@@ -98,7 +98,10 @@ def stage_structures(loaded: LoadedBenchmark, stage: str, *, qualification_stage
     records = load_records(loaded.root)
     if stage == "initial_model":
         stages = config.initial_model.stages
-        index = len(stages) - 1 if qualification_stage is None else int(qualification_stage)
+        if qualification_stage is None:
+            raise ConfigurationError("initial_model labels need an explicit qualification stage (--qualification-stage); "
+                                     "a default would silently select the expanded training set")
+        index = int(qualification_stage)
         if not 0 <= index < len(stages):
             raise ConfigurationError(f"qualification stage {index} does not exist ({len(stages)} stages)")
         bases = sorted({r["base_id"] for r in records if r["partition"] == "id_train"})[: stages[index].id_train_bases]
@@ -143,19 +146,25 @@ def label_stage(loaded: LoadedBenchmark, stage: str, *, qualification_stage: int
 
     from tools.experiments.alkane_hotspots.labels import LabelRequest, LabelRunner, LabelStore, build_service, cp2k_provenance, label_id_for, parent_region
 
+    from .budget import BudgetRefused, GuardedService, build_guard
+
     require_frozen(loaded)
     alpha, structures = stage_structures(loaded, stage, qualification_stage=qualification_stage)
     root = Path(alpha.artifacts_root)
     budget_core_s = float(getattr(loaded.config.budgets, stage)) * 3600.0
-    service = build_service(alpha)
+    guard = build_guard(loaded)
+    raw_service = build_service(alpha)
+    service = GuardedService(raw_service, guard, kind_of=lambda work: "full")
     store = LabelStore(root)
-    runner = LabelRunner(service, store, alpha, cp2k_provenance(service, smoke_only=alpha.config.cp2k.smoke_only), echo=echo)
+    runner = LabelRunner(service, store, alpha, cp2k_provenance(raw_service, smoke_only=alpha.config.cp2k.smoke_only), echo=echo)
     ids = {r["parent_id"] for r in structures}
     if stage == "initial_model":  # every qualification stage draws on one budget
         _, everything = stage_structures(loaded, stage, qualification_stage=len(loaded.config.initial_model.stages) - 1)
         ids_budget = {r["parent_id"] for r in everything}
     else:
         ids_budget = ids
+    if stage == "initial_model":
+        q0_bases = guard.ledger.q0_bases()
     outcome: dict[str, Any] = {"stage": stage, "qualification_stage": qualification_stage, "root": "sealed" if stage == "final_test" else "public",
                                "n_structures": len(structures), "completed": [], "reused": [], "failed": [], "pending": [], "not_started": []}
     for record in sorted(structures, key=lambda r: r["parent_id"]):
@@ -165,11 +174,13 @@ def label_stage(loaded: LoadedBenchmark, stage: str, *, qualification_stage: int
         if existing is not None and existing["status"] == "valid":
             outcome["reused"].append(record["parent_id"])
             continue
-        estimate, source = cost_estimate(loaded, store, alpha, "full", int(record["chain_length"]))
-        spent = stage_spent_core_s(store, ids_budget)
-        if spent + estimate > budget_core_s:
-            outcome["not_started"].append({"parent_id": record["parent_id"], "reason": f"stage budget: spent {spent / 3600:.3f} + estimate "
-                                           f"{estimate / 3600:.3f} [{source}] > budgets.{stage} {budget_core_s / 3600:.3f} core-h"})
+        scope: dict[str, Any] = {"stage": stage}
+        if stage == "initial_model":
+            scope["q"] = 0 if record["partition"] == "id_val" or record["base_id"] in q0_bases else 1
+        try:
+            guard.require_room(scope, "full", label=record["parent_id"])
+        except BudgetRefused as exc:
+            outcome["not_started"].append({"parent_id": record["parent_id"], "reason": str(exc)})
             continue
         summary = runner.run([LabelRequest("full", record["parent_id"], int(record["chain_length"]), region)], max_wall_s=max_wall_s)
         store = runner.store
@@ -181,6 +192,7 @@ def label_stage(loaded: LoadedBenchmark, stage: str, *, qualification_stage: int
         if summary.pending:
             break
     outcome["measured_stage_core_h"] = stage_spent_core_s(LabelStore(root), ids_budget) / 3600.0
+    outcome["ledger"] = guard.ledger.snapshot()
     outcome["budget_core_h"] = budget_core_s / 3600.0
     outcome["valid"] = sorted(r["parent_id"] for r in _full_records(LabelStore(root), ids) if r["status"] == "valid")
     outcome["missing"] = sorted(ids - set(outcome["valid"]))
@@ -255,9 +267,13 @@ def fidelity_audit(loaded: LoadedBenchmark, *, run_labels: bool = True, max_wall
     require_frozen(loaded)
     selection = install_fidelity_selection(loaded)
     setting = selection["setting"]
-    service = build_service(loaded.alpha)
+    from .budget import BudgetRefused, GuardedService, build_guard
+
+    guard = build_guard(loaded)
+    raw_service = build_service(loaded.alpha)
+    service = GuardedService(raw_service, guard, kind_of=lambda work: "fragment")
     store = LabelStore(loaded.root)
-    runner = LabelRunner(service, store, loaded.alpha, cp2k_provenance(service, smoke_only=loaded.alpha.config.cp2k.smoke_only), echo=echo)
+    runner = LabelRunner(service, store, loaded.alpha, cp2k_provenance(raw_service, smoke_only=loaded.alpha.config.cp2k.smoke_only), echo=echo)
     budget_core_s = loaded.config.budgets.fidelity_audit * 3600.0
     specs = audit_specs(loaded, selection)
     dev_ids = {s["parent_id"] for s in specs}
@@ -266,9 +282,12 @@ def fidelity_audit(loaded: LoadedBenchmark, *, run_labels: bool = True, max_wall
         label_id = label_id_for(spec["region"], service.settings_hash)
         record = store.get(label_id)
         if (record is None or record["status"] != "valid") and run_labels:
-            spent = stage_spent_core_s(store, dev_ids, kinds=("fragment",))
-            estimate, source = cost_estimate(loaded, store, loaded.alpha, "fragment", None)
-            if spent + estimate <= budget_core_s:
+            try:
+                guard.require_room({"stage": "fidelity_audit"}, "fragment", label=f"audit:{spec['parent_id']}:{spec['shape']}")
+                room = True
+            except BudgetRefused as exc:
+                room, refusal = False, str(exc)
+            if room:
                 fragment = {"policy": setting["policy"], "setting_id": setting["setting_id"], "site_kind": f"audit:{spec['shape']}",
                             "core_parent_ids": spec["core"], "n_atoms": spec["region"].n_atoms, "n_core": len(spec["core"]),
                             "buffer": setting.get("buffer")}
@@ -277,8 +296,7 @@ def fidelity_audit(loaded: LoadedBenchmark, *, run_labels: bool = True, max_wall
                 store = runner.store
                 record = store.get(label_id)
             else:
-                rows.append({**_row(spec), "status": "not_started", "reason": f"fidelity_audit budget ({spent / 3600:.3f} + {estimate / 3600:.3f} "
-                             f"[{source}] > {budget_core_s / 3600:.3f} core-h)"})
+                rows.append({**_row(spec), "status": "not_started", "reason": refusal})
                 continue
         rows.append(_audit_row(loaded, store, spec, record))
     targets = loaded.alpha.config.fidelity

@@ -27,6 +27,8 @@ def copy_profile(tmp_path: Path, name: str = "repair_smoke", **overrides) -> Pat
     alpha["artifacts_root"] = str(tmp_path / "art")
     (tmp_path / f"{name}_alpha.yaml").write_text(yaml.safe_dump(alpha))
     shutil.copyfile(CONFIGS / f"{name}_model.yaml", tmp_path / f"{name}_model.yaml")
+    if (CONFIGS / f"{name}_authorization.yaml").is_file():
+        shutil.copyfile(CONFIGS / f"{name}_authorization.yaml", tmp_path / f"{name}_authorization.yaml")
     bench = yaml.safe_load((CONFIGS / f"{name}.yaml").read_text())
     bench["protocol_document"] = "protocol.md"
     for key, value in overrides.items():

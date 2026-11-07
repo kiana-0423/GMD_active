@@ -102,12 +102,32 @@ def collect(loaded: LoadedBenchmark) -> dict[str, Any]:
     out["fidelity_audit"] = _maybe(root / "fidelity" / "audit.json")
     out["development_failures"] = _maybe(root / "development" / "failures.json")
     out["monitor_calibration"] = {p.stem: {k: v for k, v in read_json(p).items() if k != "state"} for p in sorted((root / "monitor_calibration").glob("*.json"))}
+    state = _maybe(root / "execution" / "state.json")
+    out["execution"] = None if state is None else {k: state.get(k) for k in ("start", "stages", "terminal", "next_action", "run_order_fixed_at",
+                                                                              "protocol_sha256")}
+    if state is not None:
+        out["execution"]["run_status_counts"] = {}
+        for item in (state.get("runs") or {}).values():
+            out["execution"]["run_status_counts"][item["status"]] = out["execution"]["run_status_counts"].get(item["status"], 0) + 1
+    try:
+        from .budget import build_guard
+
+        out["ledger"] = build_guard(loaded).ledger.snapshot()
+    except Exception as exc:  # noqa: BLE001 - no authorization (e.g. a smoke copy without one): reported, not fatal
+        out["ledger"] = {"unavailable": f"{type(exc).__name__}: {exc}"}
+    journal = root / "execution" / "budget_journal.jsonl"
+    out["budget_cancellations"] = [json.loads(line) for line in journal.read_text().splitlines() if line.strip() and '"cancelled_for_budget"' in line] \
+        if journal.is_file() else []
+    order = {item["run"] for item in (state or {}).get("run_order", [])}
     runs = []
     if (root / "parents.jsonl").is_file():
         cases = {r["parent_id"]: r for r in load_records(root)}
         for spec in run_matrix(loaded):
+            if order and spec.name not in order:
+                continue
             record = _maybe(root / RUNS_SUBDIR / spec.name / "repair_run.json")
-            row = {"run": spec.name, **spec.__dict__, "status": "planned" if record is None else record.get("final_stage")}
+            journal_status = ((state or {}).get("runs") or {}).get(spec.name, {}).get("status")
+            row = {"run": spec.name, **spec.__dict__, "status": journal_status or ("planned" if record is None else record.get("final_stage"))}
             if record is not None:
                 row["dft_core_h"] = record.get("measured_dft_cpu_core_hours")
                 row["final_model_promoted"] = not (record.get("final_model") or {}).get("initial", True)
@@ -204,6 +224,20 @@ def render_markdown(data: dict[str, Any]) -> str:
         lines += ["**Smoke profile: smoke-only CP2K settings and toy budgets. Mechanics only; no scientific claim.**", ""]
     a = data["assessment"]
     lines += ["## Implementation status", ""] + [f"- {k}: {v}" for k, v in a["implementation"].items()] + ["", f"Scientific status: **{a['scientific_status']}**", ""]
+    ex = data.get("execution")
+    if ex:
+        lines += ["## Execution", "", f"- started: {(ex.get('start') or {}).get('execution_start')}; terminal: {json.dumps(ex.get('terminal'))}",
+                  f"- next action: {ex.get('next_action')}", f"- run statuses: {json.dumps(ex.get('run_status_counts'))}", ""]
+        lines += ["| Stage | Status | Detail |", "|---|---|---|"]
+        for name, item in (ex.get("stages") or {}).items():
+            detail = {k: v for k, v in item.items() if k not in ("status", "started_at", "finished_at", "id_val", "traceback")}
+            lines.append(f"| {name} | {item.get('status')} | {json.dumps(detail, default=str)[:400]} |")
+        lines.append("")
+    led = data.get("ledger") or {}
+    if "consumed_core_h" in led:
+        lines += ["## Compute ledger (measured from every attempt record)", "", f"- consumed: {json.dumps({k: (round(v, 3) if isinstance(v, float) else v) for k, v in led['consumed_core_h'].items() if k != 'runs'})}",
+                  f"- remaining: total {led['remaining']['total_core_h']:.2f} core-h; stages {json.dumps({k: round(v, 2) for k, v in led['remaining']['stages_core_h'].items()})}; "
+                  f"q0 {led['remaining']['initial_model_q0_core_h']:.2f}", f"- budget cancellations: {len(data.get('budget_cancellations') or [])}", ""]
     freeze = data.get("protocol_freeze")
     lines += ["## Protocol", "", f"- frozen: {freeze['frozen_at'] if freeze else 'NO'}; protocol sha256 `{freeze['protocol']['sha256'][:16] if freeze else '-'}`", ""]
     s = data.get("structures")
@@ -257,6 +291,14 @@ def render_markdown(data: dict[str, Any]) -> str:
                 mean = v["relative_improvement_by_base"]["mean"]
                 lines.append(f"| {arm} | {fam} | {v['n_runs']} | {v['n_bases']} | {v['n_success']} | {v['n_promoted']} | {'-' if mean is None else f'{mean:.3f}'} |")
         lines.append("")
+        counts: dict[tuple[str, str], dict[str, int]] = {}
+        for row in ev["runs"]:
+            for item in row.get("structure_categories") or []:
+                bucket = counts.setdefault((row["arm"], row["family"]), {})
+                bucket[item["category"]] = bucket.get(item["category"], 0) + 1
+        if counts:
+            lines += ["Per sealed structure and run (a repaired failure needs a confirmed initial failure):", "", "| Arm | Family | Categories |", "|---|---|---|"]
+            lines += [f"| {arm} | {fam} | {json.dumps(c, sort_keys=True)} |" for (arm, fam), c in sorted(counts.items())] + [""]
     lines += ["## Assessment (from recorded evidence only)", ""] + [f"- **{k}**: {json.dumps(v, default=str)}" for k, v in a["answers"].items()] + [""]
     c = data["compute"]
     lines += ["## Measured compute", "", f"- reference labels by stage (core-h): {json.dumps(c['reference_label_stages_core_h'])}",
@@ -284,7 +326,8 @@ def write_figures(loaded: LoadedBenchmark, data: dict[str, Any]) -> dict[str, li
 
 
 def _portable(text: str, loaded: LoadedBenchmark) -> str:
-    return text.replace(str(loaded.root), "<artifacts_root>").replace(str(loaded.repo_path(".")), "<GMD_active>")
+    text = text.replace(str(loaded.root), "<artifacts_root>").replace(str(loaded.repo_path(".")), "<GMD_active>")
+    return text.replace(str(loaded.path.parent), "<config_dir>")
 
 
 def write_report(loaded: LoadedBenchmark, *, publish: bool = False) -> dict[str, Any]:

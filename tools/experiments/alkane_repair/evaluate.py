@@ -52,11 +52,21 @@ EVAL_SUBDIR = "evaluation"
 # ---------------------------------------------------------------------------------------------- inputs
 
 
+def planned_specs(loaded: LoadedBenchmark) -> list[RunSpec]:
+    """The frozen run list of the execution (``execution/frozen_outcomes.json``), else every planned run."""
+
+    path = loaded.root / "execution" / "frozen_outcomes.json"
+    if path.is_file():
+        names = {item["run"] for item in read_json(path)["runs"]}
+        return [s for s in run_matrix(loaded) if s.name in names]
+    return run_matrix(loaded)
+
+
 def collect_runs(loaded: LoadedBenchmark) -> tuple[list[dict[str, Any]], list[str]]:
     """Finished runs (repair_run.json) and the planned runs that are missing or unfinished."""
 
     finished, missing = [], []
-    for spec in run_matrix(loaded):
+    for spec in planned_specs(loaded):
         path = run_dir(loaded, spec) / "repair_run.json"
         if not path.is_file():
             missing.append(spec.name)
@@ -156,20 +166,24 @@ def stability(loaded: LoadedBenchmark, model: dict[str, Any], starts: Sequence[d
     st = config.evaluation.stability
     export = Path(model["export"])
     digest = file_sha256(export)
-    trajectories = []
-    for start in starts:
+    from concurrent.futures import ThreadPoolExecutor
+
+    def one(start: dict[str, Any], seed: int) -> dict[str, Any]:
         topology = AlkaneTopology(int(start["chain_length"]))
-        for seed in st.seeds:
-            name = f"{start['parent_id']}-s{seed}"
-            result = run_md(artifact=model_artifact(export, Path(model["checkpoint"]), frozen["species"], f"eval-{digest[:12]}"),
-                            positions=load_positions(loaded.sealed_root, start), topology=topology, directives=config.repair.md_directives, seed=seed,
-                            steps=st.steps, frame_interval=st.frame_interval, out_dir=loaded.root / EVAL_SUBDIR / "stability" / digest[:16] / name,
-                            run_id=f"stability-{digest[:8]}-{name}", executable=config.repair.executable, env=config.repair.env,
-                            md_box=config.repair.md_box, model_section=frozen["model_section"], covalent_scale=st.covalent_scale)
-            trajectories.append({"start": start["parent_id"], "seed": seed, **{k: result[k] for k in ("status", "n_frames", "n_broken", "first_broken_step",
-                                                                                                         "intact_fraction")},
-                                 "min_image_distance": result["image_check"].get("min_image_distance"),
-                                 "below_margin_frames": len(result["image_check"].get("below_margin") or [])})
+        name = f"{start['parent_id']}-s{seed}"
+        result = run_md(artifact=model_artifact(export, Path(model["checkpoint"]), frozen["species"], f"eval-{digest[:12]}"),
+                        positions=load_positions(loaded.sealed_root, start), topology=topology, directives=config.repair.md_directives, seed=seed,
+                        steps=st.steps, frame_interval=st.frame_interval, out_dir=loaded.root / EVAL_SUBDIR / "stability" / digest[:16] / name,
+                        run_id=f"stability-{digest[:8]}-{name}", executable=config.repair.executable, env=config.repair.env,
+                        md_box=config.repair.md_box, model_section=frozen["model_section"], covalent_scale=st.covalent_scale)
+        return {"start": start["parent_id"], "seed": seed, **{k: result[k] for k in ("status", "n_frames", "n_broken", "first_broken_step",
+                                                                                        "intact_fraction")},
+                "min_image_distance": result["image_check"].get("min_image_distance"),
+                "below_margin_frames": len(result["image_check"].get("below_margin") or [])}
+
+    jobs = [(start, seed) for start in starts for seed in st.seeds]
+    with ThreadPoolExecutor(max_workers=st.parallel_workers) as pool:
+        trajectories = list(pool.map(lambda job: one(*job), jobs))
     stable = [t["status"] == "completed" and t["intact_fraction"] >= st.min_intact_fraction for t in trajectories]
     return {"export_sha256": digest, "n_trajectories": len(trajectories), "n_stable": int(sum(stable)),
             "stable_fraction": float(np.mean(stable)) if stable else None, "all_stable": bool(stable) and all(stable),
@@ -242,6 +256,32 @@ def run_outcome(config: Any, before: dict[str, Any], after: dict[str, Any], rete
             "relative_retention_change": retention, "checks": checks, "success": all(checks.values())}
 
 
+def structure_categories(config: Any, failures: dict[str, dict[str, Any]], after: dict[str, dict[str, Any]], run_checks: dict[str, bool]) -> list[dict[str, Any]]:
+    """Per sealed challenge structure of the run's family: a repaired failure needs a confirmed initial failure."""
+
+    success = config.evaluation.success
+    rows = []
+    for parent_id, initial in failures.items():
+        result = after.get(parent_id) or {}
+        before_rmse = (initial.get("region") or {}).get("force_rmse")
+        after_rmse = (result.get("region") or {}).get("force_rmse")
+        if before_rmse is None or after_rmse is None:
+            rows.append({"parent_id": parent_id, "category": "not_evaluated"})
+            continue
+        improvement = (before_rmse - after_rmse) / before_rmse
+        if not initial.get("failure"):
+            category = "improvement_without_established_failure" if improvement >= success.min_relative_improvement else "no_initial_failure"
+        elif after_rmse <= success.challenge_region_rmse_max and improvement >= success.min_relative_improvement and all(run_checks.values()):
+            category = "confirmed_failure_repaired"
+        elif improvement > 0.0:
+            category = "confirmed_failure_partially_improved"
+        else:
+            category = "confirmed_failure_not_repaired"
+        rows.append({"parent_id": parent_id, "initial_failure": bool(initial.get("failure")), "region_rmse_before": before_rmse,
+                     "region_rmse_after": after_rmse, "relative_improvement": improvement, "category": category})
+    return rows
+
+
 def bootstrap_mean(values_by_base: dict[str, list[float]], config: dict[str, Any]) -> dict[str, Any]:
     """Mean over bases of each base's mean over seeds; percentile CI resampling bases (needs >= 2 bases)."""
 
@@ -297,8 +337,12 @@ def evaluate(loaded: LoadedBenchmark, *, allow_incomplete: bool = False, reason:
         retention_after = pooled(bank, model["checkpoint"], ordinary, loaded.sealed_root, store, hops, region=False)
         stable = stability(loaded, model, challenges[family], frozen) if config.evaluation.success.require_stability else None
         outcome = run_outcome(config, initial_family[family], after, retention_initial, retention_after, stable)
+        per_structure = structure_errors(bank, model["checkpoint"], challenges[family], loaded.sealed_root, store, hops)
+        run_checks = {k: v for k, v in outcome["checks"].items() if k in ("retention", "stability")}
+        family_failures = {r["parent_id"]: r for r in failures if r.get("family") == family and "region" in r}
         row = {"run": run["name"], **spec, "promoted": not model.get("initial", False), "outcome": outcome,
-               "per_structure": structure_errors(bank, model["checkpoint"], challenges[family], loaded.sealed_root, store, hops),
+               "structure_categories": structure_categories(config, family_failures, per_structure, run_checks),
+               "per_structure": per_structure,
                "stability": stable, "dft_core_h": run.get("measured_dft_cpu_core_hours")}
         if config.evaluation.consistency_check and spec["kind"] == "closed_loop":
             row["consistency"] = consistency(loaded, bank, run)

@@ -61,7 +61,9 @@ splits:
 cp2k:
   executable: cp2k.psmp
   data_dir: null             # $CP2K_DATA_DIR, else <prefix>/share/cp2k/data next to the executable
-  launcher: []               # e.g. [mpirun, -np, "{ntasks}"] with mpi_ranks > 1
+  # wall-clock cap of every CP2K attempt (SIGTERM, then SIGKILL after the grace): the hard backstop of the
+  # compute allowance even if no supervising process is alive (tools/experiments/alkane_repair/budget.py)
+  launcher: [/usr/bin/timeout, -k, '30', '1800']   # at most (1800 + 30) s x cores per attempt
   omp_threads: 5
   mpi_ranks: 1
   functional: PBE
