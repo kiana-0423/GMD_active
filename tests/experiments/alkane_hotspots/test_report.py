@@ -98,6 +98,31 @@ def test_executed_sections_and_negative_findings(tmp_path: Path) -> None:
     assert "### Acquisition arms" in markdown and "undefined" in markdown and report["config"]["config_hash"][:16] in markdown
 
 
+def test_phal_arm_that_never_triggered_is_reported_as_not_exercised(tmp_path: Path) -> None:
+    root = tmp_path / "art"
+    make_parents(root)
+    loaded = load_beta_config(_study(tmp_path, root))
+    out = loaded.output_dir
+    silent = {"n_frames": 4, "n_triggered_frames": 0, "events": [], "n_event_candidates": 0}
+    for rep in range(2):
+        write_json_atomic(out / "arms" / "phal_local" / f"rep{rep}" / "progress.json", {
+            "status": "complete", "seed": rep, "rounds": [
+                {"round": 0, "n_labels": 0, "n_valid_labels": 0, "cumulative_cpu_core_s": 0.0, "force_rmse": 0.7, "diagnostics": {}},
+                {"round": 1, "n_labels": 0, "n_valid_labels": 0, "cumulative_cpu_core_s": 0.0, "force_rmse": 0.7, "diagnostics": silent},
+                {"round": 2, "n_labels": 0, "n_valid_labels": 0, "cumulative_cpu_core_s": 0.0, "force_rmse": 0.7, "diagnostics": silent}]})
+        write_json_atomic(out / "arms" / "random_local" / f"rep{rep}" / "progress.json", {
+            "status": "complete", "seed": rep, "rounds": [
+                {"round": 0, "n_labels": 0, "n_valid_labels": 0, "cumulative_cpu_core_s": 0.0, "force_rmse": 0.7},
+                {"round": 1, "n_labels": 1, "n_valid_labels": 1, "cumulative_cpu_core_s": 10.0, "force_rmse": 0.5}]})
+    report = build_report(loaded)
+    phal, random_arm = report["executed"]["arms"]["phal_local"], report["executed"]["arms"]["random_local"]
+    assert phal["monitor_triggered_frames"] == [{"triggered": 0, "frames": 8}] * 2
+    assert phal["no_acquisition"].startswith("not exercised: the phal_local monitor triggered on 0 of 8")
+    assert "monitor_triggered_frames" not in random_arm and "no_acquisition" not in random_arm
+    text = render_markdown(report)
+    assert "| 0/8, 0/8 |" in text and "**phal_local: not exercised" in text
+
+
 def test_commands_register_on_alphas_cli() -> None:
     registered = {}
     register_cli(lambda name, help, add, handler: registered.setdefault(name, (add, handler)))

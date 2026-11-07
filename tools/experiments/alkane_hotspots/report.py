@@ -118,6 +118,28 @@ def _read_csv(path: Path) -> list[dict[str, str]] | None:
         return list(csv.DictReader(handle))
 
 
+def _monitor_triggers(reps: Sequence[Mapping[str, Any]]) -> list[dict[str, int]] | None:
+    """Per repetition: monitor-triggered pool frames / pool frames streamed, summed over acquisition rounds
+    (PHAL arms only; None for arms that do not run the monitor)."""
+
+    out = []
+    for rep in reps:
+        rounds = [r.get("diagnostics") or {} for r in rep.get("rounds", [])[1:]]
+        if not any("n_triggered_frames" in d for d in rounds):
+            return None
+        out.append({"triggered": int(sum(d.get("n_triggered_frames", 0) for d in rounds)),
+                    "frames": int(sum(d.get("n_frames", 0) for d in rounds))})
+    return out
+
+
+def _no_acquisition_reason(kind: str, triggers: Sequence[Mapping[str, int]] | None) -> str:
+    if triggers is not None and not any(t["triggered"] for t in triggers):
+        frames = sorted({t["frames"] for t in triggers})
+        return (f"not exercised: the {kind} monitor triggered on 0 of {'/'.join(map(str, frames))} streamed pool frames in every "
+                "repetition, so nothing was acquired and the final model is the round-0 model")
+    return "not exercised: no candidate survived selection in any round, so nothing was acquired"
+
+
 def build_report(loaded: LoadedConfig) -> dict[str, Any]:
     out = loaded.output_dir
     beta = loaded.config
@@ -166,6 +188,11 @@ def build_report(loaded: LoadedConfig) -> dict[str, Any]:
                 "final_force_rmse": [rep["rounds"][-1].get("force_rmse") for rep in reps if rep["rounds"]],
                 "progress_files": [_artifact(Path(rep["path"])) for rep in reps],
             }
+            triggers = _monitor_triggers(reps)
+            if triggers is not None:
+                variants[variant.name]["monitor_triggered_frames"] = triggers
+            if labels_n and not any(labels_n):
+                variants[variant.name]["no_acquisition"] = _no_acquisition_reason(variant.kind, triggers)
         if variants:
             executed["arms"] = variants
     evaluation = _load(out / FILES["evaluation"])
@@ -233,12 +260,17 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             lines.append("")
         lines += [f"- {item}" for item in gt["findings"]] + [""]
     if "arms" in executed:
-        lines += ["### Acquisition arms", "", "| variant | reps complete/planned | labels | cumulative CPU core-s | final force RMSE (eV/A) |",
-                  "|---|---|---|---|---|"]
+        lines += ["### Acquisition arms", "",
+                  "| variant | reps complete/planned | labels | cumulative CPU core-s | final force RMSE (eV/A) | monitor-triggered frames |",
+                  "|---|---|---|---|---|---|"]
         for name, item in executed["arms"].items():
             rmse = ", ".join("n/a" if v is None else f"{v:.4f}" for v in item["final_force_rmse"])
             cost = ", ".join(f"{v:.0f}" for v in item["cumulative_cpu_core_s"])
-            lines.append(f"| {name} | {item['repetitions_complete']}/{item['repetitions_planned']} | {item['labels_acquired']} | {cost} | {rmse} |")
+            triggers = item.get("monitor_triggered_frames")
+            trig = "n/a" if triggers is None else ", ".join(f"{t['triggered']}/{t['frames']}" for t in triggers)
+            lines.append(f"| {name} | {item['repetitions_complete']}/{item['repetitions_planned']} | {item['labels_acquired']} | {cost} | {rmse} | {trig} |")
+        lines.append("")
+        lines += [f"- **{name}: {item['no_acquisition']}**" for name, item in executed["arms"].items() if item.get("no_acquisition")]
         lines.append("")
     if "evaluation" in executed:
         lines += ["### Budget analysis", "", f"- artifact: `{executed['evaluation']['artifact']['path']}`", ""]
