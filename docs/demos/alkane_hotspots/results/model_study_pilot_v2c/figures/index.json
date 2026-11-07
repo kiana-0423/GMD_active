@@ -1,0 +1,151 @@
+{
+  "ablations": {
+    "has_data": true,
+    "missing": [],
+    "paths": [
+      "<artifacts_root>/model_study_v2c/figures/ablations.pdf",
+      "<artifacts_root>/model_study_v2c/figures/ablations.svg",
+      "<artifacts_root>/model_study_v2c/figures/ablations.png"
+    ],
+    "sources": [
+      {
+        "path": "<artifacts_root>/model_study_v2c/evaluation.json",
+        "sha256": "065260832d3d3c199ca08c4ce822730cd2fb4e5d9be0cc41ceef229f5f781739"
+      }
+    ]
+  },
+  "fidelity": {
+    "has_data": true,
+    "missing": [],
+    "paths": [
+      "<artifacts_root>/model_study_v2c/figures/fidelity.pdf",
+      "<artifacts_root>/model_study_v2c/figures/fidelity.svg",
+      "<artifacts_root>/model_study_v2c/figures/fidelity.png"
+    ],
+    "sources": [
+      {
+        "path": "<artifacts_root>/fidelity/report_calibration.json",
+        "sha256": "a3b391f6cc196856c0c60a65e335033de30ff01fae2e4ba2b044e0360212b365"
+      }
+    ]
+  },
+  "fidelity_distance": {
+    "has_data": true,
+    "missing": [],
+    "paths": [
+      "<artifacts_root>/model_study_v2c/figures/fidelity_distance.pdf",
+      "<artifacts_root>/model_study_v2c/figures/fidelity_distance.svg",
+      "<artifacts_root>/model_study_v2c/figures/fidelity_distance.png"
+    ],
+    "sources": [
+      {
+        "path": "<artifacts_root>/fidelity/per_atom_calibration.csv",
+        "sha256": "9c9e8b8569e507bd4c82f413509ab5cc1b010e42e3dc522202c9a0f5c5215030"
+      },
+      {
+        "path": "<artifacts_root>/fidelity/per_atom_final_eval.csv",
+        "sha256": "ce3d0da6daac05ab67c7dd1fe4cedb100921b14f3b05d51d4a942e4538e72bb2"
+      }
+    ]
+  },
+  "fidelity_max": {
+    "has_data": true,
+    "missing": [],
+    "paths": [
+      "<artifacts_root>/model_study_v2c/figures/fidelity_max.pdf",
+      "<artifacts_root>/model_study_v2c/figures/fidelity_max.svg",
+      "<artifacts_root>/model_study_v2c/figures/fidelity_max.png"
+    ],
+    "sources": [
+      {
+        "path": "<artifacts_root>/fidelity/report_calibration.json",
+        "sha256": "a3b391f6cc196856c0c60a65e335033de30ff01fae2e4ba2b044e0360212b365"
+      }
+    ]
+  },
+  "hotspots": {
+    "has_data": false,
+    "missing": [
+      "no ground-truth per-atom results",
+      "no ground-truth per-atom results"
+    ],
+    "paths": [
+      "<artifacts_root>/model_study_v2c/figures/hotspots.pdf",
+      "<artifacts_root>/model_study_v2c/figures/hotspots.svg",
+      "<artifacts_root>/model_study_v2c/figures/hotspots.png"
+    ],
+    "sources": []
+  },
+  "learning_curves": {
+    "has_data": true,
+    "missing": [],
+    "paths": [
+      "<artifacts_root>/model_study_v2c/figures/learning_curves.pdf",
+      "<artifacts_root>/model_study_v2c/figures/learning_curves.svg",
+      "<artifacts_root>/model_study_v2c/figures/learning_curves.png"
+    ],
+    "sources": [
+      {
+        "path": "<artifacts_root>/model_study_v2c/evaluation.json",
+        "sha256": "065260832d3d3c199ca08c4ce822730cd2fb4e5d9be0cc41ceef229f5f781739"
+      }
+    ]
+  },
+  "learning_curves_labels": {
+    "has_data": true,
+    "missing": [],
+    "paths": [
+      "<artifacts_root>/model_study_v2c/figures/learning_curves_labels.pdf",
+      "<artifacts_root>/model_study_v2c/figures/learning_curves_labels.svg",
+      "<artifacts_root>/model_study_v2c/figures/learning_curves_labels.png"
+    ],
+    "sources": [
+      {
+        "path": "<artifacts_root>/model_study_v2c/evaluation.json",
+        "sha256": "065260832d3d3c199ca08c4ce822730cd2fb4e5d9be0cc41ceef229f5f781739"
+      }
+    ]
+  },
+  "receptive_field": {
+    "has_data": false,
+    "missing": [
+      "no receptive-field result",
+      "no receptive-field result"
+    ],
+    "paths": [
+      "<artifacts_root>/model_study_v2c/figures/receptive_field.pdf",
+      "<artifacts_root>/model_study_v2c/figures/receptive_field.svg",
+      "<artifacts_root>/model_study_v2c/figures/receptive_field.png"
+    ],
+    "sources": []
+  },
+  "risk_vs_error": {
+    "has_data": false,
+    "missing": [
+      "no region table for committee",
+      "no region table for lj_residual",
+      "no region table for phal_staged"
+    ],
+    "paths": [
+      "<artifacts_root>/model_study_v2c/figures/risk_vs_error.pdf",
+      "<artifacts_root>/model_study_v2c/figures/risk_vs_error.svg",
+      "<artifacts_root>/model_study_v2c/figures/risk_vs_error.png"
+    ],
+    "sources": []
+  },
+  "timeline": {
+    "has_data": true,
+    "missing": [],
+    "paths": [
+      "<artifacts_root>/model_study_v2c/figures/timeline.pdf",
+      "<artifacts_root>/model_study_v2c/figures/timeline.svg",
+      "<artifacts_root>/model_study_v2c/figures/timeline.png"
+    ],
+    "sources": [
+      {
+        "path": "<artifacts_root>/closed_loop_v2/pilot_v2/timeline.json",
+        "sha256": "d73111c740e3256983eb0f2f7bf1aade2b9e49efd134c88f5400b9e10a04aea8"
+      }
+    ]
+  }
+}

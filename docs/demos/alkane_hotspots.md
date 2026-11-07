@@ -876,6 +876,68 @@ is reused), so arms A and B replay v2 from cached models and labels. Ablations: 
 Ground truth and the receptive field are not repeated (identical inputs). `arms_campaign.yaml`,
 which has not run, uses the same protocol for its PHAL arms.
 
+**Executed (2026-11-07), and it exposed two harness defects.** Arms A and B reproduced v2 exactly
+from cached models and labels. With the full score, the monitor triggered on all 4 pool
+configurations, but `rank_phal` then lost most of those triggers:
+
+- it streamed the pool as one sequence, so event buffering (`post_trigger_frames` 1) merged each
+  triggered configuration into the previous configuration's event and kept only that one's
+  hotspots (2 events for 4 triggers), and the running statistics absorbed earlier pool frames, so
+  the scores depended on the pool order;
+- a hotspot on an atom between the pool's candidate centres (`pool.stride` 2) matched no candidate
+  core and was skipped without a trace: in phal_local repetition 1, 4 triggered frames gave 0
+  candidates in both rounds.
+
+Both were fixed in `arms.rank_phal` (commit `cabe099`): each pool configuration is scored on its
+own against the calibrated state, and an off-grid hotspot maps to the candidates with the nearest
+core (counted in the round diagnostics). Two tests fail on the old code and pass on the new. The
+v2b artifacts and published report (`results/model_study_pilot_v2b/`) are kept as the record of the
+defective runs and are not interpreted further. One v2b observation is independent of the defects:
+in phal_full_system repetition 0, adding a third full label raised the RMSE from 0.383 to 0.724
+eV/A. The training log shows why: validation error was lowest at epoch 24 (0.660) and then rose to
+0.92 while the training error kept falling, so early stopping kept an almost untrained model. With
+7 training structures, one added sample can change the training trajectory this much.
+
+A consequence of the fix: on a static pool every configuration is its own stream, so the
+`no_event_buffering` ablation equals `phal_local` by construction. Event buffering can only be
+tested along a trajectory; no arm here does that.
+
+### Executed: pilot v2c (`arms_pilot_v2c.yaml`, 2026-11-07), post-hoc, exploratory
+
+v2b re-run unchanged with the fixed `rank_phal`. Published report and figures:
+`results/model_study_pilot_v2c/`. No new CP2K calculation was needed: every acquired label was
+already in the label store (fidelity-gate fragments of the calibration pool, the 16 full labels,
+the v1/v2 arm labels). Each arm is still charged the measured cost of every label it acquires.
+
+| Arm | Labels (rep 0, 1) | Measured DFT (core-s) | RMSE round 0 → 1 → 2 (eV/A) | Triggered frames |
+|---|---|---|---|---|
+| A random_local | 8, 8 | 3393, 3073 | 0.645 → 0.574 → 0.390; 0.749 → 0.417 → 0.328 | n/a |
+| B committee_local | 8, 8 | 3606, 3468 | 0.645 → 0.470 → 0.455; 0.749 → 0.413 → 0.411 | n/a |
+| C phal_local | 5, 6 | 2823, 2467 | 0.645 → 0.490 → 0.546; 0.749 → 0.468 → 0.438 | 8/8, 8/8 |
+| D phal_full_system | 4, 4 | 10037, 10037 | 0.645 → 0.511 → 0.511; 0.749 → 0.494 → 0.494 | 4/4, 4/4 |
+| no_lj | 3, 4 | 1887, 2234 | 0.645 → 0.499 → 0.525; 0.749 → 0.472 → 0.389 | 3/8, 4/8 |
+
+- **Every arm was exercised.** C's round-2 acquisitions were limited by the duplicate filter (11
+  candidates rejected per repetition as within 0.1 of a labeled region). D labeled all 4 pool
+  parents in round 1 and had nothing left to acquire in round 2.
+- **At 4 labels** (round 1 of every arm, measured, not interpolated): A 0.496, B 0.442, C 0.479,
+  D 0.502 eV/A (means of 2). C and D chose by the same acquisition and reached the same error;
+  D's full-system labels cost 10037 core-s against C's 1948 (mean), a ratio of 0.19, close to the
+  fragment-to-parent cost ratio of the fidelity gate (0.22-0.29), now inside the acquisition loop.
+- **LJ.** no_lj triggered on 3-4 of 8 frames against 8 of 8 with LJ; its final RMSE (0.46 mean)
+  overlaps C's (0.49). Without the LJ residual, the PHAL score on these configurations reduces to the
+  committee term: the gated force z-scores and r_min scored 0 everywhere.
+- **Ranking of A, B, C.** A ends lowest (0.36 at 8 labels), B 0.43, C 0.49 at 5-6 labels. The pool
+  holds 4 configurations of one base, the repetitions are 2, and training noise is about 0.2 eV/A.
+  None of these differences is distinguishable from noise, and no arm reached 0.15 or 0.10 eV/A.
+
+**What v2c supports:** the harness runs all four arms and the LJ ablation end to end on real
+labels, with measured cost accounting, and, at equal label count and equal acquisition, local
+fragment labels gave the same error as full-system labels at about a fifth of the DFT cost (one
+base, two repetitions). **What it does not support:** any ranking of PHAL against random or
+committee acquisition, or any effect of the LJ residual. Those need the campaign's larger pool (4
+calibration base conformations, 2 per chain length, 16 configurations) and its 5 repetitions.
+
 ## Closed-loop execution and recovery
 
 Part gamma runs the real closed loop on GMD_active's persistent controller and demonstrates its
