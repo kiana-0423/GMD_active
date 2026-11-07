@@ -133,7 +133,7 @@ def test_commands_register_on_alphas_cli() -> None:
     assert args.only == ["phal_local"] and args.repetitions == [0]
 
 
-@pytest.mark.parametrize("profile", ["smoke", "pilot", "pilot_v2", "pilot_v2b", "campaign"])
+@pytest.mark.parametrize("profile", ["smoke", "pilot", "pilot_v2", "pilot_v2b", "pilot_v2c", "campaign"])
 def test_committed_study_configs_validate(profile: str, tmp_path: Path) -> None:
     from .beta_synthetic import REPO_ROOT
 
@@ -164,6 +164,16 @@ def test_pilot_v2b_differs_from_v2_only_in_the_phal_monitor_protocol() -> None:
     assert v2b == v2
     loaded = load_beta_config(configs / "arms_pilot_v2b.yaml")
     assert loaded.config.monitor == load_beta_config(configs / "arms_pilot_v2.yaml").config.monitor
+
+
+def test_pilot_v2c_reruns_v2b_unchanged() -> None:
+    from .beta_synthetic import REPO_ROOT
+
+    configs = REPO_ROOT / "configs" / "demos" / "alkane_hotspots"
+    v2b, v2c = (yaml.safe_load((configs / f"arms_pilot_{v}.yaml").read_text()) for v in ("v2b", "v2c"))
+    assert (v2c.pop("name"), v2c.pop("output_subdir")) == ("pilot_v2c", "model_study_v2c")
+    v2b.pop("name"), v2b.pop("output_subdir")
+    assert v2c == v2b
 
 
 @pytest.mark.integration
