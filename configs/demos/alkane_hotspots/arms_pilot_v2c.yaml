@@ -3,7 +3,7 @@
 # directory. It re-runs the PHAL arms after two harness defects found in v2b were fixed in arms.rank_phal
 # (each pool configuration is now scored separately, and a hotspot between candidate centres maps to the nearest
 # candidate). model_study_v2b is kept as the record of the defective runs.
-#   cp -cR <artifacts_root>/model_study_v2/models <artifacts_root>/model_study_v2c/models
+#   cp -R <artifacts_root>/model_study_v2/models <artifacts_root>/model_study_v2c/models
 #   python -m tools.experiments.alkane_hotspots arms-run --config configs/demos/alkane_hotspots/pilot.yaml \
 #       --study configs/demos/alkane_hotspots/arms_pilot_v2c.yaml   (then evaluate, figures, report --publish)
 # Artifacts: <artifacts_root of pilot.yaml>/model_study_v2c (outside git).

@@ -14,7 +14,7 @@
 # evaluated (physical_signals: false implies stages always); no_event_buffering has no meaning on a static
 # pool; core_only_weights is left to the campaign.
 # Ground truth and the receptive field are not re-run (identical inputs): see model_study_v2.
-#   cp -cR <artifacts_root>/model_study_v2/models <artifacts_root>/model_study_v2b/models
+#   cp -R <artifacts_root>/model_study_v2/models <artifacts_root>/model_study_v2b/models
 #   python -m tools.experiments.alkane_hotspots arms-run --config configs/demos/alkane_hotspots/pilot.yaml \
 #       --study configs/demos/alkane_hotspots/arms_pilot_v2b.yaml   (then evaluate, figures, report --publish)
 # Artifacts: <artifacts_root of pilot.yaml>/model_study_v2b (outside git).

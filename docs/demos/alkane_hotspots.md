@@ -80,7 +80,7 @@ done
 $M receptive-field --config $D/pilot.yaml --study $D/arms_pilot_v2.yaml \
     --checkpoint model_study_v2/models/<round-0 key>/train/member_0/ckpt_best.pt
 A=../alkane_artifacts/pilot   # v2b/v2c reuse the v2 round-0 models (training is idempotent per work dir)
-for V in v2b v2c; do mkdir -p $A/model_study_$V && cp -cR $A/model_study_v2/models $A/model_study_$V/models; done
+for V in v2b v2c; do mkdir -p $A/model_study_$V && cp -R $A/model_study_v2/models $A/model_study_$V/models; done
 for S in arms_pilot arms_pilot_v2 arms_pilot_v2b arms_pilot_v2c; do
   $M arms-run     --config $D/pilot.yaml --study $D/$S.yaml
   $M evaluate     --config $D/pilot.yaml --study $D/$S.yaml
